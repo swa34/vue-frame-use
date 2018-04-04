@@ -1,5 +1,8 @@
 <template lang="html">
 	<table v-if="schema.columns">
+		<caption v-if="title">
+			{{ title }}
+		</caption>
 		<thead>
 			<tr>
 				<th v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
@@ -16,10 +19,7 @@
 			<tr v-for="record in records">
 				<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 					<label v-if="allowEdit && columnShouldBeEditable(column)">
-						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :disabled="column.immutable">
-							{{ record[column.columnName] }}
-						</textarea>
-						<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
+						<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
 							<option v-for="value in column.association.values" :value="value.key">
 								{{ value.label }}
 							</option>
@@ -70,6 +70,7 @@
 	export default {
 		name: 'DatabaseTable',
 		props: [
+			'title',
 			'schema',
 			'fieldsToDisplay',
 			'fieldsToEdit',

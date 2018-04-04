@@ -1,3 +1,6 @@
+import associationDeveloperApplicationSchema from '@/schemas/caes_error_log/association_developer_application';
+import errorReportSchema from '@/schemas/caes_error_log/error_report';
+
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'APPLICATION',
@@ -26,22 +29,8 @@ const schema = {
 		}
 	],
 	associations: [
-		{
-			database: 'CAES_ERROR_LOG',
-			table: 'ASSOCIATION_DEVELOPER_APPLICATION',
-			association: {
-				local: 'ID',
-				foreign: 'APPLICATION_ID'
-			}
-		},
-		{
-			database: 'CAES_ERROR_LOG',
-			table: 'ERROR_REPORT',
-			association: {
-				local: 'ID',
-				foreign: 'APPLICATION_ID'
-			}
-		}
+		associationDeveloperApplicationSchema,
+		errorReportSchema
 	]
 };
 

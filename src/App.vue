@@ -4,27 +4,22 @@
 			:pk_id="pk_id"
 			:includeAssociations="true"
 		/> -->
-		<DatabaseTable
+		<DatabaseForm
 			:schema="schema"
 			:identifier="identifier"
-			:allowInsert="true"
-			:fieldsToDisplay="[
-				'DEVELOPER_ID',
-				'DATE_CREATED'
-			]"
 		/>
 	</div>
 </template>
 
 <script>
-	import DatabaseTable from '@/views/DatabaseTable';
-	import schema from '@/schemas/caes_error_log/association_developer_application';
+	import DatabaseForm from '@/views/database/Form';
+	import schema from '@/schemas/caes_error_log/application';
 	import { url } from '@/modules/utilities';
 
 	export default {
 		name: 'App',
 		components: {
-			DatabaseTable
+			DatabaseForm
 		},
 		data () {
 			return {

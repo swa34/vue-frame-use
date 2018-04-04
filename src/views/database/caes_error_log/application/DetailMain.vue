@@ -33,10 +33,10 @@
 				Developers
 			</h4>
 			<hr />
-			<AssociationDeveloperApplicationDetailMain
-				v-if="application.ID"
-				displayType="table"
-				:applicationID="application.ID"
+			<DatabaseTable
+				:schema="associationDeveloperApplicationSchema"
+				:identifier="associationDeveloperApplicationIdentifier"
+				:allowInsert="true"
 			/>
 		</section>
 		<section id="errors" v-if="includeAssociations">
@@ -44,33 +44,20 @@
 				Errors
 			</h4>
 			<hr />
-			<ErrorReportDetailMain
-				v-if="application.ID"
-				displayType="table"
-				:applicationID="application.ID"
-				:fieldsToDisplay="[
-					'ID',
-					'FIXED_DEVELOPMENT',
-					'FIXED_PRODUCTION',
-					'DATE_CREATED',
-					'MESSAGE'
-				]"
-				:fieldsToEdit="[
-					'FIXED_DEVELOPMENT',
-					'FIXED_PRODUCTION'
-				]"
+			<DatabaseTable
+				:schema="errorReportSchema"
+				:identifier="errorReportIdentifier"
 			/>
 		</section>
-	  <!-- <pre>{{ this.$data }}</pre> -->
 	</div>
 </template>
 
 <script>
 	// Import required modules
-	import AssociationDeveloperApplicationDetailMain from '@/views/database/caes_error_log/association_developer_application/DetailMain';
 	import caesdb from '@/modules/caesdb';
-	import ErrorReportDetailMain from '@/views/database/caes_error_log/error_report/DetailMain';
-	import schema from './schema';
+	import DatabaseTable from '@/views/database/Table';
+	import associationDeveloperApplicationSchema from '@/schemas/caes_error_log/association_developer_application';
+	import errorReportSchema from '@/schemas/caes_error_log/error_report';
 	import {
 		getPrettyColumnName,
 		htmlDate,
