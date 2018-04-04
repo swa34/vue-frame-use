@@ -1,0 +1,36 @@
+const maps = [
+	{
+		input: 'number',
+		types: [
+			'int'
+		]
+	},
+	{
+		input: 'date',
+		types: [
+			'datetime'
+		]
+	},
+	{
+		input: 'checkbox',
+		types: [
+			'bit'
+		]
+	},
+	{
+		input: 'text',
+		types: [
+			'nvarchar'
+		]
+	}
+];
+
+export default (column) => {
+	for (let i = 0; i < maps.length; ++i) {
+		if (!column.association && maps[i].types.indexOf(column.type) !== -1) {
+			return maps[i].input;
+		} else if (column.association) {
+			return 'select';
+		}
+	}
+};
