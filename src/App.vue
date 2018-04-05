@@ -1,25 +1,22 @@
 <template lang="html">
   <div id="main">
-		<!-- <ApplicationDetailMain
-			:pk_id="pk_id"
-			:includeAssociations="true"
-		/> -->
-		<DatabaseForm
+		<DetailMain
 			:schema="schema"
+			:includeAssociations="true"
 			:identifier="identifier"
 		/>
 	</div>
 </template>
 
 <script>
-	import DatabaseForm from '@/views/database/Form';
+	import DetailMain from '@/views/data/DetailMain';
 	import schema from '@/schemas/caes_error_log/application';
 	import { url } from '@/modules/utilities';
 
 	export default {
 		name: 'App',
 		components: {
-			DatabaseForm
+			DetailMain
 		},
 		data () {
 			return {

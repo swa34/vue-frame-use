@@ -1,3 +1,5 @@
+import associationDeveloperApplicationSchema from '@/schemas/caes_error_log/association_developer_application';
+
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'DEVELOPER',
@@ -6,30 +8,32 @@ const schema = {
 			columnName: 'ID',
 			type: 'int',
 			prettyName: 'ID',
-			immutable: true
+			immutable: true,
+			required: true
 		},
 		{
 			columnName: 'PERSONNEL_ID',
 			type: 'int',
-			prettyName: 'Personnel ID'
+			prettyName: 'Personnel ID',
+			required: true
 		},
 		{
 			columnName: 'DATE_CREATED',
-			type: 'datetime'
+			type: 'datetime',
+			required: true
 		},
 		{
 			columnName: 'DATE_LAST_UPDATED',
-			type: 'datetime'
+			type: 'datetime',
+			required: true
 		}
 	],
 	associations: [
 		{
-			database: 'CAES_ERROR_LOG',
-			table: 'ASSOCIATION_DEVELOPER_APPLICATION',
-			association: {
-				local: 'ID',
-				foreign: 'DEVELOPER_ID'
-			}
+			title: 'Applications',
+			schema: associationDeveloperApplicationSchema,
+			localKey: 'ID',
+			foreignKey: 'DEVELOPER_ID'
 		}
 	]
 };

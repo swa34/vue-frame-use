@@ -1,14 +1,14 @@
 <template lang="html">
 	<table v-if="schema.columns">
-		<caption v-if="title">
-			{{ title }}
+		<caption v-if="title || schema.title">
+			{{ title || schema.title }}
 		</caption>
 		<thead>
 			<tr>
 				<th v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 					{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 				</th>
-				<th v-if="allowEdit || allowInsert">
+				<th v-if="(allowEdit || allowInsert) && !schema.disableUpdate && !schema.disableInsert">
 					<!--
 						No content here, just need empty space for the 'save field' column
 					-->
@@ -20,7 +20,7 @@
 				<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 					<label v-if="allowEdit && columnShouldBeEditable(column)">
 						<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
-							<option v-for="value in column.association.values" :value="value.key">
+							<option v-for="value in column.constraint.values" :value="value.key">
 								{{ value.label }}
 							</option>
 						</select>
@@ -30,27 +30,27 @@
 						{{ record[column.columnName] }}
 					</span>
 				</td>
-				<td v-if="allowEdit">
+				<td v-if="allowEdit && !schema.disableUpdate">
 					<button class="button">
 						Save
 					</button>
 				</td>
-				<td v-else-if="allowInsert">
+				<td v-else-if="allowInsert && !schema.disableInsert">
 					<!--
 						No content here, just need empty space for the 'save field' column
 					-->
 				</td>
 			</tr>
-			<tr v-if="allowInsert">
+			<tr v-if="allowInsert && !schema.disableInsert">
 				<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
-					<label v-if="columnShouldBeEditable(column)">
-						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]"></textarea>
-						<select v-else-if="sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]">
-							<option v-for="value in column.association.values" :value="value.key">
+					<label>
+						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
+						<select v-else-if="sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)">
+							<option v-for="value in column.constraint.values" :value="value.key">
 								{{ value.label }}
 							</option>
 						</select>
-						<input v-else :type="sqlToHtml(column)" v-model="newRecord[column.columnName]" />
+						<input v-else :type="sqlToHtml(column)" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)" />
 					</label>
 				</td>
 				<td>
@@ -65,10 +65,10 @@
 
 <script>
 	import caesdb from '@/modules/caesdb';
-	import { getPrettyColumnName, sqlToHtml } from '@/modules/utilities';
+	import { formatDates, getPrettyColumnName, sqlToHtml } from '@/modules/utilities';
 
 	export default {
-		name: 'DatabaseTable',
+		name: 'DataTable',
 		props: [
 			'title',
 			'schema',
@@ -81,7 +81,7 @@
 		data () {
 			let newRecord = {};
 			this.schema.columns.forEach((column) => {
-				newRecord[column.columnName] = null;
+				newRecord[column.columnName] = this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : null;
 			});
 			return {
 				records: [],
@@ -98,13 +98,19 @@
 			columnShouldBeEditable (column) {
 				// Column is only editable if the fieldsToEdit array exists and contains
 				// the column's name
-				return !this.fieldsToEdit || this.fieldsToEdit.indexOf(column.columnName) !== -1;
+				return (!this.identifier.value || this.identifier.key !== column.columnName) && (!this.fieldsToEdit || this.fieldsToEdit.indexOf(column.columnName) !== -1);
 			},
 			getPrettyColumnName,
 			sqlToHtml
 		},
 		mounted () {
 			const component = this;
+
+			let dateFields = [];
+			component.schema.columns.forEach((column) => {
+				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
+			});
+
 			const getMainData = () => {
 				const options = {
 					db: component.schema.database,
@@ -115,25 +121,27 @@
 					if (err) console.error(err);
 					if (data.success) {
 						component.records = data.results;
+						if (dateFields.length > 0) formatDates(dateFields, component.records);
 					}
 				});
 			};
-			const getAssociationData = () => {
+
+			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.association) {
+					if (column.constraint) {
 						const options = {
-							db: column.association.database,
-							table: column.association.table
+							db: column.constraint.database,
+							table: column.constraint.table
 						};
 						caesdb.getData(options, (err, data) => {
 							if (err) console.error(err);
 							if (data.success) {
 								data.results.forEach((result) => {
 									const value = {
-										key: result[column.association.foreignKey],
-										label: column.association.foreignLabel ? result[column.association.foreignLabel] : result[column.association.foreignKey]
+										key: result[column.constraint.foreignKey],
+										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
 									};
-									column.association.values.push(value);
+									column.constraint.values.push(value);
 								});
 							}
 						});
@@ -141,7 +149,7 @@
 				});
 			};
 			getMainData();
-			if (component.allowEdit || component.allowInsert) getAssociationData();
+			if (component.allowEdit || component.allowInsert) getConstraintData();
 		}
 	};
 </script>

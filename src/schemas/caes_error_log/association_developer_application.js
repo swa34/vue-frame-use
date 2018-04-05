@@ -1,13 +1,14 @@
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'ASSOCIATION_DEVELOPER_APPLICATION',
+	title: 'Developer/Application Association',
 	columns: [
 		{
 			columnName: 'DEVELOPER_ID',
 			prettyName: 'Developer ID',
 			type: 'int',
 			required: true,
-			association: {
+			constraint: {
 				database: 'CAES_ERROR_LOG',
 				table: 'DEVELOPER',
 				foreignKey: 'ID',
@@ -16,10 +17,10 @@ const schema = {
 		},
 		{
 			columnName: 'APPLICATION_ID',
-			prettyName: 'Application ID',
+			prettyName: 'Application',
 			type: 'int',
 			required: true,
-			association: {
+			constraint: {
 				database: 'CAES_ERROR_LOG',
 				table: 'APPLICATION',
 				foreignKey: 'ID',

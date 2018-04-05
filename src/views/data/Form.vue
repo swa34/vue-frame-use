@@ -1,19 +1,19 @@
 <template lang="html">
 	<form>
-		<fieldset v-for="column in schema.columns" v-if="!column.immutable">
+		<fieldset v-for="column in schema.columns">
 			<label>
 				<legend>
 					{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 				</legend>
-				<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]">
+				<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
 					{{ record[column.columnName] }}
 				</textarea>
-				<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]">
-					<option v-for="value in column.association.values" :value="value.key">
+				<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
+					<option v-for="value in column.constraint.values" :value="value.key">
 						{{ value.label }}
 					</option>
 				</select>
-				<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" />
+				<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable" />
 			</label>
 		</fieldset>
 		<input class="button" value="Save" type="submit" />
@@ -22,7 +22,7 @@
 
 <script>
 	import caesdb from '@/modules/caesdb';
-	import { getPrettyColumnName, sqlToHtml } from '@/modules/utilities';
+	import { formatDates, getPrettyColumnName, sqlToHtml } from '@/modules/utilities';
 	export default {
 		name: 'DatabaseForm',
 		props: [
@@ -44,6 +44,12 @@
 		},
 		mounted () {
 			const component = this;
+
+			let dateFields = [];
+			component.schema.columns.forEach((column) => {
+				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
+			});
+
 			const getMainData = () => {
 				const options = {
 					db: component.schema.database,
@@ -54,25 +60,27 @@
 					if (err) console.error(err);
 					if (data.success) {
 						component.record = data.results[0];
+						if (dateFields.length > 0) formatDates(dateFields, component.record);
 					}
 				});
 			};
-			const getAssociationData = () => {
+
+			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.association) {
+					if (column.constraint) {
 						const options = {
-							db: column.association.database,
-							table: column.association.table
+							db: column.constraint.database,
+							table: column.constraint.table
 						};
 						caesdb.getData(options, (err, data) => {
 							if (err) console.error(err);
 							if (data.success) {
 								data.results.forEach((result) => {
 									const value = {
-										key: result[column.association.foreignKey],
-										label: column.association.foreignLabel ? result[column.association.foreignLabel] : result[column.association.foreignKey]
+										key: result[column.constraint.foreignKey],
+										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
 									};
-									column.association.values.push(value);
+									column.constraint.values.push(value);
 								});
 							}
 						});
@@ -81,7 +89,7 @@
 			};
 
 			if (component.identifier && component.identifier.value) getMainData();
-			getAssociationData();
+			getConstraintData();
 		}
 	};
 </script>

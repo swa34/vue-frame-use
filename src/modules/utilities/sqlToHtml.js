@@ -27,9 +27,9 @@ const maps = [
 
 export default (column) => {
 	for (let i = 0; i < maps.length; ++i) {
-		if (!column.association && maps[i].types.indexOf(column.type) !== -1) {
+		if (!column.constraint && maps[i].types.indexOf(column.type) !== -1) {
 			return maps[i].input;
-		} else if (column.association) {
+		} else if (column.constraint) {
 			return 'select';
 		}
 	}

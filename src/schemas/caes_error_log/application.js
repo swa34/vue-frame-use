@@ -4,6 +4,7 @@ import errorReportSchema from '@/schemas/caes_error_log/error_report';
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'APPLICATION',
+	title: 'Application',
 	columns: [
 		{
 			columnName: 'ID',
@@ -13,7 +14,8 @@ const schema = {
 		},
 		{
 			columnName: 'APPLICATION_NAME',
-			type: 'nvarchar'
+			type: 'nvarchar',
+			required: true
 		},
 		{
 			columnName: 'BASE_TEMPLATE_PATH',
@@ -21,16 +23,28 @@ const schema = {
 		},
 		{
 			columnName: 'DATE_CREATED',
-			type: 'datetime'
+			type: 'datetime',
+			required: true
 		},
 		{
 			columnName: 'DATE_LAST_UPDATED',
-			type: 'datetime'
+			type: 'datetime',
+			required: true
 		}
 	],
 	associations: [
-		associationDeveloperApplicationSchema,
-		errorReportSchema
+		{
+			title: 'Developers',
+			schema: associationDeveloperApplicationSchema,
+			localKey: 'ID',
+			foreignKey: 'APPLICATION_ID'
+		},
+		{
+			title: 'Error Reports',
+			schema: errorReportSchema,
+			localKey: 'ID',
+			foreignKey: 'APPLICATION_ID'
+		}
 	]
 };
 
