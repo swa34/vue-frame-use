@@ -5,12 +5,14 @@
 			:includeAssociations="true"
 			:identifier="identifier"
 		/>
+		<pre>{{ this.$store.state }}</pre>
 	</div>
 </template>
 
 <script>
 	import DetailMain from '@/views/data/DetailMain';
 	import schema from '@/schemas/caes_error_log/application';
+	import { getComputed, getStore } from '@/modules/store';
 	import { url } from '@/modules/utilities';
 
 	export default {
@@ -26,7 +28,9 @@
 					value: url.getParam('value')
 				}
 			};
-		}
+		},
+		computed: getComputed(schema),
+		store: getStore(schema)
 	};
 </script>
 

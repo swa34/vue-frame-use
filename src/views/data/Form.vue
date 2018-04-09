@@ -17,26 +17,46 @@
 			</label>
 		</fieldset>
 		<input class="button" value="Save" type="submit" />
+		<pre>{{ record }}</pre>
 	</form>
 </template>
 
 <script>
 	import caesdb from '@/modules/caesdb';
-	import { formatDates, getPrettyColumnName, sqlToHtml } from '@/modules/utilities';
+	import { getComputed } from '@/modules/store';
+	import { formatDates, getPrettyColumnName, sqlToHtml, stringFormats } from '@/modules/utilities';
 	export default {
 		name: 'DatabaseForm',
 		props: [
 			'schema',
 			'identifier'
 		],
+		computed: {
+			record: {
+				get () {
+					return this.$store ? this.$store.state[stringFormats.camelCase(this.schema.title)] : this.localRecord;
+				},
+				set (val) {
+					if (this.$store) {
+						this.$store.state[stringFormats.camelCase(this.schema.title)] = val;
+					} else {
+						this.localRecord = val;
+					}
+				}
+			}
+		},
 		data () {
-			let record = {};
-			this.schema.columns.forEach((column) => {
-				record[column.columnName] = null;
-			});
-			return {
-				record
-			};
+			if (this.$store) {
+				return {};
+			} else {
+				let localRecord = {};
+				this.schema.columns.forEach((column) => {
+					localRecord[column.columnName] = null;
+				});
+				return {
+					localRecord
+				};
+			}
 		},
 		methods: {
 			getPrettyColumnName,

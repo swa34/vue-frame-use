@@ -7,7 +7,7 @@
 			:schema="schema"
 			:identifier="identifier"
 		/>
-		<DataTable
+		<!-- <DataTable
 			v-if="includeAssociations"
 			v-for="association in schema.associations"
 			:title="association.title"
@@ -16,7 +16,7 @@
 			:identifier="{ key: association.foreignKey, value: identifier.value}"
 			:allowInsert="true"
 			:allowEdit="true"
-		/>
+		/> -->
   </main>
 </template>
 

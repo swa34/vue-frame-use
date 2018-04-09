@@ -1,5 +1,6 @@
 import formatDates from './formatDates';
 import sqlToHtml from './sqlToHtml';
+import stringFormats from './stringFormats';
 import url from './url';
 
 // Function for prettifying table column names
@@ -14,5 +15,6 @@ export {
 	formatDates,
 	getPrettyColumnName,
 	sqlToHtml,
+	stringFormats,
 	url
 };
