@@ -1,6 +1,7 @@
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'ERROR_REPORT',
+	title: 'Error Reports',
 	disableInsert: true,
 	disableUpdate: true,
 	columns: [

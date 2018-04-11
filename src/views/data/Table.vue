@@ -31,8 +31,11 @@
 					</span>
 				</td>
 				<td v-if="allowEdit && !schema.disableUpdate">
-					<button class="button">
+					<button v-if="!$store" v-on:click="updateRecord(record)" class="button">
 						Save
+					</button>
+					<button v-on:click="deleteRecord(record)" class="button red">
+						Delete
 					</button>
 				</td>
 				<td v-else-if="allowInsert && !schema.disableInsert">
@@ -54,7 +57,7 @@
 					</label>
 				</td>
 				<td>
-					<button class="button">
+					<button v-on:click="addNewRecord" class="button">
 						Add
 					</button>
 				</td>
@@ -65,43 +68,109 @@
 
 <script>
 	import caesdb from '@/modules/caesdb';
-	import { formatDates, getPrettyColumnName, sqlToHtml } from '@/modules/utilities';
+	import {
+		formatDates,
+		getPrettyColumnName,
+		sqlToHtml,
+		stringFormats
+	} from '@/modules/utilities';
 
 	export default {
 		name: 'DataTable',
-		props: [
-			'title',
-			'schema',
-			'fieldsToDisplay',
-			'fieldsToEdit',
-			'allowEdit',
-			'allowInsert',
-			'identifier'
-		],
+		props: {
+			'title': {
+				type: String
+			},
+			'schema': {
+				type: Object,
+				required: true
+			},
+			'associatedColumn': {
+				type: String
+			},
+			'fieldsToDisplay': {
+				type: Array
+			},
+			'fieldsToEdit': {
+				type: Array
+			},
+			'allowEdit': {
+				type: Boolean
+			},
+			'allowInsert': {
+				type: Boolean
+			},
+			'identifier': {
+				type: Object
+			}
+		},
+		computed: {
+			records: {
+				get () {
+					return this.$store ? this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records : this.localRecords;
+				},
+				set (val) {
+					if (this.$store) {
+						this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
+					} else {
+						this.localRecords = val;
+					}
+				}
+			}
+		},
 		data () {
 			let newRecord = {};
 			this.schema.columns.forEach((column) => {
 				newRecord[column.columnName] = this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : null;
 			});
 			return {
-				records: [],
+				localRecords: [],
 				associations: [],
 				newRecord
 			};
 		},
 		methods: {
+			addNewRecord () {
+				this.records.push(Object.assign({}, this.newRecord));
+				for (let key in this.newRecord) {
+					this.newRecord[key] = null;
+				}
+			},
 			columnShouldBeDisplayed (column) {
-				// If fields to display is null, show it, otherwise only show it if its
-				// name is in the fieldsToDisplay array
-				return !this.fieldsToDisplay || (this.allowInsert && column.required) || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
+				if (!this.identifier.value) {
+					// If there's no identifier and the column is not the associated column
+					if (column.columnName !== this.associatedColumn) {
+						// Show it
+						return true;
+					} else {
+						// Otherwise, don't
+						return false;
+					}
+				} else {
+					// If there is an identifier, then show the column if no fields to
+					// display were passed in, or if inserting is allowed and the column
+					// is required, or if fields to display were passed in and the column
+					// is one of those fields.
+					return !this.fieldsToDisplay || (this.allowInsert && column.required) || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
+				}
 			},
 			columnShouldBeEditable (column) {
 				// Column is only editable if the fieldsToEdit array exists and contains
 				// the column's name
 				return (!this.identifier.value || this.identifier.key !== column.columnName) && (!this.fieldsToEdit || this.fieldsToEdit.indexOf(column.columnName) !== -1);
 			},
+			deleteRecord (record) {
+				const index = this.records.indexOf(record);
+				if (index !== -1) {
+					this.records.splice(index, 1);
+				}
+			},
 			getPrettyColumnName,
-			sqlToHtml
+			sqlToHtml,
+			updateRecord (record) {
+				console.log('Sending data to server:');
+				console.log(JSON.stringify(record, null, 2));
+			}
 		},
 		mounted () {
 			const component = this;
@@ -148,7 +217,7 @@
 					}
 				});
 			};
-			getMainData();
+			if (component.identifier.key && component.identifier.value) getMainData();
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		}
 	};

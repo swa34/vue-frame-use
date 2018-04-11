@@ -1,7 +1,7 @@
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'ASSOCIATION_DEVELOPER_APPLICATION',
-	title: 'Developer/Application Association',
+	title: 'Developer/Application Associations',
 	columns: [
 		{
 			columnName: 'DEVELOPER_ID',

@@ -3,6 +3,7 @@ import associationDeveloperApplicationSchema from '@/schemas/caes_error_log/asso
 const schema = {
 	database: 'CAES_ERROR_LOG',
 	table: 'DEVELOPER',
+	title: 'Developers',
 	columns: [
 		{
 			columnName: 'ID',

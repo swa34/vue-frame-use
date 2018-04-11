@@ -16,21 +16,33 @@
 				<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable" />
 			</label>
 		</fieldset>
-		<input class="button" value="Save" type="submit" />
-		<pre>{{ record }}</pre>
+		<input v-if="!$store" class="button" value="Save" type="submit" />
 	</form>
 </template>
 
 <script>
 	import caesdb from '@/modules/caesdb';
-	import { getComputed } from '@/modules/store';
-	import { formatDates, getPrettyColumnName, sqlToHtml, stringFormats } from '@/modules/utilities';
+	import {
+		formatDates,
+		getPrettyColumnName,
+		sqlToHtml,
+		stringFormats
+	} from '@/modules/utilities';
+
 	export default {
 		name: 'DatabaseForm',
-		props: [
-			'schema',
-			'identifier'
-		],
+		props: {
+			'schema': {
+				type: Object,
+				required: true
+			},
+			'identifier': {
+				type: [
+					Object,
+					Boolean
+				]
+			}
+		},
 		computed: {
 			record: {
 				get () {

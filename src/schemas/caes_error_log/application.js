@@ -37,7 +37,8 @@ const schema = {
 			title: 'Developers',
 			schema: associationDeveloperApplicationSchema,
 			localKey: 'ID',
-			foreignKey: 'APPLICATION_ID'
+			foreignKey: 'APPLICATION_ID',
+			isAssignable: true
 		},
 		{
 			title: 'Error Reports',

@@ -30,7 +30,7 @@ const getComputed = (schema) => {
 	return config;
 };
 
-const getStore = (schema) => {
+const getStore = (schema, isNew = false) => {
 	// Create a config object that will eventually be passed into Vuex.Store() to
 	// generate our store
 	const schemaCamelTitle = stringFormats.camelCase(schema.title);
@@ -47,17 +47,21 @@ const getStore = (schema) => {
 		config.modules[schemaCamelTitle].state[column.columnName] = column.default || null;
 	});
 
-	schema.associations.forEach((association) => {
-		const associationCamelTitle = stringFormats.camelCase(association.title);
-		if (!config.modules[associationCamelTitle]) {
-			config.modules[associationCamelTitle] = {
-				namespaced: true,
-				state: {
-					records: []
+	if (schema.associations) {
+		schema.associations.forEach((association) => {
+			if ((isNew && association.isAssignable) || !isNew) {
+				const associationCamelTitle = stringFormats.camelCase(association.title);
+				if (!config.modules[associationCamelTitle]) {
+					config.modules[associationCamelTitle] = {
+						namespaced: true,
+						state: {
+							records: []
+						}
+					};
 				}
-			};
-		}
-	});
+			}
+		});
+	}
 
 	const store = new Vuex.Store(config);
 	return store;
