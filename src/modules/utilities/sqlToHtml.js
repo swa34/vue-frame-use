@@ -22,6 +22,12 @@ const maps = [
 		types: [
 			'nvarchar'
 		]
+	},
+	{
+		input: 'textarea',
+		types: [
+			'ntext'
+		]
 	}
 ];
 

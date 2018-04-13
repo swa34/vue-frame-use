@@ -1,3 +1,4 @@
 node_modules/
 dist/
-dbdumps/
+tools/schemagen/schemas/
+tools/schemagen/config.js

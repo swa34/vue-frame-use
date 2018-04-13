@@ -12,7 +12,7 @@
 <script>
 	// Import required modules
 	import DetailMain from '@/views/data/DetailMain';
-	import schema from '@/schemas/caes_central_database/oit_websites';
+	import schema from '@/schemas/caes_central_database/module';
 	import { getComputed, getStore } from '@/modules/store';
 	import { url } from '@/modules/utilities';
 
