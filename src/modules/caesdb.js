@@ -25,4 +25,9 @@ const getData = (options, cb) => {
 	json(url, cb);
 };
 
-export default { getData };
+const post = (data, cb) => {
+	// Doesn't actually post anything, just says it does
+	cb(null, { success: true });
+};
+
+export default { getData, post };

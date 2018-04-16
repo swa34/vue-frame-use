@@ -1,69 +1,72 @@
 <template lang="html">
-	<table v-if="schema.columns">
-		<caption v-if="title || schema.title">
-			{{ title || schema.title }}
-		</caption>
-		<thead>
-			<tr>
-				<th v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
-					{{ column.prettyName || getPrettyColumnName(column.columnName) }}
-				</th>
-				<th v-if="(allowEdit || allowInsert) && !schema.disableUpdate && !schema.disableInsert">
-					<!--
-						No content here, just need empty space for the 'save field' column
-					-->
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr v-for="record in records">
-				<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
-					<label v-if="allowEdit && columnShouldBeEditable(column)">
-						<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
-							<option v-for="value in column.constraint.values" :value="value.key">
-								{{ value.label }}
-							</option>
-						</select>
-						<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable"/>
-					</label>
-					<span v-else>
-						{{ record[column.columnName] }}
-					</span>
-				</td>
-				<td v-if="allowEdit && !schema.disableUpdate">
-					<button v-if="!$store" v-on:click="updateRecord(record)" class="button">
-						Save
-					</button>
-					<button v-on:click="deleteRecord(record)" class="button red">
-						Delete
-					</button>
-				</td>
-				<td v-else-if="allowInsert && !schema.disableInsert">
-					<!--
-						No content here, just need empty space for the 'save field' column
-					-->
-				</td>
-			</tr>
-			<tr v-if="allowInsert && !schema.disableInsert">
-				<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
-					<label>
-						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
-						<select v-else-if="sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)">
-							<option v-for="value in column.constraint.values" :value="value.key">
-								{{ value.label }}
-							</option>
-						</select>
-						<input v-else :type="sqlToHtml(column)" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)" />
-					</label>
-				</td>
-				<td>
-					<button v-on:click="addNewRecord" class="button">
-						Add
-					</button>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<div>
+		<table v-if="schema.columns">
+			<caption v-if="title || schema.title">
+				{{ title || schema.title }}
+			</caption>
+			<thead>
+				<tr>
+					<th v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
+						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
+					</th>
+					<th v-if="(allowEdit || allowInsert) && !schema.disableUpdate && !schema.disableInsert">
+						<!--
+							No content here, just need empty space for the 'save field' column
+						-->
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="record in records">
+					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
+						<label v-if="allowEdit && columnShouldBeEditable(column)">
+							<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
+								<option v-for="value in column.constraint.values" :value="value.key">
+									{{ value.label }}
+								</option>
+							</select>
+							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable"/>
+						</label>
+						<span v-else>
+							{{ record[column.columnName] }}
+						</span>
+					</td>
+					<td v-if="allowEdit && !schema.disableUpdate">
+						<button v-if="!$store" v-on:click="updateRecord(record)" class="button">
+							Save
+						</button>
+						<button v-on:click="deleteRecord(record)" class="button red">
+							Delete
+						</button>
+					</td>
+					<td v-else-if="allowInsert && !schema.disableInsert">
+						<!--
+							No content here, just need empty space for the 'save field' column
+						-->
+					</td>
+				</tr>
+				<tr v-if="allowInsert && !schema.disableInsert">
+					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
+						<label>
+							<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
+							<select v-else-if="sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)">
+								<option v-for="value in column.constraint.values" :value="value.key">
+									{{ value.label }}
+								</option>
+							</select>
+							<input v-else :type="sqlToHtml(column)" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)" />
+						</label>
+					</td>
+					<td>
+						<button v-on:click="addNewRecord" class="button">
+							Add
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<pre v-if="!$store">{{ $data }}</pre>
+	</div>
 </template>
 
 <script>

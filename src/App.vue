@@ -12,9 +12,12 @@
 <script>
 	// Import required modules
 	import DetailMain from '@/views/data/DetailMain';
-	import schema from '@/schemas/caes_central_database/module';
+	import schema from '@/schemas/caes_central_database/help_message';
 	import { getComputed, getStore } from '@/modules/store';
-	import { url } from '@/modules/utilities';
+	import { stringFormats, url } from '@/modules/utilities';
+
+	// Hacky fix for schemas without titles
+	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);
 
 	// Export the actual component
 	export default {
@@ -36,8 +39,8 @@
 				} : false
 			};
 		},
-		computed: getComputed(schema),	// Fetches computed values from our store module
-		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))					// Fetches the store from our store module
+		computed: getComputed(schema),
+		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
 </script>
 

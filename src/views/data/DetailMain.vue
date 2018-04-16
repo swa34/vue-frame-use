@@ -1,7 +1,7 @@
 <template lang="html">
   <main>
   	<h1>
-  		{{ schema.title }} Detail
+  		{{ schema.title || schema.table }} Detail
   	</h1>
 		<!-- We use a data form component to display the main record -->
 		<DataForm
@@ -22,6 +22,9 @@
 				/>
 			</div>
 		</div>
+		<button v-if="!identifier.value" v-on:click="submitData" class="button">
+			Submit
+		</button>
   </main>
 </template>
 
@@ -29,6 +32,7 @@
 	// Import required modules
 	import DataForm from '@/views/data/Form';
 	import DataTable from '@/views/data/Table';
+	import caesdb from '@/modules/caesdb';
 
 	// Export the actual component
 	export default {
@@ -36,6 +40,19 @@
 		components: {
 			DataForm,
 			DataTable
+		},
+		methods: {
+			submitData () {
+				// Doesn't send anything yet, just pretends like it does
+				caesdb.post(this.$store.state, (err, data) => {
+					if (err) console.error(err);
+					if (data.success) {
+						this.$swal('Awesome!', 'Your entry has been saved successfully.', 'success');
+						console.log('Successfully sent this data to the server:');
+						console.log(JSON.stringify(this.$store.state, null, 2));
+					}
+				});
+			}
 		},
 		props: {
 			'schema': {

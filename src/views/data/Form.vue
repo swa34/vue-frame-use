@@ -17,6 +17,7 @@
 			</label>
 		</fieldset>
 		<input v-if="!$store" class="button" value="Save" type="submit" />
+		<pre v-if="!$store">{{ $data }}</pre>
 	</form>
 </template>
 
