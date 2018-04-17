@@ -11,10 +11,10 @@
 
 <script>
 	// Import required modules
-	import DetailMain from '@/views/data/DetailMain';
-	import schema from '@/schemas/caes_central_database/help_message';
 	import { getComputed, getStore } from '@/modules/store';
 	import { stringFormats, url } from '@/modules/utilities';
+	import DetailMain from '@/views/data/DetailMain';
+	import schema from '@/schemas/caes_news/story';
 
 	// Hacky fix for schemas without titles
 	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);
@@ -22,9 +22,7 @@
 	// Export the actual component
 	export default {
 		name: 'App',
-		components: {
-			DetailMain
-		},
+		components: { DetailMain },
 		data () {
 			// Fetch identifier parameters from the url
 			const key = url.getParam('key');

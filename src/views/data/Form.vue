@@ -8,6 +8,10 @@
 				<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
 					{{ record[column.columnName] }}
 				</textarea>
+				<quillEditor
+					v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
+					v-model="record[column.columnName]"
+				/>
 				<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
 					<option v-for="value in column.constraint.values" :value="value.key">
 						{{ value.label }}
@@ -22,16 +26,21 @@
 </template>
 
 <script>
-	import caesdb from '@/modules/caesdb';
 	import {
 		formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
+	import { quillEditor } from 'vue-quill-editor';
+	import 'quill/dist/quill.core.css';
+	import 'quill/dist/quill.snow.css';
+	import 'quill/dist/quill.bubble.css';
+	import caesdb from '@/modules/caesdb';
 
 	export default {
 		name: 'DatabaseForm',
+		components: { quillEditor },
 		props: {
 			'schema': {
 				type: Object,
