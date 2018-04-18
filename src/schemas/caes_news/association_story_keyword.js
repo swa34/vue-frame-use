@@ -1,6 +1,6 @@
 const schema = {
 	database: 'CAES_NEWS',
-	table: 'ASSOCIATION_STORY_AUDIENCE',
+	table: 'ASSOCIATION_STORY_KEYWORD',
 	columns: [
 		{
 			columnName: 'STORY_ID',
@@ -14,15 +14,14 @@ const schema = {
 			}
 		},
 		{
-			columnName: 'AUDIENCE_ID',
+			columnName: 'KEYWORD_ID',
 			type: 'int',
 			required: true,
 			constraint: {
-				database: 'CAES_NEWS',
-				table: 'STORY_AUDIENCE',
+				database: 'EXTENSION_WEBSITE_CONTENT',
+				table: 'KEYWORD',
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
-				foreignDescription: 'DESCRIPTION',
 				values: []
 			}
 		}

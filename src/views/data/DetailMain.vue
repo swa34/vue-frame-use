@@ -11,15 +11,26 @@
 		<!-- And data table components to display the main record's associated data -->
 		<div v-if="includeAssociations">
 			<div v-for="association in schema.associations">
-				<DataTable
-					v-if="!identifier.value ? association.isAssignable : true"
-					:title="association.title"
-					:schema="association.schema"
-					:associatedColumn="association.foreignKey"
-					:identifier="{ key: association.foreignKey, value: identifier.value}"
-					:allowInsert="true"
-					:allowEdit="true"
-				/>
+				<div v-if="association.multiSelect">
+					<DataMultiSelect
+						:title="association.title"
+						:schema="association.schema"
+						:allowEdit="true"
+						:associatedColumn="association.associatedColumn"
+						:identifier="{ key: association.foreignKey, value: identifier.value}"
+					/>
+				</div>
+				<div v-else>
+					<DataTable
+						v-if="!identifier.value ? association.isAssignable : true"
+						:title="association.title"
+						:schema="association.schema"
+						:associatedColumn="association.foreignKey"
+						:identifier="{ key: association.foreignKey, value: identifier.value}"
+						:allowInsert="true"
+						:allowEdit="true"
+					/>
+				</div>
 			</div>
 		</div>
 		<button v-if="!identifier.value" v-on:click="submitData" class="button">
@@ -31,6 +42,7 @@
 <script>
 	// Import required modules
 	import DataForm from '@/views/data/Form';
+	import DataMultiSelect from '@/views/data/MultiSelect';
 	import DataTable from '@/views/data/Table';
 	import caesdb from '@/modules/caesdb';
 
@@ -39,6 +51,7 @@
 		name: 'DetailMain',
 		components: {
 			DataForm,
+			DataMultiSelect,
 			DataTable
 		},
 		methods: {

@@ -1,5 +1,6 @@
 import associationStoryWriterSchema from '@/schemas/caes_news/association_story_writer';
 import associationStoryAudienceSchema from '@/schemas/caes_news/association_story_audience';
+import associationStoryKeywordSchema from '@/schemas/caes_news/association_story_keyword';
 
 const schema = {
 	database: 'CAES_NEWS',
@@ -103,7 +104,16 @@ const schema = {
 			schema: associationStoryAudienceSchema,
 			localKey: 'ID',
 			foreignKey: 'STORY_ID',
-			isAssignable: true
+			associatedColumn: 'AUDIENCE_ID',
+			multiSelect: true
+		},
+		{
+			title: 'Keywords',
+			schema: associationStoryKeywordSchema,
+			localKey: 'ID',
+			foreignKey: 'STORY_ID',
+			associatedColumn: 'KEYWORD_ID',
+			multiSelect: true
 		}
 	]
 };
