@@ -76,7 +76,7 @@ const getStore = (schema, isNew = false) => {
 			// As long as we're working with a 'new' form, and the association is
 			// assignable, just add a module to the store with an empty array to hold
 			// the records that will be attached by the user.
-			if ((isNew && association.isAssignable) || !isNew) {
+			if ((isNew && (association.isAssignable || association.multiSelect)) || !isNew) {
 				const associationCamelTitle = stringFormats.camelCase(association.title);
 				if (!config.modules[associationCamelTitle]) {
 					config.modules[associationCamelTitle] = {

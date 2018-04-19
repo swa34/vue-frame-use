@@ -6,22 +6,27 @@
 		<p v-if="description">
 			{{ description }}
 		</p>
-		<label v-for="option in options">
-			<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
-			<span>
-				{{ option[optionLabel || optionID] }}
+		<div v-for="group in groups">
+			<span v-if="group.name">
+				{{ group.name }}
 			</span>
-			<span v-if="optionDescription">
-				: {{ option[optionDescription] }}
-			</span>
-		</label>
-		<div v-if="allowEdit">
-			<button v-on:click="checkAll" class="button">
-				Check All
-			</button>
-			<button v-on:click="uncheckAll" class="button">
-				Uncheck All
-			</button>
+			<label v-for="option in group.options">
+				<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+				<span>
+					{{ option[optionLabel || optionID] }}
+				</span>
+				<span v-if="optionDescription">
+					: {{ option[optionDescription] }}
+				</span>
+			</label>
+			<div v-if="allowEdit">
+				<button v-on:click="checkAll" class="button">
+					Check All
+				</button>
+				<button v-on:click="uncheckAll" class="button">
+					Uncheck All
+				</button>
+			</div>
 		</div>
 	</div>
 </template>
@@ -54,6 +59,9 @@
 			'associatedColumn': {
 				type: String,
 				required: true
+			},
+			'groupBy': {
+				type: String
 			}
 		},
 		computed: {
@@ -73,7 +81,7 @@
 		data () {
 			const data = {
 				localRecords: [],
-				options: [],
+				groups: [],
 				optionID: null,
 				optionLabel: null,
 				optionDescription: null
@@ -107,6 +115,33 @@
 					}
 				});
 				return record;
+			},
+			populateGroups (options, groupBy) {
+				const component = this;
+				options.forEach((option) => {
+					if (component.groups.length === 0) {
+						component.groups.push({
+							name: option[groupBy],
+							options: [option]
+						});
+					} else {
+						for (let i = 0; i < component.groups.length; ++i) {
+							if (component.groups[i].name === option[groupBy]) {
+								// Group is already present
+								if (component.groups[i].options.indexOf(option) === -1) {
+									// Option is not present in group
+									component.groups[i].options.push(option);
+								}
+							} else if (i === component.groups.length - 1) {
+								// Group is not present
+								component.groups.push({
+									name: option[groupBy],
+									options: [option]
+								});
+							}
+						}
+					}
+				});
 			}
 		},
 		mounted () {
@@ -139,7 +174,13 @@
 						caesdb.getData(options, (err, data) => {
 							if (err) console.error(err);
 							if (data.success) {
-								component.options = data.results;
+								if (component.groupBy) {
+									component.populateGroups(data.results, component.groupBy);
+								} else {
+									component.groups.push({
+										options: data.results
+									});
+								}
 							}
 						});
 					} else if (column.columnName === component.associatedColumn) {

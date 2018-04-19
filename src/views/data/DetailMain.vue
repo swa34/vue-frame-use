@@ -18,6 +18,7 @@
 						:allowEdit="true"
 						:associatedColumn="association.associatedColumn"
 						:identifier="{ key: association.foreignKey, value: identifier.value}"
+						:groupBy="association.groupBy"
 					/>
 				</div>
 				<div v-else>

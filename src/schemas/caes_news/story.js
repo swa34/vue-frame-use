@@ -113,7 +113,8 @@ const schema = {
 			localKey: 'ID',
 			foreignKey: 'STORY_ID',
 			associatedColumn: 'KEYWORD_ID',
-			multiSelect: true
+			multiSelect: true,
+			groupBy: 'TYPE_ID'
 		}
 	]
 };
