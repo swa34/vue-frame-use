@@ -1,6 +1,8 @@
-import associationStoryWriterSchema from '@/schemas/caes_news/association_story_writer';
 import associationStoryAudienceSchema from '@/schemas/caes_news/association_story_audience';
 import associationStoryKeywordSchema from '@/schemas/caes_news/association_story_keyword';
+import associationStorySourceExpertSchema from '@/schemas/caes_news/association_story_source_expert';
+import associationStoryWriterSchema from '@/schemas/caes_news/association_story_writer';
+import dateFormat from 'dateformat';
 
 const schema = {
 	database: 'CAES_NEWS',
@@ -28,20 +30,15 @@ const schema = {
 			required: true
 		},
 		{
-			columnName: 'BODY',
-			type: 'nvarchar',
-			required: true,
-			inputType: 'richtext'
-		},
-		{
 			columnName: 'LEAD_PARAGRAPH',
 			type: 'ntext',
 			required: true
 		},
 		{
-			columnName: 'RELEASE_DATE',
-			type: 'datetime',
-			required: true
+			columnName: 'BODY',
+			type: 'nvarchar',
+			required: true,
+			inputType: 'richtext'
 		},
 		{
 			columnName: 'STATUS_ID',
@@ -56,16 +53,19 @@ const schema = {
 		},
 		{
 			columnName: 'OMITS_BYLINE',
+			prettyName: 'Hide Byline',
 			type: 'bit',
 			required: true
 		},
 		{
 			columnName: 'OMITS_TAGLINE',
+			prettyName: 'Hide Tagline',
 			type: 'bit',
 			required: true
 		},
 		{
 			columnName: 'IS_FEATURED',
+			prettyName: 'Featured',
 			type: 'bit',
 			required: true
 		},
@@ -79,6 +79,12 @@ const schema = {
 				foreignKey: 'ID',
 				values: []
 			}
+		},
+		{
+			columnName: 'RELEASE_DATE',
+			type: 'datetime',
+			required: true,
+			default: dateFormat(Date.now(), 'yyyy-mm-dd')
 		},
 		{
 			columnName: 'DATE_CREATED',
@@ -95,6 +101,13 @@ const schema = {
 		{
 			title: 'Writers',
 			schema: associationStoryWriterSchema,
+			localKey: 'ID',
+			foreignKey: 'STORY_ID',
+			isAssignable: true
+		},
+		{
+			title: 'Sources/Experts',
+			schema: associationStorySourceExpertSchema,
 			localKey: 'ID',
 			foreignKey: 'STORY_ID',
 			isAssignable: true

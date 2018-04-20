@@ -20,10 +20,10 @@
 				</span>
 			</label>
 			<div v-if="allowEdit">
-				<button v-on:click="checkAll" class="button">
+				<button v-on:click="checkAll(group)" class="button">
 					Check All
 				</button>
-				<button v-on:click="uncheckAll" class="button">
+				<button v-on:click="uncheckAll(group)" class="button">
 					Uncheck All
 				</button>
 			</div>
@@ -97,13 +97,19 @@
 			return data;
 		},
 		methods: {
-			checkAll () {
-				this.options.forEach((option) => {
-					this.records.push(this.generateRecord(option));
+			checkAll (group) {
+				group.options.forEach((option) => {
+					const record = this.generateRecord(option);
+					const recordIndex = this.records.map(e => e[this.associatedColumn]).indexOf(record[this.associatedColumn]);
+					if (recordIndex === -1)	this.records.push(record);
 				});
 			},
-			uncheckAll () {
-				this.records = [];
+			uncheckAll (group) {
+				group.options.forEach((option) => {
+					const record = this.generateRecord(option);
+					const recordIndex = this.records.map(e => e[this.associatedColumn]).indexOf(record[this.associatedColumn]);
+					if (recordIndex !== -1) this.records.splice(recordIndex, 1);
+				});
 			},
 			generateRecord (option) {
 				const record = {};
@@ -119,26 +125,18 @@
 			populateGroups (options, groupBy) {
 				const component = this;
 				options.forEach((option) => {
-					if (component.groups.length === 0) {
+					const groupsIndex = component.groups.map(e => e.name).indexOf(option[groupBy]);
+					if (groupsIndex === -1) {
+						// Group is not present
 						component.groups.push({
 							name: option[groupBy],
 							options: [option]
 						});
 					} else {
-						for (let i = 0; i < component.groups.length; ++i) {
-							if (component.groups[i].name === option[groupBy]) {
-								// Group is already present
-								if (component.groups[i].options.indexOf(option) === -1) {
-									// Option is not present in group
-									component.groups[i].options.push(option);
-								}
-							} else if (i === component.groups.length - 1) {
-								// Group is not present
-								component.groups.push({
-									name: option[groupBy],
-									options: [option]
-								});
-							}
+						// Group is present
+						if (component.groups[groupsIndex].options.indexOf(option) === -1) {
+							// Option is not present
+							component.groups[groupsIndex].options.push(option);
 						}
 					}
 				});
