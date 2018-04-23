@@ -128,6 +128,15 @@ const schema = {
 			associatedColumn: 'KEYWORD_ID',
 			multiSelect: true,
 			groupBy: 'TYPE_ID'
+		},
+		{
+			title: 'Images',
+			isExternal: true,
+			source: {
+				url: 'https://devssl.caes.uga.edu/news/admin/index.cfm?referenceInterface=STORY&subInterface=detail_ASSOCIATION_STORY_IMAGE',
+				selector: 'PK_ID',
+				hasParams: true
+			}
 		}
 	]
 };

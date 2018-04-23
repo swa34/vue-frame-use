@@ -11,7 +11,17 @@
 		<!-- And data table components to display the main record's associated data -->
 		<div v-if="includeAssociations">
 			<div v-for="association in schema.associations">
-				<div v-if="association.multiSelect">
+				<div v-if="association.isExternal && identifier.value">
+					<span>
+						{{ association.title }}
+					</span>
+					<p>
+						<a :href="association.source.url + (association.source.hasParams ? '&' : '?') + association.source.selector + '=' + identifier.value" class="button">
+							Edit
+						</a>
+					</p>
+				</div>
+				<div v-else-if="association.multiSelect">
 					<DataMultiSelect
 						:title="association.title"
 						:schema="association.schema"
@@ -21,9 +31,8 @@
 						:groupBy="association.groupBy"
 					/>
 				</div>
-				<div v-else>
+				<div v-else-if="!identifier.value ? association.isAssignable : true">
 					<DataTable
-						v-if="!identifier.value ? association.isAssignable : true"
 						:title="association.title"
 						:schema="association.schema"
 						:associatedColumn="association.foreignKey"
