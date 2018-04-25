@@ -25,7 +25,7 @@
 									{{ value.label }}
 								</option>
 							</select>
-							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable"/>
+							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<span v-else>
 							{{ record[column.columnName] }}

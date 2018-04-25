@@ -1,25 +1,27 @@
 <template lang="html">
 	<form>
-		<fieldset v-for="column in schema.columns">
-			<label>
-				<legend>
-					{{ column.prettyName || getPrettyColumnName(column.columnName) }}
-				</legend>
-				<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
-					{{ record[column.columnName] }}
-				</textarea>
-				<quillEditor
-					v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
-					v-model="record[column.columnName]"
-				/>
-				<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
-					<option v-for="value in column.constraint.values" :value="value.key">
-						{{ value.label }}
-					</option>
-				</select>
-				<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable" />
-			</label>
-		</fieldset>
+		<div v-for="column in schema.columns">
+			<fieldset v-if="columnShouldBeDisplayed(column)">
+				<label>
+					<legend>
+						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
+					</legend>
+					<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
+						{{ record[column.columnName] }}
+					</textarea>
+					<quillEditor
+						v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
+						v-model="record[column.columnName]"
+					/>
+					<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
+						<option v-for="value in column.constraint.values" :value="value.key">
+							{{ value.label }}
+						</option>
+					</select>
+					<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable" />
+				</label>
+			</fieldset>
+		</div>
 		<input v-if="!$store" class="button" value="Save" type="submit" />
 		<pre v-if="!$store">{{ $data }}</pre>
 	</form>
@@ -82,7 +84,14 @@
 		},
 		methods: {
 			getPrettyColumnName,
-			sqlToHtml
+			sqlToHtml,
+			columnShouldBeDisplayed (column) {
+				if (!column.depends) {
+					return true;
+				} else {
+					return column.depends.test(this.record[column.depends.column]);
+				}
+			}
 		},
 		mounted () {
 			const component = this;

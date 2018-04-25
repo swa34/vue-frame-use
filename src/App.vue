@@ -14,7 +14,7 @@
 	import { getComputed, getStore } from '@/modules/store';
 	import { stringFormats, url } from '@/modules/utilities';
 	import DetailMain from '@/views/data/DetailMain';
-	import schema from '@/schemas/caes_news/story';
+	import schema from '@/schemas/extension_website_content/educational_opportunity';
 
 	// Hacky fix for schemas without titles
 	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);
