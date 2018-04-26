@@ -87,6 +87,9 @@
 			sqlToHtml,
 			columnShouldBeDisplayed (column) {
 				if (!column.depends) {
+					if ((!this.identifier || !this.identifier.key || (this.identifier.key && !this.identifier.value)) && column.automated) {
+						return false;
+					}
 					return true;
 				} else {
 					return column.depends.test(this.record[column.depends.column]);
@@ -118,11 +121,21 @@
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.constraint) {
+					if (column.constraint && column.constraint.database) {
 						const options = {
 							db: column.constraint.database,
 							table: column.constraint.table
 						};
+						if (column.constraint.identifier) {
+							if (typeof column.constraint.identifier.value !== 'object') {
+								options.identifier = column.constraint.identifier;
+							} else {
+								options.identifier = {
+									key: column.constraint.identifier.key,
+									value: this.record[column.constraint.identifier.value.column]
+								};
+							}
+						}
 						caesdb.getData(options, (err, data) => {
 							if (err) console.error(err);
 							if (data.success) {

@@ -29,6 +29,7 @@
 						:associatedColumn="association.associatedColumn"
 						:identifier="{ key: association.foreignKey, value: identifier.value}"
 						:groupBy="association.groupBy"
+						:groupsToShow="association.groupsToShow"
 					/>
 				</div>
 				<div v-else-if="!identifier.value ? association.isAssignable : true">

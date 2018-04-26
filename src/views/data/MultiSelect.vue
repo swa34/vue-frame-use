@@ -7,25 +7,27 @@
 			{{ description }}
 		</p>
 		<div v-for="group in groups">
-			<span v-if="group.name">
-				{{ group.name }}
-			</span>
-			<label v-for="option in group.options">
-				<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
-				<span>
-					{{ option[optionLabel || optionID] }}
+			<div v-if="!groupsToShow || displayedGroups.indexOf(group.name) !== -1">
+				<span v-if="group.name">
+					{{ group.name }}
 				</span>
-				<span v-if="optionDescription">
-					: {{ option[optionDescription] }}
-				</span>
-			</label>
-			<div v-if="allowEdit">
-				<button v-on:click="checkAll(group)" class="button">
-					Check All
-				</button>
-				<button v-on:click="uncheckAll(group)" class="button">
-					Uncheck All
-				</button>
+				<label v-for="option in group.options">
+					<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+					<span>
+						{{ option[optionLabel || optionID] }}
+					</span>
+					<span v-if="optionDescription">
+						: {{ option[optionDescription] }}
+					</span>
+				</label>
+				<div v-if="allowEdit">
+					<button v-on:click="checkAll(group)" class="button">
+						Check All
+					</button>
+					<button v-on:click="uncheckAll(group)" class="button">
+						Uncheck All
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -62,6 +64,12 @@
 			},
 			'groupBy': {
 				type: String
+			},
+			'groupsToShow': {
+				type: [
+					Array,
+					Object
+				]
 			}
 		},
 		computed: {
@@ -74,6 +82,20 @@
 						this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
 					} else {
 						this.localRecords = val;
+					}
+				}
+			},
+			displayedGroups: {
+				get () {
+					if (Array.isArray(this.groupsToShow)) return this.groupsToShow;
+					if (!this.groupsToShow.association || !this.groupsToShow.column) {
+						console.error('Groups to show must either be an array or an object containing an association and a column.');
+					} else if (!this.$store) {
+						console.error('Cannot restrict displayed groups when not using a data store.');
+					} else {
+						const groupRecords = this.$store.state[stringFormats.camelCase(this.groupsToShow.association)].records;
+						const displayedGroups = groupRecords.map(record => record[this.groupsToShow.column]);
+						return displayedGroups;
 					}
 				}
 			}

@@ -5,12 +5,25 @@ const schema = {
 		{
 			columnName: 'REPORT_ID',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				database: 'GACOUNTS3',
+				table: 'REPORT',
+				foreignKey: 'ID',
+				foreignLabel: 'TITLE',
+				values: []
+			}
 		},
 		{
 			columnName: 'TOPIC_ID',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				database: 'CAES_CENTRAL_DATABASE',
+				table: 'ASSOCIATION_TOPIC_AREA',
+				foreignKey: 'TOPIC_ID',
+				values: []
+			}
 		}
 	]
 };

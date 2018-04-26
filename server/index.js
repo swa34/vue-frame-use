@@ -35,6 +35,7 @@ const sendFailure = (res) => {
 };
 
 app.get('/api/:db/:table/:selector?/:value?', (req, res) => {
+	console.log(req.url);
 	// Get url params
 	const db = req.params.db;
 	const table = req.params.table;
