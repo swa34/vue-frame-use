@@ -32,6 +32,9 @@
 						:groupsToShow="association.groupsToShow"
 					/>
 				</div>
+				<div v-else-if="association.forbidMultiple">
+
+				</div>
 				<div v-else-if="!identifier.value ? association.isAssignable : true">
 					<DataTable
 						:title="association.title"

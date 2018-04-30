@@ -87,16 +87,35 @@
 			},
 			displayedGroups: {
 				get () {
+					if (!this.groupsToShow) return [];
 					if (Array.isArray(this.groupsToShow)) return this.groupsToShow;
 					if (!this.groupsToShow.association || !this.groupsToShow.column) {
 						console.error('Groups to show must either be an array or an object containing an association and a column.');
 					} else if (!this.$store) {
 						console.error('Cannot restrict displayed groups when not using a data store.');
 					} else {
-						const groupRecords = this.$store.state[stringFormats.camelCase(this.groupsToShow.association)].records;
-						const displayedGroups = groupRecords.map(record => record[this.groupsToShow.column]);
+						const displayedGroups = this.groupRecords.map(record => record[this.groupsToShow.column]);
 						return displayedGroups;
 					}
+					return [];
+				}
+			},
+			groupRecords: {
+				get () {
+					return this.$store.state[stringFormats.camelCase(this.groupsToShow.association)].records;
+				}
+			},
+			validOptions: {
+				get () {
+					let validOptions = [];
+					const groupsMap = this.groups.map(g => g.name);
+					this.displayedGroups.forEach((group) => {
+						const groupIndex = groupsMap.indexOf(group);
+						if (groupIndex !== -1) {
+							validOptions = validOptions.concat(this.groups[groupIndex].options.map(o => o[this.associatedColumn]));
+						}
+					});
+					return validOptions;
 				}
 			}
 		},
@@ -211,6 +230,16 @@
 
 			getOptions();
 			if (component.identifier.value) getRecords();
+		},
+		watch: {
+			validOptions () {
+				let validRecords = [];
+				this.records.forEach((record, i) => {
+					const validOptionsIndex = this.validOptions.indexOf(record[this.associatedColumn]);
+					if (validOptionsIndex !== -1) validRecords.push(record);
+				});
+				this.records = validRecords;
+			}
 		}
 	};
 </script>

@@ -2,6 +2,7 @@ const CleanWebpackPlugin	= require('clean-webpack-plugin');
 const HtmlWebpackPlugin		= require('html-webpack-plugin');
 const pkg									= require('./package.json');
 const path								= require('path');
+const { VueLoaderPlugin }	= require('vue-loader');
 
 const resolve = dir => path.join(__dirname, dir);
 
@@ -15,7 +16,8 @@ module.exports = (env, argv) => {
 			new HtmlWebpackPlugin({
 				title: pkg.name,
 				template: './src/index.html'
-			})
+			}),
+			new VueLoaderPlugin()
 		],
 		resolve: {
 			extensions: [
@@ -43,14 +45,14 @@ module.exports = (env, argv) => {
 				{
 					test: /\.css$/,
 					use: [
-						'style-loader',
+						'vue-style-loader',
 						'css-loader'
 					]
 				},
 				{
 					test: /\.scss$/,
 					use: [
-						'style-loader',
+						'vue-style-loader',
 						'css-loader',
 						'sass-loader'
 					]
