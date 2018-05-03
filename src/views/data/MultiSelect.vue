@@ -6,6 +6,9 @@
 		<p v-if="description">
 			{{ description }}
 		</p>
+		<p v-if="groups.length < 1">
+			(None)
+		</p>
 		<div v-for="group in groups">
 			<div v-if="!groupsToShow || displayedGroups.indexOf(group.name) !== -1">
 				<span v-if="group.name">

@@ -14,7 +14,7 @@
 	import { getComputed, getStore } from '@/modules/store';
 	import { stringFormats, url } from '@/modules/utilities';
 	import DetailMain from '@/views/data/DetailMain';
-	import schema from '@/schemas/gacounts3/report';
+	import schema from '@/schemas/gacounts3/sub_report';
 
 	// Hacky fix for schemas without titles
 	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);

@@ -2,6 +2,7 @@
 import associationReportProgramAreaSchema from '@/schemas/gacounts3/association_report_program_area';
 import associationReportTopicSchema from '@/schemas/gacounts3/association_report_topic';
 import associationReportTypeSchema from '@/schemas/gacounts3/association_report_type';
+import subreportSchema from '@/schemas/gacounts3/sub_report';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -239,9 +240,23 @@ const schema = {
 			schema: associationReportTypeSchema,
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
+			associatedColumn: 'TYPE_ID',
 			isAssignable: true,
-			forbidMultiple: true
+			forbidMultiple: true,
+			filter: {
+				association: {
+					title: 'Program Areas',
+					column: 'AREA_ID'
+				},
+				database: 'GACOUNTS3',
+				table: 'ASSOCIATION_REPORT_TYPE_PROGRAM_AREA',
+				associatedColumn: 'AREA_ID',
+				optionColumn: 'REPORT_TYPE_ID'
+			}
 		}
+	],
+	subschemas: [
+		subReportSchema
 	]
 };
 

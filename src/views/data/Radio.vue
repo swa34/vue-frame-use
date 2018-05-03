@@ -1,0 +1,183 @@
+<template lang="html">
+  <div>
+		<strong v-if="title || schema.title">
+			{{ title || schema.title }}
+		</strong>
+		<p v-if="description">
+			{{ description }}
+		</p>
+		<label v-for="option in options">
+			<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+			<span>
+				{{ option[optionLabel || optionID] }}
+			</span>
+			<span v-if="optionDescription">
+				: {{ option[optionDescription] }}
+			</span>
+		</label>
+	</div>
+</template>
+
+<script>
+	import { stringFormats } from '@/modules/utilities';
+	import caesdb from '@/modules/caesdb';
+
+	export default {
+		name: 'Radio',
+		computed: {
+			associatedColumnSchema: {
+				get () {
+					for (let i = 0; i < this.schema.columns.length; ++i) {
+						if (this.schema.columns[i].columnName === this.associatedColumn) return this.schema.columns[i];
+					}
+				}
+			},
+			filterLoaded: {
+				get () {
+					return this.filterRecords.length > 0;
+				}
+			},
+			options: {
+				get () {
+					if (!this.filter) return this.unfilteredOptions;
+					if (!this.filterLoaded) return [];
+					const associationRecords = this.$store.state[stringFormats.camelCase(this.filter.association.title)].records.map(r => r[this.filter.association.column]);
+					let validOptionValues = [];
+					this.filterRecords.forEach((record) => {
+						const associationRecordIndex = associationRecords.indexOf(record[this.filter.associatedColumn]);
+						if (associationRecordIndex !== -1 && validOptionValues.indexOf(record[this.filter.optionColumn]) === -1) {
+							validOptionValues.push(record[this.filter.optionColumn]);
+						}
+					});
+					let options = [];
+					this.unfilteredOptions.forEach((option) => {
+						if (validOptionValues.indexOf(option[this.associatedColumnSchema.constraint.foreignKey]) !== -1) options.push(option);
+					});
+					return options;
+				}
+			},
+			records: {
+				get () {
+					return this.$store ? this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records : this.localRecords;
+				},
+				set (val) {
+					if (this.$store) {
+						this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
+					} else {
+						this.localRecords = val;
+					}
+				}
+			}
+		},
+		data () {
+			const data = {
+				localRecords: [],
+				optionID: null,
+				optionLabel: null,
+				optionDescription: null,
+				unfilteredOptions: [],
+				filterRecords: []
+			};
+			for (let i = 0; i < this.schema.columns.length; ++i) {
+				const column = this.schema.columns[i];
+				if (column.columnName === this.associatedColumn && column.constraint) {
+					data.optionID = column.constraint.foreignKey;
+					data.optionLabel = column.constraint.foreignLabel;
+					data.optionDescription = column.constraint.foreignDescription || false;
+				}
+			}
+			return data;
+		},
+		methods: {
+			generateRecord (option) {
+				const record = {};
+				this.schema.columns.forEach((column) => {
+					if (column.columnName === this.associatedColumn) {
+						record[column.columnName] = option[this.optionID];
+					} else {
+						record[column.columnName] = this.identifier.value || null;
+					}
+				});
+				return record;
+			}
+		},
+		mounted () {
+			const component = this;
+
+			const getRecords = () => {
+				const options = {
+					db: component.schema.database,
+					table: component.schema.table,
+					identifier: component.identifier
+				};
+				caesdb.getData(options, (err, data) => {
+					if (err) console.error(err);
+					if (data.success) {
+						component.records = data.results;
+					}
+				});
+			};
+
+			const getOptions = () => {
+				component.schema.columns.forEach((column) => {
+					if (column.columnName === component.associatedColumn && column.constraint) {
+						const options = {
+							db: column.constraint.database,
+							table: column.constraint.table
+						};
+						caesdb.getData(options, (err, data) => {
+							if (err) console.error(err);
+							if (data.success) {
+								component.unfilteredOptions = data.results;
+							}
+						});
+					} else if (column.columnName === component.associatedColumn) {
+						console.error('ID Column does not have necessary constraint information.');
+					}
+				});
+			};
+
+			const getFilterData = () => {
+				const options = {
+					db: component.filter.database,
+					table: component.filter.table
+				};
+				caesdb.getData(options, (err, data) => {
+					if (err) console.error(err);
+					if (data.success) {
+						component.filterRecords = data.results;
+					}
+				});
+			};
+
+			getOptions();
+			if (component.identifier.value) getRecords();
+			if (component.filter) getFilterData();
+		},
+		props: {
+			'allowEdit': {
+				type: Boolean
+			},
+			'associatedColumn': {
+				type: String,
+				required: true
+			},
+			'description': {
+				type: String
+			},
+			'filter': {
+				type: Object
+			},
+			'identifier': {
+				type: Object
+			},
+			'schema': {
+				type: Object,
+				required: true
+			},
+			'title': {
+				type: String
+			}
+		}
+	};
+</script>

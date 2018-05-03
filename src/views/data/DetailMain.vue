@@ -11,40 +11,50 @@
 		<!-- And data table components to display the main record's associated data -->
 		<div v-if="includeAssociations">
 			<div v-for="association in schema.associations">
-				<div v-if="association.isExternal && identifier.value">
-					<span>
-						{{ association.title }}
-					</span>
-					<p>
-						<a :href="association.source.url + (association.source.hasParams ? '&' : '?') + association.source.selector + '=' + identifier.value" class="button">
-							Edit
-						</a>
-					</p>
-				</div>
-				<div v-else-if="association.multiSelect">
-					<DataMultiSelect
-						:title="association.title"
-						:schema="association.schema"
-						:allowEdit="true"
-						:associatedColumn="association.associatedColumn"
-						:identifier="{ key: association.foreignKey, value: identifier.value}"
-						:groupBy="association.groupBy"
-						:groupsToShow="association.groupsToShow"
-					/>
-				</div>
-				<div v-else-if="association.forbidMultiple">
-
-				</div>
-				<div v-else-if="!identifier.value ? association.isAssignable : true">
-					<DataTable
-						:title="association.title"
-						:schema="association.schema"
-						:associatedColumn="association.foreignKey"
-						:identifier="{ key: association.foreignKey, value: identifier.value}"
-						:allowInsert="true"
-						:allowEdit="true"
-					/>
-				</div>
+				<!-- <div v-if="dependencyMet(association)"> -->
+					<div v-if="association.isExternal && identifier.value">
+						<span>
+							{{ association.title }}
+						</span>
+						<p>
+							<a :href="association.source.url + (association.source.hasParams ? '&' : '?') + association.source.selector + '=' + identifier.value" class="button">
+								Edit
+							</a>
+						</p>
+					</div>
+					<div v-else-if="association.multiSelect">
+						<DataMultiSelect
+							:title="association.title"
+							:schema="association.schema"
+							:allowEdit="true"
+							:associatedColumn="association.associatedColumn"
+							:identifier="{ key: association.foreignKey, value: identifier.value }"
+							:groupBy="association.groupBy"
+							:groupsToShow="association.groupsToShow"
+						/>
+					</div>
+					<div v-else-if="association.forbidMultiple">
+						<DataRadio
+							:title="association.title"
+							:schema="association.schema"
+							:allowEdit="true"
+							:associatedColumn="association.associatedColumn"
+							:identifier="{ key: association.foreignKey, value: identifier.value }"
+							:filter="association.filter"
+						/>
+					</div>
+					<div v-else-if="!identifier.value ? association.isAssignable : true">
+						<DataTable
+							:title="association.title"
+							:schema="association.schema"
+							:associatedColumn="association.foreignKey"
+							:identifier="{ key: association.foreignKey, value: identifier.value}"
+							:allowInsert="true"
+							:allowEdit="true"
+						/>
+					</div>
+					<hr />
+				<!-- </div> -->
 			</div>
 		</div>
 		<button v-if="!identifier.value" v-on:click="submitData" class="button">
@@ -55,8 +65,10 @@
 
 <script>
 	// Import required modules
+	import { stringFormats } from '@/modules/utilities';
 	import DataForm from '@/views/data/Form';
 	import DataMultiSelect from '@/views/data/MultiSelect';
+	import DataRadio from '@/views/data/Radio';
 	import DataTable from '@/views/data/Table';
 	import caesdb from '@/modules/caesdb';
 
@@ -66,6 +78,7 @@
 		components: {
 			DataForm,
 			DataMultiSelect,
+			DataRadio,
 			DataTable
 		},
 		methods: {
@@ -79,6 +92,16 @@
 						console.log(JSON.stringify(this.$store.state, null, 2));
 					}
 				});
+			},
+			dependencyMet (association) {
+				if (!association.depends) return true;
+				if (association.depends.column) {
+					return association.depends.test(this.$store.state[stringFormats.camelCase(this.schema.title || this.schema.table)][association.depends.column]);
+				} else if (association.depends.association) {
+					return association.depends.test(this.$store.state[stringFormats.camelCase(association.title)].records);
+				}
+				console.error('Dependency information missing for association: ' + association.title);
+				return false;
 			}
 		},
 		props: {
