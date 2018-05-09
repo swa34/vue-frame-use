@@ -108,6 +108,11 @@
 					return this.$store.state[stringFormats.camelCase(this.groupsToShow.association)].records;
 				}
 			},
+			filteredOptions: {
+				get () {
+					return this.options;
+				}
+			},
 			validOptions: {
 				get () {
 					let validOptions = [];
@@ -126,6 +131,7 @@
 			const data = {
 				localRecords: [],
 				groups: [],
+				options: [],
 				optionID: null,
 				optionLabel: null,
 				optionDescription: null
@@ -165,25 +171,6 @@
 					}
 				});
 				return record;
-			},
-			populateGroups (options, groupBy) {
-				const component = this;
-				options.forEach((option) => {
-					const groupsIndex = component.groups.map(e => e.name).indexOf(option[groupBy]);
-					if (groupsIndex === -1) {
-						// Group is not present
-						component.groups.push({
-							name: option[groupBy],
-							options: [option]
-						});
-					} else {
-						// Group is present
-						if (component.groups[groupsIndex].options.indexOf(option) === -1) {
-							// Option is not present
-							component.groups[groupsIndex].options.push(option);
-						}
-					}
-				});
 			}
 		},
 		mounted () {
@@ -216,13 +203,7 @@
 						caesdb.getData(options, (err, data) => {
 							if (err) console.error(err);
 							if (data.success) {
-								if (component.groupBy) {
-									component.populateGroups(data.results, component.groupBy);
-								} else {
-									component.groups.push({
-										options: data.results
-									});
-								}
+								component.options = data.results;
 							}
 						});
 					} else if (column.columnName === component.associatedColumn) {
@@ -235,6 +216,35 @@
 			if (component.identifier.value) getRecords();
 		},
 		watch: {
+			filteredOptions () {
+				const populateGroups = () => {
+					this.groups = [];
+					if (!this.groupBy) {
+						this.groups.push({
+							options: this.filteredOptions
+						});
+					} else {
+						this.options.forEach((option) => {
+							const groupsIndex = this.groups.map(e => e.name).indexOf(option[this.groupBy]);
+							if (groupsIndex === -1) {
+								// Group is not present
+								this.groups.push({
+									name: option[this.groupBy],
+									options: [option]
+								});
+							} else {
+								// Group is present
+								if (this.groups[groupsIndex].options.indexOf(option) === -1) {
+									// Option is not present
+									this.groups[groupsIndex].options.push(option);
+								}
+							}
+						});
+					}
+				};
+
+				populateGroups();
+			},
 			validOptions () {
 				let validRecords = [];
 				this.records.forEach((record, i) => {

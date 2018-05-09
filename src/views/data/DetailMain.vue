@@ -24,13 +24,14 @@
 					</div>
 					<div v-else-if="association.multiSelect">
 						<DataMultiSelect
-							:title="association.title"
-							:schema="association.schema"
 							:allowEdit="true"
 							:associatedColumn="association.associatedColumn"
-							:identifier="{ key: association.foreignKey, value: identifier.value }"
+							:filter="association.filter"
 							:groupBy="association.groupBy"
 							:groupsToShow="association.groupsToShow"
+							:identifier="{ key: association.foreignKey, value: identifier.value }"
+							:schema="association.schema"
+							:title="association.title"
 						/>
 					</div>
 					<div v-else-if="association.forbidMultiple">

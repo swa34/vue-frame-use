@@ -1,8 +1,10 @@
 // Pull in required modules
-import associationReportProgramAreaSchema from '@/schemas/gacounts3/association_report_program_area';
-import associationReportTopicSchema from '@/schemas/gacounts3/association_report_topic';
-import associationReportTypeSchema from '@/schemas/gacounts3/association_report_type';
-import subreportSchema from '@/schemas/gacounts3/sub_report';
+import {
+	associationReportKeywordSchema,
+	associationReportProgramAreaSchema,
+	associationReportTopicSchema,
+	associationReportTypeSchema
+} from '@/schemas/gacounts3';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -253,11 +255,34 @@ const schema = {
 				associatedColumn: 'AREA_ID',
 				optionColumn: 'REPORT_TYPE_ID'
 			}
+		},
+		{
+			title: 'Keywords',
+			schema: associationReportKeywordSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'KEYWORD_ID',
+			multiSelect: true,
+			filter: {
+				associations: [
+					{
+						title: 'Program Areas',
+						column: 'AREA_ID'
+					},
+					{
+						title: 'Topics',
+						column: 'TOPIC_ID'
+					}
+				],
+				database: 'CAES_CENTRAL_DATABASE',
+				table: 'ASSOCIATION_KEYWORD_TOPIC',
+				optionColumn: 'KEYWORD_ID'
+			}
 		}
-	],
-	subschemas: [
-		subReportSchema
 	]
+	// subschemas: [
+	// 	subReportSchema
+	// ]
 };
 
 export default schema;
