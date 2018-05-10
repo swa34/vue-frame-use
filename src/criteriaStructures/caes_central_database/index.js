@@ -1,5 +1,5 @@
-import CCD_ASSOCIATION_KEYWORD_TOPIC_CRITERIA from './association_report_keyword';
+import ccdAssociationKeywordTopicCriteriaStructure from './association_report_keyword';
 
 export {
-	CCD_ASSOCIATION_KEYWORD_TOPIC_CRITERIA
+	ccdAssociationKeywordTopicCriteriaStructure
 };

@@ -5,6 +5,9 @@ import {
 	associationReportTopicSchema,
 	associationReportTypeSchema
 } from '@/schemas/gacounts3';
+import {
+	ccdAssociationKeywordTopicCriteriaStructure
+} from '@/criteriaStructures/caes_central_database';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -276,7 +279,8 @@ const schema = {
 				],
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'ASSOCIATION_KEYWORD_TOPIC',
-				optionColumn: 'KEYWORD_ID'
+				optionColumn: 'KEYWORD_ID',
+				criteriaStructure: ccdAssociationKeywordTopicCriteriaStructure
 			}
 		}
 	]

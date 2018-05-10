@@ -1,7 +1,7 @@
-const ccdAssociationKeywordTopicPopulateCriteriaStructure	= require('./src/criteriaStructures/caes_central_database/association_report_keyword.js');
+const ccdAssociationKeywordTopicCriteriaStructure	= require('./src/criteriaStructures/caes_central_database/association_report_keyword.js');
 const filter = require('./src/modules/criteriaFilter.js');
 
-const critStruct = ccdAssociationKeywordTopicPopulateCriteriaStructure();
+const critStruct = ccdAssociationKeywordTopicCriteriaStructure;
 
 critStruct.criteria_KEYWORD_ID_eq = '1,3';
 critStruct.criteria_AREA_ID_lt = 5;

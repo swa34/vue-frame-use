@@ -20,5 +20,4 @@ const getCriteriaStructure = (schema) => {
 	return criteriaStructure;
 };
 
-// export default { getCriteriaStructure };
-module.exports = { getCriteriaStructure };
+export default { getCriteriaStructure };

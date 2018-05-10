@@ -41,29 +41,25 @@
 	import {
 		stringFormats
 	} from '@/modules/utilities';
+	import {
+		filter
+	} from '@/modules/criteriaUtils';
 
 	export default {
 		name: 'DataMultiSelect',
 		props: {
-			'title': {
-				type: String
-			},
-			'description': {
-				type: String
-			},
-			'schema': {
-				type: Object,
-				required: true
-			},
 			'allowEdit': {
 				type: Boolean
-			},
-			'identifier': {
-				type: Object
 			},
 			'associatedColumn': {
 				type: String,
 				required: true
+			},
+			'description': {
+				type: String
+			},
+			'filter': {
+				type: Object
 			},
 			'groupBy': {
 				type: String
@@ -73,6 +69,16 @@
 					Array,
 					Object
 				]
+			},
+			'identifier': {
+				type: Object
+			},
+			'schema': {
+				type: Object,
+				required: true
+			},
+			'title': {
+				type: String
 			}
 		},
 		computed: {
@@ -110,6 +116,7 @@
 			},
 			filteredOptions: {
 				get () {
+					if (!this.filter) return this.options;
 					return this.options;
 				}
 			},

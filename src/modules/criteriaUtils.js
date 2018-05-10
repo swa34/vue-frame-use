@@ -2,18 +2,14 @@
 // structure lines.
 const rgx = {
 	criteria: /^criteria_/,
-	key: /^criteria_(.*)_(?:n?eq|gt|lt)$/,
-	comparison: /_([^_]+)$/,
-	eq: /_eq$/,
-	neq: /_neq$/,
-	gt: /_gt$/,
-	lt: /_lt$/
+	key: /^criteria_(.*)_[^_]+$/,
+	comparison: /_([^_]+)$/
 };
 
 // Object to contain our comparison functions
 const compare = {
-	eq: (a, b) => b.split(',').indexOf(a.toString()) !== -1,
-	neq: (a, b) => b.split(',').indexOf(a.toString()) === -1,
+	eq: (a, b) => b.indexOf(a) !== -1 || b.indexOf(a.toString()) !== -1,
+	neq: (a, b) => b.indexOf(a) === -1 || b.indexOf(a.toString()) === -1,
 	gt: (a, b) => a > b,
 	lt: (a, b) => a < b
 };
@@ -81,6 +77,49 @@ const filter = (records, criteriaStructure = {}) => {
 	return newRecords;
 };
 
+const jsToCf = (criteriaStructure) => {
+	let newCriteriaStructure = Object.assign({}, criteriaStructure);
+	for (let key in newCriteriaStructure) {
+		switch (true) {
+			case (newCriteriaStructure[key] === null):
+				newCriteriaStructure[key] = '';
+				break;
+			case (Array.isArray(newCriteriaStructure[key])):
+				newCriteriaStructure[key] = newCriteriaStructure[key].join(',');
+				break;
+			case (typeof newCriteriaStructure[key] === 'boolean'):
+				newCriteriaStructure[key] = newCriteriaStructure[key].toString();
+				break;
+		};
+	}
+	return newCriteriaStructure;
+};
+
+const cfToJs = (criteriaStructure) => {
+	let newCriteriaStructure = Object.assign({}, criteriaStructure);
+	for (let key in newCriteriaStructure) {
+		switch (true) {
+			case (newCriteriaStructure[key] === ''):
+				const critMatch = key.match(rgx.comparison);
+				if (critMatch && critMatch[1]) {
+					if (/n?eq/.test(critMatch[1])) {
+						newCriteriaStructure[key] = [];
+					} else {
+						newCriteriaStructure[key] = null;
+					}
+				}
+				break;
+			case (/false|true/i.test(newCriteriaStructure[key])):
+				newCriteriaStructure[key] = JSON.parse(newCriteriaStructure[key]);
+				break;
+		}
+	}
+	return newCriteriaStructure;
+};
+
 // We only want to export the filter function
-// export default filter;
-module.exports = filter;
+export {
+	cfToJs,
+	filter,
+	jsToCf
+};
