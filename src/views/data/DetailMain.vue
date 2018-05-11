@@ -1,3 +1,4 @@
+<!-- The HTML portion of the component -->
 <template lang="html">
   <main>
   	<h1>
@@ -8,11 +9,14 @@
 			:schema="schema"
 			:identifier="identifier"
 		/>
-		<!-- And data table components to display the main record's associated data -->
+		<!-- Then, if we want to include associations -->
 		<div v-if="includeAssociations">
+			<!-- We loop through each of them -->
 			<div v-for="association in schema.associations">
 				<!-- <div v-if="dependencyMet(association)"> -->
+					<!-- If it's an external association (not Vue-based) -->
 					<div v-if="association.isExternal && identifier.value">
+						<!-- Then just show the association title and link to edit it -->
 						<span>
 							{{ association.title }}
 						</span>
@@ -22,6 +26,7 @@
 							</a>
 						</p>
 					</div>
+					<!-- If it's a multiselect association, use a data multi select component -->
 					<div v-else-if="association.multiSelect">
 						<DataMultiSelect
 							:allowEdit="true"
@@ -34,6 +39,7 @@
 							:title="association.title"
 						/>
 					</div>
+					<!-- If multiple values are forbidden, use a data radio component -->
 					<div v-else-if="association.forbidMultiple">
 						<DataRadio
 							:title="association.title"
@@ -44,6 +50,7 @@
 							:filter="association.filter"
 						/>
 					</div>
+					<!-- Else, just use a data table component -->
 					<div v-else-if="!identifier.value ? association.isAssignable : true">
 						<DataTable
 							:title="association.title"
@@ -64,27 +71,33 @@
   </main>
 </template>
 
+<!-- The script portion of the component -->
 <script>
 	// Import required modules
-	import { stringFormats } from '@/modules/utilities';
-	import DataForm from '@/views/data/Form';
-	import DataMultiSelect from '@/views/data/MultiSelect';
-	import DataRadio from '@/views/data/Radio';
-	import DataTable from '@/views/data/Table';
 	import caesdb from '@/modules/caesdb';
+	import {
+		DataForm,
+		DataMultiSelect,
+		DataRadio,
+		DataTable
+	} from '@/views/data';
+	import { stringFormats } from '@/modules/utilities';
 
 	// Export the actual component
 	export default {
+		// The component's name
 		name: 'DetailMain',
+		// The nested components available to this component
 		components: {
 			DataForm,
 			DataMultiSelect,
 			DataRadio,
 			DataTable
 		},
+		// The methods available to this component during render
 		methods: {
+			// Doesn't send anything yet, just pretends like it does
 			submitData () {
-				// Doesn't send anything yet, just pretends like it does
 				caesdb.post(this.$store.state, (err, data) => {
 					if (err) console.error(err);
 					if (data.success) {
@@ -94,28 +107,42 @@
 					}
 				});
 			},
+			// A function to determine if an association's dependency has been met
 			dependencyMet (association) {
+				// If there is no dependency, it obviously has
 				if (!association.depends) return true;
+				// Otherwise, we need to make sure the association dependency specifies
+				// which column or association it depends on
 				if (association.depends.column) {
+					// If it depends on a column, run the depend's test function on that
+					// columns value
 					return association.depends.test(this.$store.state[stringFormats.camelCase(this.schema.title || this.schema.table)][association.depends.column]);
 				} else if (association.depends.association) {
+					// If it's an association, run the test function on that association's
+					// records.
 					return association.depends.test(this.$store.state[stringFormats.camelCase(association.title)].records);
 				}
+				// If no column or association were specified, we're in an error state
+				// so say so and consider the dependency unmet.
 				console.error('Dependency information missing for association: ' + association.title);
 				return false;
 			}
 		},
+		// The component's properties, which are set by the parent component.
 		props: {
+			// The schema to be used
 			'schema': {
 				type: Object,
 				required: true
 			},
+			// An optional identifier/selector
 			'identifier': {
 				type: [
 					Object,
 					Boolean
 				]
 			},
+			// Should associations be rendered too?
 			'includeAssociations': {
 				type: Boolean,
 				default: true
