@@ -41,11 +41,3 @@
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
 </script>
-
-<style lang="scss">
-	body {
-		padding: 0 1rem;
-		max-width: 1920px;
-		margin: auto;
-	}
-</style>

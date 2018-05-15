@@ -1,6 +1,6 @@
 import App from '@/App.vue';
-import 'normalize.css/normalize.css';
-import 'milligram-scss';
+// import 'normalize.css/normalize.css';
+// import 'milligram-scss';
 import Vue from 'vue';
 import VueSweetAlert2 from 'vue-sweetalert2';
 

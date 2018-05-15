@@ -220,3 +220,9 @@
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	fieldset {
+		border: none;
+	}
+</style>

@@ -8,25 +8,30 @@
 		<p v-if="description">
 			{{ description }}
 		</p>
-		<!-- Create a label to hold the option elements -->
-		<label v-for="option in options">
-			<!--
-				A radio input for the option, props as follows:
-				name: All options use the schema title so that only one can be checked
-				value: Set to a record generated from the option
-				v-model: Tells vue to store the value in the component's records array
-				disabled: Bound to whether editing is allowed or not
-			-->
-			<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
-			<!-- Option's label or ID -->
-			<span>
-				{{ option[optionLabel || optionID] }}
-			</span>
-			<!-- Description if there is one -->
-			<span v-if="optionDescription">
-				: {{ option[optionDescription] }}
-			</span>
-		</label>
+		<!-- A list to hold each of the options -->
+		<ul>
+			<li v-for="option in options">
+				<!-- Create a label to hold the option elements -->
+				<label>
+					<!--
+						A radio input for the option, props as follows:
+						name: All options use the schema title so that only one can be checked
+						value: Set to a record generated from the option
+						v-model: Tells vue to store the value in the component's records array
+						disabled: Bound to whether editing is allowed or not
+					-->
+					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+					<!-- Option's label or ID -->
+					<span>
+						{{ option[optionLabel || optionID] }}
+					</span>
+					<!-- Description if there is one -->
+					<span v-if="optionDescription">
+						: {{ option[optionDescription] }}
+					</span>
+				</label>
+			</li>
+		</ul>
 	</div>
 </template>
 
@@ -198,3 +203,10 @@
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	ul {
+		list-style-type: none;
+		padding: 0;
+	}
+</style>

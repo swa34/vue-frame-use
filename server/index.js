@@ -6,6 +6,7 @@ const readlineSync	= require('readline-sync');
 
 // Create our express app
 const app = express();
+app.use(express.static('./public'));
 app.use(express.static('../dist'));
 
 // Configure sql

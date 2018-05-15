@@ -23,24 +23,28 @@
 				<span v-if="group.name">
 					{{ group.name }}
 				</span>
-				<!-- Then, loop through each of the group's options -->
-				<label v-for="option in group.options">
-					<!--
-						Show a checkbox for the option, here's prop explanations:
-						value: Set to a generated record object from the option
-						v-model: Says where to store the record when checked
-						disabled: Depends on whether editing is enabled or not.
-					-->
-					<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
-					<!-- The option's label -->
-					<span>
-						{{ option[optionLabel || optionID] }}
-					</span>
-					<!-- And the option's description if it has one -->
-					<span v-if="optionDescription">
-						: {{ option[optionDescription] }}
-					</span>
-				</label>
+				<!-- Then, create a list to hold each of the group's options -->
+				<ul>
+					<li v-for="option in group.options">
+						<label>
+							<!--
+								Show a checkbox for the option, here's prop explanations:
+								value: Set to a generated record object from the option
+								v-model: Says where to store the record when checked
+								disabled: Depends on whether editing is enabled or not.
+							-->
+							<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+							<!-- The option's label -->
+							<span>
+								{{ option[optionLabel || optionID] }}
+							</span>
+							<!-- And the option's description if it has one -->
+							<span v-if="optionDescription">
+								: {{ option[optionDescription] }}
+							</span>
+						</label>
+					</li>
+				</ul>
 				<!-- If editing is allowed, show the check/uncheck all buttons -->
 				<div v-if="allowEdit">
 					<button v-on:click="checkAll(group)" class="button">
@@ -446,3 +450,12 @@
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	ul {
+		list-style-type: none;
+		padding: 0;
+		column-count: 5;
+		column-width: 7.5rem;
+	}
+</style>
