@@ -1,3 +1,7 @@
+import {
+	getReportTypes
+} from '@/modules/caesdb';
+
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'ASSOCIATION_REPORT_TYPE',
@@ -19,6 +23,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
+				getValues: getReportTypes,
 				database: 'GACOUNTS3',
 				table: 'REPORT_TYPE',
 				foreignKey: 'ID',

@@ -16,8 +16,8 @@
 					</th>
 				</tr>
 			</thead>
-			<tbody>
-				<tr v-for="record in records">
+			<transition-group name="list-complete" tag="tbody">
+				<tr v-for="record in records" v-bind:key="record" class="list-complete-item">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label v-if="allowEdit && columnShouldBeEditable(column)">
 							<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
@@ -45,7 +45,7 @@
 						-->
 					</td>
 				</tr>
-				<tr v-if="allowInsert && !schema.disableInsert">
+				<tr v-if="allowInsert && !schema.disableInsert" v-bind:key="-1">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label>
 							<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
@@ -63,14 +63,15 @@
 						</button>
 					</td>
 				</tr>
-			</tbody>
+			</transition-group>
 		</table>
 		<pre v-if="!$store">{{ $data }}</pre>
 	</div>
 </template>
 
 <script>
-	import caesdb from '@/modules/caesdb';
+	/* global activeUserID */
+	import { getCriteriaStructure } from '@/modules/caesdb';
 	import {
 		formatDates,
 		getPrettyColumnName,
@@ -183,45 +184,69 @@
 				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
 			});
 
-			const getMainData = () => {
-				const options = {
-					db: component.schema.database,
-					table: component.schema.table,
-					identifier: component.identifier
-				};
-				caesdb.getData(options, (err, data) => {
-					if (err) console.error(err);
-					if (data.success) {
-						component.records = data.results;
-						if (dateFields.length > 0) formatDates(dateFields, component.records);
-					}
-				});
-			};
+			// const getMainData = () => {
+			// 	const options = {
+			// 		db: component.schema.database,
+			// 		table: component.schema.table,
+			// 		identifier: component.identifier
+			// 	};
+			// 	caesdb.getData(options, (err, data) => {
+			// 		if (err) console.error(err);
+			// 		if (data.success) {
+			// 			component.records = data.results;
+			// 			if (dateFields.length > 0) formatDates(dateFields, component.records);
+			// 		}
+			// 	});
+			// };
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.constraint) {
-						const options = {
-							db: column.constraint.database,
-							table: column.constraint.table
-						};
-						caesdb.getData(options, (err, data) => {
-							if (err) console.error(err);
-							if (data.success) {
-								data.results.forEach((result) => {
-									const value = {
-										key: result[column.constraint.foreignKey],
-										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
-									};
-									column.constraint.values.push(value);
+					if (column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							// structure first, then send our request
+							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) console.error(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) console.error(err);
+									if (data) column.constraint.values = data;
 								});
-							}
-						});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) console.error(err);
+								if (data) {
+									data.forEach((result) => {
+										const value = {
+											key: result[column.constraint.foreignKey],
+											label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+										};
+										column.constraint.values.push(value);
+									});
+								}
+							});
+						}
 					}
 				});
 			};
-			if (component.identifier.key && component.identifier.value) getMainData();
+			// if (component.identifier.key && component.identifier.value) getMainData();
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	.list-complete-item {
+		transition: all .5s;
+		display: table-row;
+	}
+	.list-complete-enter, .list-complete-leave-to {
+		opacity: 0;
+		transform: translateY(-1.5rem);
+	}
+	.list-complete-leave-active {
+		position: absolute;
+	}
+</style>

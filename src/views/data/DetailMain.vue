@@ -1,9 +1,9 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
   <main>
-  	<h1>
+  	<!-- <h1>
   		{{ schema.title || schema.table }} Detail
-  	</h1>
+  	</h1> -->
 		<!-- We use a data form component to display the main record -->
 		<DataForm
 			:schema="schema"
@@ -33,10 +33,12 @@
 							:associatedColumn="association.associatedColumn"
 							:filter="association.filter"
 							:groupBy="association.groupBy"
+							:groupLabel="association.groupLabel"
 							:groupsToShow="association.groupsToShow"
 							:identifier="{ key: association.foreignKey, value: identifier.value }"
 							:schema="association.schema"
 							:title="association.title"
+							:description="association.description"
 						/>
 					</div>
 					<!-- If multiple values are forbidden, use a data radio component -->
@@ -48,6 +50,7 @@
 							:associatedColumn="association.associatedColumn"
 							:identifier="{ key: association.foreignKey, value: identifier.value }"
 							:filter="association.filter"
+							:description="association.description"
 						/>
 					</div>
 					<!-- Else, just use a data table component -->
@@ -74,7 +77,6 @@
 <!-- The script portion of the component -->
 <script>
 	// Import required modules
-	import caesdb from '@/modules/caesdb';
 	import {
 		DataForm,
 		DataMultiSelect,
@@ -98,14 +100,9 @@
 		methods: {
 			// Doesn't send anything yet, just pretends like it does
 			submitData () {
-				caesdb.post(this.$store.state, (err, data) => {
-					if (err) console.error(err);
-					if (data.success) {
-						this.$swal('Awesome!', 'Your entry has been saved successfully.', 'success');
-						console.log('Successfully sent this data to the server:');
-						console.log(JSON.stringify(this.$store.state, null, 2));
-					}
-				});
+				this.$swal('Awesome!', 'Your entry has been saved successfully.', 'success');
+				console.log('Successfully sent this data to the server:');
+				console.log(JSON.stringify(this.$store.state, null, 2));
 			},
 			// A function to determine if an association's dependency has been met
 			dependencyMet (association) {
@@ -150,3 +147,23 @@
 		}
 	};
 </script>
+
+<style lang="scss">
+	.fade-enter-active, .fade-leave-active {
+		transition: opacity .5s;
+	}
+	.fade-enter, .fade-leave-to {
+		opacity: 0;
+	}
+	li.list-complete-item {
+		transition: all .5s;
+		display: list-item;
+	}
+	li.list-complete-enter, .list-complete-leave-to {
+		opacity: 0;
+		transform: translateX(-1.5rem);
+	}
+	li.list-complete-leave-active {
+		position: absolute;
+	}
+</style>

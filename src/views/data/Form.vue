@@ -2,37 +2,41 @@
 	<form>
 		<!-- Loop through each of the columns specified in the schema -->
 		<div v-for="column in schema.columns">
-			<!--
-				If the column should be displayed, create a fieldset to hold the fields
-			-->
-			<fieldset v-if="columnShouldBeDisplayed(column)">
-				<label>
-					<legend>
+			<transition appear name="fade">
+				<!--
+					If the column should be displayed, create a fieldset to hold the fields
+				-->
+				<fieldset v-if="columnShouldBeDisplayed(column)">
+					<label>
+						<legend>
+							<strong>
+								<!--
+									Show the column's pretty name if set, otherwise create a
+									pretty-ish name from the column name
+								-->
+								{{ column.prettyName || getPrettyColumnName(column.columnName) }}
+							</strong>
+						</legend>
 						<!--
-							Show the column's pretty name if set, otherwise create a
-							pretty-ish name from the column name
+							Pretty straightforward here: use the approriate input type depending
+							on what type of data we're working with
 						-->
-						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
-					</legend>
-					<!--
-						Pretty straightforward here: use the approriate input type depending
-						on what type of data we're working with
-					-->
-					<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
-						{{ record[column.columnName] }}
-					</textarea>
-					<quillEditor
-						v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
-						v-model="record[column.columnName]"
-					/>
-					<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable">
-						<option v-for="value in column.constraint.values" :value="value.key">
-							{{ value.label }}
-						</option>
-					</select>
-					<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="column.required" :disabled="column.immutable" />
-				</label>
-			</fieldset>
+						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable">
+							{{ record[column.columnName] }}
+						</textarea>
+						<quillEditor
+							v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
+							v-model="record[column.columnName]"
+						/>
+						<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable">
+							<option v-for="value in column.constraint.values" :value="value[column.constraint.foreignKey]">
+								{{ value[column.constraint.foreignLabel] }}
+							</option>
+						</select>
+						<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable" />
+					</label>
+				</fieldset>
+			</transition>
 		</div>
 		<!-- If no data store, add a button to update this record individually -->
 		<input v-if="!$store" class="button" value="Save" type="submit" />
@@ -40,17 +44,18 @@
 </template>
 
 <script>
+	/* global activeUserID */
 	// Import required modules
-	import caesdb from '@/modules/caesdb';
 	import 'quill/dist/quill.core.css';
 	import 'quill/dist/quill.snow.css';
 	import 'quill/dist/quill.bubble.css';
 	import {
-		formatDates,
+		// formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
+	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { quillEditor } from 'vue-quill-editor';
 
 	// Export the actual component
@@ -141,80 +146,57 @@
 			});
 
 			// Our main data grabbing function, grabs data for the main schema
-			const getMainData = () => {
-				// Options configuration for caesdb
-				const options = {
-					db: component.schema.database,
-					table: component.schema.table,
-					identifier: component.identifier
-				};
-				// Fetch the data
-				caesdb.getData(options, (err, data) => {
-					// Log an error if it exists
-					if (err) console.error(err);
-					// If everything went smoothly, set the component's record to the
-					// fetched data, and then run our date formatter function (if needed)
-					if (data.success) {
-						component.record = data.results[0];
-						if (dateFields.length > 0) formatDates(dateFields, component.record);
-					}
-				});
-			};
+			// const getMainData = () => {
+			// 	// Options configuration for caesdb
+			// 	const options = {
+			// 		db: component.schema.database,
+			// 		table: component.schema.table,
+			// 		identifier: component.identifier
+			// 	};
+			// 	// Fetch the data
+			// 	caesdb.getData(options, (err, data) => {
+			// 		// Log an error if it exists
+			// 		if (err) console.error(err);
+			// 		// If everything went smoothly, set the component's record to the
+			// 		// fetched data, and then run our date formatter function (if needed)
+			// 		if (data.success) {
+			// 			component.record = data.results[0];
+			// 			if (dateFields.length > 0) formatDates(dateFields, component.record);
+			// 		}
+			// 	});
+			// };
 
 			// Our constraint data grabbing function
 			const getConstraintData = () => {
 				// Loop through each of the schema's columns
 				component.schema.columns.forEach((column) => {
-					// If the column has a constraint specified, and a database specified
-					// to get the data from
-					if (column.constraint && column.constraint.database) {
-						// Set up our options config
-						const options = {
-							db: column.constraint.database,
-							table: column.constraint.table
-						};
-						// If an identifier is present, we need to pass it in to caesdb as
-						// well.
-						if (column.constraint.identifier) {
-							if (typeof column.constraint.identifier.value !== 'object') {
-								// If identifier value is not an object, we just use the value
-								options.identifier = column.constraint.identifier;
-							} else {
-								// If it is an object, that means it depends on the value set
-								// for a specific column, which is specified in the value field.
-								// So, we construct an identifier using that information.
-								options.identifier = {
-									key: column.constraint.identifier.key,
-									value: this.record[column.constraint.identifier.value.column]
-								};
-							}
-						}
-						// Finally, fetch the data
-						caesdb.getData(options, (err, data) => {
-							// Log an error if it exists
-							if (err) console.error(err);
-							// If the request was successful...
-							if (data.success) {
-								// Loop through each of the records returned
-								data.results.forEach((result) => {
-									// Turn the record into a value object
-									const value = {
-										key: result[column.constraint.foreignKey],
-										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
-									};
-									// Create a constraint values array if it doesn't have one
-									if (!column.constraint.values) column.constraint.values = [];
-									// And push it into the constraint's values array
-									column.constraint.values.push(value);
+					// We only care about columns that have a constraint and a getValues
+					// function, since those are the ones we have to fetch values for
+					if (column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							// structure first, then send our request
+							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) console.error(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) console.error(err);
+									if (data) column.constraint.values = data;
 								});
-							}
-						});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) console.error(err);
+								if (data) column.constraint.values = data;
+							});
+						}
 					}
 				});
 			};
 
 			// If an identifier was specified, we need to fetch that record's data
-			if (component.identifier && component.identifier.value) getMainData();
+			// if (component.identifier && component.identifier.value) getMainData();
 			// Regardless, get all column constraint data
 			getConstraintData();
 		}
@@ -224,5 +206,22 @@
 <style lang="scss" scoped>
 	fieldset {
 		border: none;
+	}
+	input[type="text"] {
+		width: 100%;
+	}
+	input[type="date"] {
+		font-family: inherit;
+		font-size: inherit;
+	}
+	@media (min-width: 960px) {
+		input[type="text"] {
+			width: 50%;
+		}
+	}
+	@media (min-width: 1400px) {
+		input[type="text"] {
+			width: 33%;
+		}
 	}
 </style>

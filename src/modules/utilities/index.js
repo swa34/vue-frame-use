@@ -1,4 +1,5 @@
 import formatDates from './formatDates';
+import request from './request';
 import sqlToHtml from './sqlToHtml';
 import stringFormats from './stringFormats';
 import url from './url';
@@ -14,6 +15,7 @@ const getPrettyColumnName = (name) => {
 export {
 	formatDates,
 	getPrettyColumnName,
+	request,
 	sqlToHtml,
 	stringFormats,
 	url

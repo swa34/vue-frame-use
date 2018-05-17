@@ -1,33 +1,98 @@
-/* global XMLHttpRequest */
-const json = (url, cb) => {
-	const request = new XMLHttpRequest();
-	request.open('GET', url, true);
-	request.onload = () => {
-		if (request.status >= 200 && request.status < 400) {
-			cb(null, JSON.parse(request.response));
-		} else {
-			cb(new Error('HTTP Status ' + request.status));
-		}
-	};
+import { request } from '@/modules/utilities';
 
-	request.onerror = () => {
-		cb(new Error('Request failed'));
-	};
+const apiPrefix = '/rest/gacounts-api/';
 
-	request.send();
+const generateURL = str => apiPrefix + str + '.json';
+
+const getActivityLocationTypes = (callback) => {
+	const url = generateURL('activityLocationTypes');
+	request.get(url, callback);
 };
 
-const getData = (options, cb) => {
-	let url = '/api/' + options.db + '/' + options.table;
-	if (options.identifier && options.identifier.key && options.identifier.value) {
-		url += '/' + options.identifier.key + '/' + options.identifier.value;
-	}
-	json(url, cb);
+const getAssociationKeywordTopic = (callback) => {
+	const url = generateURL('associationKeywordTopic');
+	request.get(url, callback);
 };
 
-const post = (data, cb) => {
-	// Doesn't actually post anything, just says it does
-	cb(null, { success: true });
+const getAssociationReportTypeContactType = (callback) => {
+	const url = generateURL('associationReportTypeContactType');
+	request.get(url, callback);
 };
 
-export default { getData, post };
+const getAssociationReportTypeProgramArea = (callback) => {
+	const url = generateURL('associationReportTypeProgramArea');
+	request.get(url, callback);
+};
+
+const getAssociationTopicArea = (callback) => {
+	const url = generateURL('associationTopicArea');
+	request.get(url, callback);
+};
+
+const getContactTypes = (callback) => {
+	const url = generateURL('contactTypes');
+	request.get(url, callback);
+};
+
+const getCounties = (callback) => {
+	const url = generateURL('counties');
+	request.get(url, callback);
+};
+
+const getCriteriaStructure = (tablePrefix, callback) => {
+	const url = apiPrefix + 'criteriaStructure?TablePrefix=' + tablePrefix;
+	request.get(url, callback);
+};
+
+const getKeywords = (callback) => {
+	const url = generateURL('keywords');
+	request.get(url, callback);
+};
+
+const getPlannedPrograms = (criteriaStructure, callback) => {
+	const url = generateURL('plannedPrograms');
+	request.post(url, criteriaStructure, callback);
+};
+
+const getProgramScopes = (callback) => {
+	const url = generateURL('programScopes');
+	request.get(url, callback);
+};
+
+const getProgramAreas = (callback) => {
+	const url = generateURL('programAreas');
+	request.get(url, callback);
+};
+
+const getReportTypes = (callback) => {
+	const url = generateURL('reportTypes');
+	request.get(url, callback);
+};
+
+const getStatePlannedPrograms = (criteriaStructure, callback) => {
+	const url = generateURL('statePlannedPrograms');
+	request.post(url, criteriaStructure, callback);
+};
+
+const getTopics = (callback) => {
+	const url = generateURL('topics');
+	request.get(url, callback);
+};
+
+export {
+	getActivityLocationTypes,
+	getAssociationKeywordTopic,
+	getAssociationReportTypeContactType,
+	getAssociationReportTypeProgramArea,
+	getAssociationTopicArea,
+	getContactTypes,
+	getCounties,
+	getCriteriaStructure,
+	getKeywords,
+	getPlannedPrograms,
+	getProgramScopes,
+	getProgramAreas,
+	getReportTypes,
+	getStatePlannedPrograms,
+	getTopics
+};

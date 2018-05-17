@@ -1,3 +1,7 @@
+import {
+	getAssociationTopicArea
+} from '@/modules/caesdb';
+
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'ASSOCIATION_REPORT_TOPIC',
@@ -19,9 +23,11 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
+				getValues: getAssociationTopicArea,
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'ASSOCIATION_TOPIC_AREA',
 				foreignKey: 'TOPIC_ID',
+				foreignLabel: 'TOPIC_LABEL',
 				values: []
 			}
 		}

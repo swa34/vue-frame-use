@@ -9,8 +9,8 @@
 			{{ description }}
 		</p>
 		<!-- A list to hold each of the options -->
-		<ul>
-			<li v-for="option in options">
+		<transition-group name="list-complete" tag="ul">
+			<li v-for="option in options" v-bind:key="option[optionID]" class="list-complete-item">
 				<!-- Create a label to hold the option elements -->
 				<label>
 					<!--
@@ -31,13 +31,14 @@
 					</span>
 				</label>
 			</li>
-		</ul>
+		</transition-group>
 	</div>
 </template>
 
 <script>
+	/* global activeUserID */
 	// Import required modules
-	import caesdb from '@/modules/caesdb';
+	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { stringFormats } from '@/modules/utilities';
 
 	// Export the actual component
@@ -126,55 +127,60 @@
 		mounted () {
 			const component = this;
 
-			const getRecords = () => {
-				const options = {
-					db: component.schema.database,
-					table: component.schema.table,
-					identifier: component.identifier
-				};
-				caesdb.getData(options, (err, data) => {
-					if (err) console.error(err);
-					if (data.success) {
-						component.records = data.results;
-					}
-				});
-			};
+			// const getRecords = () => {
+			// 	const options = {
+			// 		db: component.schema.database,
+			// 		table: component.schema.table,
+			// 		identifier: component.identifier
+			// 	};
+			// 	caesdb.getData(options, (err, data) => {
+			// 		if (err) console.error(err);
+			// 		if (data.success) {
+			// 			component.records = data.results;
+			// 		}
+			// 	});
+			// };
 
 			const getOptions = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.columnName === component.associatedColumn && column.constraint) {
-						const options = {
-							db: column.constraint.database,
-							table: column.constraint.table
-						};
-						caesdb.getData(options, (err, data) => {
-							if (err) console.error(err);
-							if (data.success) {
-								component.unfilteredOptions = data.results;
-							}
-						});
+					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) console.error(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) console.error(err);
+									if (data) component.unfilteredOptions = data;
+								});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) console.error(err);
+								if (data) component.unfilteredOptions = data;
+							});
+						}
 					} else if (column.columnName === component.associatedColumn) {
 						console.error('ID Column does not have necessary constraint information.');
 					}
 				});
 			};
 
-			const getFilterData = () => {
-				const options = {
-					db: component.filter.database,
-					table: component.filter.table
-				};
-				caesdb.getData(options, (err, data) => {
-					if (err) console.error(err);
-					if (data.success) {
-						component.filterRecords = data.results;
-					}
-				});
+			const getFilterRecords = () => {
+				if (component.filter.getValues) {
+					component.filter.getValues((err, data) => {
+						if (err) console.error(err);
+						if (data) component.filterRecords = data;
+					});
+				} else {
+					console.error('Filter does not contain function to get values');
+				}
 			};
 
 			getOptions();
-			if (component.identifier.value) getRecords();
-			if (component.filter) getFilterData();
+			// if (component.identifier.value) getRecords();
+			if (component.filter) getFilterRecords();
 		},
 		props: {
 			'allowEdit': {

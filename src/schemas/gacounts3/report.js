@@ -3,11 +3,25 @@ import {
 	associationReportKeywordSchema,
 	associationReportProgramAreaSchema,
 	associationReportTopicSchema,
-	associationReportTypeSchema
+	associationReportTypeSchema,
+	reportContactSchema
 } from '@/schemas/gacounts3';
 import {
 	ccdAssociationKeywordTopicCriteriaStructure
 } from '@/criteriaStructures/caes_central_database';
+import {
+	gc3AssociationReportTypeContactTypeCriteriaStructure
+} from '@/criteriaStructures/gacounts3';
+import {
+	getActivityLocationTypes,
+	getAssociationKeywordTopic,
+	getAssociationReportTypeContactType,
+	getAssociationReportTypeProgramArea,
+	getCounties,
+	getPlannedPrograms,
+	getProgramScopes,
+	getStatePlannedPrograms
+} from '@/modules/caesdb';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -76,6 +90,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
+				getValues: getProgramScopes,
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'PROGRAM_SCOPE',
 				foreignKey: 'ID',
@@ -88,6 +103,7 @@ const schema = {
 			prettyName: 'Location of Activity',
 			type: 'int',
 			constraint: {
+				getValues: getActivityLocationTypes,
 				database: 'GACOUNTS3',
 				table: 'ACTIVITY_LOCATION_TYPE',
 				foreignKey: 'ID',
@@ -101,10 +117,11 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
+				getValues: getCounties,
 				database: 'Portal',
 				table: 'CountyList',
-				foreignKey: 'CountyListID',
-				foreignLabel: 'CountyName',
+				foreignKey: 'COUNTYLISTID',
+				foreignLabel: 'COUNTYNAME',
 				values: []
 			},
 			depends: {
@@ -147,6 +164,8 @@ const schema = {
 			type: 'nvarchar',
 			default: 'LOCAL',
 			constraint: {
+				foreignKey: 'key',
+				foreignLabel: 'label',
 				values: [
 					{
 						label: 'Local',
@@ -164,6 +183,12 @@ const schema = {
 			prettyName: 'Local Issue',
 			type: 'int',
 			constraint: {
+				getValues: getPlannedPrograms,
+				tablePrefix: 'FPW_PLANNED_PROGRAM',
+				criteria: {
+					string: 'criteria_USER_ID_eq',
+					useUserID: true
+				},
 				database: 'FederalPOW',
 				table: 'PLANNED_PROGRAM',
 				foreignKey: 'ID',
@@ -186,6 +211,12 @@ const schema = {
 			prettyName: 'State Issue',
 			type: 'int',
 			constraint: {
+				getValues: getStatePlannedPrograms,
+				tablePrefix: 'FPW_STATE_PLANNED_PROGRAM',
+				criteria: {
+					string: 'criteria_USER_ID_eq',
+					useUserID: true
+				},
 				database: 'FederalPOW',
 				table: 'STATE_PLANNED_PROGRAM',
 				foreignKey: 'ID',
@@ -225,7 +256,8 @@ const schema = {
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'AREA_ID',
-			multiSelect: true
+			multiSelect: true,
+			description: 'Bacon ipsum dolor amet t-bone pork voluptate officia dolore prosciutto commodo pork loin jerky brisket hamburger. Dolore ullamco shoulder velit, nulla sausage kevin andouille shank sirloin pork chop. Cupim bresaola bacon kielbasa excepteur magna, consectetur exercitation. Cow nostrud filet mignon pork reprehenderit ut, ground round strip steak adipisicing.'
 		},
 		{
 			title: 'Topics',
@@ -235,10 +267,12 @@ const schema = {
 			associatedColumn: 'TOPIC_ID',
 			multiSelect: true,
 			groupBy: 'AREA_ID',
+			groupLabel: 'PROGRAM_AREA_LABEL',
 			groupsToShow: {
 				association: 'Program Areas',
 				column: 'AREA_ID'
-			}
+			},
+			description: 'Bacon ipsum dolor amet id aliqua sed sint magna short ribs, velit shankle pastrami laborum in lorem corned beef anim. Ut officia voluptate bresaola esse enim alcatra ham pork loin spare ribs drumstick chicken. Reprehenderit ut ground round aliqua andouille turducken nulla filet mignon flank ball tip. Jerky quis biltong, id picanha salami turducken qui elit. Tri-tip incididunt chuck, qui officia pig pork belly kevin turkey spare ribs kielbasa nisi. Cow ball tip dolore incididunt chuck hamburger.\n\nPancetta pork proident, elit chuck drumstick porchetta chicken exercitation tri-tip ut. Mollit shank picanha prosciutto incididunt kielbasa. Andouille mollit kielbasa, aliquip sirloin ut magna aute deserunt. Frankfurter duis aute, et est tail jerky pariatur burgdoggen. Nisi venison porchetta ullamco.'
 		},
 		{
 			title: 'Report Type',
@@ -253,11 +287,13 @@ const schema = {
 					title: 'Program Areas',
 					column: 'AREA_ID'
 				},
+				getValues: getAssociationReportTypeProgramArea,
 				database: 'GACOUNTS3',
 				table: 'ASSOCIATION_REPORT_TYPE_PROGRAM_AREA',
 				associatedColumn: 'AREA_ID',
 				optionColumn: 'REPORT_TYPE_ID'
-			}
+			},
+			description: 'Bacon ipsum dolor amet tri-tip pancetta ea meatball spare ribs. Tenderloin porchetta velit pariatur ad. Pork loin exercitation excepteur cupim. Ground round deserunt pancetta, et bacon est jerky eiusmod tail sausage in dolor corned beef lorem. Pancetta aliqua rump pig boudin.'
 		},
 		{
 			title: 'Keywords',
@@ -277,11 +313,35 @@ const schema = {
 						column: 'TOPIC_ID'
 					}
 				],
+				getValues: getAssociationKeywordTopic,
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'ASSOCIATION_KEYWORD_TOPIC',
 				optionColumn: 'KEYWORD_ID',
 				criteriaStructure: ccdAssociationKeywordTopicCriteriaStructure
-			}
+			},
+			description: 'Bacon ipsum dolor amet aliqua bresaola ipsum, beef ribs dolore filet mignon pork laboris tongue. Adipisicing commodo officia tenderloin shank rump jerky minim landjaeger andouille. Est cillum proident shoulder fugiat. Non bacon aute tempor beef kevin boudin short loin tri-tip chicken. Landjaeger dolor in officia pork belly magna commodo turducken id kielbasa nostrud flank strip steak eu. Duis velit quis pig qui sausage, tempor cow. Occaecat minim in sed, excepteur aliquip pork chop shank ground round dolore sunt reprehenderit voluptate.'
+		},
+		{
+			title: 'Contacts',
+			schema: reportContactSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'QUANTITY',
+			isAssignable: true,
+			filter: {
+				associations: [
+					{
+						title: 'Report Type',
+						column: 'TYPE_ID'
+					}
+				],
+				getValues: getAssociationReportTypeContactType,
+				database: 'GACOUNTS3',
+				table: 'ASSOCIATION_REPORT_TYPE_CONTACT_TYPE',
+				optionColumn: 'CONTACT_TYPE_ID',
+				criteriaStructure: gc3AssociationReportTypeContactTypeCriteriaStructure
+			},
+			description: 'Turkey bresaola fugiat, minim landjaeger do andouille ham. Ut tri-tip landjaeger fugiat. Non sed sunt, meatloaf lorem strip steak jowl reprehenderit. Nulla tempor laborum fugiat kevin, shank dolore sed ea ipsum rump hamburger incididunt. Esse adipisicing kielbasa corned beef venison nulla. Shankle laboris short loin turducken minim. Meatball sunt shankle, swine excepteur lorem ball tip occaecat sirloin enim reprehenderit eiusmod.'
 		}
 	]
 	// subschemas: [

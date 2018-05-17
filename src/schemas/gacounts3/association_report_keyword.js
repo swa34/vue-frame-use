@@ -1,3 +1,7 @@
+import {
+	getKeywords
+} from '@/modules/caesdb';
+
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'ASSOCIATION_REPORT_KEYWORD',
@@ -21,6 +25,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
+				getValues: getKeywords,
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'KEYWORD',
 				foreignKey: 'ID',

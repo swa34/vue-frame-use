@@ -8,6 +8,7 @@
 		<p v-if="description">
 			{{ description }}
 		</p>
+		<br v-else />
 		<!-- If no groups are present, say so -->
 		<p v-if="groups.length < 1">
 			(None)
@@ -18,50 +19,53 @@
 				And if either no groups to show were specified, or the current group
 				made the cut...
 			-->
-			<div v-if="!groupsToShow || displayedGroups.indexOf(group.name) !== -1">
-				<!-- Show the group's name if there is one -->
-				<span v-if="group.name">
-					{{ group.name }}
-				</span>
-				<!-- Then, create a list to hold each of the group's options -->
-				<ul>
-					<li v-for="option in group.options">
-						<label>
-							<!--
-								Show a checkbox for the option, here's prop explanations:
-								value: Set to a generated record object from the option
-								v-model: Says where to store the record when checked
-								disabled: Depends on whether editing is enabled or not.
-							-->
-							<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
-							<!-- The option's label -->
-							<span>
-								{{ option[optionLabel || optionID] }}
-							</span>
-							<!-- And the option's description if it has one -->
-							<span v-if="optionDescription">
-								: {{ option[optionDescription] }}
-							</span>
-						</label>
-					</li>
-				</ul>
-				<!-- If editing is allowed, show the check/uncheck all buttons -->
-				<div v-if="allowEdit">
-					<button v-on:click="checkAll(group)" class="button">
-						Check All
-					</button>
-					<button v-on:click="uncheckAll(group)" class="button">
-						Uncheck All
-					</button>
+			<transition appear name="fade">
+				<div v-if="!groupsToShow || displayedGroups.indexOf(group.id) !== -1">
+					<!-- Show the group's name if there is one -->
+					<span v-if="group.name" class="group-name">
+						{{ group.name }}
+					</span>
+					<!-- Then, create a list to hold each of the group's options -->
+					<transition-group name="list-complete" tag="ul">
+						<li v-for="option in group.options" v-bind:key="option[optionID]" class="list-complete-item">
+							<label>
+								<!--
+									Show a checkbox for the option, here's prop explanations:
+									value: Set to a generated record object from the option
+									v-model: Says where to store the record when checked
+									disabled: Depends on whether editing is enabled or not.
+								-->
+								<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+								<!-- The option's label -->
+								<span>
+									{{ option[optionLabel || optionID] }}
+								</span>
+								<!-- And the option's description if it has one -->
+								<span v-if="optionDescription">
+									: {{ option[optionDescription] }}
+								</span>
+							</label>
+						</li>
+					</transition-group>
+					<!-- If editing is allowed, show the check/uncheck all buttons -->
+					<!-- <div v-if="allowEdit">
+						<button v-on:click="checkAll(group)" class="button">
+							Check All
+						</button>
+						<button v-on:click="uncheckAll(group)" class="button">
+							Uncheck All
+						</button>
+					</div> -->
 				</div>
-			</div>
+			</transition>
 		</div>
 	</div>
 </template>
 
 <script>
+	/* global activeUserID */
 	// Import required modules
-	import caesdb from '@/modules/caesdb';
+	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { stringFormats } from '@/modules/utilities';
 	import { filter } from '@/modules/criteriaUtils';
 
@@ -90,6 +94,10 @@
 			},
 			// The column to group records with
 			'groupBy': {
+				type: String
+			},
+			// The column to get the group labels from
+			'groupLabel': {
 				type: String
 			},
 			// An array or object specifying which groups should be displayed
@@ -137,7 +145,7 @@
 			displayedGroups: {
 				get () {
 					// If the groupsToShow property was not specified, return empty array
-					if (!this.groupsToShow) return [];
+					if (!this.groupsToShow) return [-1];
 					// If the groupsToShow property is already an array of values, use it
 					if (Array.isArray(this.groupsToShow)) return this.groupsToShow;
 					if (!this.groupsToShow.association || !this.groupsToShow.column) {
@@ -162,7 +170,8 @@
 			// Get the associated group's records from the datastore
 			groupRecords: {
 				get () {
-					return this.$store.state[stringFormats.camelCase(this.groupsToShow.association)].records;
+					if (this.groupsToShow) return this.$store.state[stringFormats.camelCase(this.groupsToShow.association)].records;
+					return [];
 				}
 			},
 			// Takes all available options and filters them based on the configuration
@@ -219,7 +228,7 @@
 					// Create an empty array to hold them
 					let validOptions = [];
 					// Map the groups to an array of just the group names
-					const groupsMap = this.groups.map(g => g.name);
+					const groupsMap = this.groups.map(g => g.id);
 					// Loop through each of the displayed groups
 					this.displayedGroups.forEach((group) => {
 						// Get the index of that group
@@ -227,7 +236,7 @@
 						// If the group index is not negative one, it must be checked
 						if (groupIndex !== -1) {
 							// So, append its values to the valid options array
-							validOptions = validOptions.concat(this.groups[groupIndex].options.map(o => o[this.associatedColumn]));
+							validOptions = validOptions.concat(this.groups[groupIndex].options.map(o => o[this.optionID]));
 						}
 					});
 					// Finally, return the array
@@ -316,44 +325,47 @@
 			const component = this;
 
 			// Gets the records for an existing document
-			const getRecords = () => {
-				// Configuration options for caesdb
-				const options = {
-					db: component.schema.database,
-					table: component.schema.table,
-					identifier: component.identifier
-				};
-				// Fetch the data
-				caesdb.getData(options, (err, data) => {
-					if (err) console.error(err);
-					if (data.success) {
-						// If successful, set the component's records to the returned
-						// records.
-						component.records = data.results;
-					}
-				});
-			};
+			// const getRecords = () => {
+			// 	// Configuration options for caesdb
+			// 	const options = {
+			// 		db: component.schema.database,
+			// 		table: component.schema.table,
+			// 		identifier: component.identifier
+			// 	};
+			// 	// Fetch the data
+			// 	caesdb.getData(options, (err, data) => {
+			// 		if (err) console.error(err);
+			// 		if (data.success) {
+			// 			// If successful, set the component's records to the returned
+			// 			// records.
+			// 			component.records = data.results;
+			// 		}
+			// 	});
+			// };
 
 			// Function to get all options available
 			const getOptions = () => {
 				// Loop through the schema's columns looking for the associated column
 				// with a constraint
 				component.schema.columns.forEach((column) => {
-					if (column.columnName === component.associatedColumn && column.constraint) {
-						// Once we find it, create the caesdb config
-						const options = {
-							db: column.constraint.database,
-							table: column.constraint.table
-						};
-						// Then fetch the data
-						caesdb.getData(options, (err, data) => {
-							if (err) console.error(err);
-							if (data.success) {
-								// If successful, set the component's options to the returned
-								// records.
-								component.options = data.results;
-							}
-						});
+					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) console.error(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) console.error(err);
+									if (data) component.options = data;
+								});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) console.error(err);
+								if (data) component.options = data;
+							});
+						}
 					} else if (column.columnName === component.associatedColumn) {
 						// If we find the associated column but it doesn't have a constraint
 						// we're in an error condition, so log it to the console.
@@ -364,26 +376,20 @@
 
 			// Gets records used to filter options
 			const getFilterRecords = () => {
-				// caesdb config
-				const options = {
-					db: component.filter.database,
-					table: component.filter.table
-				};
-				// Fetch the data
-				caesdb.getData(options, (err, data) => {
-					if (err) console.error(err);
-					if (data.success) {
-						// If successful, set the component's filter records to the returned
-						// results.
-						component.filterRecords = data.results;
-					}
-				});
+				if (component.filter.getValues) {
+					component.filter.getValues((err, data) => {
+						if (err) console.error(err);
+						if (data) component.filterRecords = data;
+					});
+				} else {
+					console.error('Filter does not contain function to get values');
+				}
 			};
 
 			// Get our options
 			getOptions();
 			// If an identifier is present, get the existing records
-			if (component.identifier.value) getRecords();
+			// if (component.identifier.value) getRecords();
 			// If a filter was specified, get the filter records
 			if (component.filter) getFilterRecords();
 		},
@@ -401,6 +407,7 @@
 						// If the component's groupBy property wasn't specified, just push a
 						// single group containing all filtered options into the groups array.
 						this.groups.push({
+							id: -1,
 							options: this.filteredOptions
 						});
 					} else {
@@ -408,12 +415,13 @@
 						this.options.forEach((option) => {
 							// And get the index of the option's group in the existing groups
 							// array.
-							const groupsIndex = this.groups.map(e => e.name).indexOf(option[this.groupBy]);
+							const groupsIndex = this.groups.map(e => e.name).indexOf(this.groupLabel ? option[this.groupLabel] : option[this.groupBy]);
 							if (groupsIndex === -1) {
 								// If the group is not present, push a new group in, containing
 								// the option
 								this.groups.push({
-									name: option[this.groupBy],
+									id: option[this.groupBy],
+									name: this.groupLabel ? option[this.groupLabel] : option[this.groupBy],
 									options: [option]
 								});
 							} else {
@@ -441,6 +449,7 @@
 					// And check to see if the record's value is in the valid options
 					// array.
 					const validOptionsIndex = this.validOptions.indexOf(record[this.associatedColumn]);
+					console.log(validOptionsIndex);
 					// If it is, push that record into the valid records array
 					if (validOptionsIndex !== -1) validRecords.push(record);
 				});
@@ -457,5 +466,13 @@
 		padding: 0;
 		column-count: 5;
 		column-width: 7.5rem;
+		li {
+			break-inside: avoid-column;
+		}
+	}
+	span.group-name {
+		font-size: .85rem;
+		font-weight: 600;
+		border-bottom: .05rem solid #000;
 	}
 </style>
