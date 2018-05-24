@@ -81,33 +81,6 @@
 
 	export default {
 		name: 'DataTable',
-		props: {
-			'title': {
-				type: String
-			},
-			'schema': {
-				type: Object,
-				required: true
-			},
-			'associatedColumn': {
-				type: String
-			},
-			'fieldsToDisplay': {
-				type: Array
-			},
-			'fieldsToEdit': {
-				type: Array
-			},
-			'allowEdit': {
-				type: Boolean
-			},
-			'allowInsert': {
-				type: Boolean
-			},
-			'identifier': {
-				type: Object
-			}
-		},
 		computed: {
 			records: {
 				get () {
@@ -233,6 +206,33 @@
 			};
 			// if (component.identifier.key && component.identifier.value) getMainData();
 			if (component.allowEdit || component.allowInsert) getConstraintData();
+		},
+		props: {
+			'allowEdit': {
+				type: Boolean
+			},
+			'allowInsert': {
+				type: Boolean
+			},
+			'associatedColumn': {
+				type: String
+			},
+			'fieldsToDisplay': {
+				type: Array
+			},
+			'fieldsToEdit': {
+				type: Array
+			},
+			'identifier': {
+				type: Object
+			},
+			'schema': {
+				type: Object,
+				required: true
+			},
+			'title': {
+				type: String
+			}
 		}
 	};
 </script>

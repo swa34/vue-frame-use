@@ -326,13 +326,16 @@ const schema = {
 			schema: reportContactSchema,
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
-			associatedColumn: 'QUANTITY',
+			associatedColumn: 'REPORT_ID',
+			optionColumnName: 'TYPE_ID',
 			isAssignable: true,
+			displayAllOptions: true,
 			filter: {
 				associations: [
 					{
 						title: 'Report Type',
-						column: 'TYPE_ID'
+						column: 'TYPE_ID',
+						criteriaColumn: 'REPORT_TYPE_ID'
 					}
 				],
 				getValues: getAssociationReportTypeContactType,

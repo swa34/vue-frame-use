@@ -5,9 +5,9 @@
 			{{ title || schema.title }}
 		</strong>
 		<!-- Show the description if there's one of those too -->
-		<p v-if="description">
+		<!-- <p v-if="description">
 			{{ description }}
-		</p>
+		</p> -->
 		<br v-else />
 		<!-- If no groups are present, say so -->
 		<p v-if="groups.length < 1">
@@ -201,7 +201,7 @@
 						if (associatedValues.length > 0) associationsSelected++;
 						// And push those values the criteria structure specified in the
 						// filter.
-						this.filter.criteriaStructure['criteria_' + association.column + '_eq'] = associatedValues;
+						this.filter.criteriaStructure['criteria_' + (association.criteriaColumn || association.column) + '_eq'] = associatedValues;
 					});
 					// Once our criteria structure is populated with values, run the
 					// filter function to get the filtered records.

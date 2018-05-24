@@ -5,9 +5,9 @@
 			{{ title || schema.title }}
 		</strong>
 		<!-- Same deal with description -->
-		<p v-if="description">
+		<!-- <p v-if="description">
 			{{ description }}
-		</p>
+		</p> -->
 		<!-- A list to hold each of the options -->
 		<transition-group name="list-complete" tag="ul">
 			<li v-for="option in options" v-bind:key="option[optionID]" class="list-complete-item">
@@ -20,7 +20,7 @@
 						v-model: Tells vue to store the value in the component's records array
 						disabled: Bound to whether editing is allowed or not
 					-->
-					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="computedRecord" :disabled="!allowEdit" />
 					<!-- Option's label or ID -->
 					<span>
 						{{ option[optionLabel || optionID] }}
@@ -53,6 +53,14 @@
 					for (let i = 0; i < this.schema.columns.length; ++i) {
 						if (this.schema.columns[i].columnName === this.associatedColumn) return this.schema.columns[i];
 					}
+				}
+			},
+			computedRecord: {
+				get () {
+					return this.record;
+				},
+				set (val) {
+					this.record = val;
 				}
 			},
 			filterLoaded: {
@@ -99,7 +107,8 @@
 				optionLabel: null,
 				optionDescription: null,
 				unfilteredOptions: [],
-				filterRecords: []
+				filterRecords: [],
+				record: null
 			};
 			for (let i = 0; i < this.schema.columns.length; ++i) {
 				const column = this.schema.columns[i];
@@ -205,6 +214,11 @@
 			},
 			'title': {
 				type: String
+			}
+		},
+		watch: {
+			computedRecord () {
+				this.records = [this.computedRecord];
 			}
 		}
 	};

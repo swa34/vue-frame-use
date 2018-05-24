@@ -10,7 +10,7 @@ const schema = {
 			columnName: 'REPORT_ID',
 			prettyName: 'Report',
 			type: 'int',
-			required: true
+			immutable: true
 			// constraint: {
 			// 	database: 'GACOUNTS3',
 			// 	table: 'REPORT',

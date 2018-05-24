@@ -13,7 +13,7 @@
 	// Import required modules
 	import { getComputed, getStore } from '@/modules/store';
 	import { stringFormats, url } from '@/modules/utilities';
-	import DetailMain from '@/views/data/DetailMain';
+	import DetailMain from '@/views/DetailMain';
 	import schema from '@/schemas/gacounts3/report';
 
 	// Hacky fix for schemas without titles

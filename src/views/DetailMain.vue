@@ -53,6 +53,17 @@
 							:description="association.description"
 						/>
 					</div>
+					<div v-else-if="association.displayAllOptions">
+						<DataMultiTable
+							:title="association.title"
+							:schema="association.schema"
+							:associatedColumn="association.associatedColumn"
+							:identifier="{ key: association.foreignKey, value: identifier.value}"
+							:allowEdit="true"
+							:optionColumnName="association.optionColumnName"
+							:filter="association.filter"
+						/>
+					</div>
 					<!-- Else, just use a data table component -->
 					<div v-else-if="!identifier.value ? association.isAssignable : true">
 						<DataTable
@@ -80,6 +91,7 @@
 	import {
 		DataForm,
 		DataMultiSelect,
+		DataMultiTable,
 		DataRadio,
 		DataTable
 	} from '@/views/data';
@@ -93,6 +105,7 @@
 		components: {
 			DataForm,
 			DataMultiSelect,
+			DataMultiTable,
 			DataRadio,
 			DataTable
 		},
