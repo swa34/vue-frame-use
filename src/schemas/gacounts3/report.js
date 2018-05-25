@@ -4,6 +4,8 @@ import {
 	associationReportProgramAreaSchema,
 	associationReportTopicSchema,
 	associationReportTypeSchema,
+	ethnicDemographicSchema,
+	racialDemographicSchema,
 	reportContactSchema
 } from '@/schemas/gacounts3';
 import {
@@ -41,6 +43,40 @@ let activityLocations = [
 		USES_ALTERNATE_TEXT: 1
 	}
 ];
+
+// Adjust the racial demographic schema to suit our needs
+const altRacialDemographicSchema = Object.assign({}, racialDemographicSchema);
+altRacialDemographicSchema.columns = [];
+racialDemographicSchema.columns.forEach((column) => {
+	if (column.columnName !== 'GENDER_ID' && column.columnName !== 'QUANTITY') altRacialDemographicSchema.columns.push(column);
+});
+altRacialDemographicSchema.columns.push({
+	columnName: 'QUANTITY_MALE',
+	prettyName: 'Male',
+	type: 'int'
+});
+altRacialDemographicSchema.columns.push({
+	columnName: 'QUANTITY_FEMALE',
+	prettyName: 'Female',
+	type: 'int'
+});
+
+// Adjust the ethnic demographic schema to suit our needs
+const altEthnicDemographicSchema = Object.assign({}, ethnicDemographicSchema);
+altEthnicDemographicSchema.columns = [];
+ethnicDemographicSchema.columns.forEach((column) => {
+	if (column.columnName !== 'GENDER_ID' && column.columnName !== 'QUANTITY') altEthnicDemographicSchema.columns.push(column);
+});
+altEthnicDemographicSchema.columns.push({
+	columnName: 'QUANTITY_MALE',
+	prettyName: 'Male',
+	type: 'int'
+});
+altEthnicDemographicSchema.columns.push({
+	columnName: 'QUANTITY_FEMALE',
+	prettyName: 'Female',
+	type: 'int'
+});
 
 const schema = {
 	database: 'GACOUNTS3',
@@ -330,6 +366,7 @@ const schema = {
 			optionColumnName: 'TYPE_ID',
 			isAssignable: true,
 			displayAllOptions: true,
+			showTotals: true,
 			filter: {
 				associations: [
 					{
@@ -345,6 +382,28 @@ const schema = {
 				criteriaStructure: gc3AssociationReportTypeContactTypeCriteriaStructure
 			},
 			description: 'Turkey bresaola fugiat, minim landjaeger do andouille ham. Ut tri-tip landjaeger fugiat. Non sed sunt, meatloaf lorem strip steak jowl reprehenderit. Nulla tempor laborum fugiat kevin, shank dolore sed ea ipsum rump hamburger incididunt. Esse adipisicing kielbasa corned beef venison nulla. Shankle laboris short loin turducken minim. Meatball sunt shankle, swine excepteur lorem ball tip occaecat sirloin enim reprehenderit eiusmod.'
+		},
+		{
+			title: 'Racial Demographics',
+			schema: altRacialDemographicSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			optionColumnName: 'RACE_ID',
+			isAssignable: true,
+			displayAllOptions: true,
+			showTotals: true
+		},
+		{
+			title: 'Ethnic Demographics',
+			schema: altEthnicDemographicSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			optionColumnName: 'ETHNICITY_ID',
+			isAssignable: true,
+			displayAllOptions: true,
+			showTotals: true
 		}
 	]
 	// subschemas: [

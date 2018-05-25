@@ -1,19 +1,19 @@
 <template lang="html">
   <div>
-		<table v-if="schema.columns">
+		<table v-if="schema.columns && records.length > 0">
 			<caption v-if="title || schema.title">
 				{{ title || schema.title }}
 			</caption>
 			<thead>
 				<tr>
-					<th v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
+					<th v-for="column in filteredColumns">
 						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 					</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr v-for="record in records" v-bind:key="record[optionColumnName]">
-					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
+					<td v-for="column in filteredColumns">
 						<span v-if="column.columnName === optionColumnName">
 							{{ getOptionLabel(record[optionColumnName]) }}
 						</span>
@@ -23,6 +23,7 @@
 									{{ value.label }}
 								</option>
 							</select>
+							<input v-else-if="sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :disabled="column.immutable" />
 							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<span v-else>
@@ -31,6 +32,21 @@
 					</td>
 				</tr>
 			</tbody>
+			<tfoot v-if="showTotals">
+				<tr>
+					<td v-for="(column, index) in filteredColumns">
+						<span v-if="index === 0">
+							Total
+						</span>
+						<span v-else-if="sqlToHtml(column) === 'number'">
+							{{ getSum(column) }}
+						</span>
+						<span v-else>
+							&nbsp;
+						</span>
+					</td>
+				</tr>
+			</tfoot>
 		</table>
 	</div>
 </template>
@@ -48,6 +64,15 @@
 	export default {
 		name: 'DataMultiTable',
 		computed: {
+			filteredColumns: {
+				get () {
+					let filteredColumns = [];
+					this.schema.columns.forEach((column) => {
+						if (this.columnShouldBeDisplayed(column)) filteredColumns.push(column);
+					});
+					return filteredColumns;
+				}
+			},
 			filteredOptions: {
 				get () {
 					// If no filter was specified, return the unfiltered options
@@ -182,6 +207,13 @@
 				});
 				return value;
 			},
+			getSum (column) {
+				let sum = 0;
+				this.records.forEach((record) => {
+					sum += record[column.columnName];
+				});
+				return sum;
+			},
 			sqlToHtml
 		},
 		mounted () {
@@ -245,6 +277,9 @@
 			'schema': {
 				type: Object,
 				required: true
+			},
+			'showTotals': {
+				type: Boolean
 			},
 			'title': {
 				type: String

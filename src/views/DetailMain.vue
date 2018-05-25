@@ -62,6 +62,7 @@
 							:allowEdit="true"
 							:optionColumnName="association.optionColumnName"
 							:filter="association.filter"
+							:showTotals="association.showTotals"
 						/>
 					</div>
 					<!-- Else, just use a data table component -->

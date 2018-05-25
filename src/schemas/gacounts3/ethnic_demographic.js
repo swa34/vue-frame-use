@@ -1,31 +1,33 @@
 import {
-	getGenders,
-	getRaces
+	getEthnicities,
+	getGenders
 } from '@/modules/caesdb';
+import { enableConstraintValues } from '@/modules/schemaTools';
 
 const schema = {
 	database: 'GACOUNTS3',
-	table: 'RACIAL_DEMOGRAPHIC',
+	table: 'ETHNIC_DEMOGRAPHIC',
 	columns: [
 		{
 			columnName: 'REPORT_ID',
-			prettyName: 'Report',
+			prettyName: 'Report ID',
 			type: 'int',
 			required: true
 		},
 		{
-			columnName: 'RACE_ID',
-			prettyName: 'Race',
+			columnName: 'ETHNICITY_ID',
+			prettyName: 'Ethnicity',
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getRaces,
+				getValues: getEthnicities,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL'
 			}
 		},
 		{
 			columnName: 'GENDER_ID',
+			prettyName: 'Gender',
 			type: 'int',
 			required: true,
 			constraint: {
@@ -33,17 +35,8 @@ const schema = {
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL'
 			}
-		},
-		{
-			columnName: 'QUANTITY',
-			type: 'int',
-			required: true
 		}
 	]
 };
 
-schema.columns.forEach((column) => {
-	if (column.constraint) column.constraint.values = [];
-});
-
-export default schema;
+export default enableConstraintValues(schema);

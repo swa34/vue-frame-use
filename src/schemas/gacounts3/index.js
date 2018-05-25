@@ -7,6 +7,7 @@ import associationReportTopicSchema from './association_report_topic';
 import associationReportTypeSchema from './association_report_type';
 import associationSubReportFieldSchema from './association_sub_report_field';
 import associationSubReportRoleSchema from './association_sub_report_role';
+import ethnicDemographicSchema from './ethnic_demographic';
 import mediaDistributedSchema from './media_distributed';
 import mediaProductionSchema from './media_production';
 import mediaReviewSchema from './media_review';
@@ -32,6 +33,7 @@ export {
 	associationReportTypeSchema,
 	associationSubReportFieldSchema,
 	associationSubReportRoleSchema,
+	ethnicDemographicSchema,
 	mediaDistributedSchema,
 	mediaProductionSchema,
 	mediaReviewSchema,

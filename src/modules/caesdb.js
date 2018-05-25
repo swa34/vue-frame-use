@@ -44,6 +44,16 @@ const getCriteriaStructure = (tablePrefix, callback) => {
 	request.get(url, callback);
 };
 
+const getEthnicities = (callback) => {
+	const url = generateURL('ethnicities');
+	request.get(url, callback);
+};
+
+const getGenders = (callback) => {
+	const url = generateURL('genders');
+	request.get(url, callback);
+};
+
 const getKeywords = (callback) => {
 	const url = generateURL('keywords');
 	request.get(url, callback);
@@ -61,6 +71,11 @@ const getProgramScopes = (callback) => {
 
 const getProgramAreas = (callback) => {
 	const url = generateURL('programAreas');
+	request.get(url, callback);
+};
+
+const getRaces = (callback) => {
+	const url = generateURL('races');
 	request.get(url, callback);
 };
 
@@ -88,10 +103,13 @@ export {
 	getContactTypes,
 	getCounties,
 	getCriteriaStructure,
+	getEthnicities,
+	getGenders,
 	getKeywords,
 	getPlannedPrograms,
 	getProgramScopes,
 	getProgramAreas,
+	getRaces,
 	getReportTypes,
 	getStatePlannedPrograms,
 	getTopics
