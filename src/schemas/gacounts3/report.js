@@ -6,19 +6,22 @@ import {
 	associationReportTypeSchema,
 	ethnicDemographicSchema,
 	racialDemographicSchema,
-	reportContactSchema
+	reportContactSchema,
+	targetAudienceSchema
 } from '@/schemas/gacounts3';
 import {
 	ccdAssociationKeywordTopicCriteriaStructure
 } from '@/criteriaStructures/caes_central_database';
 import {
-	gc3AssociationReportTypeContactTypeCriteriaStructure
+	gc3AssociationReportTypeContactTypeCriteriaStructure,
+	gc3TargetAudienceCriteriaStructure
 } from '@/criteriaStructures/gacounts3';
 import {
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
 	getAssociationReportTypeProgramArea,
+	getAssociationTargetAudienceProgramArea,
 	getCounties,
 	getPlannedPrograms,
 	getProgramScopes,
@@ -53,12 +56,14 @@ racialDemographicSchema.columns.forEach((column) => {
 altRacialDemographicSchema.columns.push({
 	columnName: 'QUANTITY_MALE',
 	prettyName: 'Male',
-	type: 'int'
+	type: 'int',
+	min: 0
 });
 altRacialDemographicSchema.columns.push({
 	columnName: 'QUANTITY_FEMALE',
 	prettyName: 'Female',
-	type: 'int'
+	type: 'int',
+	min: 0
 });
 
 // Adjust the ethnic demographic schema to suit our needs
@@ -78,6 +83,24 @@ altEthnicDemographicSchema.columns.push({
 	type: 'int'
 });
 
+// Define our demographics test function to be reused for each of the
+// demographic associations
+const demographicsTest = (records, schema) => {
+	let passes = false;
+	const associationsMap = schema.associations.map(a => a.title);
+	const association = schema.associations[associationsMap.indexOf('Contacts')];
+	const columnsMap = association.schema.columns.map(c => c.columnName);
+	const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
+	const values = column.constraint.values;
+	const valuesIdMap = values.map(v => v.key);
+	const valuesUsesDemographicsMap = values.map(v => v.originalValue.USES_DEMOGRAPHICS);
+	records.forEach((record) => {
+		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+	});
+	return passes;
+};
+
+// And finally define the schema itself
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'REPORT',
@@ -392,7 +415,12 @@ const schema = {
 			optionColumnName: 'RACE_ID',
 			isAssignable: true,
 			displayAllOptions: true,
-			showTotals: true
+			showTotals: true,
+			depends: {
+				association: 'Contacts',
+				useValues: true,
+				test: demographicsTest
+			}
 		},
 		{
 			title: 'Ethnic Demographics',
@@ -403,7 +431,34 @@ const schema = {
 			optionColumnName: 'ETHNICITY_ID',
 			isAssignable: true,
 			displayAllOptions: true,
-			showTotals: true
+			showTotals: true,
+			depends: {
+				association: 'Contacts',
+				useValues: true,
+				test: demographicsTest
+			}
+		},
+		{
+			title: 'Target Audiences',
+			schema: targetAudienceSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			optionColumnName: 'TYPE_ID',
+			isAssignable: true,
+			displayAllOptions: true,
+			showTotals: true,
+			filter: {
+				associations: [
+					{
+						title: 'Program Areas',
+						column: 'AREA_ID'
+					}
+				],
+				getValues: getAssociationTargetAudienceProgramArea,
+				optionColumn: 'AUDIENCE_ID',
+				criteriaStructure: gc3TargetAudienceCriteriaStructure
+			}
 		}
 	]
 	// subschemas: [

@@ -55,6 +55,7 @@
 					</div>
 					<div v-else-if="association.displayAllOptions">
 						<DataMultiTable
+							v-if="dependencyMet(association)"
 							:title="association.title"
 							:schema="association.schema"
 							:associatedColumn="association.associatedColumn"
@@ -63,6 +64,7 @@
 							:optionColumnName="association.optionColumnName"
 							:filter="association.filter"
 							:showTotals="association.showTotals"
+							:depends="association.depends"
 						/>
 					</div>
 					<!-- Else, just use a data table component -->
@@ -131,7 +133,11 @@
 				} else if (association.depends.association) {
 					// If it's an association, run the test function on that association's
 					// records.
-					return association.depends.test(this.$store.state[stringFormats.camelCase(association.title)].records);
+					if (association.depends.useValues) {
+						return association.depends.test(this.$store.state[stringFormats.camelCase(association.depends.association)].records, this.$store.state.schema);
+					} else {
+						return association.depends.test(this.$store.state[stringFormats.camelCase(association.depends.association)].records);
+					}
 				}
 				// If no column or association were specified, we're in an error state
 				// so say so and consider the dependency unmet.

@@ -35,6 +35,12 @@ const schema = {
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL'
 			}
+		},
+		{
+			columnName: 'QUANTITY',
+			type: 'int',
+			required: true,
+			min: 0
 		}
 	]
 };

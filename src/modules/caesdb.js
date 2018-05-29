@@ -24,6 +24,11 @@ const getAssociationReportTypeProgramArea = (callback) => {
 	request.get(url, callback);
 };
 
+const getAssociationTargetAudienceProgramArea = (callback) => {
+	const url = generateURL('associationTargetAudienceProgramArea');
+	request.get(url, callback);
+};
+
 const getAssociationTopicArea = (callback) => {
 	const url = generateURL('associationTopicArea');
 	request.get(url, callback);
@@ -89,6 +94,11 @@ const getStatePlannedPrograms = (criteriaStructure, callback) => {
 	request.post(url, criteriaStructure, callback);
 };
 
+const getTargetAudiences = (callback) => {
+	const url = generateURL('targetAudiences');
+	request.get(url, callback);
+};
+
 const getTopics = (callback) => {
 	const url = generateURL('topics');
 	request.get(url, callback);
@@ -99,6 +109,7 @@ export {
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
 	getAssociationReportTypeProgramArea,
+	getAssociationTargetAudienceProgramArea,
 	getAssociationTopicArea,
 	getContactTypes,
 	getCounties,
@@ -112,5 +123,6 @@ export {
 	getRaces,
 	getReportTypes,
 	getStatePlannedPrograms,
+	getTargetAudiences,
 	getTopics
 };

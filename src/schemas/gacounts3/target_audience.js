@@ -1,3 +1,7 @@
+import {
+	getTargetAudiences
+} from '@/modules/caesdb';
+
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'TARGET_AUDIENCE',
@@ -9,15 +13,26 @@ const schema = {
 		},
 		{
 			columnName: 'TYPE_ID',
+			prettyName: 'Type',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				getValues: getTargetAudiences,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			}
 		},
 		{
 			columnName: 'QUANTITY',
 			type: 'int',
-			required: true
+			required: true,
+			min: 0
 		}
 	]
 };
+
+schema.columns.forEach((column) => {
+	if (column.constraint) column.constraint.values = [];
+});
 
 export default schema;

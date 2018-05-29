@@ -23,7 +23,7 @@
 									{{ value.label }}
 								</option>
 							</select>
-							<input v-else-if="sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :disabled="column.immutable" />
+							<input v-else-if="sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :min="column.min" :disabled="column.immutable" />
 							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<span v-else>
@@ -52,10 +52,10 @@
 </template>
 
 <script>
-	import { getCriteriaStructure } from '@/modules/caesdb';
+	// import { getCriteriaStructure } from '@/modules/caesdb';
 	import { filter } from '@/modules/criteriaUtils';
 	import {
-		formatDates,
+		// formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
@@ -142,7 +142,11 @@
 				},
 				set (val) {
 					if (this.$store) {
-						this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
+						this.$store.commit(stringFormats.camelCase(this.title || this.schema.title) + '/setRecords', {
+							records: val
+						});
+						// Vue.set(this.$store.state[stringFormats.camelCase(this.title || this.schema.title)], 'records', val);
+						// this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
 					} else {
 						this.localRecords = val;
 					}
@@ -226,14 +230,15 @@
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.constraint && column.constraint.getValues) {
+					if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
 						column.constraint.getValues((err, data) => {
 							if (err) console.error(err);
 							if (data) {
 								data.forEach((result) => {
 									const value = {
 										key: result[column.constraint.foreignKey],
-										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+										originalValue: result
 									};
 									column.constraint.values.push(value);
 								});

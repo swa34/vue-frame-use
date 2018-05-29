@@ -55,6 +55,10 @@ const getStore = (schema, isNew = false) => {
 	// generate our store
 	const config = {
 		modules: {
+			schema: {
+				namespaced: true,
+				state: schema
+			},
 			[schemaCamelTitle]: {
 				namespaced: true,
 				state: {}
@@ -81,6 +85,11 @@ const getStore = (schema, isNew = false) => {
 				if (!config.modules[associationCamelTitle]) {
 					config.modules[associationCamelTitle] = {
 						namespaced: true,
+						mutations: {
+							setRecords (state, payload) {
+								state.records = payload.records;
+							}
+						},
 						state: {
 							records: []
 						}
