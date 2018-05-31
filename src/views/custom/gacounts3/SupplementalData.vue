@@ -16,7 +16,7 @@
 		<tbody>
 			<tr v-for="field in reportFields">
 				<td>
-					{{ field.LABEL }}
+					{{ field.REPORT_FIELD_LABEL }}
 				</td>
 				<td>
 
@@ -45,6 +45,9 @@
 			},
 			fieldIDs () {
 				return this.reportFields.map(f => f.FIELD_ID);
+			},
+			fieldTypeIDs () {
+				return this.fieldTypes.map(t => t.ID);
 			},
 			programAreas () {
 				return this.$store.state.programAreas.records.map(r => r.AREA_ID);
@@ -129,7 +132,6 @@
 					} else {
 						// A program area has been added, so we need to fetch missing fields
 						// based on the added area
-						console.log('added area');
 						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
 						criteriaStructure.criteria_AREA_ID_eq = newAreas.filter(val => oldAreas.indexOf(val) === -1);
 						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
@@ -158,14 +160,12 @@
 					} else {
 						// A topic has been added, so we need to fetch missing fields based
 						// on the added topic
-						console.log('added topic');
 						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
 						criteriaStructure.criteria_TOPIC_ID_eq = newTopics.filter(val => oldTopics.indexOf(val) === -1);
 						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
 						getAssociationReportTypeField(jsToCf(criteriaStructure), (err, data) => {
 							if (err) console.error(err);
 							if (data) this.reportFields = this.reportFields.concat(data);
-							if (data) console.log(data);
 						});
 					}
 				}
