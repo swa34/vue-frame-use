@@ -1,5 +1,6 @@
 // Pull in required modules
 import {
+	associationReportFieldSchema,
 	associationReportKeywordSchema,
 	associationReportProgramAreaSchema,
 	associationReportTopicSchema,
@@ -14,12 +15,14 @@ import {
 } from '@/criteriaStructures/caes_central_database';
 import {
 	gc3AssociationReportTypeContactTypeCriteriaStructure,
+	gc3AssociationReportTypeFieldCriteriaStructure,
 	gc3TargetAudienceCriteriaStructure
 } from '@/criteriaStructures/gacounts3';
 import {
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
+	getAssociationReportTypeField,
 	getAssociationReportTypeProgramArea,
 	getAssociationTargetAudienceProgramArea,
 	getCounties,
@@ -27,6 +30,7 @@ import {
 	getProgramScopes,
 	getStatePlannedPrograms
 } from '@/modules/caesdb';
+import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -459,6 +463,38 @@ const schema = {
 				optionColumn: 'AUDIENCE_ID',
 				criteriaStructure: gc3TargetAudienceCriteriaStructure
 			}
+		},
+		{
+			title: 'Supplemental Data',
+			schema: associationReportFieldSchema,
+			customComponent: SupplementalDataComponent,
+			// localKey: 'ID',
+			// foreignKey: 'REPORT_ID',
+			// associatedColumn: 'REPORT_ID',
+			// optionColumnName: 'FIELD_ID',
+			isAssignable: true
+			// displayAllOptions: true,
+			// filter: {
+			// 	associations: [
+			// 		{
+			// 			title: 'Report Type',
+			// 			column: 'TYPE_ID'
+			// 		},
+			// 		{
+			// 			title: 'Program Areas',
+			// 			column: 'AREA_ID'
+			// 		},
+			// 		{
+			// 			title: 'Topics',
+			// 			column: 'TOPIC_ID'
+			// 		}
+			// 	],
+			// 	getValues: getAssociationReportTypeField,
+			// 	optionColumn: 'FIELD_ID',
+			// 	criteriaStructure: gc3AssociationReportTypeFieldCriteriaStructure
+			// 	// fetchCriteriaStructure: true,
+			// 	// tablePrefix: 'GC3_ASSOCIATION_REPORT_TYPE_FIELD'
+			// }
 		}
 	]
 	// subschemas: [

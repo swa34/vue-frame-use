@@ -26,6 +26,10 @@
 							</a>
 						</p>
 					</div>
+					<!-- If it uses a custom component, render that component -->
+					<div v-else-if="association.customComponent">
+						<component v-bind:is="association.customComponent" />
+					</div>
 					<!-- If it's a multiselect association, use a data multi select component -->
 					<div v-else-if="association.multiSelect">
 						<DataMultiSelect
@@ -118,7 +122,9 @@
 			submitData () {
 				this.$swal('Awesome!', 'Your entry has been saved successfully.', 'success');
 				console.log('Successfully sent this data to the server:');
-				console.log(JSON.stringify(this.$store.state, null, 2));
+				const schemaLessStore = Object.assign({}, this.$store.state);
+				delete schemaLessStore.schema;
+				console.log(JSON.stringify(schemaLessStore, null, 2));
 			},
 			// A function to determine if an association's dependency has been met
 			dependencyMet (association) {

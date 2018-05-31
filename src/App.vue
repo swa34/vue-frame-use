@@ -5,7 +5,7 @@
 			:includeAssociations="true"
 			:identifier="identifier"
 		/>
-		<pre>{{ this.$store.state }}</pre>
+		<pre>{{ schemaLessStore }}</pre>
 	</div>
 </template>
 
@@ -23,6 +23,16 @@
 	export default {
 		name: 'App',
 		components: { DetailMain },
+		computed: {
+			...getComputed(schema),
+			schemaLessStore: {
+				get () {
+					let schemaLessStore = Object.assign({}, this.$store.state);
+					delete schemaLessStore.schema;
+					return schemaLessStore;
+				}
+			}
+		},
 		data () {
 			// Fetch identifier parameters from the url
 			const key = url.getParam('key');
@@ -37,7 +47,6 @@
 				} : false
 			};
 		},
-		computed: getComputed(schema),
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
 </script>

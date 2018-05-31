@@ -52,7 +52,7 @@
 </template>
 
 <script>
-	// import { getCriteriaStructure } from '@/modules/caesdb';
+	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { filter } from '@/modules/criteriaUtils';
 	import {
 		// formatDates,
@@ -155,6 +155,7 @@
 		},
 		data () {
 			return {
+				criteriaStructure: {},
 				filterRecords: [],
 				localRecords: []
 			};
@@ -228,6 +229,17 @@
 				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
 			});
 
+			const getFilterRecords = () => {
+				if (component.filter.getValues) {
+					component.filter.getValues((err, data) => {
+						if (err) console.error(err);
+						if (data) component.filterRecords = data;
+					});
+				} else {
+					console.error('Filter does not contain function to get values');
+				}
+			};
+
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
 					if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
@@ -248,19 +260,20 @@
 				});
 			};
 
-			const getFilterRecords = () => {
-				if (component.filter.getValues) {
-					component.filter.getValues((err, data) => {
-						if (err) console.error(err);
-						if (data) component.filterRecords = data;
-					});
-				} else {
-					console.error('Filter does not contain function to get values');
-				}
+			const fetchCriteriaStructure = () => {
+				getCriteriaStructure(component.filter.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						component.criteriaStructure = data;
+					}
+				});
 			};
 
 			if (component.allowEdit) getConstraintData();
-			if (component.filter) getFilterRecords();
+			if (component.filter) {
+				getFilterRecords();
+				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
+			}
 		},
 		props: {
 			'allowEdit': {

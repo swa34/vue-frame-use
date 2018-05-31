@@ -1,3 +1,7 @@
+import {
+	getReportFields
+} from '@/modules/caesdb';
+
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'ASSOCIATION_REPORT_FIELD',
@@ -9,15 +13,27 @@ const schema = {
 		},
 		{
 			columnName: 'FIELD_ID',
+			prettyName: 'Field',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				getValues: getReportFields,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			}
 		},
 		{
 			columnName: 'FIELD_VALUE',
+			prettyName: 'Value',
 			type: 'float',
-			required: true
+			required: true,
+			min: 0
 		}
 	]
 };
+
+schema.columns.forEach((column) => {
+	if (column.constraint) column.constraint.values = [];
+});
 
 export default schema;

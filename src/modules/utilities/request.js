@@ -13,6 +13,7 @@ const makeRequest = (url, options, callback) => {
 const getOptions = (method, data) => {
 	return {
 		body: JSON.stringify(data),
+		credentials: 'cors',
 		headers: {
 			'content-type': 'application/json'
 		},

@@ -2,7 +2,8 @@ const maps = [
 	{
 		input: 'number',
 		types: [
-			'int'
+			'int',
+			'float'
 		]
 	},
 	{
