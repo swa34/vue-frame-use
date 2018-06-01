@@ -449,7 +449,6 @@
 					// And check to see if the record's value is in the valid options
 					// array.
 					const validOptionsIndex = this.validOptions.indexOf(record[this.associatedColumn]);
-					console.log(validOptionsIndex);
 					// If it is, push that record into the valid records array
 					if (validOptionsIndex !== -1) validRecords.push(record);
 				});

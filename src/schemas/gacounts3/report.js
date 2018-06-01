@@ -15,14 +15,12 @@ import {
 } from '@/criteriaStructures/caes_central_database';
 import {
 	gc3AssociationReportTypeContactTypeCriteriaStructure,
-	gc3AssociationReportTypeFieldCriteriaStructure,
 	gc3TargetAudienceCriteriaStructure
 } from '@/criteriaStructures/gacounts3';
 import {
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
-	getAssociationReportTypeField,
 	getAssociationReportTypeProgramArea,
 	getAssociationTargetAudienceProgramArea,
 	getCounties,

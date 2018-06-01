@@ -94,6 +94,15 @@ const getEthnicities = (callback) => {
 		});
 };
 
+const getFieldOptions = (criteriaStructure, callback) => {
+	const url = generateURL('fieldOptions');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getFieldTypes = (callback) => {
 	const url = generateURL('fieldTypes');
 	request.get(url)
@@ -105,8 +114,8 @@ const getFieldTypes = (callback) => {
 const getGenders = (callback) => {
 	const url = generateURL('genders');
 	request.get(url)
-		.end((err, res) => {
-			callback(err, res);
+		.end((err, response) => {
+			callback(err, response.body);
 		});
 };
 
@@ -169,7 +178,11 @@ const getReportTypes = (callback) => {
 
 const getStatePlannedPrograms = (criteriaStructure, callback) => {
 	const url = generateURL('statePlannedPrograms');
-	request.post(url, criteriaStructure, callback);
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
 };
 
 const getTargetAudiences = (callback) => {
@@ -200,6 +213,7 @@ export {
 	getCounties,
 	getCriteriaStructure,
 	getEthnicities,
+	getFieldOptions,
 	getFieldTypes,
 	getGenders,
 	getKeywords,
