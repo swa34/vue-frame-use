@@ -1,8 +1,9 @@
 const camelCase = (str = '') => {
 	return str
-		.replace(/\s(.)/g, $1 => $1.toUpperCase())
-		.replace(/\s/g, '')
-		.replace(/^(.)/, $1 => $1.toLowerCase());
+		.replace(/-/g, ' ')													// Replace dashes with spaces
+		.replace(/\s(.)/g, $1 => $1.toUpperCase())	// Capitalize the first letter after whitespace
+		.replace(/\s/g, '')													// Remove whitespace
+		.replace(/^(.)/, $1 => $1.toLowerCase());		// Change the first character to lowercase
 };
 
 const tableToTitle = str => {

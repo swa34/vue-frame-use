@@ -8,6 +8,7 @@ import {
 	ethnicDemographicSchema,
 	racialDemographicSchema,
 	reportContactSchema,
+	subReportSchema,
 	targetAudienceSchema
 } from '@/schemas/gacounts3';
 import {
@@ -29,6 +30,7 @@ import {
 	getStatePlannedPrograms
 } from '@/modules/caesdb';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
+import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -104,6 +106,7 @@ const demographicsTest = (records, schema) => {
 
 // And finally define the schema itself
 const schema = {
+	title: 'Report',
 	database: 'GACOUNTS3',
 	table: 'REPORT',
 	columns: [
@@ -494,10 +497,14 @@ const schema = {
 			// 	// tablePrefix: 'GC3_ASSOCIATION_REPORT_TYPE_FIELD'
 			// }
 		}
+	],
+	subschemas: [
+		{
+			title: 'Sub-Report',
+			schema: subReportSchema,
+			customComponent: SubReportForReportComponent
+		}
 	]
-	// subschemas: [
-	// 	subReportSchema
-	// ]
 };
 
 export default schema;

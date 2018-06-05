@@ -29,6 +29,11 @@
 				get () {
 					let schemaLessStore = Object.assign({}, this.$store.state);
 					delete schemaLessStore.schema;
+					if (schemaLessStore.subschemas) {
+						for (let key in schemaLessStore.subschemas) {
+							delete schemaLessStore.subschemas[key].schema;
+						}
+					}
 					return schemaLessStore;
 				}
 			}

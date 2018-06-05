@@ -20,7 +20,7 @@ import reportPurposeAchievementsSchema from './report_purpose_achievements';
 import residenceDemographicSchema from './residence_demographic';
 // import subReportCommentSchema from './sub_report_comment';
 // import subReportContactSchema from './sub_report_contact';
-// import subReportSchema from './sub_report';
+import subReportSchema from './sub_report';
 import targetAudienceSchema from './target_audience';
 
 export {
@@ -46,6 +46,6 @@ export {
 	residenceDemographicSchema,
 	// subReportCommentSchema,
 	// subReportContactSchema,
-	// subReportSchema,
+	subReportSchema,
 	targetAudienceSchema
 };

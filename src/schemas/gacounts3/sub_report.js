@@ -1,6 +1,7 @@
 import associationSubReportRoleSchema from '@/schemas/gacounts3/association_sub_report_role';
 
 const schema = {
+	title: 'Sub-Report',
 	database: 'GACOUNTS3',
 	table: 'SUB_REPORT',
 	columns: [
@@ -65,14 +66,14 @@ const schema = {
 			foreignKey: 'SUB_REPORT_ID',
 			associatedColumn: 'ROLE_ID',
 			multiSelect: true
-		},
-		{
-			title: 'Contacts',
-			schema: subReportContactSchema,
-			localKey: 'ID',
-			foreignKey: 'SUB_REPORT_ID',
-			associatedColumn
 		}
+		// {
+		// 	title: 'Contacts',
+		// 	schema: subReportContactSchema,
+		// 	localKey: 'ID',
+		// 	foreignKey: 'SUB_REPORT_ID',
+		// 	associatedColumn
+		// }
 	]
 };
 

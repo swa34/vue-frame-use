@@ -1,9 +1,9 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
   <main>
-  	<!-- <h1>
-  		{{ schema.title || schema.table }} Detail
-  	</h1> -->
+		<h3>
+			{{ schema.title || schema.table }}
+		</h3>
 		<!-- We use a data form component to display the main record -->
 		<DataForm
 			:schema="schema"
@@ -12,7 +12,7 @@
 		<!-- Then, if we want to include associations -->
 		<div v-if="includeAssociations">
 			<!-- We loop through each of them -->
-			<div v-for="association in schema.associations">
+			<div v-for="association in schema.associations" v-bind:key="association.title">
 				<!-- <div v-if="dependencyMet(association)"> -->
 					<!-- If it's an external association (not Vue-based) -->
 					<div v-if="association.isExternal && identifier.value">
@@ -86,6 +86,14 @@
 				<!-- </div> -->
 			</div>
 		</div>
+		<div v-if="includeSubSchemas">
+			<div v-for="subschema in schema.subschemas" v-bind:key="subschema.title">
+				<!-- Right now, only supporting custom components.  Later, DetailMain
+				and everything else under it will be made to support recursive usage.
+				The issue is the Vuex data store... -->
+				<component v-bind:is="subschema.customComponent" />
+			</div>
+		</div>
 		<button v-if="!identifier.value" v-on:click="submitData" class="button">
 			Submit
 		</button>
@@ -95,6 +103,7 @@
 <!-- The script portion of the component -->
 <script>
 	// Import required modules
+	import DetailMain from '@/views/DetailMain';
 	import {
 		DataForm,
 		DataMultiSelect,
@@ -114,7 +123,8 @@
 			DataMultiSelect,
 			DataMultiTable,
 			DataRadio,
-			DataTable
+			DataTable,
+			DetailMain
 		},
 		// The methods available to this component during render
 		methods: {
@@ -167,6 +177,11 @@
 			},
 			// Should associations be rendered too?
 			'includeAssociations': {
+				type: Boolean,
+				default: true
+			},
+			// How about subschemas?
+			'includeSubSchemas': {
 				type: Boolean,
 				default: true
 			}

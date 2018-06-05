@@ -48,8 +48,8 @@ const getComputed = (schema) => {
 	return config;
 };
 
-// Creates the actual data store, based on the schema passed in
-const getStore = (schema, isNew = false) => {
+// Create a store config, to be used to create a store
+const getStoreConfig = (schema, isNew = false) => {
 	const schemaCamelTitle = stringFormats.camelCase(schema.title);
 	// Create a config object that will eventually be passed into Vuex.Store() to
 	// generate our store
@@ -99,8 +99,26 @@ const getStore = (schema, isNew = false) => {
 		});
 	}
 
-	// Once we're done, create the actual store and return it
-	const store = new Vuex.Store(config);
+	// If the schema has subschemas, we need to set up extra modules for those too
+	if (schema.subschemas) {
+		config.modules.subschemas = {
+			modules: {},
+			namespaced: true
+		};
+		schema.subschemas.forEach((subschema) => {
+			const subSchemaCamelTitle = stringFormats.camelCase(subschema.title);
+			if (!config.modules.subschemas.modules[subSchemaCamelTitle]) {
+				config.modules.subschemas.modules[subSchemaCamelTitle] = getStoreConfig(subschema.schema);
+			}
+		});
+	}
+
+	return config;
+};
+
+// Creates the actual data store, based on the schema passed in
+const getStore = (schema, isNew = false) => {
+	const store = new Vuex.Store(getStoreConfig(schema));
 	return store;
 };
 
