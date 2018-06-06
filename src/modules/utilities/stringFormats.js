@@ -1,6 +1,7 @@
 const camelCase = (str = '') => {
 	return str
-		.replace(/-/g, ' ')													// Replace dashes with spaces
+		.replace(/,/g, '')													// Remove commas
+		.replace(/-/g, ' ')													// Replace dashes and commas with spaces
 		.replace(/\s(.)/g, $1 => $1.toUpperCase())	// Capitalize the first letter after whitespace
 		.replace(/\s/g, '')													// Remove whitespace
 		.replace(/^(.)/, $1 => $1.toLowerCase());		// Change the first character to lowercase

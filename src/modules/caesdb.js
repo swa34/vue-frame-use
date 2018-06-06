@@ -46,6 +46,14 @@ const getAssociationReportTypeProgramArea = (callback) => {
 		});
 };
 
+const getAssociationReportTypeRole = (callback) => {
+	const url = generateURL('associationReportTypeRole');
+	request.get(url)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getAssociationTargetAudienceProgramArea = (callback) => {
 	const url = generateURL('associationTargetAudienceProgramArea');
 	request.get(url)
@@ -207,6 +215,7 @@ export {
 	getAssociationReportTypeContactType,
 	getAssociationReportTypeField,
 	getAssociationReportTypeProgramArea,
+	getAssociationReportTypeRole,
 	getAssociationTargetAudienceProgramArea,
 	getAssociationTopicArea,
 	getContactTypes,

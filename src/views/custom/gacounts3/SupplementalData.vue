@@ -24,6 +24,7 @@
 							{{ option.LABEL }}
 						</option>
 					</select>
+					<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" type="number" step="any" />
 					<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" />
 				</td>
 			</tr>

@@ -5,27 +5,34 @@ const schema = {
 		{
 			columnName: 'ID',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'REPORT_ID',
+			prettyName: 'Report',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'USER_ID',
+			prettyName: 'User',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'MEMO',
 			type: 'nvarchar',
+			inputType: 'textarea',
 			required: true
 		},
 		{
 			columnName: 'DATE_CREATED',
 			type: 'datetime',
-			required: true
+			required: true,
+			automated: true
 		}
 	]
 };

@@ -20,12 +20,13 @@
 				<tr v-for="record in records" v-bind:key="record" class="list-complete-item">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label v-if="allowEdit && columnShouldBeEditable(column)">
-							<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
+							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :disabled="column.immutable"></textarea>
+							<select v-else-if="column.inputType === 'select' || sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
 								<option v-for="value in column.constraint.values" :value="value.key">
 									{{ value.label }}
 								</option>
 							</select>
-							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
+							<input v-else :type="column.inputType || sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<span v-else>
 							{{ record[column.columnName] }}
@@ -48,13 +49,13 @@
 				<tr v-if="allowInsert && !schema.disableInsert" v-bind:key="-1">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label>
-							<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
-							<select v-else-if="sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)">
+							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
+							<select v-else-if="column.inputType === 'select' || sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)">
 								<option v-for="value in column.constraint.values" :value="value.key">
 									{{ value.label }}
 								</option>
 							</select>
-							<input v-else :type="sqlToHtml(column)" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)" />
+							<input v-else :type="column.inputType || sqlToHtml(column)" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)" />
 						</label>
 					</td>
 					<td>
@@ -73,7 +74,7 @@
 	/* global activeUserID */
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import {
-		formatDates,
+		// formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
@@ -117,8 +118,8 @@
 				if (!this.identifier.value) {
 					// If there's no identifier and the column is not the associated column
 					if (column.columnName !== this.associatedColumn) {
-						// Show it
-						return true;
+						// Show it if it's not automated
+						return !column.automated;
 					} else {
 						// Otherwise, don't
 						return false;

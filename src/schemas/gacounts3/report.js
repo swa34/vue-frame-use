@@ -8,6 +8,7 @@ import {
 	ethnicDemographicSchema,
 	racialDemographicSchema,
 	reportContactSchema,
+	reportPurposeAchievementsSchema,
 	subReportSchema,
 	targetAudienceSchema
 } from '@/schemas/gacounts3';
@@ -496,6 +497,13 @@ const schema = {
 			// 	// fetchCriteriaStructure: true,
 			// 	// tablePrefix: 'GC3_ASSOCIATION_REPORT_TYPE_FIELD'
 			// }
+		},
+		{
+			title: 'Outcome, Impact, and Achievements',
+			schema: reportPurposeAchievementsSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			isAssignable: true
 		}
 	],
 	subschemas: [

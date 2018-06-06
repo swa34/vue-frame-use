@@ -3,6 +3,22 @@
 		<h3>
 			Sub-Report
 		</h3>
+		<!-- Roles -->
+		<h4>
+			Roles
+		</h4>
+		<ul v-if="reportType !== -1">
+			<li v-for="role in roleTypes">
+				<label>
+					<input type="checkbox" :value="generateRoleRecord(role)" v-model="roles" />
+					<span>
+						{{ role.SUB_REPORT_ROLE_LABEL }}
+					</span>
+				</label>
+			</li>
+		</ul>
+		<hr />
+		<!-- Contacts  -->
 		<table v-if="contacts.length > 0">
 			<caption>
 				Contacts
@@ -23,7 +39,7 @@
 						{{ getContactLabelFromID(contact.TYPE_ID) }}
 					</td>
 					<td>
-						<input type="number" v-model.number="contact.QUANTITY" />
+						<input type="number" v-model.number="contact.QUANTITY" min="0" />
 					</td>
 				</tr>
 			</tbody>
@@ -38,6 +54,8 @@
 				</tr>
 			</tfoot>
 		</table>
+		<hr />
+		<!-- Supplemental Data -->
 		<SupplementalData
 			:forSubReport="true"
 		/>
@@ -45,8 +63,15 @@
 </template>
 
 <script>
-	// import { mapState } from 'vuex';
 	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
+	import {
+		getAssociationReportTypeRole,
+		getCriteriaStructure
+	} from '@/modules/caesdb';
+	import {
+		cfToJs,
+		filter
+	} from '@/modules/criteriaUtils';
 
 	export default {
 		name: 'SubReportForReport',
@@ -66,6 +91,11 @@
 				const contactAssociationIndex = this.$store.state.schema.associations.map(a => a.title).indexOf('Contacts');
 				const contactTypesIndex = this.$store.state.schema.associations[contactAssociationIndex].schema.columns.map(c => c.columnName).indexOf('TYPE_ID');
 				return this.$store.state.schema.associations[contactAssociationIndex].schema.columns[contactTypesIndex].constraint.values;
+			},
+			criteriaStructure () {
+				const critStruct = Object.assign({}, this.criteriaStructureTemplate);
+				critStruct.criteria_TYPE_ID_eq = this.$store.state.reportType.records.map(r => r.TYPE_ID);
+				return critStruct;
 			},
 			neededReportValues () {
 				return {
@@ -87,6 +117,10 @@
 					this.$store.state.subschemas.subReport.subReport = val;
 				}
 			},
+			reportType () {
+				const reportTypeRecords = this.$store.state.reportType.records;
+				return reportTypeRecords.length > 0 ? reportTypeRecords[0].TYPE_ID : -1;
+			},
 			roles: {
 				get () {
 					return this.$store.state.subschemas.subReport.roles.records;
@@ -94,6 +128,9 @@
 				set (val) {
 					this.$store.state.subschemas.subReport.roles.records = val;
 				}
+			},
+			roleTypes () {
+				return filter(this.unfilteredRoleTypes, this.criteriaStructure);
 			},
 			supplementalData: {
 				get () {
@@ -111,6 +148,12 @@
 				return sum;
 			}
 		},
+		data () {
+			return {
+				criteriaStructureTemplate: {},
+				unfilteredRoleTypes: []
+			};
+		},
 		methods: {
 			getContactLabelFromID (id) {
 				let label = '';
@@ -118,7 +161,27 @@
 					if (type.key === id) label = type.label;
 				});
 				return label;
+			},
+			generateRoleRecord (role) {
+				return {
+					SUB_REPORT_ID: null,
+					ROLE_ID: role.ROLE_ID
+				};
 			}
+		},
+		mounted () {
+			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
+				if (err) console.error(err);
+				if (data) {
+					this.criteriaStructureTemplate = cfToJs(data);
+				}
+			});
+			getAssociationReportTypeRole((err, data) => {
+				if (err) console.error(err);
+				if (data) {
+					this.unfilteredRoleTypes = data;
+				}
+			});
 		},
 		watch: {
 			neededReportValues (values) {
@@ -134,3 +197,15 @@
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	ul {
+		list-style-type: none;
+		padding: 0;
+		column-count: 5;
+		column-width: 7.5rem;
+		li {
+			break-inside: avoid-column;
+		}
+	}
+</style>
