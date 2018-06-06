@@ -66,14 +66,16 @@ const schema = {
 			foreignKey: 'SUB_REPORT_ID',
 			associatedColumn: 'ROLE_ID',
 			multiSelect: true
+		},
+		{
+			title: 'Contacts',
+			localKey: 'ID',
+			foreignKey: 'SUB_REPORT_ID',
+			associatedColumn: 'TYPE_ID'
+		},
+		{
+			title: 'Supplemental Data'
 		}
-		// {
-		// 	title: 'Contacts',
-		// 	schema: subReportContactSchema,
-		// 	localKey: 'ID',
-		// 	foreignKey: 'SUB_REPORT_ID',
-		// 	associatedColumn
-		// }
 	]
 };
 

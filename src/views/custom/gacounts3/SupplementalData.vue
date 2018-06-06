@@ -1,5 +1,5 @@
 <template lang="html">
-	<table v-if="dependenciesMet">
+	<table v-if="dependenciesMet && records.length > 0">
 		<caption>
 			Supplemental Data
 		</caption>
@@ -56,6 +56,12 @@
 
 	export default {
 		name: 'SupplementalData',
+		props: {
+			forSubReport: {
+				type: Boolean,
+				default: false
+			}
+		},
 		computed: {
 			dependenciesMet () {
 				return this.programAreas.length > 0 && this.reportType !== null && this.topics.length > 0;
@@ -82,10 +88,14 @@
 			},
 			records: {
 				get () {
-					return this.$store.state.supplementalData.records;
+					return this.forSubReport ? this.$store.state.subschemas.subReport.supplementalData.records : this.$store.state.supplementalData.records;
 				},
 				set (val) {
-					this.$store.state.supplementalData.records = val;
+					if (this.forSubReport) {
+						this.$store.state.subschemas.subReport.supplementalData.records = val;
+					} else {
+						this.$store.state.supplementalData.records = val;
+					}
 				}
 			},
 			recordFieldIDs () {
@@ -96,6 +106,11 @@
 				criteriaStructure.criteria_TYPE_ID_eq = [this.reportType];
 				criteriaStructure.criteria_AREA_ID_eq = this.programAreas;
 				criteriaStructure.criteria_TOPIC_ID_eq = this.topics;
+				if (this.forSubReport) {
+					criteriaStructure.criteria_FOR_SUB_REPORT_eq = [1];
+				} else {
+					criteriaStructure.criteria_FOR_REPORT_eq = [1];
+				}
 				return criteriaStructure;
 			},
 			reportFieldCriteriaStructureForCF () {
