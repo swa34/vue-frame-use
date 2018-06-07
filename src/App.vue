@@ -55,3 +55,11 @@
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
 </script>
+
+<style lang="scss">
+	table tfoot td {
+		color: #fff;
+		background-color: lighten(#545959, 20%);
+		font-weight: 600;
+	}
+</style>

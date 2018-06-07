@@ -17,7 +17,7 @@
 				</tr>
 			</thead>
 			<transition-group name="list-complete" tag="tbody">
-				<tr v-for="record in records" v-bind:key="record" class="list-complete-item">
+				<tr v-for="record in records" v-bind:key="hash(record)" class="list-complete-item">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label v-if="allowEdit && columnShouldBeEditable(column)">
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :disabled="column.immutable"></textarea>
@@ -33,10 +33,10 @@
 						</span>
 					</td>
 					<td v-if="allowEdit && !schema.disableUpdate">
-						<button v-if="!$store" v-on:click="updateRecord(record)" class="button">
+						<button v-if="!$store" v-on:click="updateRecord(record)" type="button" class="button">
 							Save
 						</button>
-						<button v-on:click="deleteRecord(record)" class="button red">
+						<button v-on:click="deleteRecord(record)" type="button" class="button red">
 							Delete
 						</button>
 					</td>
@@ -46,7 +46,7 @@
 						-->
 					</td>
 				</tr>
-				<tr v-if="allowInsert && !schema.disableInsert" v-bind:key="-1">
+				<tr v-if="allowInsert && !schema.disableInsert" v-bind:key="'new-record'">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label>
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
@@ -59,7 +59,7 @@
 						</label>
 					</td>
 					<td>
-						<button v-on:click="addNewRecord" class="button">
+						<button v-on:click="addNewRecord" type="button" class="button">
 							Add
 						</button>
 					</td>
@@ -72,6 +72,7 @@
 
 <script>
 	/* global activeUserID */
+	import hash from 'object-hash';
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import {
 		// formatDates,
@@ -144,6 +145,7 @@
 				}
 			},
 			getPrettyColumnName,
+			hash,
 			sqlToHtml,
 			updateRecord (record) {
 				console.log('Sending data to server:');

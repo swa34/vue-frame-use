@@ -215,7 +215,7 @@
 			getSum (column) {
 				let sum = 0;
 				this.records.forEach((record) => {
-					sum += record[column.columnName];
+					sum += typeof record[column.columnName] === 'number' ? record[column.columnName] : 0;
 				});
 				return sum;
 			},

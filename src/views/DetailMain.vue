@@ -94,7 +94,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div>
-		<button v-if="!identifier.value" v-on:click="submitData" class="button">
+		<button v-if="!identifier.value" v-on:click="submitData" type="button" class="button">
 			Submit
 		</button>
   </main>
