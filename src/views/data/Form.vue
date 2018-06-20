@@ -24,7 +24,7 @@
 						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable">
 							{{ record[column.columnName] }}
 						</textarea>
-						<quillEditor
+						<Editor
 							v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
 							v-model="record[column.columnName]"
 						/>
@@ -46,9 +46,7 @@
 <script>
 	/* global activeUserID */
 	// Import required modules
-	import 'quill/dist/quill.core.css';
-	import 'quill/dist/quill.snow.css';
-	import 'quill/dist/quill.bubble.css';
+	import Editor from '@tinymce/tinymce-vue';
 	import {
 		// formatDates,
 		getPrettyColumnName,
@@ -56,12 +54,11 @@
 		stringFormats
 	} from '@/modules/utilities';
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import { quillEditor } from 'vue-quill-editor';
 
 	// Export the actual component
 	export default {
 		name: 'DatabaseForm',
-		components: { quillEditor },
+		components: { Editor },
 		props: {
 			'schema': {
 				type: Object,

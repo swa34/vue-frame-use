@@ -12,6 +12,7 @@
   "author": "",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@tinymce/tinymce-vue": "^1.0.8",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -33,7 +34,6 @@
     "vue": "^2.5.16",
     "vue-feather-icons": "^4.7.1",
     "vue-loader": "^15.2.4",
-    "vue-quill-editor": "^3.0.6",
     "vue-sweetalert2": "^1.4.2",
     "vue-template-compiler": "^2.5.16",
     "vuex": "^3.0.1",
