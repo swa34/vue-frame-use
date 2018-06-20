@@ -4,6 +4,7 @@ const HtmlWebpackPlugin		= require('html-webpack-plugin');
 const path								= require('path');
 const pkg									= require('./package.json');
 const webpack							= require('webpack');
+const Visualizer					= require('webpack-visualizer-plugin');
 const { VueLoaderPlugin }	= require('vue-loader');
 
 const resolve = dir => path.join(__dirname, dir);
@@ -17,7 +18,8 @@ const commonConfig = {
 			title: pkg.name,
 			template: './src/index.html'
 		}),
-		new VueLoaderPlugin()
+		new VueLoaderPlugin(),
+		new Visualizer()
 	],
 	resolve: {
 		extensions: [

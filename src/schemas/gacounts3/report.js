@@ -8,6 +8,7 @@ import {
 	ethnicDemographicSchema,
 	racialDemographicSchema,
 	reportContactSchema,
+	reportPersonnelSchema,
 	reportPurposeAchievementsSchema,
 	subReportSchema,
 	targetAudienceSchema
@@ -315,6 +316,14 @@ const schema = {
 		}
 	],
 	associations: [
+		{
+			title: 'Collaborators',
+			schema: reportPersonnelSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'PERSONNEL_ID',
+			isAssignable: true
+		},
 		{
 			title: 'Program Areas',
 			schema: associationReportProgramAreaSchema,

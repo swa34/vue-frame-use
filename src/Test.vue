@@ -1,25 +1,37 @@
 <template lang="html">
   <div id="main">
-		<pre>{{ JSON.stringify(response, null, 2) }}</pre>
+		<FuzzySelect
+			v-model="personnelID"
+			:options="options"
+		/>
+		<pre>{{ JSON.stringify(this.personnelID, null, 2) }}</pre>
 	</div>
 </template>
 
 <script>
-	import request from 'superagent';
+	import FuzzySelect from '@/views/elements/FuzzySelect';
+	import personnel from '@/personnel';
 
 	export default {
 		name: 'Test',
+		components: {
+			FuzzySelect
+		},
+		computed: {
+			options () {
+				return this.personnel.map((p) => {
+					return {
+						key: p.ID,
+						label: [p.FIRST_NAME, p.MIDDLE_NAME, p.LAST_NAME].join(' ')
+					};
+				});
+			}
+		},
 		data () {
 			return {
-				response: null
+				personnel,
+				personnelID: null
 			};
-		},
-		mounted () {
-			request.get('/rest/gacounts-api/genders.json')
-				.end((err, response) => {
-					if (err) console.error(err);
-					this.response = response.body;
-				});
 		}
 	};
 </script>

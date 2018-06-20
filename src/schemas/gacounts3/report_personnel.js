@@ -1,3 +1,7 @@
+import {
+	getPersonnel
+} from '@/modules/caesdb';
+
 const schema = {
 	database: 'GACOUNTS3',
 	table: 'REPORT_PERSONNEL',
@@ -9,13 +13,28 @@ const schema = {
 		},
 		{
 			columnName: 'PERSONNEL_ID',
+			prettyName: 'Personnel',
 			type: 'int',
-			required: true
+			inputType: 'fuzzyselect',
+			required: true,
+			constraint: {
+				getValues: getPersonnel,
+				foreignKey: 'ID',
+				generateValue: (personnel) => {
+					return {
+						key: personnel.ID,
+						label: [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ')
+					};
+				},
+				values: []
+			}
 		},
 		{
 			columnName: 'IS_REJECTED',
 			type: 'bit',
-			required: true
+			required: true,
+			automated: true,
+			default: false
 		}
 	]
 };

@@ -21,6 +21,11 @@
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label v-if="allowEdit && columnShouldBeEditable(column)">
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :disabled="column.immutable"></textarea>
+							<FuzzySelect
+								v-else-if="column.inputType === 'fuzzyselect' || sqlToHtml(column) === 'fuzzyselect'"
+								v-model="record[column.columnName]"
+								:options="column.constraint.values"
+							/>
 							<select v-else-if="column.inputType === 'select' || sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
 								<option v-for="value in column.constraint.values" :value="value.key">
 									{{ value.label }}
@@ -50,6 +55,11 @@
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label>
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
+							<FuzzySelect
+								v-else-if="column.inputType === 'fuzzyselect' || sqlToHtml(column) === 'fuzzyselect'"
+								v-model="newRecord[column.columnName]"
+								:options="column.constraint.values"
+							/>
 							<select v-else-if="column.inputType === 'select' || sqlToHtml(column) === 'select'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)">
 								<option v-for="value in column.constraint.values" :value="value.key">
 									{{ value.label }}
@@ -73,6 +83,7 @@
 <script>
 	/* global activeUserID */
 	import hash from 'object-hash';
+	import FuzzySelect from '@/views/elements/FuzzySelect';
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import {
 		// formatDates,
@@ -83,6 +94,9 @@
 
 	export default {
 		name: 'DataTable',
+		components: {
+			FuzzySelect
+		},
 		computed: {
 			records: {
 				get () {
@@ -195,10 +209,15 @@
 								if (err) console.error(err);
 								if (data) {
 									data.forEach((result) => {
-										const value = {
-											key: result[column.constraint.foreignKey],
-											label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
-										};
+										let value = null;
+										if (column.constraint.generateValue) {
+											value = column.constraint.generateValue(result);
+										} else {
+											value = {
+												key: result[column.constraint.foreignKey],
+												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+											};
+										}
 										column.constraint.values.push(value);
 									});
 								}

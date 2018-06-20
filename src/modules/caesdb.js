@@ -135,6 +135,14 @@ const getKeywords = (callback) => {
 		});
 };
 
+const getPersonnel = (callback) => {
+	const url = generateURL('personnel');
+	request.get(url)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getPlannedPrograms = (criteriaStructure, callback) => {
 	const url = generateURL('plannedPrograms');
 	request.post(url)
@@ -226,6 +234,7 @@ export {
 	getFieldTypes,
 	getGenders,
 	getKeywords,
+	getPersonnel,
 	getPlannedPrograms,
 	getProgramScopes,
 	getProgramAreas,
