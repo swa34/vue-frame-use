@@ -1,10 +1,15 @@
 import {
-	getPersonnel
+	getPersonnel,
+	getReportPersonnel
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'REPORT_PERSONNEL',
+	title: 'Collaborator',
+	tablePrefix: 'GC3_REPORT_PERSONNEL',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getReportPersonnel,
 	columns: [
 		{
 			columnName: 'REPORT_ID',

@@ -1,4 +1,8 @@
 import associationSubReportRoleSchema from '@/schemas/gacounts3/association_sub_report_role';
+import {
+	getPlannedPrograms,
+	getStatePlannedPrograms
+} from '@/modules/caesdb';
 
 const schema = {
 	title: 'Sub-Report',
@@ -34,14 +38,49 @@ const schema = {
 			automated: true
 		},
 		{
-			columnName: 'STATE_PLANNED_PROGRAM_ID',
-			prettyName: 'State Planned Program ID',
-			type: 'int'
+			columnName: 'PLANNED_PROGRAM_ID',
+			prettyName: 'Local Issue',
+			type: 'int',
+			constraint: {
+				getValues: getPlannedPrograms,
+				tablePrefix: 'FPW_PLANNED_PROGRAM',
+				criteria: {
+					string: 'criteria_USER_ID_eq',
+					useUserID: true
+				},
+				database: 'FederalPOW',
+				table: 'PLANNED_PROGRAM',
+				foreignKey: 'ID',
+				foreignLabel: 'NAME',
+				identifier: {
+					key: 'USER_ID',
+					value: 9307
+				},
+				values: []
+			},
+			depends: {
+				column: 'ISSUE_TYPE',
+				test (val) {
+					return val === 'LOCAL';
+				}
+			}
 		},
 		{
-			columnName: 'PLANNED_PROGRAM_ID',
-			prettyName: 'Planned Program ID',
-			type: 'int'
+			columnName: 'STATE_PLANNED_PROGRAM_ID',
+			prettyName: 'State Issue',
+			type: 'int',
+			constraint: {
+				getValues: getStatePlannedPrograms,
+				foreignKey: 'ID',
+				foreignLabel: 'NAME',
+				values: []
+			},
+			depends: {
+				column: 'ISSUE_TYPE',
+				test (val) {
+					return val === 'STATE';
+				}
+			}
 		},
 		{
 			columnName: 'IS_HIGHLIGHTED',

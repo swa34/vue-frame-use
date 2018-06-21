@@ -29,6 +29,7 @@ import {
 	getCounties,
 	getPlannedPrograms,
 	getProgramScopes,
+	getReport,
 	getStatePlannedPrograms
 } from '@/modules/caesdb';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
@@ -109,8 +110,11 @@ const demographicsTest = (records, schema) => {
 // And finally define the schema itself
 const schema = {
 	title: 'Report',
-	database: 'GACOUNTS3',
-	table: 'REPORT',
+	tablePrefix: 'GC3_REPORT',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getReport,
 	columns: [
 		{
 			columnName: 'ID',
@@ -224,84 +228,84 @@ const schema = {
 			type: 'datetime',
 			required: true
 		},
-		{
-			columnName: 'ISSUE_TYPE',
-			prettyName: 'Type of Issue',
-			type: 'nvarchar',
-			default: 'LOCAL',
-			constraint: {
-				foreignKey: 'key',
-				foreignLabel: 'label',
-				values: [
-					{
-						label: 'Local',
-						key: 'LOCAL'
-					},
-					{
-						label: 'State',
-						key: 'STATE'
-					}
-				]
-			}
-		},
-		{
-			columnName: 'PLANNED_PROGRAM_ID',
-			prettyName: 'Local Issue',
-			type: 'int',
-			constraint: {
-				getValues: getPlannedPrograms,
-				tablePrefix: 'FPW_PLANNED_PROGRAM',
-				criteria: {
-					string: 'criteria_USER_ID_eq',
-					useUserID: true
-				},
-				database: 'FederalPOW',
-				table: 'PLANNED_PROGRAM',
-				foreignKey: 'ID',
-				foreignLabel: 'NAME',
-				identifier: {
-					key: 'USER_ID',
-					value: 9307
-				},
-				values: []
-			},
-			depends: {
-				column: 'ISSUE_TYPE',
-				test (val) {
-					return val === 'LOCAL';
-				}
-			}
-		},
-		{
-			columnName: 'STATE_PLANNED_PROGRAM_ID',
-			prettyName: 'State Issue',
-			type: 'int',
-			constraint: {
-				getValues: getStatePlannedPrograms,
-				tablePrefix: 'FPW_STATE_PLANNED_PROGRAM',
-				criteria: {
-					string: 'criteria_USER_ID_eq',
-					useUserID: true
-				},
-				database: 'FederalPOW',
-				table: 'STATE_PLANNED_PROGRAM',
-				foreignKey: 'ID',
-				foreignLabel: 'NAME',
-				identifier: {
-					key: 'IS_FEDERAL_LEVEL',
-					value: {
-						column: 'OWNER_ID'
-					}
-				},
-				values: []
-			},
-			depends: {
-				column: 'ISSUE_TYPE',
-				test (val) {
-					return val === 'STATE';
-				}
-			}
-		},
+		// {
+		// 	columnName: 'ISSUE_TYPE',
+		// 	prettyName: 'Type of Issue',
+		// 	type: 'nvarchar',
+		// 	default: 'LOCAL',
+		// 	constraint: {
+		// 		foreignKey: 'key',
+		// 		foreignLabel: 'label',
+		// 		values: [
+		// 			{
+		// 				label: 'Local',
+		// 				key: 'LOCAL'
+		// 			},
+		// 			{
+		// 				label: 'State',
+		// 				key: 'STATE'
+		// 			}
+		// 		]
+		// 	}
+		// },
+		// {
+		// 	columnName: 'PLANNED_PROGRAM_ID',
+		// 	prettyName: 'Local Issue',
+		// 	type: 'int',
+		// 	constraint: {
+		// 		getValues: getPlannedPrograms,
+		// 		tablePrefix: 'FPW_PLANNED_PROGRAM',
+		// 		criteria: {
+		// 			string: 'criteria_USER_ID_eq',
+		// 			useUserID: true
+		// 		},
+		// 		database: 'FederalPOW',
+		// 		table: 'PLANNED_PROGRAM',
+		// 		foreignKey: 'ID',
+		// 		foreignLabel: 'NAME',
+		// 		identifier: {
+		// 			key: 'USER_ID',
+		// 			value: 9307
+		// 		},
+		// 		values: []
+		// 	},
+		// 	depends: {
+		// 		column: 'ISSUE_TYPE',
+		// 		test (val) {
+		// 			return val === 'LOCAL';
+		// 		}
+		// 	}
+		// },
+		// {
+		// 	columnName: 'STATE_PLANNED_PROGRAM_ID',
+		// 	prettyName: 'State Issue',
+		// 	type: 'int',
+		// 	constraint: {
+		// 		getValues: getStatePlannedPrograms,
+		// 		tablePrefix: 'FPW_STATE_PLANNED_PROGRAM',
+		// 		criteria: {
+		// 			string: 'criteria_USER_ID_eq',
+		// 			useUserID: true
+		// 		},
+		// 		database: 'FederalPOW',
+		// 		table: 'STATE_PLANNED_PROGRAM',
+		// 		foreignKey: 'ID',
+		// 		foreignLabel: 'NAME',
+		// 		identifier: {
+		// 			key: 'IS_FEDERAL_LEVEL',
+		// 			value: {
+		// 				column: 'OWNER_ID'
+		// 			}
+		// 		},
+		// 		values: []
+		// 	},
+		// 	depends: {
+		// 		column: 'ISSUE_TYPE',
+		// 		test (val) {
+		// 			return val === 'STATE';
+		// 		}
+		// 	}
+		// },
 		{
 			columnName: 'DATE_CREATED',
 			type: 'datetime',
@@ -321,6 +325,7 @@ const schema = {
 			schema: reportPersonnelSchema,
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
+			criteriaString: 'criteria_REPORT_ID_eq',
 			associatedColumn: 'PERSONNEL_ID',
 			isAssignable: true
 		},
@@ -510,6 +515,7 @@ const schema = {
 		{
 			title: 'Outcome, Impact, and Achievements',
 			schema: reportPurposeAchievementsSchema,
+			criteriaString: 'criteria_REPORT_ID_eq',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			isAssignable: true

@@ -86,11 +86,15 @@
 	import FuzzySelect from '@/views/elements/FuzzySelect';
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import {
-		// formatDates,
+		formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
+	import {
+		cfToJs,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 
 	export default {
 		name: 'DataTable',
@@ -174,20 +178,26 @@
 				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
 			});
 
-			// const getMainData = () => {
-			// 	const options = {
-			// 		db: component.schema.database,
-			// 		table: component.schema.table,
-			// 		identifier: component.identifier
-			// 	};
-			// 	caesdb.getData(options, (err, data) => {
-			// 		if (err) console.error(err);
-			// 		if (data.success) {
-			// 			component.records = data.results;
-			// 			if (dateFields.length > 0) formatDates(dateFields, component.records);
-			// 		}
-			// 	});
-			// };
+			const getMainData = () => {
+				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct[this.identifier.criteriaString] = this.identifier.value;
+						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								this.records = data;
+								if (dateFields.length > 0) formatDates(dateFields, this.records);
+							}
+						});
+					}
+				});
+			};
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
@@ -226,7 +236,7 @@
 					}
 				});
 			};
-			// if (component.identifier.key && component.identifier.value) getMainData();
+			if (component.identifier.key && component.identifier.value) getMainData();
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		},
 		props: {

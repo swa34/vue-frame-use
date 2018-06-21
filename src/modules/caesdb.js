@@ -176,9 +176,36 @@ const getRaces = (callback) => {
 		});
 };
 
+const getReport = (criteriaStructure, callback) => {
+	const url = generateURL('report');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getReportFields = (callback) => {
 	const url = generateURL('reportFields');
 	request.get(url)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getReportPersonnel = (criteriaStructure, callback) => {
+	const url = generateURL('reportPersonnel');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getReportPurposeAchievements = (criteriaStructure, callback) => {
+	const url = generateURL('reportPurposeAchievements');
+	request.post(url)
+		.send(criteriaStructure)
 		.end((err, response) => {
 			callback(err, response.body);
 		});
@@ -192,10 +219,9 @@ const getReportTypes = (callback) => {
 		});
 };
 
-const getStatePlannedPrograms = (criteriaStructure, callback) => {
+const getStatePlannedPrograms = (callback) => {
 	const url = generateURL('statePlannedPrograms');
-	request.post(url)
-		.send(criteriaStructure)
+	request.get(url)
 		.end((err, response) => {
 			callback(err, response.body);
 		});
@@ -239,7 +265,10 @@ export {
 	getProgramScopes,
 	getProgramAreas,
 	getRaces,
+	getReport,
 	getReportFields,
+	getReportPersonnel,
+	getReportPurposeAchievements,
 	getReportTypes,
 	getStatePlannedPrograms,
 	getTargetAudiences,

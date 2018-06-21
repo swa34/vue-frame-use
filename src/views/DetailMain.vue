@@ -77,7 +77,11 @@
 							:title="association.title"
 							:schema="association.schema"
 							:associatedColumn="association.foreignKey"
-							:identifier="{ key: association.foreignKey, value: identifier.value}"
+							:identifier="{
+								key: association.foreignKey,
+								value: identifier.value,
+								criteriaString: association.criteriaString
+							}"
 							:allowInsert="true"
 							:allowEdit="true"
 						/>
@@ -102,6 +106,7 @@
 
 <!-- The script portion of the component -->
 <script>
+	/* global swal */
 	// Import required modules
 	import DetailMain from '@/views/DetailMain';
 	import {
@@ -130,7 +135,7 @@
 		methods: {
 			// Doesn't send anything yet, just pretends like it does
 			submitData () {
-				this.$swal('Awesome!', 'Your entry has been saved successfully.', 'success');
+				swal('Awesome!', 'Your entry has been saved successfully.', 'success');
 				console.log('Successfully sent this data to the server:');
 				const schemaLessStore = Object.assign({}, this.$store.state);
 				delete schemaLessStore.schema;

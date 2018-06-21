@@ -48,12 +48,16 @@
 	// Import required modules
 	import Editor from '@tinymce/tinymce-vue';
 	import {
-		// formatDates,
+		formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
 	import { getCriteriaStructure } from '@/modules/caesdb';
+	import {
+		cfToJs,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 
 	// Export the actual component
 	export default {
@@ -143,25 +147,33 @@
 			});
 
 			// Our main data grabbing function, grabs data for the main schema
-			// const getMainData = () => {
-			// 	// Options configuration for caesdb
-			// 	const options = {
-			// 		db: component.schema.database,
-			// 		table: component.schema.table,
-			// 		identifier: component.identifier
-			// 	};
-			// 	// Fetch the data
-			// 	caesdb.getData(options, (err, data) => {
-			// 		// Log an error if it exists
-			// 		if (err) console.error(err);
-			// 		// If everything went smoothly, set the component's record to the
-			// 		// fetched data, and then run our date formatter function (if needed)
-			// 		if (data.success) {
-			// 			component.record = data.results[0];
-			// 			if (dateFields.length > 0) formatDates(dateFields, component.record);
-			// 		}
-			// 	});
-			// };
+			const getMainData = () => {
+				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct[this.schema.criteria.string] = this.identifier.value;
+						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								let existingRecord = data[0];
+								for (let key in this.record) {
+									if (existingRecord.hasOwnProperty(key)) {
+										this.record[key] = existingRecord[key];
+									} else {
+										console.warn('Local record has key "' + key + '" but remote record does not.');
+									}
+								}
+								if (dateFields.length > 0) formatDates(dateFields, this.record);
+							}
+						});
+					}
+				});
+			};
 
 			// Our constraint data grabbing function
 			const getConstraintData = () => {
@@ -193,7 +205,7 @@
 			};
 
 			// If an identifier was specified, we need to fetch that record's data
-			// if (component.identifier && component.identifier.value) getMainData();
+			if (component.identifier) getMainData();
 			// Regardless, get all column constraint data
 			getConstraintData();
 		}

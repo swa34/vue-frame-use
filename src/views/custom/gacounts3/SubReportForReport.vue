@@ -3,6 +3,40 @@
 		<h3>
 			Sub-Report
 		</h3>
+		<!-- Planned Program -->
+		<label>
+			<strong>
+				Type of Issue
+			</strong>
+			<select v-model="issueType">
+				<option value="local">
+					Local
+				</option>
+				<option value="state">
+					State
+				</option>
+			</select>
+		</label>
+		<label v-if="issueType === 'local'">
+			<strong>
+				Local Issue
+			</strong>
+			<select v-model="record.PLANNED_PROGRAM_ID">
+				<option v-for="program in plannedPrograms" :value="program.ID">
+					{{ program.NAME }}
+				</option>
+			</select>
+		</label>
+		<label v-else-if="issueType === 'state'">
+			<strong>
+				State Issue
+			</strong>
+			<select v-model="record.STATE_PLANNED_PROGRAM_ID">
+				<option v-for="program in statePlannedPrograms" :value="program.ID">
+					{{ program.NAME }}
+				</option>
+			</select>
+		</label>
 		<!-- Roles -->
 		<h4>
 			Roles
@@ -63,14 +97,18 @@
 </template>
 
 <script>
+	/* global activeUserID */
 	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
 	import {
 		getAssociationReportTypeRole,
-		getCriteriaStructure
+		getCriteriaStructure,
+		getPlannedPrograms,
+		getStatePlannedPrograms
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
-		filter
+		filter,
+		jsToCf
 	} from '@/modules/criteriaUtils';
 
 	export default {
@@ -151,6 +189,9 @@
 		data () {
 			return {
 				criteriaStructureTemplate: {},
+				issueType: 'local',
+				plannedPrograms: [],
+				statePlannedPrograms: [],
 				unfilteredRoleTypes: []
 			};
 		},
@@ -180,6 +221,25 @@
 				if (err) console.error(err);
 				if (data) {
 					this.unfilteredRoleTypes = data;
+				}
+			});
+			getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+				if (err) console.error(err);
+				if (data) {
+					let critStruct = cfToJs(data);
+					critStruct.criteria_USER_ID_eq.push(activeUserID);
+					getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							this.plannedPrograms = data;
+						}
+					});
+				}
+			});
+			getStatePlannedPrograms((err, data) => {
+				if (err) console.error(err);
+				if (data) {
+					this.statePlannedPrograms = data;
 				}
 			});
 		},
