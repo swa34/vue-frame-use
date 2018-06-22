@@ -27,10 +27,8 @@ import {
 	getAssociationReportTypeProgramArea,
 	getAssociationTargetAudienceProgramArea,
 	getCounties,
-	getPlannedPrograms,
 	getProgramScopes,
-	getReport,
-	getStatePlannedPrograms
+	getReport
 } from '@/modules/caesdb';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
 import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
@@ -325,7 +323,6 @@ const schema = {
 			schema: reportPersonnelSchema,
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
-			criteriaString: 'criteria_REPORT_ID_eq',
 			associatedColumn: 'PERSONNEL_ID',
 			isAssignable: true
 		},

@@ -83,7 +83,7 @@
 
 			// If not entering a new record, we need to get the Report ID
 			if (!isNew) {
-				const id = url.getParam('pkid');
+				const id = url.getParam('PK_ID') || url.getParam('pk_id');
 				if (id) {
 					data.identifier = {
 						key: 'ID',

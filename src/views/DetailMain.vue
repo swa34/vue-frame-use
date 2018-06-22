@@ -39,7 +39,7 @@
 							:groupBy="association.groupBy"
 							:groupLabel="association.groupLabel"
 							:groupsToShow="association.groupsToShow"
-							:identifier="{ key: association.foreignKey, value: identifier.value }"
+							:identifier="generateIdentifier(association)"
 							:schema="association.schema"
 							:title="association.title"
 							:description="association.description"
@@ -52,7 +52,7 @@
 							:schema="association.schema"
 							:allowEdit="true"
 							:associatedColumn="association.associatedColumn"
-							:identifier="{ key: association.foreignKey, value: identifier.value }"
+							:identifier="generateIdentifier(association)"
 							:filter="association.filter"
 							:description="association.description"
 						/>
@@ -63,7 +63,7 @@
 							:title="association.title"
 							:schema="association.schema"
 							:associatedColumn="association.associatedColumn"
-							:identifier="{ key: association.foreignKey, value: identifier.value}"
+							:identifier="generateIdentifier(association)"
 							:allowEdit="true"
 							:optionColumnName="association.optionColumnName"
 							:filter="association.filter"
@@ -77,11 +77,7 @@
 							:title="association.title"
 							:schema="association.schema"
 							:associatedColumn="association.foreignKey"
-							:identifier="{
-								key: association.foreignKey,
-								value: identifier.value,
-								criteriaString: association.criteriaString
-							}"
+							:identifier="generateIdentifier(association)"
 							:allowInsert="true"
 							:allowEdit="true"
 						/>
@@ -164,6 +160,13 @@
 				// so say so and consider the dependency unmet.
 				console.error('Dependency information missing for association: ' + association.title);
 				return false;
+			},
+			generateIdentifier (association) {
+				return {
+					key: association.foreignKey,
+					value: this.identifier.value,
+					criteriaString: association.criteriaString || 'criteria_' + association.foreignKey + '_eq'
+				};
 			}
 		},
 		// The component's properties, which are set by the parent component.

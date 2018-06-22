@@ -116,12 +116,13 @@
 			columnShouldBeDisplayed (column) {
 				// Check if the column has a dependency
 				if (!column.depends) {
-					if ((!this.identifier || !this.identifier.key || (this.identifier.key && !this.identifier.value)) && column.automated) {
-						// If no identifier was passed in, or no identifier key was passed
-						// in, or if a key was passed in without a value, AND the column is
-						// set as automated, don't show the column.
-						return false;
-					}
+					if (column.automated) return false;
+					// if ((!this.identifier || !this.identifier.key || (this.identifier.key && !this.identifier.value)) && column.automated) {
+					// 	// If no identifier was passed in, or no identifier key was passed
+					// 	// in, or if a key was passed in without a value, AND the column is
+					// 	// set as automated, don't show the column.
+					// 	return false;
+					// }
 					// Otherwise, do.
 					return true;
 				} else {

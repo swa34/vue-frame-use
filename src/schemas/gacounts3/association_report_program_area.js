@@ -1,10 +1,15 @@
 import {
+	getAssociationReportProgramArea,
 	getProgramAreas
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'ASSOCIATION_REPORT_PROGRAM_AREA',
+	title: 'Report Program Areas',
+	tablePrefix: 'GC3_ASSOCIATION_REPORT_PROGRAM_AREA',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getAssociationReportProgramArea,
 	columns: [
 		{
 			columnName: 'REPORT_ID',

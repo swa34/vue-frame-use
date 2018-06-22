@@ -1,10 +1,15 @@
 import {
+	getAssociationReportType,
 	getReportTypes
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'ASSOCIATION_REPORT_TYPE',
+	title: 'Report Type Associations',
+	tablePrefix: 'GC3_ASSOCIATION_REPORT_TYPE',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getAssociationReportType,
 	columns: [
 		{
 			columnName: 'REPORT_ID',

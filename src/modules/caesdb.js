@@ -21,6 +21,33 @@ const getAssociationKeywordTopic = (callback) => {
 		});
 };
 
+const getAssociationReportProgramArea = (criteriaStructure, callback) => {
+	const url = generateURL('associationReportProgramArea');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getAssociationReportTopic = (criteriaStructure, callback) => {
+	const url = generateURL('associationReportTopic');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getAssociationReportType = (criteriaStructure, callback) => {
+	const url = generateURL('associationReportType');
+	request.post(url)
+		.send(criteriaStructure)
+			.end((err, response) => {
+				callback(err, response.body);
+			});
+};
+
 const getAssociationReportTypeContactType = (callback) => {
 	const url = generateURL('associationReportTypeContactType');
 	request.get(url)
@@ -87,6 +114,10 @@ const getCounties = (callback) => {
 };
 
 const getCriteriaStructure = (tablePrefix, callback) => {
+	if (!tablePrefix) {
+		console.error(new Error('Cannot fetch criteria structure: table prefix is undefined'));
+		return;
+	}
 	const url = apiPrefix + 'criteriaStructure?TablePrefix=' + tablePrefix;
 	request.get(url)
 		.end((err, response) => {
@@ -246,6 +277,9 @@ const getTopics = (callback) => {
 export {
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
+	getAssociationReportProgramArea,
+	getAssociationReportTopic,
+	getAssociationReportType,
 	getAssociationReportTypeContactType,
 	getAssociationReportTypeField,
 	getAssociationReportTypeProgramArea,

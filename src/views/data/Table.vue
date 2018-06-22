@@ -148,6 +148,7 @@
 					// display were passed in, or if inserting is allowed and the column
 					// is required, or if fields to display were passed in and the column
 					// is one of those fields.
+					if (column.automated) return false;
 					return !this.fieldsToDisplay || (this.allowInsert && column.required) || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
 				}
 			},

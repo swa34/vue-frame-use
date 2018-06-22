@@ -40,6 +40,10 @@
 	// Import required modules
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { stringFormats } from '@/modules/utilities';
+	import {
+		cfToJs,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 
 	// Export the actual component
 	export default {
@@ -136,19 +140,34 @@
 		mounted () {
 			const component = this;
 
-			// const getRecords = () => {
-			// 	const options = {
-			// 		db: component.schema.database,
-			// 		table: component.schema.table,
-			// 		identifier: component.identifier
-			// 	};
-			// 	caesdb.getData(options, (err, data) => {
-			// 		if (err) console.error(err);
-			// 		if (data.success) {
-			// 			component.records = data.results;
-			// 		}
-			// 	});
-			// };
+			const getRecords = () => {
+				console.log('yeah dude');
+				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct[this.identifier.criteriaString] = this.identifier.value;
+						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								let convertedRecords = [];
+								data.forEach((record) => {
+									let convertedRecord = {};
+									this.schema.columns.forEach((column) => {
+										convertedRecord[column.columnName] = record[column.columnName];
+									});
+									convertedRecords.push(convertedRecord);
+								});
+								this.records = convertedRecords;
+							}
+						});
+					}
+				});
+			};
 
 			const getOptions = () => {
 				component.schema.columns.forEach((column) => {
@@ -188,7 +207,7 @@
 			};
 
 			getOptions();
-			// if (component.identifier.value) getRecords();
+			if (component.identifier.value) getRecords();
 			if (component.filter) getFilterRecords();
 		},
 		props: {

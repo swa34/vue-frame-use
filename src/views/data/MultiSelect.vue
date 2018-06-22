@@ -67,7 +67,11 @@
 	// Import required modules
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { stringFormats } from '@/modules/utilities';
-	import { filter } from '@/modules/criteriaUtils';
+	import {
+		cfToJs,
+		filter,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 
 	// Export the actual component
 	export default {
@@ -325,23 +329,33 @@
 			const component = this;
 
 			// Gets the records for an existing document
-			// const getRecords = () => {
-			// 	// Configuration options for caesdb
-			// 	const options = {
-			// 		db: component.schema.database,
-			// 		table: component.schema.table,
-			// 		identifier: component.identifier
-			// 	};
-			// 	// Fetch the data
-			// 	caesdb.getData(options, (err, data) => {
-			// 		if (err) console.error(err);
-			// 		if (data.success) {
-			// 			// If successful, set the component's records to the returned
-			// 			// records.
-			// 			component.records = data.results;
-			// 		}
-			// 	});
-			// };
+			const getRecords = () => {
+				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct[this.identifier.criteriaString] = this.identifier.value;
+						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								let convertedRecords = [];
+								data.forEach((record) => {
+									let convertedRecord = {};
+									this.schema.columns.forEach((column) => {
+										convertedRecord[column.columnName] = record[column.columnName];
+									});
+									convertedRecords.push(convertedRecord);
+								});
+								this.records = convertedRecords;
+							}
+						});
+					}
+				});
+			};
 
 			// Function to get all options available
 			const getOptions = () => {
@@ -389,7 +403,7 @@
 			// Get our options
 			getOptions();
 			// If an identifier is present, get the existing records
-			// if (component.identifier.value) getRecords();
+			if (component.identifier.value) getRecords();
 			// If a filter was specified, get the filter records
 			if (component.filter) getFilterRecords();
 		},
