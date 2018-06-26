@@ -197,6 +197,7 @@
 			}
 		},
 		mounted () {
+			// Fetch some things we need
 			getCriteriaStructure('GC3_FIELD_OPTION', (err, data) => {
 				if (err) console.error(err);
 				if (data) this.criteriaStructureTemplates.fieldOption = cfToJs(data);

@@ -27,7 +27,7 @@
 							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<span v-else>
-							{{ getRecordValue(option, column) }}
+							{{ record[column.columnName] }}
 						</span>
 					</td>
 				</tr>
@@ -53,7 +53,11 @@
 
 <script>
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import { filter } from '@/modules/criteriaUtils';
+	import {
+		cfToJs,
+		filter,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 	import {
 		// formatDates,
 		getPrettyColumnName,
@@ -192,8 +196,10 @@
 				this.schema.columns.forEach((column) => {
 					if (column.columnName === this.optionColumnName) {
 						record[column.columnName] = option.key;
-					} else {
+					} else if (column.columnName === this.associatedColumn) {
 						record[column.columnName] = this.identifier.value || null;
+					} else {
+						record[column.columnName] = null;
 					}
 				});
 				// Then return the record
@@ -228,6 +234,38 @@
 			component.schema.columns.forEach((column) => {
 				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
 			});
+
+			const getExistingRecords = () => {
+				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct[this.identifier.criteriaString] = this.identifier.value;
+						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								if (this.schema.prepareFromRetrieval) {
+									this.schema.prepareFromRetrieval(data, this.records);
+								} else {
+									data.forEach((existingRecord) => {
+										this.records.forEach((record) => {
+											if (record[this.optionColumn.columnName] === existingRecord[this.optionColumn.columnName]) {
+												for (let key in record) {
+													if (existingRecord.hasOwnProperty(key)) record[key] = existingRecord[key];
+												}
+											}
+										});
+									});
+								}
+							}
+						});
+					}
+				});
+			};
 
 			const getFilterRecords = () => {
 				if (component.filter.getValues) {
@@ -274,6 +312,7 @@
 				getFilterRecords();
 				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
 			}
+			if (component.identifier.value) getExistingRecords();
 		},
 		props: {
 			'allowEdit': {

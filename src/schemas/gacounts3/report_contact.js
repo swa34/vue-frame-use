@@ -1,10 +1,15 @@
 import {
-	getContactTypes
+	getContactTypes,
+	getReportContact
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'REPORT_CONTACT',
+	title: 'Report Contacts',
+	tablePrefix: 'GC3_REPORT_CONTACT',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getReportContact,
 	columns: [
 		{
 			columnName: 'REPORT_ID',

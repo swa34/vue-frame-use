@@ -70,6 +70,42 @@ altRacialDemographicSchema.columns.push({
 	type: 'int',
 	min: 0
 });
+altRacialDemographicSchema.prepareForSubmit = (newRecords) => {
+	// An array to hold our records to be submitted
+	let transformedRecords = [];
+	newRecords.forEach((record) => {
+		if (record.QUANTITY_MALE > 0 || record.QUANTITY_FEMALE > 0) {
+			let newRecordTemplate = {};
+			for (let key in record) {
+				if (key !== 'QUANTITY_MALE' && key !== 'QUANTITY_FEMALE') newRecordTemplate[key] = record[key];
+			}
+			if (record.QUANTITY_MALE > 0) {
+				let maleRecord = Object.assign({}, newRecordTemplate);
+				maleRecord.GENDER_ID = 1;
+				maleRecord.QUANTITY = record.QUANTITY_MALE;
+				transformedRecords.push(maleRecord);
+			}
+			if (record.QUANTITY_FEMALE > 0) {
+				let femaleRecord = Object.assign({}, newRecordTemplate);
+				femaleRecord.GENDER_ID = 2;
+				femaleRecord.QUANTITY = record.QUANTITY_FEMALE;
+				transformedRecords.push(femaleRecord);
+			}
+		}
+	});
+	return transformedRecords;
+};
+altRacialDemographicSchema.prepareFromRetrieval = (existingRecords, componentRecords) => {
+	existingRecords.forEach((record) => {
+		let componentRecordsRaceMap = componentRecords.map(r => r.RACE_ID);
+		let matchingRecord = componentRecords[componentRecordsRaceMap.indexOf(record.RACE_ID)];
+		if (record.GENDER_ID === 1) {
+			matchingRecord.QUANTITY_MALE = record.QUANTITY;
+		} else if (record.GENDER_ID === 2) {
+			matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
+		}
+	});
+};
 
 // Adjust the ethnic demographic schema to suit our needs
 const altEthnicDemographicSchema = Object.assign({}, ethnicDemographicSchema);
@@ -87,6 +123,17 @@ altEthnicDemographicSchema.columns.push({
 	prettyName: 'Female',
 	type: 'int'
 });
+altEthnicDemographicSchema.prepareFromRetrieval = (existingRecords, componentRecords) => {
+	existingRecords.forEach((record) => {
+		let componentRecordsEthnicMap = componentRecords.map(r => r.ETHNICITY_ID);
+		let matchingRecord = componentRecords[componentRecordsEthnicMap.indexOf(record.ETHNICITY_ID)];
+		if (record.GENDER_ID === 1) {
+			matchingRecord.QUANTITY_MALE = record.QUANTITY;
+		} else if (record.GENDER_ID === 2) {
+			matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
+		}
+	});
+};
 
 // Define our demographics test function to be reused for each of the
 // demographic associations
@@ -226,84 +273,6 @@ const schema = {
 			type: 'datetime',
 			required: true
 		},
-		// {
-		// 	columnName: 'ISSUE_TYPE',
-		// 	prettyName: 'Type of Issue',
-		// 	type: 'nvarchar',
-		// 	default: 'LOCAL',
-		// 	constraint: {
-		// 		foreignKey: 'key',
-		// 		foreignLabel: 'label',
-		// 		values: [
-		// 			{
-		// 				label: 'Local',
-		// 				key: 'LOCAL'
-		// 			},
-		// 			{
-		// 				label: 'State',
-		// 				key: 'STATE'
-		// 			}
-		// 		]
-		// 	}
-		// },
-		// {
-		// 	columnName: 'PLANNED_PROGRAM_ID',
-		// 	prettyName: 'Local Issue',
-		// 	type: 'int',
-		// 	constraint: {
-		// 		getValues: getPlannedPrograms,
-		// 		tablePrefix: 'FPW_PLANNED_PROGRAM',
-		// 		criteria: {
-		// 			string: 'criteria_USER_ID_eq',
-		// 			useUserID: true
-		// 		},
-		// 		database: 'FederalPOW',
-		// 		table: 'PLANNED_PROGRAM',
-		// 		foreignKey: 'ID',
-		// 		foreignLabel: 'NAME',
-		// 		identifier: {
-		// 			key: 'USER_ID',
-		// 			value: 9307
-		// 		},
-		// 		values: []
-		// 	},
-		// 	depends: {
-		// 		column: 'ISSUE_TYPE',
-		// 		test (val) {
-		// 			return val === 'LOCAL';
-		// 		}
-		// 	}
-		// },
-		// {
-		// 	columnName: 'STATE_PLANNED_PROGRAM_ID',
-		// 	prettyName: 'State Issue',
-		// 	type: 'int',
-		// 	constraint: {
-		// 		getValues: getStatePlannedPrograms,
-		// 		tablePrefix: 'FPW_STATE_PLANNED_PROGRAM',
-		// 		criteria: {
-		// 			string: 'criteria_USER_ID_eq',
-		// 			useUserID: true
-		// 		},
-		// 		database: 'FederalPOW',
-		// 		table: 'STATE_PLANNED_PROGRAM',
-		// 		foreignKey: 'ID',
-		// 		foreignLabel: 'NAME',
-		// 		identifier: {
-		// 			key: 'IS_FEDERAL_LEVEL',
-		// 			value: {
-		// 				column: 'OWNER_ID'
-		// 			}
-		// 		},
-		// 		values: []
-		// 	},
-		// 	depends: {
-		// 		column: 'ISSUE_TYPE',
-		// 		test (val) {
-		// 			return val === 'STATE';
-		// 		}
-		// 	}
-		// },
 		{
 			columnName: 'DATE_CREATED',
 			type: 'datetime',
@@ -473,42 +442,16 @@ const schema = {
 			title: 'Supplemental Data',
 			schema: associationReportFieldSchema,
 			customComponent: SupplementalDataComponent,
-			// localKey: 'ID',
-			// foreignKey: 'REPORT_ID',
-			// associatedColumn: 'REPORT_ID',
-			// optionColumnName: 'FIELD_ID',
-			isAssignable: true
-			// displayAllOptions: true,
-			// filter: {
-			// 	associations: [
-			// 		{
-			// 			title: 'Report Type',
-			// 			column: 'TYPE_ID'
-			// 		},
-			// 		{
-			// 			title: 'Program Areas',
-			// 			column: 'AREA_ID'
-			// 		},
-			// 		{
-			// 			title: 'Topics',
-			// 			column: 'TOPIC_ID'
-			// 		}
-			// 	],
-			// 	getValues: getAssociationReportTypeField,
-			// 	optionColumn: 'FIELD_ID',
-			// 	criteriaStructure: gc3AssociationReportTypeFieldCriteriaStructure
-			// 	// fetchCriteriaStructure: true,
-			// 	// tablePrefix: 'GC3_ASSOCIATION_REPORT_TYPE_FIELD'
-			// }
-		},
-		{
-			title: 'Outcome, Impact, and Achievements',
-			schema: reportPurposeAchievementsSchema,
-			criteriaString: 'criteria_REPORT_ID_eq',
-			localKey: 'ID',
-			foreignKey: 'REPORT_ID',
 			isAssignable: true
 		},
+		// {
+		// 	title: 'Outcome, Impact, and Achievements',
+		// 	schema: reportPurposeAchievementsSchema,
+		// 	criteriaString: 'criteria_REPORT_ID_eq',
+		// 	localKey: 'ID',
+		// 	foreignKey: 'REPORT_ID',
+		// 	isAssignable: true
+		// },
 		{
 			title: 'Collaborators',
 			schema: reportPersonnelSchema,

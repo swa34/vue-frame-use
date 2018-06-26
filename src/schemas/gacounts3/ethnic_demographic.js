@@ -1,12 +1,17 @@
 import {
+	getEthnicDemographic,
 	getEthnicities,
 	getGenders
 } from '@/modules/caesdb';
 import { enableConstraintValues } from '@/modules/schemaTools';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'ETHNIC_DEMOGRAPHIC',
+	title: 'Report Ethnicity Demographics',
+	tablePrefix: 'GC3_ETHNIC_DEMOGRAPHIC',
+	criteria: {
+		string: 'criteria_REPORT_ID_eq'
+	},
+	fetchExisting: getEthnicDemographic,
 	columns: [
 		{
 			columnName: 'REPORT_ID',

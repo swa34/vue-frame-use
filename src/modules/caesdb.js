@@ -26,7 +26,7 @@ const getAssociationReportKeyword = (criteriaStructure, callback) => {
 	request.post(url)
 		.send(criteriaStructure)
 		.end((err, response) => {
-			callback(err, response);
+			callback(err, response.body);
 		});
 };
 
@@ -134,6 +134,15 @@ const getCriteriaStructure = (tablePrefix, callback) => {
 		});
 };
 
+const getEthnicDemographic = (criteriaStructure, callback) => {
+	const url = generateURL('ethnicDemographic');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getEthnicities = (callback) => {
 	const url = generateURL('ethnicities');
 	request.get(url)
@@ -216,8 +225,26 @@ const getRaces = (callback) => {
 		});
 };
 
+const getRacialDemographic = (criteriaStructure, callback) => {
+	const url = generateURL('racialDemographic');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getReport = (criteriaStructure, callback) => {
 	const url = generateURL('report');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getReportContact = (criteriaStructure, callback) => {
+	const url = generateURL('reportContact');
 	request.post(url)
 		.send(criteriaStructure)
 		.end((err, response) => {
@@ -244,6 +271,15 @@ const getReportPersonnel = (criteriaStructure, callback) => {
 
 const getReportPurposeAchievements = (criteriaStructure, callback) => {
 	const url = generateURL('reportPurposeAchievements');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getReportTargetAudience = (criteriaStructure, callback) => {
+	const url = generateURL('reportTargetAudience');
 	request.post(url)
 		.send(criteriaStructure)
 		.end((err, response) => {
@@ -299,6 +335,7 @@ export {
 	getContactTypes,
 	getCounties,
 	getCriteriaStructure,
+	getEthnicDemographic,
 	getEthnicities,
 	getFieldOptions,
 	getFieldTypes,
@@ -309,10 +346,13 @@ export {
 	getProgramScopes,
 	getProgramAreas,
 	getRaces,
+	getRacialDemographic,
 	getReport,
+	getReportContact,
 	getReportFields,
 	getReportPersonnel,
 	getReportPurposeAchievements,
+	getReportTargetAudience,
 	getReportTypes,
 	getStatePlannedPrograms,
 	getTargetAudiences,

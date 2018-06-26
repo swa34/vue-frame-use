@@ -141,7 +141,6 @@
 			const component = this;
 
 			const getRecords = () => {
-				console.log('yeah dude');
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
 					if (data.Message) {
@@ -154,15 +153,12 @@
 							if (data.Message) {
 								console.error(new Error(data.Message));
 							} else {
-								let convertedRecords = [];
-								data.forEach((record) => {
-									let convertedRecord = {};
-									this.schema.columns.forEach((column) => {
-										convertedRecord[column.columnName] = record[column.columnName];
-									});
-									convertedRecords.push(convertedRecord);
+								if (data.length > 1) console.warn('More than one record retrieved, when only one record should be allowed.  The first record retrieved will be used.');
+								let convertedRecord = {};
+								this.schema.columns.forEach((column) => {
+									convertedRecord[column.columnName] = data[0][column.columnName];
 								});
-								this.records = convertedRecords;
+								this.computedRecord = convertedRecord;
 							}
 						});
 					}
@@ -236,8 +232,8 @@
 			}
 		},
 		watch: {
-			computedRecord () {
-				this.records = [this.computedRecord];
+			computedRecord (val) {
+				this.records = [val];
 			}
 		}
 	};

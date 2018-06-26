@@ -1,11 +1,16 @@
 import {
 	getGenders,
-	getRaces
+	getRaces,
+	getRacialDemographic
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'RACIAL_DEMOGRAPHIC',
+	title: 'Report Racial Demographics',
+	tablePrefix: 'GC3_RACIAL_DEMOGRAPHIC',
+	criteria: {
+		string: 'criteria_REPORT_ID_eq'
+	},
+	fetchExisting: getRacialDemographic,
 	columns: [
 		{
 			columnName: 'REPORT_ID',

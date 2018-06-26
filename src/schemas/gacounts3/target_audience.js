@@ -1,10 +1,15 @@
 import {
+	getReportTargetAudience,
 	getTargetAudiences
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'TARGET_AUDIENCE',
+	title: 'Report Target Audiences',
+	tablePrefix: 'GC3_TARGET_AUDIENCE',
+	criteria: {
+		string: 'critieria_REPORT_ID_eq'
+	},
+	fetchExisting: getReportTargetAudience,
 	columns: [
 		{
 			columnName: 'REPORT_ID',
