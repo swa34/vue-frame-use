@@ -21,6 +21,15 @@ const getAssociationKeywordTopic = (callback) => {
 		});
 };
 
+const getAssociationReportKeyword = (criteriaStructure, callback) => {
+	const url = generateURL('associationReportKeyword');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response);
+		});
+};
+
 const getAssociationReportProgramArea = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportProgramArea');
 	request.post(url)
@@ -277,6 +286,7 @@ const getTopics = (callback) => {
 export {
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
+	getAssociationReportKeyword,
 	getAssociationReportProgramArea,
 	getAssociationReportTopic,
 	getAssociationReportType,

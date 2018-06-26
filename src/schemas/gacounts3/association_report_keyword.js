@@ -1,10 +1,15 @@
 import {
+	getAssociationReportKeyword,
 	getKeywords
 } from '@/modules/caesdb';
 
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'ASSOCIATION_REPORT_KEYWORD',
+	title: 'Report Keyword Associations',
+	tablePrefix: 'GC3_ASSOCIATION_REPORT_KEYWORD',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getAssociationReportKeyword,
 	columns: [
 		{
 			columnName: 'REPORT_ID',
