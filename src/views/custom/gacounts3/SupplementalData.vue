@@ -34,16 +34,19 @@
 
 <script>
 	import {
+		getAssociationReportField,
+		getAssociationReportTypeField,
+		getAssociationSubReportField,
 		getCriteriaStructure,
 		getFieldOptions,
-		getFieldTypes,
-		getAssociationReportTypeField
+		getFieldTypes
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
 		filter,
 		jsToCf
 	} from '@/modules/criteriaUtils';
+	import { url } from '@/modules/utilities';
 
 	// An object containing input types corresponding to field types
 	const fieldTypeInputTypes = {
@@ -134,6 +137,7 @@
 					fieldOption: {},
 					reportField: {}
 				},
+				existingRecords: [],
 				fieldOptions: [],
 				fieldTypes: [],
 				reportFields: []
@@ -156,18 +160,23 @@
 				return options;
 			},
 			populateRecords () {
-				const generateRecord = (field) => {
+				const generateRecord = (field, value = null) => {
 					return {
 						REPORT_ID: null,
 						FIELD_ID: field.FIELD_ID,
-						FIELD_VALUE: null
+						FIELD_VALUE: value
 					};
 				};
 				let records = [];
 				this.reportFields.forEach((field) => {
 					const indexOfField = this.recordFieldIDs.indexOf(field.FIELD_ID);
+					const indexOfExistingRecord = this.existingRecords.map(r => r.FIELD_ID).indexOf(field.FIELD_ID);
 					if (indexOfField === -1) {
-						records.push(generateRecord(field));
+						if (indexOfExistingRecord !== -1) {
+							records.push(generateRecord(field, this.existingRecords[indexOfExistingRecord].FIELD_VALUE));
+						} else {
+							records.push(generateRecord(field));
+						}
 					} else {
 						records.push(this.records[indexOfField]);
 					}
@@ -178,6 +187,7 @@
 				getAssociationReportTypeField(this.reportFieldCriteriaStructureForCF, (err, data) => {
 					if (err) console.error(err);
 					if (data) {
+						console.log(data);
 						let uniqueFields = [];
 						let newReportFields = [];
 						data.forEach((field) => {
@@ -210,6 +220,41 @@
 				if (err) console.error(err);
 				if (data) this.fieldTypes = data;
 			});
+
+			const fetchExistingRecords = (reportID) => {
+				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
+				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
+				getCriteriaStructure(tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct.criteria_REPORT_ID_eq = reportID;
+						getFields(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								this.existingRecords = data;
+								// data.forEach((existingRecord) => {
+								// 	console.log(this.records.length);
+								// 	this.records.forEach((record) => {
+								// 		if (record.FIELD_ID === existingRecord.FIELD_ID) {
+								// 			console.log('match found');
+								// 			for (let key in record) {
+								// 				if (existingRecord.hasOwnProperty(key)) record[key] = existingRecord[key];
+								// 			}
+								// 		}
+								// 	});
+								// });
+							}
+						});
+					}
+				});
+			};
+			let reportID = url.getParam('PK_ID') || url.getParam('pk_id');
+			if (reportID && !url.getParam('new') && !this.forSubReport) fetchExistingRecords(reportID);
 		},
 		watch: {
 			// dependenciesMet (newStatus, oldStatus) {

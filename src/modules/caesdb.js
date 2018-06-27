@@ -21,6 +21,15 @@ const getAssociationKeywordTopic = (callback) => {
 		});
 };
 
+const getAssociationReportField = (criteriaStructure, callback) => {
+	const url = generateURL('associationReportField');
+	request.post(url)
+		.send(criteriaStructure)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
 const getAssociationReportKeyword = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportKeyword');
 	request.post(url)
@@ -85,6 +94,15 @@ const getAssociationReportTypeProgramArea = (callback) => {
 const getAssociationReportTypeRole = (callback) => {
 	const url = generateURL('associationReportTypeRole');
 	request.get(url)
+		.end((err, response) => {
+			callback(err, response.body);
+		});
+};
+
+const getAssociationSubReportField = (criteriaStructure, callback) => {
+	const url = generateURL('associationSubReportField');
+	request.post(url)
+		.send(criteriaStructure)
 		.end((err, response) => {
 			callback(err, response.body);
 		});
@@ -322,6 +340,7 @@ const getTopics = (callback) => {
 export {
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
+	getAssociationReportField,
 	getAssociationReportKeyword,
 	getAssociationReportProgramArea,
 	getAssociationReportTopic,
@@ -330,6 +349,7 @@ export {
 	getAssociationReportTypeField,
 	getAssociationReportTypeProgramArea,
 	getAssociationReportTypeRole,
+	getAssociationSubReportField,
 	getAssociationTargetAudienceProgramArea,
 	getAssociationTopicArea,
 	getContactTypes,

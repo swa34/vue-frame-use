@@ -16,7 +16,8 @@ const schema = {
 			columnName: 'REPORT_ID',
 			prettyName: 'Report',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'RACE_ID',

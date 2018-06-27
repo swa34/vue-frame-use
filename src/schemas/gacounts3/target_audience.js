@@ -14,7 +14,8 @@ const schema = {
 		{
 			columnName: 'REPORT_ID',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'TYPE_ID',
