@@ -262,7 +262,7 @@
 	ul {
 		list-style-type: none;
 		padding: 0;
-		column-count: 5;
+		column-count: 2;
 		column-width: 7.5rem;
 		li {
 			break-inside: avoid-column;

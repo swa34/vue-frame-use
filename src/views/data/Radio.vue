@@ -1,9 +1,9 @@
 <template lang="html">
-  <div>
+  <div v-if="options.length > 0">
 		<!-- If there's a title, show it -->
-		<strong v-if="title || schema.title">
+		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
-		</strong>
+		</h3>
 		<!-- Same deal with description -->
 		<!-- <p v-if="description">
 			{{ description }}

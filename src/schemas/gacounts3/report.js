@@ -166,7 +166,11 @@ const schema = {
 			type: 'int',
 			immutable: true,
 			prettyName: 'ID',
-			automated: true
+			automated: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 1
+			}
 		},
 		{
 			columnName: 'OWNER_ID',
@@ -179,6 +183,10 @@ const schema = {
 				table: 'PERSONNEL',
 				foreignKey: 'ID',
 				values: []
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 2
 			}
 		},
 		{
@@ -192,12 +200,20 @@ const schema = {
 				table: 'PERSONNEL',
 				foreignKey: 'ID',
 				values: []
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 3
 			}
 		},
 		{
 			columnName: 'TITLE',
 			type: 'nvarchar',
-			required: true
+			required: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 4
+			}
 		},
 		{
 			columnName: 'SCOPE_ID',
@@ -211,6 +227,10 @@ const schema = {
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: []
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 5
 			}
 		},
 		{
@@ -224,6 +244,10 @@ const schema = {
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: []
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 6
 			}
 		},
 		{
@@ -243,9 +267,13 @@ const schema = {
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
 				test (val) {
 					const activityLocationMap = activityLocations.map(location => location.ID);
-					const activityLocationIndex = activityLocationMap.indexOf(val);
+					const activityLocationIndex = activityLocationMap.indexOf(Number(val));
 					return activityLocationIndex !== -1 && !activityLocations[activityLocationIndex].USES_ALTERNATE_TEXT;
 				}
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 7
 			}
 		},
 		{
@@ -256,34 +284,54 @@ const schema = {
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
 				test (val) {
 					const activityLocationMap = activityLocations.map(location => location.ID);
-					const activityLocationIndex = activityLocationMap.indexOf(val);
+					const activityLocationIndex = activityLocationMap.indexOf(Number(val));
 					return activityLocationIndex !== -1 && activityLocations[activityLocationIndex].USES_ALTERNATE_TEXT;
 				}
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 8
 			}
 		},
 		{
 			columnName: 'DATE_BEGIN',
 			prettyName: 'Begin Date',
 			type: 'datetime',
-			required: true
+			required: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 9
+			}
 		},
 		{
 			columnName: 'DATE_END',
 			prettyName: 'End Date',
 			type: 'datetime',
-			required: true
+			required: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 10
+			}
 		},
 		{
 			columnName: 'DATE_CREATED',
 			type: 'datetime',
 			required: true,
-			automated: true
+			automated: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 11
+			}
 		},
 		{
 			columnName: 'DATE_LAST_UPDATED',
 			type: 'datetime',
 			required: true,
-			automated: true
+			automated: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 12
+			}
 		}
 	],
 	associations: [
@@ -294,6 +342,10 @@ const schema = {
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'AREA_ID',
 			multiSelect: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 13
+			},
 			description: 'Bacon ipsum dolor amet t-bone pork voluptate officia dolore prosciutto commodo pork loin jerky brisket hamburger. Dolore ullamco shoulder velit, nulla sausage kevin andouille shank sirloin pork chop. Cupim bresaola bacon kielbasa excepteur magna, consectetur exercitation. Cow nostrud filet mignon pork reprehenderit ut, ground round strip steak adipisicing.'
 		},
 		{
@@ -304,6 +356,10 @@ const schema = {
 			associatedColumn: 'TYPE_ID',
 			isAssignable: true,
 			forbidMultiple: true,
+			grouping: {
+				section: 'Main Report Information',
+				order: 14
+			},
 			filter: {
 				association: {
 					title: 'Program Areas',
@@ -324,8 +380,12 @@ const schema = {
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'TOPIC_ID',
 			multiSelect: true,
+			grouping: {
+				section: 'Topics and Keywords',
+				order: 1
+			},
 			groupBy: 'AREA_ID',
-			groupLabel: 'PROGRAM_AREA_LABEL',
+			groupLabel: 'PROGRAM_AREA_ABBREVIATION',
 			groupsToShow: {
 				association: 'Program Areas',
 				column: 'AREA_ID'
@@ -339,6 +399,10 @@ const schema = {
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'KEYWORD_ID',
 			multiSelect: true,
+			grouping: {
+				section: 'Topics and Keywords',
+				order: 2
+			},
 			filter: {
 				associations: [
 					{
@@ -366,6 +430,10 @@ const schema = {
 			associatedColumn: 'REPORT_ID',
 			optionColumnName: 'TYPE_ID',
 			isAssignable: true,
+			grouping: {
+				section: 'Demographic Information',
+				order: 1
+			},
 			displayAllOptions: true,
 			showTotals: true,
 			filter: {
@@ -394,6 +462,10 @@ const schema = {
 			isAssignable: true,
 			displayAllOptions: true,
 			showTotals: true,
+			grouping: {
+				section: 'Demographic Information',
+				order: 3
+			},
 			depends: {
 				association: 'Contacts',
 				useValues: true,
@@ -410,6 +482,10 @@ const schema = {
 			isAssignable: true,
 			displayAllOptions: true,
 			showTotals: true,
+			grouping: {
+				section: 'Demographic Information',
+				order: 4
+			},
 			depends: {
 				association: 'Contacts',
 				useValues: true,
@@ -426,6 +502,10 @@ const schema = {
 			isAssignable: true,
 			displayAllOptions: true,
 			showTotals: true,
+			grouping: {
+				section: 'Demographic Information',
+				order: 2
+			},
 			filter: {
 				associations: [
 					{
@@ -442,7 +522,11 @@ const schema = {
 			title: 'Supplemental Data',
 			schema: associationReportFieldSchema,
 			customComponent: SupplementalDataComponent,
-			isAssignable: true
+			isAssignable: true,
+			grouping: {
+				section: 'Supplemental Data',
+				order: 1
+			}
 		},
 		// {
 		// 	title: 'Outcome, Impact, and Achievements',
@@ -458,14 +542,48 @@ const schema = {
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'PERSONNEL_ID',
-			isAssignable: true
+			isAssignable: true,
+			grouping: {
+				section: 'Collaborators',
+				order: 1
+			}
 		}
 	],
 	subschemas: [
 		{
 			title: 'Sub-Report',
 			schema: subReportSchema,
-			customComponent: SubReportForReportComponent
+			customComponent: SubReportForReportComponent,
+			grouping: {
+				section: 'My Sub-Report',
+				order: 1
+			}
+		}
+	],
+	sections: [
+		{
+			title: 'Main Report Information',
+			order: 1
+		},
+		{
+			title: 'Topics and Keywords',
+			order: 2
+		},
+		{
+			title: 'Demographic Information',
+			order: 3
+		},
+		{
+			title: 'Supplemental Data',
+			order: 4
+		},
+		{
+			title: 'My Sub-Report',
+			order: 5
+		},
+		{
+			title: 'Collaborators',
+			order: 6
 		}
 	]
 };

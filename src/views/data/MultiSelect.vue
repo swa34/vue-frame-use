@@ -1,14 +1,13 @@
 <template lang="html">
-  <div>
+  <div v-if="displayedGroups.length > 0 && filteredOptions.length > 0">
 		<!-- Show the title if there is one -->
-		<strong v-if="title || schema.title">
+		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
-		</strong>
+		</h3>
 		<!-- Show the description if there's one of those too -->
 		<!-- <p v-if="description">
 			{{ description }}
 		</p> -->
-		<br v-else />
 		<!-- If no groups are present, say so -->
 		<p v-if="groups.length < 1">
 			(None)
@@ -22,9 +21,9 @@
 			<transition appear name="fade">
 				<div v-if="!groupsToShow || displayedGroups.indexOf(group.id) !== -1">
 					<!-- Show the group's name if there is one -->
-					<span v-if="group.name" class="group-name">
+					<h4 v-if="group.name">
 						{{ group.name }}
-					</span>
+					</h4>
 					<!-- Then, create a list to hold each of the group's options -->
 					<transition-group name="list-complete" tag="ul">
 						<li v-for="option in group.options" v-bind:key="option[optionID]" class="list-complete-item">
@@ -481,6 +480,17 @@
 		column-width: 7.5rem;
 		li {
 			break-inside: avoid-column;
+			page-break-inside: avoid;
+			-webkit-column-break-inside: avoid;
+			margin-bottom: .75rem;
+			label {
+				display: flex;
+				span {
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+				}
+			}
 		}
 	}
 	span.group-name {

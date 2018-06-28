@@ -187,7 +187,6 @@
 				getAssociationReportTypeField(this.reportFieldCriteriaStructureForCF, (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						console.log(data);
 						let uniqueFields = [];
 						let newReportFields = [];
 						data.forEach((field) => {

@@ -44,11 +44,15 @@
 	// Import required modules
 	import { getComputed, getStore } from '@/modules/store';
 	import { stringFormats, url } from '@/modules/utilities';
+	import { getSortedSchema } from '@/modules/schemaTools';
 	import DetailMain from '@/views/DetailMain';
 	import schema from '@/schemas/gacounts3/report';
 
 	// Hacky fix for schemas without titles
 	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);
+
+	// Sort the schema
+	const sortedSchema = getSortedSchema(schema);
 
 	// Export the actual component
 	export default {
@@ -78,7 +82,7 @@
 				identifier: null,
 				inputID: null,
 				isNew,
-				schema
+				schema: sortedSchema
 			};
 
 			// If not entering a new record, we need to get the Report ID

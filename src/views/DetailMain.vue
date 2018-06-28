@@ -1,99 +1,104 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
   <main>
-		<h3>
-			{{ schema.title || schema.table }}
-		</h3>
-		<!-- We use a data form component to display the main record -->
-		<DataForm
-			:schema="schema"
-			:identifier="identifier"
-		/>
-		<!-- Then, if we want to include associations -->
-		<div v-if="includeAssociations">
-			<!-- We loop through each of them -->
-			<div v-for="association in schema.associations" v-bind:key="association.title">
-				<!-- <div v-if="dependencyMet(association)"> -->
-					<!-- If it's an external association (not Vue-based) -->
-					<div v-if="association.isExternal && identifier.value">
+		<h1>
+			{{ schema.title }}
+		</h1>
+		<div v-for="section in schema.sections">
+			<h2>
+				{{ section.title }}
+			</h2>
+			<div v-for="area in section.areas">
+				<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
+					<SmartInput
+						v-model="record[area.data.columnName]"
+						:field="area.data"
+					/>
+				</div>
+				<div v-else-if="area.type === 'association'">
+					<div v-if="area.data.isExternal && identifier.value">
 						<!-- Then just show the association title and link to edit it -->
-						<span>
-							{{ association.title }}
-						</span>
+						<h3>
+							{{ area.data.title }}
+						</h3>
 						<p>
-							<a :href="association.source.url + (association.source.hasParams ? '&' : '?') + association.source.selector + '=' + identifier.value" class="button">
+							<a :href="area.data.source.url + (area.data.source.hasParams ? '&' : '?') + area.data.source.selector + '=' + identifier.value" class="button">
 								Edit
 							</a>
 						</p>
 					</div>
 					<!-- If it uses a custom component, render that component -->
-					<div v-else-if="association.customComponent">
-						<component v-bind:is="association.customComponent" />
+					<div v-else-if="area.data.customComponent">
+						<component v-bind:is="area.data.customComponent" />
 					</div>
 					<!-- If it's a multiselect association, use a data multi select component -->
-					<div v-else-if="association.multiSelect">
+					<div v-else-if="area.data.multiSelect">
 						<DataMultiSelect
 							:allowEdit="true"
-							:associatedColumn="association.associatedColumn"
-							:filter="association.filter"
-							:groupBy="association.groupBy"
-							:groupLabel="association.groupLabel"
-							:groupsToShow="association.groupsToShow"
-							:identifier="generateIdentifier(association)"
-							:schema="association.schema"
-							:title="association.title"
-							:description="association.description"
+							:associatedColumn="area.data.associatedColumn"
+							:filter="area.data.filter"
+							:groupBy="area.data.groupBy"
+							:groupLabel="area.data.groupLabel"
+							:groupsToShow="area.data.groupsToShow"
+							:identifier="generateIdentifier(area.data)"
+							:schema="area.data.schema"
+							:title="area.data.title"
+							:description="area.data.description"
 						/>
 					</div>
 					<!-- If multiple values are forbidden, use a data radio component -->
-					<div v-else-if="association.forbidMultiple">
+					<div v-else-if="area.data.forbidMultiple">
 						<DataRadio
-							:title="association.title"
-							:schema="association.schema"
+							:title="area.data.title"
+							:schema="area.data.schema"
 							:allowEdit="true"
-							:associatedColumn="association.associatedColumn"
-							:identifier="generateIdentifier(association)"
-							:filter="association.filter"
-							:description="association.description"
+							:associatedColumn="area.data.associatedColumn"
+							:identifier="generateIdentifier(area.data)"
+							:filter="area.data.filter"
+							:description="area.data.description"
 						/>
 					</div>
-					<div v-else-if="association.displayAllOptions">
+					<div v-else-if="area.data.displayAllOptions">
 						<DataMultiTable
-							v-if="dependencyMet(association)"
-							:title="association.title"
-							:schema="association.schema"
-							:associatedColumn="association.associatedColumn"
-							:identifier="generateIdentifier(association)"
+							v-if="dependencyMet(area.data)"
+							:title="area.data.title"
+							:schema="area.data.schema"
+							:associatedColumn="area.data.associatedColumn"
+							:identifier="generateIdentifier(area.data)"
 							:allowEdit="true"
-							:optionColumnName="association.optionColumnName"
-							:filter="association.filter"
-							:showTotals="association.showTotals"
-							:depends="association.depends"
+							:optionColumnName="area.data.optionColumnName"
+							:filter="area.data.filter"
+							:showTotals="area.data.showTotals"
+							:depends="area.data.depends"
 						/>
 					</div>
 					<!-- Else, just use a data table component -->
-					<div v-else-if="!identifier.value ? association.isAssignable : true">
+					<div v-else-if="!identifier.value ? area.data.isAssignable : true">
 						<DataTable
-							:title="association.title"
-							:schema="association.schema"
-							:associatedColumn="association.foreignKey"
-							:identifier="generateIdentifier(association)"
+							:title="area.data.title"
+							:schema="area.data.schema"
+							:associatedColumn="area.data.foreignKey"
+							:identifier="generateIdentifier(area.data)"
 							:allowInsert="true"
 							:allowEdit="true"
 						/>
 					</div>
-					<hr />
-				<!-- </div> -->
+				</div>
+				<div v-else-if="area.type === 'subschema'">
+					<component v-bind:is="area.data.customComponent" />
+				</div>
 			</div>
 		</div>
+		<!-- We use a data form component to display the main record -->
+		<!-- <DataForm
+			:schema="schema"
+			:identifier="identifier"
+		/>
 		<div v-if="includeSubSchemas">
 			<div v-for="subschema in schema.subschemas" v-bind:key="subschema.title">
-				<!-- Right now, only supporting custom components.  Later, DetailMain
-				and everything else under it will be made to support recursive usage.
-				The issue is the Vuex data store... -->
 				<component v-bind:is="subschema.customComponent" />
 			</div>
-		</div>
+		</div> -->
 		<button v-if="!identifier.value" v-on:click="submitData" type="button" class="button">
 			Submit
 		</button>
@@ -102,9 +107,11 @@
 
 <!-- The script portion of the component -->
 <script>
+	/* global activeUserID */
 	/* global swal */
 	// Import required modules
 	import DetailMain from '@/views/DetailMain';
+	import SmartInput from '@/views/elements/SmartInput';
 	import {
 		DataForm,
 		DataMultiSelect,
@@ -112,7 +119,18 @@
 		DataRadio,
 		DataTable
 	} from '@/views/data';
-	import { stringFormats } from '@/modules/utilities';
+	import {
+		formatDates,
+		sqlToHtml,
+		stringFormats
+	} from '@/modules/utilities';
+	import {
+		getCriteriaStructure
+	} from '@/modules/caesdb';
+	import {
+		cfToJs,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 
 	// Export the actual component
 	export default {
@@ -125,7 +143,36 @@
 			DataMultiTable,
 			DataRadio,
 			DataTable,
-			DetailMain
+			DetailMain,
+			SmartInput
+		},
+		computed: {
+			columns: {
+				get () {
+					let columns = [];
+					this.schema.sections.forEach((section) => {
+						section.areas.forEach((area) => {
+							if (area.type === 'column') columns.push(area.data);
+						});
+					});
+					return columns;
+				}
+			},
+			dateFields () {
+				let dateFields = [];
+				this.columns.forEach((column) => {
+					if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
+				});
+				return dateFields;
+			},
+			record: {
+				get () {
+					return this.$store.state[stringFormats.camelCase(this.schema.title)];
+				},
+				set (val) {
+					this.$store.state[stringFormats.camelCase(this.schema.title)] = val;
+				}
+			}
 		},
 		// The methods available to this component during render
 		methods: {
@@ -136,6 +183,14 @@
 				const schemaLessStore = Object.assign({}, this.$store.state);
 				delete schemaLessStore.schema;
 				console.log(JSON.stringify(schemaLessStore, null, 2));
+			},
+			columnShouldBeDisplayed (column) {
+				if (!column.depends) {
+					if (column.automated) return false;
+					return true;
+				} else {
+					return column.depends.test(this.record[column.depends.column]);
+				}
 			},
 			// A function to determine if an association's dependency has been met
 			dependencyMet (association) {
@@ -168,6 +223,65 @@
 					criteriaString: association.criteriaString || 'criteria_' + association.foreignKey + '_eq'
 				};
 			}
+		},
+		mounted () {
+			const getMainData = () => {
+				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+					if (err) console.error(err);
+					if (data.Message) {
+						console.error(new Error(data.Message));
+					} else {
+						let critStruct = cfToJs(data);
+						critStruct[this.schema.criteria.string] = this.identifier.value;
+						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data.Message) {
+								console.error(new Error(data.Message));
+							} else {
+								let existingRecord = data[0];
+								for (let key in this.record) {
+									if (existingRecord.hasOwnProperty(key)) {
+										this.record[key] = existingRecord[key];
+									} else {
+										console.warn('Local record has key "' + key + '" but remote record does not.');
+									}
+								}
+								if (this.dateFields.length > 0) formatDates(this.dateFields, this.record);
+							}
+						});
+					}
+				});
+			};
+
+			const getConstraintData = () => {
+				this.columns.forEach((column) => {
+					// We only care about columns that have a constraint and a getValues
+					// function, since those are the ones we have to fetch values for
+					if (column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							// structure first, then send our request
+							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) console.error(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) console.error(err);
+									if (data) column.constraint.values = data;
+								});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) console.error(err);
+								if (data) column.constraint.values = data;
+							});
+						}
+					}
+				});
+			};
+
+			if (this.identifier) getMainData();
+			getConstraintData();
 		},
 		// The component's properties, which are set by the parent component.
 		props: {
