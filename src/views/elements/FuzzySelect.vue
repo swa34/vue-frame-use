@@ -1,8 +1,9 @@
 <template lang="html">
 	<fieldset class="fuzzy-select">
-		<input type="text" @input="debounceInput" />
+		<input v-model="inputText" type="text" @input="debounceInput" />
 		<select v-model="computedValue" :disabled="filteredOptions.length < 1">
-			<option v-for="option in filteredOptions" :value="option.key">
+			<input type="text" />
+			<option v-for="option in filteredOptions" v-bind:key="option.key" :value="option.key">
 				{{ option.label }}
 			</option>
 		</select>
@@ -29,6 +30,10 @@
 			}
 		},
 		data () {
+			let selectedOptionLabel = '';
+			this.options.forEach((option) => {
+				if (option.key === this.value) selectedOptionLabel = option.label;
+			});
 			return {
 				fuseOptions: {
 					includeMatches: true,
@@ -36,7 +41,8 @@
 					shouldSort: true,
 					threshold: 0.45
 				},
-				filteredOptions: this.options
+				filteredOptions: this.options,
+				inputText: selectedOptionLabel
 			};
 		},
 		methods: {
@@ -69,6 +75,9 @@
 <style lang="scss" scoped>
 	fieldset.fuzzy-select {
 		border: none;
-		display: flex;
+		// display: flex;
+		input, select {
+			width: 100%;
+		}
 	}
 </style>

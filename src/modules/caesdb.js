@@ -5,139 +5,113 @@ const apiPrefix = '/rest/gacounts-api/';
 
 const generateURL = str => apiPrefix + str + '.json';
 
-const getActivityLocationTypes = (callback) => {
-	const url = generateURL('activityLocationTypes');
+const makeGetRequest = (url, callback) => {
 	request.get(url)
 		.end((err, response) => {
-			callback(err, response.body);
+			const data = response.body;
+			if (err) {
+				callback(err, null);
+			} else if (data.Message) {
+				callback(new Error(data.Message), null);
+			} else {
+				callback(null, data);
+			}
 		});
+};
+
+const makePostRequest = (url, dataToSend, callback) => {
+	request.post(url)
+		.send(dataToSend)
+		.end((err, response) => {
+			const data = response.body;
+			if (err) {
+				callback(err, null);
+			} else if (data.Message) {
+				callback(new Error(data.Message), null);
+			} else {
+				callback(null, data);
+			}
+		});
+};
+
+const getActivityLocationTypes = (callback) => {
+	const url = generateURL('activityLocationTypes');
+	makeGetRequest(url, callback);
 };
 
 const getAssociationKeywordTopic = (callback) => {
 	const url = generateURL('associationKeywordTopic');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getAssociationReportField = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportField');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationReportKeyword = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportKeyword');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationReportProgramArea = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportProgramArea');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationReportTopic = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportTopic');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationReportType = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportType');
-	request.post(url)
-		.send(criteriaStructure)
-			.end((err, response) => {
-				callback(err, response.body);
-			});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationReportTypeContactType = (callback) => {
 	const url = generateURL('associationReportTypeContactType');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getAssociationReportTypeField = (criteriaStructure, callback) => {
 	const url = generateURL('associationReportTypeField');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationReportTypeProgramArea = (callback) => {
 	const url = generateURL('associationReportTypeProgramArea');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getAssociationReportTypeRole = (callback) => {
 	const url = generateURL('associationReportTypeRole');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getAssociationSubReportField = (criteriaStructure, callback) => {
 	const url = generateURL('associationSubReportField');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getAssociationTargetAudienceProgramArea = (callback) => {
 	const url = generateURL('associationTargetAudienceProgramArea');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getAssociationTopicArea = (callback) => {
 	const url = generateURL('associationTopicArea');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getContactTypes = (callback) => {
 	const url = generateURL('contactTypes');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getCounties = (callback) => {
 	const url = generateURL('counties');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getCriteriaStructure = (tablePrefix, callback) => {
@@ -154,187 +128,112 @@ const getCriteriaStructure = (tablePrefix, callback) => {
 
 const getEthnicDemographic = (criteriaStructure, callback) => {
 	const url = generateURL('ethnicDemographic');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getEthnicities = (callback) => {
 	const url = generateURL('ethnicities');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getFieldOptions = (criteriaStructure, callback) => {
 	const url = generateURL('fieldOptions');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getFieldTypes = (callback) => {
 	const url = generateURL('fieldTypes');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getGenders = (callback) => {
 	const url = generateURL('genders');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getKeywords = (callback) => {
 	const url = generateURL('keywords');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getPersonnel = (callback) => {
 	const url = generateURL('personnel');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getPlannedPrograms = (criteriaStructure, callback) => {
 	const url = generateURL('plannedPrograms');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getProgramScopes = (callback) => {
 	const url = generateURL('programScopes');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getProgramAreas = (callback) => {
 	const url = generateURL('programAreas');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getRaces = (callback) => {
 	const url = generateURL('races');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getRacialDemographic = (criteriaStructure, callback) => {
 	const url = generateURL('racialDemographic');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getReport = (criteriaStructure, callback) => {
 	const url = generateURL('report');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getReportContact = (criteriaStructure, callback) => {
 	const url = generateURL('reportContact');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getReportFields = (callback) => {
 	const url = generateURL('reportFields');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getReportPersonnel = (criteriaStructure, callback) => {
 	const url = generateURL('reportPersonnel');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getReportPurposeAchievements = (criteriaStructure, callback) => {
 	const url = generateURL('reportPurposeAchievements');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getReportTargetAudience = (criteriaStructure, callback) => {
 	const url = generateURL('reportTargetAudience');
-	request.post(url)
-		.send(criteriaStructure)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getReportTypes = (callback) => {
 	const url = generateURL('reportTypes');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getStatePlannedPrograms = (callback) => {
 	const url = generateURL('statePlannedPrograms');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getTargetAudiences = (callback) => {
 	const url = generateURL('targetAudiences');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 const getTopics = (callback) => {
 	const url = generateURL('topics');
-	request.get(url)
-		.end((err, response) => {
-			callback(err, response.body);
-		});
+	makeGetRequest(url, callback);
 };
 
 export {

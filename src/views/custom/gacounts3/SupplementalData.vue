@@ -214,6 +214,7 @@
 			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
 				if (err) console.error(err);
 				if (data) this.criteriaStructureTemplates.reportField = cfToJs(data);
+				this.populateReportFields();
 			});
 			getFieldTypes((err, data) => {
 				if (err) console.error(err);
@@ -236,17 +237,6 @@
 								console.error(new Error(data.Message));
 							} else {
 								this.existingRecords = data;
-								// data.forEach((existingRecord) => {
-								// 	console.log(this.records.length);
-								// 	this.records.forEach((record) => {
-								// 		if (record.FIELD_ID === existingRecord.FIELD_ID) {
-								// 			console.log('match found');
-								// 			for (let key in record) {
-								// 				if (existingRecord.hasOwnProperty(key)) record[key] = existingRecord[key];
-								// 			}
-								// 		}
-								// 	});
-								// });
 							}
 						});
 					}
@@ -256,13 +246,6 @@
 			if (reportID && !url.getParam('new') && !this.forSubReport) fetchExistingRecords(reportID);
 		},
 		watch: {
-			// dependenciesMet (newStatus, oldStatus) {
-			// 	if (newStatus === true) {
-			// 		// Dependencies are met, so we need to fetch data based on our initial
-			// 		// options
-			// 		this.populateReportFields();
-			// 	}
-			// },
 			fieldIDs (newFieldIDs, oldFieldIDs) {
 				// Populate records with updated fields
 				this.populateRecords();
