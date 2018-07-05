@@ -14,6 +14,31 @@ const compare = {
 	lt: (a, b) => a < b
 };
 
+// Sorting function
+const sortRecords = (records, key) => {
+	console.log(key);
+	if (records.length > 0) {
+		if (!key) {
+			// If no key, attempt alphabetical sort
+			let testRecord = records[0];
+			console.log(testRecord);
+			if (testRecord.hasOwnProperty('LABEL')) {
+				// Sort by LABEL key
+				records.sort((a, b) => { return a.LABEL > b.LABEL; });
+			} else if (testRecord.hasOwnProperty('NAME')) {
+				// Sort by NAME key
+				records.sort((a, b) => { return a.NAME > b.NAME; });
+			}
+		} else {
+			// Else, sort by the key
+			console.log(records[0]);
+			records.sort((a, b) => {
+				return a[key] > b[key];
+			});
+		}
+	}
+};
+
 // Function to convert criteria key to object
 const criteriaToObj = (criteria, value) => {
 	// If the criteria doesn't begin with 'criteria_', it's invalid (for now) so
@@ -74,6 +99,7 @@ const filter = (records, criteriaStructure = {}) => {
 	});
 
 	// Return the valid records
+	sortRecords(newRecords, criteriaStructure.SortKey);
 	return newRecords;
 };
 

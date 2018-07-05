@@ -1,19 +1,24 @@
 <template lang="html">
   <div id="main">
-		<pre>{{ JSON.stringify(schemaSections, null, 2) }}</pre>
+		<pre>{{ JSON.stringify(activityList, null, 2) }}</pre>
 	</div>
 </template>
 
 <script>
-	import schema from '@/schemas/gacounts3/report';
-	import { getSchemaSections } from '@/modules/schemaTools';
+	import { get4HActivityList } from '@/modules/caesdb';
 
 	export default {
 		name: 'Test',
 		data () {
 			return {
-				schemaSections: getSchemaSections(schema)
+				activityList: {}
 			};
+		},
+		mounted () {
+			get4HActivityList('barrow', (err, data) => {
+				if (err) console.error(err);
+				if (data) this.activityList = data;
+			});
 		}
 	};
 </script>

@@ -1,3 +1,6 @@
+/* global activeUser */
+/* global actualUser */
+
 // Pull in required modules
 import {
 	associationReportFieldSchema,
@@ -177,7 +180,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			automated: true,
-			default: 9307,
+			default: activeUser.PERSONNEL_ID,
 			constraint: {
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'PERSONNEL',
@@ -194,7 +197,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			automated: true,
-			default: 9307,
+			default: actualUser.PERSONNEL_ID,
 			constraint: {
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'PERSONNEL',
@@ -255,6 +258,7 @@ const schema = {
 			prettyName: 'County',
 			type: 'int',
 			required: true,
+			default: activeUser.COUNTYLISTID,
 			constraint: {
 				getValues: getCounties,
 				database: 'Portal',

@@ -45,7 +45,7 @@ const schema = {
 				getValues: getPlannedPrograms,
 				tablePrefix: 'FPW_PLANNED_PROGRAM',
 				criteria: {
-					string: 'criteria_USER_ID_eq',
+					string: 'criteria_PersonnelMayFileUnder',
 					useUserID: true
 				},
 				database: 'FederalPOW',

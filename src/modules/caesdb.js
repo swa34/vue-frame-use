@@ -34,6 +34,11 @@ const makePostRequest = (url, dataToSend, callback) => {
 		});
 };
 
+const get4HActivityList = (countyName, callback) => {
+	const url = generateURL('4HActivityList');
+	makePostRequest(url, countyName, callback);
+};
+
 const getActivityLocationTypes = (callback) => {
 	const url = generateURL('activityLocationTypes');
 	makeGetRequest(url, callback);
@@ -237,6 +242,7 @@ const getTopics = (callback) => {
 };
 
 export {
+	get4HActivityList,
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportField,
