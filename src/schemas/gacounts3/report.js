@@ -350,6 +350,14 @@ const schema = {
 				section: 'Main Report Information',
 				order: 13
 			},
+			affects: {
+				titles: [
+					'Report Types',
+					'Topics',
+					'Keywords'
+				],
+				showAlways: false
+			},
 			description: 'Bacon ipsum dolor amet t-bone pork voluptate officia dolore prosciutto commodo pork loin jerky brisket hamburger. Dolore ullamco shoulder velit, nulla sausage kevin andouille shank sirloin pork chop. Cupim bresaola bacon kielbasa excepteur magna, consectetur exercitation. Cow nostrud filet mignon pork reprehenderit ut, ground round strip steak adipisicing.'
 		},
 		{
@@ -375,6 +383,15 @@ const schema = {
 				associatedColumn: 'AREA_ID',
 				optionColumn: 'REPORT_TYPE_ID'
 			},
+			affects: {
+				titles: [
+					'Target Audiences',
+					'Demographics',
+					'Contact Types',
+					'Supplemental Data',
+					'Sub-Report Roles'
+				]
+			},
 			description: 'Bacon ipsum dolor amet tri-tip pancetta ea meatball spare ribs. Tenderloin porchetta velit pariatur ad. Pork loin exercitation excepteur cupim. Ground round deserunt pancetta, et bacon est jerky eiusmod tail sausage in dolor corned beef lorem. Pancetta aliqua rump pig boudin.'
 		},
 		{
@@ -393,6 +410,9 @@ const schema = {
 			groupsToShow: {
 				association: 'Program Areas',
 				column: 'AREA_ID'
+			},
+			affects: {
+				titles: [ 'Keywords' ]
 			},
 			description: 'Bacon ipsum dolor amet id aliqua sed sint magna short ribs, velit shankle pastrami laborum in lorem corned beef anim. Ut officia voluptate bresaola esse enim alcatra ham pork loin spare ribs drumstick chicken. Reprehenderit ut ground round aliqua andouille turducken nulla filet mignon flank ball tip. Jerky quis biltong, id picanha salami turducken qui elit. Tri-tip incididunt chuck, qui officia pig pork belly kevin turkey spare ribs kielbasa nisi. Cow ball tip dolore incididunt chuck hamburger.\n\nPancetta pork proident, elit chuck drumstick porchetta chicken exercitation tri-tip ut. Mollit shank picanha prosciutto incididunt kielbasa. Andouille mollit kielbasa, aliquip sirloin ut magna aute deserunt. Frankfurter duis aute, et est tail jerky pariatur burgdoggen. Nisi venison porchetta ullamco.'
 		},
