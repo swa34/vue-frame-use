@@ -126,5 +126,6 @@ const getStore = (schema, isNew = false) => {
 export {
 	getComputed,
 	getMapState,
-	getStore
+	getStore,
+	getStoreConfig
 };

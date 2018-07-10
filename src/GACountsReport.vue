@@ -1,7 +1,10 @@
 <template lang="html">
   <div id="main">
+		<DuplicationModal
+			v-if="identifier && identifier.duplicate && !duplication.ready"
+		/>
 		<DetailMain
-			v-if="isNew || identifier !== null"
+			v-else-if="isNew || identifier !== null"
 			:schema="schema"
 			:identifier="identifier || false"
 		/>
@@ -43,11 +46,20 @@
 <script>
 	/* global notify */
 	// Import required modules
-	import { getComputed, getStore } from '@/modules/store';
-	import { stringFormats, url } from '@/modules/utilities';
+	import {
+		getComputed,
+		getStore,
+		getStoreConfig,
+	} from '@/modules/store';
+	import {
+		stringFormats,
+		url
+	} from '@/modules/utilities';
 	import { getSortedSchema } from '@/modules/schemaTools';
 	import DetailMain from '@/views/DetailMain';
+	import DuplicationModal from '@/views/custom/gacounts3/DuplicationModal';
 	import schema from '@/schemas/gacounts3/report';
+	import Vuex from 'vuex';
 
 	// Hacky fix for schemas without titles
 	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);
@@ -55,12 +67,30 @@
 	// Sort the schema
 	const sortedSchema = getSortedSchema(schema);
 
+	// We want to customize the store a bit, so first we're going to get the config
+	const storeConfig = getStoreConfig(schema);
+	storeConfig.modules.duplication = {
+		namespaced: true,
+		state: {
+			ready: false,
+			columns: {},
+			associations: {},
+			subschemas: {}
+		}
+	};
+
 	// Export the actual component
 	export default {
 		name: 'GACountsReport',
-		components: { DetailMain },
+		components: {
+			DetailMain,
+			DuplicationModal
+		},
 		computed: {
 			...getComputed(schema),
+			duplication () {
+				return this.$store.state.duplication;
+			},
 			fieldsToWatch () {
 				let columns = [];
 				let associations = [];
@@ -102,6 +132,7 @@
 		data () {
 			// Determine if entering new record
 			const isNew = url.getParam('new') !== null;
+			const duplicateId = url.getParam('duplicateId') || false;
 
 			// Create our data object to return
 			const data = {
@@ -119,11 +150,18 @@
 				if (id) {
 					data.identifier = {
 						key: 'ID',
-						value: id
+						value: id,
+						duplicate: false
 					};
 				} else {
 					console.error('Neither the "new" parameter or a pkid were found');
 				}
+			} else if (duplicateId) {
+				data.identifier = {
+					key: 'ID',
+					value: duplicateId,
+					duplicate: {}
+				};
 			}
 
 			return data;
@@ -166,7 +204,8 @@
 		mounted () {
 			this.watchFields = true;
 		},
-		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
+		// store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
+		store: new Vuex.Store(storeConfig),
 		watch: {
 			fieldsToWatch (newData, oldData) {
 				// Only do anything if it's not the change from the initial page load
