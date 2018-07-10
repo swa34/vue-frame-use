@@ -59,6 +59,15 @@ const getStoreConfig = (schema, isNew = false) => {
 				namespaced: true,
 				state: schema
 			},
+			duplication: {
+				namespaced: true,
+				state: {
+					ready: false,
+					columns: {},
+					associations: {},
+					subschemas: {}
+				}
+			},
 			[schemaCamelTitle]: {
 				namespaced: true,
 				state: {}

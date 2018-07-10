@@ -68,6 +68,9 @@
 	export default {
 		name: 'DataMultiTable',
 		computed: {
+			duplication () {
+				return this.$store.state.duplication;
+			},
 			filteredColumns: {
 				get () {
 					let filteredColumns = [];
@@ -313,7 +316,9 @@
 				getFilterRecords();
 				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
 			}
-			if (component.identifier.value) getExistingRecords();
+			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
+				getExistingRecords();
+			}
 		},
 		props: {
 			'allowEdit': {

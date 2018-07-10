@@ -175,6 +175,9 @@
 				});
 				return dateFields;
 			},
+			duplication () {
+				return this.$store.state.duplication;
+			},
 			record: {
 				get () {
 					return this.$store.state[stringFormats.camelCase(this.schema.title)];
@@ -235,7 +238,8 @@
 				return {
 					key: association.foreignKey,
 					value: this.identifier.value,
-					criteriaString: association.criteriaString || 'criteria_' + association.foreignKey + '_eq'
+					criteriaString: association.criteriaString || 'criteria_' + association.foreignKey + '_eq',
+					duplicate: this.identifier.duplicate || false
 				};
 			},
 			sectionShouldBeDisplayed (section) {
@@ -266,10 +270,12 @@
 							} else {
 								let existingRecord = data[0];
 								for (let key in this.record) {
-									if (existingRecord.hasOwnProperty(key)) {
-										this.record[key] = existingRecord[key];
-									} else {
-										console.warn('Local record has key "' + key + '" but remote record does not.');
+									if ((this.identifier.duplicate && this.duplication.columns[key]) || !this.identifier.duplicate) {
+										if (existingRecord.hasOwnProperty(key)) {
+											this.record[key] = existingRecord[key];
+										} else {
+											console.warn('Local record has key "' + key + '" but remote record does not.');
+										}
 									}
 								}
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.record);

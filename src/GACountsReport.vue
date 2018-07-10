@@ -48,8 +48,7 @@
 	// Import required modules
 	import {
 		getComputed,
-		getStore,
-		getStoreConfig,
+		getStore
 	} from '@/modules/store';
 	import {
 		stringFormats,
@@ -59,25 +58,12 @@
 	import DetailMain from '@/views/DetailMain';
 	import DuplicationModal from '@/views/custom/gacounts3/DuplicationModal';
 	import schema from '@/schemas/gacounts3/report';
-	import Vuex from 'vuex';
 
 	// Hacky fix for schemas without titles
 	if (!schema.title) schema.title = stringFormats.tableToTitle(schema.table);
 
 	// Sort the schema
 	const sortedSchema = getSortedSchema(schema);
-
-	// We want to customize the store a bit, so first we're going to get the config
-	const storeConfig = getStoreConfig(schema);
-	storeConfig.modules.duplication = {
-		namespaced: true,
-		state: {
-			ready: false,
-			columns: {},
-			associations: {},
-			subschemas: {}
-		}
-	};
 
 	// Export the actual component
 	export default {
@@ -160,7 +146,7 @@
 				data.identifier = {
 					key: 'ID',
 					value: duplicateId,
-					duplicate: {}
+					duplicate: true
 				};
 			}
 
@@ -204,8 +190,7 @@
 		mounted () {
 			this.watchFields = true;
 		},
-		// store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
-		store: new Vuex.Store(storeConfig),
+		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
 		watch: {
 			fieldsToWatch (newData, oldData) {
 				// Only do anything if it's not the change from the initial page load

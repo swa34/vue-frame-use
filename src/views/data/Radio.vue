@@ -67,6 +67,9 @@
 					this.record = val;
 				}
 			},
+			duplication () {
+				return this.$store.state.duplication;
+			},
 			filterLoaded: {
 				get () {
 					return this.filterRecords.length > 0;
@@ -203,7 +206,9 @@
 			};
 
 			getOptions();
-			if (component.identifier.value) getRecords();
+			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
+				getRecords();
+			}
 			if (component.filter) getFilterRecords();
 		},
 		props: {

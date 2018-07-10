@@ -102,6 +102,9 @@
 			FuzzySelect
 		},
 		computed: {
+			duplication () {
+				return this.$store.state.duplication;
+			},
 			records: {
 				get () {
 					return this.$store ? this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records : this.localRecords;
@@ -237,7 +240,9 @@
 					}
 				});
 			};
-			if (component.identifier.key && component.identifier.value) getMainData();
+			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
+				getMainData();
+			}
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		},
 		props: {

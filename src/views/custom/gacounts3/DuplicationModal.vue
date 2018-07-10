@@ -1,7 +1,7 @@
 <template lang="html">
   <div>
 		<h2>
-			Duplication
+			Report Duplication
 		</h2>
 		<p>
 			<strong>
@@ -10,8 +10,8 @@
 			<ul>
 				<li v-for="(section, title) in sections">
 					<label>
-						<input type="checkbox" v-model="section.duplicate" v-bind:key="title" />
-						<span>
+						<input type="checkbox" v-model="section.duplicate" v-bind:key="title" :disabled="!dependenciesMet(section)" />
+						<span :class="!dependenciesMet(section) ? 'disabled' : ''">
 							{{ title }}
 						</span>
 					</label>
@@ -35,6 +35,13 @@
 				set (val) {
 					this.$store.state.duplication = val;
 				}
+			},
+			totalDuplicates () {
+				let count = 0;
+				for (let key in this.sections) {
+					if (this.sections[key].duplicate) ++count;
+				}
+				return count;
 			}
 		},
 		data () {
@@ -82,7 +89,10 @@
 							associations: [
 								'reportType'
 							]
-						}
+						},
+						depends: [
+							'Program Areas'
+						]
 					},
 					'Topics and Keywords': {
 						duplicate: false,
@@ -91,7 +101,11 @@
 								'topics',
 								'keywords'
 							]
-						}
+						},
+						depends: [
+							'Program Areas',
+							'Report Type'
+						]
 					},
 					'Demographic Information': {
 						title: 'Demographic Information',
@@ -103,7 +117,12 @@
 								'ethnicDemographics',
 								'targetAudiences'
 							]
-						}
+						},
+						depends: [
+							'Program Areas',
+							'Report Type',
+							'Topics and Keywords'
+						]
 					},
 					'Supplemental Data': {
 						duplicate: false,
@@ -111,7 +130,12 @@
 							associations: [
 								'supplementalData'
 							]
-						}
+						},
+						depends: [
+							'Program Areas',
+							'Report Type',
+							'Topics and Keywords'
+						]
 					},
 					'Sub-Report': {
 						duplicate: false,
@@ -119,7 +143,12 @@
 							subschemas: [
 								'subReport'
 							]
-						}
+						},
+						depends: [
+							'Program Areas',
+							'Report Type',
+							'Topics and Keywords'
+						]
 					},
 					'Collaborators': {
 						title: 'Collaborators',
@@ -134,12 +163,17 @@
 			};
 		},
 		methods: {
+			dependenciesMet (section) {
+				if (!section.depends) return true;
+				let dependenciesMet = true;
+				section.depends.forEach((dependency) => {
+					if (!this.sections[dependency].duplicate) dependenciesMet = false;
+				});
+				return dependenciesMet;
+			},
 			processDuplicationOptions () {
-				console.log('Button clicked');
 				for (let key in this.sections) {
-					console.log(key);
 					const section = this.sections[key];
-					console.log(section.duplicate);
 					if (section.duplicate) {
 						if (section.areas.columns && section.areas.columns.length > 0) {
 							section.areas.columns.forEach((column) => {
@@ -160,9 +194,37 @@
 				}
 				this.duplication.ready = true;
 			}
+		},
+		watch: {
+			totalDuplicates () {
+				for (let key in this.sections) {
+					const section = this.sections[key];
+					if (!this.dependenciesMet(section)) {
+						section.duplicate = false;
+					}
+				}
+			}
 		}
 	};
 </script>
 
 <style lang="scss" scoped>
+	ul {
+		list-style-type: none;
+		padding: 0;
+		li {
+			margin-bottom: .75rem;
+			label {
+				display: flex;
+				span {
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					&.disabled {
+						color: #999;
+					}
+				}
+			}
+		}
+	}
 </style>
