@@ -126,7 +126,8 @@
 			return {
 				localRecords: [],
 				associations: [],
-				newRecord
+				newRecord,
+				dateFields: []
 			};
 		},
 		methods: {
@@ -172,17 +173,8 @@
 			updateRecord (record) {
 				console.log('Sending data to server:');
 				console.log(JSON.stringify(record, null, 2));
-			}
-		},
-		mounted () {
-			const component = this;
-
-			let dateFields = [];
-			component.schema.columns.forEach((column) => {
-				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
-			});
-
-			const getMainData = () => {
+			},
+			getMainData () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
 					if (data.Message) {
@@ -196,12 +188,19 @@
 								console.error(new Error(data.Message));
 							} else {
 								this.records = data;
-								if (dateFields.length > 0) formatDates(dateFields, this.records);
+								if (this.dateFields.length > 0) formatDates(this.dateFields, this.records);
 							}
 						});
 					}
 				});
-			};
+			}
+		},
+		mounted () {
+			const component = this;
+
+			component.schema.columns.forEach((column) => {
+				if (sqlToHtml(column) === 'date') this.dateFields.push(column.columnName);
+			});
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
@@ -241,7 +240,7 @@
 				});
 			};
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				getMainData();
+				this.getMainData();
 			}
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		},
@@ -270,6 +269,16 @@
 			},
 			'title': {
 				type: String
+			}
+		},
+		watch: {
+			duplication: {
+				handler () {
+					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
+						this.getMainData();
+					}
+				},
+				deep: true
 			}
 		}
 	};

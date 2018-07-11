@@ -47,6 +47,7 @@
 								:schema="area.data.schema"
 								:title="area.data.title"
 								:description="area.data.description"
+								:affects="area.data.affects"
 							/>
 						</div>
 						<!-- If multiple values are forbidden, use a data radio component -->
@@ -59,6 +60,7 @@
 								:identifier="generateIdentifier(area.data)"
 								:filter="area.data.filter"
 								:description="area.data.description"
+								:affects="area.data.affects"
 							/>
 						</div>
 						<div v-else-if="area.data.displayAllOptions">
@@ -242,20 +244,7 @@
 					duplicate: this.identifier.duplicate || false
 				};
 			},
-			sectionShouldBeDisplayed (section) {
-				return this.sectionsToDisplay.indexOf(section.title) !== -1;
-			},
-			toggleSection (section) {
-				const index = this.sectionsToDisplay.indexOf(section.title);
-				if (index === -1) {
-					this.sectionsToDisplay.push(section.title);
-				} else {
-					this.sectionsToDisplay.splice(index, 1);
-				}
-			}
-		},
-		mounted () {
-			const getMainData = () => {
+			getMainData () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
 					if (data.Message) {
@@ -283,8 +272,20 @@
 						});
 					}
 				});
-			};
-
+			},
+			sectionShouldBeDisplayed (section) {
+				return this.sectionsToDisplay.indexOf(section.title) !== -1;
+			},
+			toggleSection (section) {
+				const index = this.sectionsToDisplay.indexOf(section.title);
+				if (index === -1) {
+					this.sectionsToDisplay.push(section.title);
+				} else {
+					this.sectionsToDisplay.splice(index, 1);
+				}
+			}
+		},
+		mounted () {
 			const getConstraintData = () => {
 				this.columns.forEach((column) => {
 					// We only care about columns that have a constraint and a getValues
@@ -312,7 +313,7 @@
 				});
 			};
 
-			if (this.identifier) getMainData();
+			if (this.identifier) this.getMainData();
 			getConstraintData();
 		},
 		// The component's properties, which are set by the parent component.
@@ -338,6 +339,14 @@
 			'includeSubSchemas': {
 				type: Boolean,
 				default: true
+			}
+		},
+		watch: {
+			duplication: {
+				handler () {
+					this.getMainData();
+				},
+				deep: true
 			}
 		}
 	};

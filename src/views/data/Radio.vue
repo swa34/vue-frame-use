@@ -20,7 +20,7 @@
 						v-model: Tells vue to store the value in the component's records array
 						disabled: Bound to whether editing is allowed or not
 					-->
-					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="computedRecord" :disabled="!allowEdit" />
+					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="computedRecord" v-on:click="notifyOfChanges" :disabled="!allowEdit" />
 					<!-- Option's label or ID -->
 					<span>
 						{{ option[optionLabel || optionID] }}
@@ -37,6 +37,8 @@
 
 <script>
 	/* global activeUserID */
+	/* global notify */
+
 	// Import required modules
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { stringFormats } from '@/modules/utilities';
@@ -44,6 +46,7 @@
 		cfToJs,
 		jsToCf
 	} from '@/modules/criteriaUtils';
+	import { constructNotificationMessage } from '@/modules/notifications';
 
 	// Export the actual component
 	export default {
@@ -115,7 +118,8 @@
 				optionDescription: null,
 				unfilteredOptions: [],
 				filterRecords: [],
-				record: null
+				record: null,
+				changeCount: 0
 			};
 			for (let i = 0; i < this.schema.columns.length; ++i) {
 				const column = this.schema.columns[i];
@@ -138,12 +142,8 @@
 					}
 				});
 				return record;
-			}
-		},
-		mounted () {
-			const component = this;
-
-			const getRecords = () => {
+			},
+			getRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
 					if (data.Message) {
@@ -166,7 +166,16 @@
 						});
 					}
 				});
-			};
+			},
+			notifyOfChanges () {
+				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {
+					notify.log(constructNotificationMessage(this.title, this.affects.titles));
+				}
+				++this.changeCount;
+			}
+		},
+		mounted () {
+			const component = this;
 
 			const getOptions = () => {
 				component.schema.columns.forEach((column) => {
@@ -207,11 +216,14 @@
 
 			getOptions();
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				getRecords();
+				this.getRecords();
 			}
 			if (component.filter) getFilterRecords();
 		},
 		props: {
+			'affects': {
+				type: Object
+			},
 			'allowEdit': {
 				type: Boolean
 			},
@@ -239,6 +251,14 @@
 		watch: {
 			computedRecord (val) {
 				this.records = [val];
+			},
+			duplication: {
+				handler () {
+					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
+						this.getRecords();
+					}
+				},
+				deep: true
 			}
 		}
 	};

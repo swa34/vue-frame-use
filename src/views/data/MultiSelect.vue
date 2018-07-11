@@ -34,7 +34,7 @@
 									v-model: Says where to store the record when checked
 									disabled: Depends on whether editing is enabled or not.
 								-->
-								<input type="checkbox" :value="generateRecord(option)" v-model="records" :disabled="!allowEdit" />
+								<input type="checkbox" :value="generateRecord(option)" v-model="records" v-on:click="notifyOfChanges" :disabled="!allowEdit" />
 								<!-- The option's label -->
 								<span>
 									{{ option[optionLabel || optionID] }}
@@ -63,6 +63,7 @@
 
 <script>
 	/* global activeUserID */
+	/* global notify */
 	// Import required modules
 	import { getCriteriaStructure } from '@/modules/caesdb';
 	import { stringFormats } from '@/modules/utilities';
@@ -71,6 +72,7 @@
 		filter,
 		jsToCf
 	} from '@/modules/criteriaUtils';
+	import { constructNotificationMessage } from '@/modules/notifications';
 
 	// Export the actual component
 	export default {
@@ -78,6 +80,9 @@
 		name: 'DataMultiSelect',
 		// Component's properties, which are set by the parent component
 		props: {
+			'affects': {
+				type: Object
+			},
 			// Should editing be enabled?
 			'allowEdit': {
 				type: Boolean
@@ -255,13 +260,14 @@
 		data () {
 			// Create our main data object
 			const data = {
-				localRecords: [],				// Local records array, used if no data store
-				groups: [],							// Array to hold groups of options
-				options: [],						// The array to hold all, unfiltered, options
-				filterRecords: [],			// The array to store the filter's records in
-				optionID: null,					// The column holding the option's ID
-				optionLabel: null,			// The column holding the option's label
-				optionDescription: null	// The column holding the option's description
+				changeCount: 0,						// Used to track changes for notifications
+				filterRecords: [],				// The array to store the filter's records in
+				groups: [],								// Array to hold groups of options
+				localRecords: [],					// Local records array, used if no data store
+				optionDescription: null,	// The column holding the option's description
+				optionID: null,						// The column holding the option's ID
+				optionLabel: null,				// The column holding the option's label
+				options: []								// The array to hold all, unfiltered, options
 			};
 
 			// We need to loop through each of the schema's columns to find the column
@@ -322,16 +328,8 @@
 				});
 				// Then return the record
 				return record;
-			}
-		},
-		// The mounted function is run every time the component is mounted/rendered
-		// onto the page.
-		mounted () {
-			// Alias 'this' to component
-			const component = this;
-
-			// Gets the records for an existing document
-			const getRecords = () => {
+			},
+			getRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
 					if (data.Message) {
@@ -357,7 +355,19 @@
 						});
 					}
 				});
-			};
+			},
+			notifyOfChanges () {
+				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {
+					notify.log(constructNotificationMessage(this.title, this.affects.titles));
+				}
+				++this.changeCount;
+			}
+		},
+		// The mounted function is run every time the component is mounted/rendered
+		// onto the page.
+		mounted () {
+			// Alias 'this' to component
+			const component = this;
 
 			// Function to get all options available
 			const getOptions = () => {
@@ -406,7 +416,7 @@
 			getOptions();
 			// If an identifier is present, get the existing records
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				getRecords();
+				this.getRecords();
 			}
 			// If a filter was specified, get the filter records
 			if (component.filter) getFilterRecords();
@@ -414,6 +424,14 @@
 		// Holds functions corresponding to computed values that will be run every
 		// time the computed value changes.
 		watch: {
+			duplication: {
+				handler () {
+					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
+						this.getRecords();
+					}
+				},
+				deep: true
+			},
 			// We need to watch filtered options so that we can populate the group's
 			// array of options with the filtered ones.
 			filteredOptions () {

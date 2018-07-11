@@ -209,37 +209,7 @@
 				// Then return the record
 				return record;
 			},
-			getOptionLabel (key) {
-				const optionKeys = this.filteredOptions.map(o => o.key);
-				const optionLabels = this.filteredOptions.map(o => o.label);
-				return optionLabels[optionKeys.indexOf(key)];
-			},
-			getPrettyColumnName,
-			getRecordValue (option, column) {
-				let value = null;
-				this.records.forEach((record) => {
-					if (record[this.optionColumnName] === option[this.optionColumn.constraint.foreignKey]) value = record[column.columnName];
-				});
-				return value;
-			},
-			getSum (column) {
-				let sum = 0;
-				this.records.forEach((record) => {
-					sum += typeof record[column.columnName] === 'number' ? record[column.columnName] : 0;
-				});
-				return sum;
-			},
-			sqlToHtml
-		},
-		mounted () {
-			const component = this;
-
-			let dateFields = [];
-			component.schema.columns.forEach((column) => {
-				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
-			});
-
-			const getExistingRecords = () => {
+			getExistingRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
 					if (data.Message) {
@@ -269,7 +239,36 @@
 						});
 					}
 				});
-			};
+			},
+			getOptionLabel (key) {
+				const optionKeys = this.filteredOptions.map(o => o.key);
+				const optionLabels = this.filteredOptions.map(o => o.label);
+				return optionLabels[optionKeys.indexOf(key)];
+			},
+			getPrettyColumnName,
+			getRecordValue (option, column) {
+				let value = null;
+				this.records.forEach((record) => {
+					if (record[this.optionColumnName] === option[this.optionColumn.constraint.foreignKey]) value = record[column.columnName];
+				});
+				return value;
+			},
+			getSum (column) {
+				let sum = 0;
+				this.records.forEach((record) => {
+					sum += typeof record[column.columnName] === 'number' ? record[column.columnName] : 0;
+				});
+				return sum;
+			},
+			sqlToHtml
+		},
+		mounted () {
+			const component = this;
+
+			let dateFields = [];
+			component.schema.columns.forEach((column) => {
+				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
+			});
 
 			const getFilterRecords = () => {
 				if (component.filter.getValues) {
@@ -317,7 +316,7 @@
 				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
 			}
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				getExistingRecords();
+				this.getExistingRecords();
 			}
 		},
 		props: {
@@ -349,6 +348,14 @@
 			}
 		},
 		watch: {
+			duplication: {
+				handler () {
+					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
+						this.getExistingRecords();
+					}
+				},
+				deep: true
+			},
 			filteredOptions () {
 				const populateRecords = () => {
 					this.filteredOptions.forEach((option) => {
