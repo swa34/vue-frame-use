@@ -5,6 +5,19 @@ const apiPrefix = '/rest/gacounts-api/';
 
 const generateURL = str => apiPrefix + str + '.json';
 
+const serializeByColumns = (obj) => {
+	if (!obj.COLUMNS || !obj.DATA) return obj;
+	let newArr = [];
+	obj.DATA.forEach((item) => {
+		let newObj = {};
+		item.forEach((field, i) => {
+			newObj[obj.COLUMNS[i]] = field;
+		});
+		newArr.push(newObj);
+	});
+	return newArr;
+};
+
 const makeGetRequest = (url, callback) => {
 	request.get(url)
 		.end((err, response) => {
@@ -34,9 +47,29 @@ const makePostRequest = (url, dataToSend, callback) => {
 		});
 };
 
+const makeSerializedPostRequest = (url, dataToSend, callback) => {
+	request.post(url)
+		.send(dataToSend)
+		.end((err, response) => {
+			const data = serializeByColumns(response.body);
+			if (err) {
+				callback(err);
+			} else if (data.Message) {
+				callback(new Error(data.Message), null);
+			} else {
+				callback(null, data);
+			}
+		});
+};
+
+const get4HActivity = (activityID, callback) => {
+	const url = generateURL('4HActivity');
+	makeSerializedPostRequest(url, activityID, callback);
+};
+
 const get4HActivityList = (countyName, callback) => {
 	const url = generateURL('4HActivityList');
-	makePostRequest(url, countyName, callback);
+	makeSerializedPostRequest(url, countyName, callback);
 };
 
 const getActivityLocationTypes = (callback) => {
@@ -242,6 +275,7 @@ const getTopics = (callback) => {
 };
 
 export {
+	get4HActivity,
 	get4HActivityList,
 	getActivityLocationTypes,
 	getAssociationKeywordTopic,

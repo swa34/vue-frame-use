@@ -1,4 +1,5 @@
 import formatDates from './formatDates';
+import recursiveAssign from './recursiveAssign';
 import request from './request';
 import sqlToHtml from './sqlToHtml';
 import stringFormats from './stringFormats';
@@ -15,6 +16,7 @@ const getPrettyColumnName = (name) => {
 export {
 	formatDates,
 	getPrettyColumnName,
+	recursiveAssign,
 	request,
 	sqlToHtml,
 	stringFormats,

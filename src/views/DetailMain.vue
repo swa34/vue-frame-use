@@ -32,7 +32,7 @@
 						</div>
 						<!-- If it uses a custom component, render that component -->
 						<div v-else-if="area.data.customComponent">
-							<component v-bind:is="area.data.customComponent" />
+							<component v-if="dependencyMet(area.data)" v-bind:is="area.data.customComponent" />
 						</div>
 						<!-- If it's a multiselect association, use a data multi select component -->
 						<div v-else-if="area.data.multiSelect">

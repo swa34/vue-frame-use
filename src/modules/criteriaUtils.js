@@ -16,12 +16,10 @@ const compare = {
 
 // Sorting function
 const sortRecords = (records, key) => {
-	console.log(key);
 	if (records.length > 0) {
 		if (!key) {
 			// If no key, attempt alphabetical sort
 			let testRecord = records[0];
-			console.log(testRecord);
 			if (testRecord.hasOwnProperty('LABEL')) {
 				// Sort by LABEL key
 				records.sort((a, b) => { return a.LABEL > b.LABEL; });
@@ -31,7 +29,6 @@ const sortRecords = (records, key) => {
 			}
 		} else {
 			// Else, sort by the key
-			console.log(records[0]);
 			records.sort((a, b) => {
 				return a[key] > b[key];
 			});

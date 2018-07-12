@@ -33,6 +33,7 @@ import {
 	getProgramScopes,
 	getReport
 } from '@/modules/caesdb';
+import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
 import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
 
@@ -447,6 +448,22 @@ const schema = {
 			description: 'Bacon ipsum dolor amet aliqua bresaola ipsum, beef ribs dolore filet mignon pork laboris tongue. Adipisicing commodo officia tenderloin shank rump jerky minim landjaeger andouille. Est cillum proident shoulder fugiat. Non bacon aute tempor beef kevin boudin short loin tri-tip chicken. Landjaeger dolor in officia pork belly magna commodo turducken id kielbasa nostrud flank strip steak eu. Duis velit quis pig qui sausage, tempor cow. Occaecat minim in sed, excepteur aliquip pork chop shank ground round dolore sunt reprehenderit voluptate.'
 		},
 		{
+			title: '4H Import',
+			customComponent: FourHImportComponent,
+			isAssignable: true,
+			depends: {
+				association: 'Program Areas',
+				useValues: true,
+				test: (records, schema) => {
+					return records.length > 0 && records.map(r => r.AREA_ID).indexOf(3) !== -1;
+				}
+			},
+			grouping: {
+				section: 'Demographic Information',
+				order: 1
+			}
+		},
+		{
 			title: 'Contacts',
 			schema: reportContactSchema,
 			localKey: 'ID',
@@ -456,7 +473,7 @@ const schema = {
 			isAssignable: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 1
+				order: 2
 			},
 			displayAllOptions: true,
 			showTotals: true,
@@ -488,7 +505,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 3
+				order: 4
 			},
 			depends: {
 				association: 'Contacts',
@@ -508,7 +525,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 4
+				order: 5
 			},
 			depends: {
 				association: 'Contacts',
@@ -528,7 +545,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 2
+				order: 3
 			},
 			filter: {
 				associations: [

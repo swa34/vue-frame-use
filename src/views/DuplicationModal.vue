@@ -1,8 +1,8 @@
 <template lang="html">
-  <div class="modal">
+  <div class="modal" v-on:click="closeModal">
 		<div class="container">
-			<span class="close" v-on:click="cancelDuplication">
-				<XIcon />
+			<span class="close">
+				<XIcon v-on:click="cancelDuplication" />
 			</span>
 			<h2>
 				{{ duplicationSchema.title }}
@@ -66,6 +66,11 @@
 			cancelDuplication () {
 				this.duplication.ready = true;
 			},
+			closeModal (event) {
+				if (event.target.matches('div.modal')) {
+					this.cancelDuplication();
+				}
+			},
 			dependenciesMet (section) {
 				if (!section.depends) return true;
 				let dependenciesMet = true;
@@ -122,10 +127,13 @@
 		background: rgba(0,0,0,.15);
 		padding-top: 1rem;
 		overflow: auto;
+		text-align: center;
 		span.close {
 			display: block;
 			text-align: right;
-			cursor: pointer;
+			svg {
+				cursor: pointer;
+			}
 		}
 		div.container {
 			background: #fff;
@@ -135,8 +143,11 @@
 			padding: 1rem;
 			box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 			text-align: center;
+			display: inline-block;
+			border-radius: .375rem;
 			strong.instruction {
 				display: block;
+				padding: 0 2rem;
 			}
 			ul {
 				list-style-type: none;
