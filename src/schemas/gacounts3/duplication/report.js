@@ -70,6 +70,7 @@ const reportDuplication = {
 					'contacts',
 					'racialDemographics',
 					'ethnicDemographics',
+					'residenceDemographics',
 					'targetAudiences'
 				]
 			},

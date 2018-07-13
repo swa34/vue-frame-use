@@ -12,7 +12,8 @@ import {
 	racialDemographicSchema,
 	reportContactSchema,
 	reportPersonnelSchema,
-	reportPurposeAchievementsSchema,
+	// reportPurposeAchievementsSchema,
+	residenceDemographicSchema,
 	subReportSchema,
 	targetAudienceSchema
 } from '@/schemas/gacounts3';
@@ -531,6 +532,39 @@ const schema = {
 				association: 'Contacts',
 				useValues: true,
 				test: demographicsTest
+			}
+		},
+		{
+			title: 'Residence Demographics',
+			schema: residenceDemographicSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			optionColumnName: 'TYPE_ID',
+			isAssignable: true,
+			displayAllOptions: true,
+			showTotals: true,
+			grouping: {
+				section: 'Demographic Information',
+				order: 6
+			},
+			depends: {
+				association: 'Report Type',
+				useValues: true,
+				test: (records, schema) => {
+					let passes = false;
+					const associationsMap = schema.associations.map(a => a.title);
+					const association = schema.associations[associationsMap.indexOf('Report Type')];
+					const columnsMap = association.schema.columns.map(c => c.columnName);
+					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
+					const values = column.constraint.values;
+					const valuesIdMap = values.map(v => v.key);
+					const valuesUsesResidenceMap = values.map(v => v.originalValue.USES_RESIDENCE);
+					records.forEach((record) => {
+						if (valuesUsesResidenceMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+					});
+					return passes;
+				}
 			}
 		},
 		{

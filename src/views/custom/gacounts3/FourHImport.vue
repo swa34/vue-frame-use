@@ -71,6 +71,7 @@
 <script>
 	/* global activeUser */
 	/* global notify */
+	import translations from '@/modules/4HDemographicsTranslation';
 	import { XIcon } from 'vue-feather-icons';
 	import {
 		get4HActivity,
@@ -101,7 +102,7 @@
 					} else if (data.Message) {
 						console.error(new Error(data.Message));
 					} else {
-						console.log(data[0]);
+						this.setDemographics(data[0]);
 					}
 				});
 			},
@@ -125,8 +126,6 @@
 						console.error(new Error(data.Message));
 					} else {
 						this.counties = data;
-						console.log(this.$store.state.report.COUNTY_ID);
-						console.log(activeUser.COUNTYLISTID);
 						if (this.$store.state.report.COUNTY_ID) {
 							this.setCountyName(this.$store.state.report.COUNTY_ID);
 						} else if (activeUser.COUNTYLISTID) {
@@ -147,51 +146,53 @@
 			setCountyName (countyID) {
 				countyID = Number(countyID);
 				const countyIndex = this.counties.map(c => c.COUNTYLISTID).indexOf(countyID);
-				console.log(countyIndex);
 				if (countyIndex > -1) this.countyName = this.counties[countyIndex].COUNTYNAME;
 			},
 			setDemographics (data) {
-				const setAssociationRecordValue = (association, identifier, key, value) => {
-					const index = this.$store.state[association].records.map(r => r[identifier.key]).indexOf(identifier.value);
+				// A function to handle assign records that have defined translations
+				const setAssociationRecordValue = (translation, value) => {
+					const association = translation.subschema ? this.$store.state.subschemas[translation.subschema][translation.association] : this.$store.state[translation.association];
+					const index = association.records.map(r => r[translation.identifier.key]).indexOf(translation.identifier.value);
+					console.log(index);
 					if (index !== -1) {
-						this.$store.state[association].records[index][key] = value;
+						association.records[index][translation.key] = value;
 					}
 				};
-				const translation = {
-					CONTACTS: {
-						association: 'contacts',
-						identifier: {
-							key: 'TYPE_ID',
-							value: 1
-						},
-						key: 'QUANTITY'
-					},
-					WHITE_MALE: {
-						association: 'racialDemographics',
-						identifier: {
-							key: 'RACE_ID',
-							value: 1
-						},
-						key: 'QUANTITY_MALE'
-					},
-					WHITE_FEMALE: {
-						association: 'racialDemographics',
-						identifier: {
-							key: 'RACE_ID',
-							value: 1
-						},
-						key: 'QUANTITY_FEMALE'
-					},
-					BLACK_MALE: {
-						association: 'racialDemographics',
-						identifier: {
-							key: 'RACE_ID'
+
+				// Handler function for the special cases (K-3 counts)
+				const handleK3 = (totalValue) => {
+					const k3TargetAudienceId = 24;
+					const association = this.$store.state.targetAudiences;
+					const index = association.records.map(r => r.TYPE_ID).indexOf(k3TargetAudienceId);
+					if (index !== -1) {
+						association.records[index].QUANTITY = totalValue;
+					}
+				};
+
+				// Variable to hold K3 totals
+				let k3Total = 0;
+
+				// Loop through each key in the returned data
+				for (let key in data) {
+					console.log(key);
+					// And if it has a defined translation
+					if (translations[key]) {
+						// Set the correct record values
+						if (Array.isArray(translations[key])) {
+							translations[key].forEach((translation) => {
+								setAssociationRecordValue(translation, data[key]);
+							});
+						} else {
+							setAssociationRecordValue(translations[key], data[key]);
 						}
+					} else if (translations.k3Keys.indexOf(key) !== -1) {
+						k3Total += data[key];
+						console.log(k3Total);
 					}
 				}
-				for (let key in data) {
 
-				}
+				// Also handle K-3
+				handleK3(k3Total);
 			}
 		},
 		mounted () {

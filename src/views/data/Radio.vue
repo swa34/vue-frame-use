@@ -187,14 +187,36 @@
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {
 									if (err) console.error(err);
-									if (data) component.unfilteredOptions = data;
+									if (data) {
+										component.unfilteredOptions = data;
+										data.forEach((result) => {
+											const value = {
+												key: result[column.constraint.foreignKey],
+												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+												originalValue: result
+											};
+											column.constraint.values.push(value);
+										});
+									}
+									// if (data) component.unfilteredOptions = data;
 								});
 							});
 						} else {
 							// If no table prefix, just fetch the data
 							column.constraint.getValues((err, data) => {
 								if (err) console.error(err);
-								if (data) component.unfilteredOptions = data;
+								if (data) {
+									component.unfilteredOptions = data;
+									data.forEach((result) => {
+										const value = {
+											key: result[column.constraint.foreignKey],
+											label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+											originalValue: result
+										};
+										column.constraint.values.push(value);
+									});
+								}
+								// if (data) component.unfilteredOptions = data;
 							});
 						}
 					} else if (column.columnName === component.associatedColumn) {

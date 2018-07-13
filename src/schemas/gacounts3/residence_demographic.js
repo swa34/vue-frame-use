@@ -1,23 +1,42 @@
+import {
+	getResidenceDemographic,
+	getResidenceTypes
+} from '@/modules/caesdb';
+import { enableConstraintValues } from '@/modules/schemaTools';
+
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'RESIDENCE_DEMOGRAPHIC',
+	title: 'Residence Demographics',
+	tablePrefix: 'GC3_RESIDENCE_DEMOGRAPHIC',
+	criteria: {
+		string: 'criteria_REPORT_ID_eq'
+	},
+	fetchExisting: getResidenceDemographic,
 	columns: [
 		{
 			columnName: 'REPORT_ID',
+			prettyName: 'Report',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'TYPE_ID',
+			prettyName: 'Residence Type',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				getValues: getResidenceTypes,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			}
 		},
 		{
 			columnName: 'QUANTITY',
 			type: 'int',
-			required: true
+			required: true,
+			min: 0
 		}
 	]
 };
 
-export default schema;
+export default enableConstraintValues(schema);

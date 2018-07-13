@@ -64,12 +64,12 @@ const makeSerializedPostRequest = (url, dataToSend, callback) => {
 
 const get4HActivity = (activityID, callback) => {
 	const url = generateURL('4HActivity');
-	makeSerializedPostRequest(url, activityID, callback);
+	makePostRequest(url, activityID, callback);
 };
 
 const get4HActivityList = (countyName, callback) => {
 	const url = generateURL('4HActivityList');
-	makeSerializedPostRequest(url, countyName, callback);
+	makePostRequest(url, countyName, callback);
 };
 
 const getActivityLocationTypes = (callback) => {
@@ -259,6 +259,16 @@ const getReportTypes = (callback) => {
 	makeGetRequest(url, callback);
 };
 
+const getResidenceDemographic = (criteriaStructure, callback) => {
+	const url = generateURL('residenceDemographic');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
+const getResidenceTypes = (callback) => {
+	const url = generateURL('residenceTypes');
+	makeGetRequest(url, callback);
+};
+
 const getStatePlannedPrograms = (callback) => {
 	const url = generateURL('statePlannedPrograms');
 	makeGetRequest(url, callback);
@@ -313,6 +323,8 @@ export {
 	getReportPurposeAchievements,
 	getReportTargetAudience,
 	getReportTypes,
+	getResidenceDemographic,
+	getResidenceTypes,
 	getStatePlannedPrograms,
 	getTargetAudiences,
 	getTopics
