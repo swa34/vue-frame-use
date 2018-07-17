@@ -1,20 +1,9 @@
 <template lang="html">
 	<div>
-		<h3>
-			4H Enrollment Import
-		</h3>
-		<p>
-			Entering a 4-H Youth activity report?  If you'd like, you may import demographic information from the 4-H Enrollment system using the button below.
-		</p>
-		<p>
-			<em>
-				(Note: This will overwrite any demographics information you have already entered manually.)
-			</em>
-		</p>
 		<button type="button" v-on:click="openModal" class="load-modal">
-			<img src="/global/images/4h-logo-white-transparent.svg" /> Import
+			<img src="/global/images/4h-logo-white-transparent.svg" /> Import 4-H Enrollment Activity Demographics
 		</button>
-		<div v-if="displayModal" class="modal">
+		<div v-if="displayModal" class="modal" v-on:click="closeModal">
 			<div class="container">
 				<span class="close">
 					<XIcon v-on:click="closeModal" />
@@ -22,21 +11,7 @@
 				<h2>
 					4-H Enrollment Activity Import
 				</h2>
-				<div>
-					<p class="instructions">
-						Use the following fields to select the 4-H enrollment activity whose demographic information you'd like to import.
-						<ul>
-							<li>
-								First, select the county where the activity took place.
-							</li>
-							<li>
-								Then, select the activity from the drop-down menu.
-							</li>
-							<li>
-								When you've made your selection, simply hit the import button!
-							</li>
-						</ul>
-					</p>
+				<div v-if="!loadingActivity">
 					<form>
 						<label>
 							<strong>
@@ -44,25 +19,29 @@
 							</strong>
 							<select v-model="countyName" :disabled="counties.length < 1">
 								<option v-for="county in counties" v-bind:key="county.ID" :value="county.COUNTYNAME">
-									{{ county.COUNTYNAME}}
+									{{ county.COUNTYNAME }}
 								</option>
 							</select>
 						</label>
-						<label>
+						<label class="activity">
 							<strong>
 								Activity
 							</strong>
-							<select v-model="activityID" :disabled="activities.length < 1">
+							<select v-model="activityID" v-if="!loadingActivityList" :disabled="activities.length < 1">
 								<option v-for="activity in activities" v-bind:key="activity.ACTIVITY_ID" :value="activity.ACTIVITY_ID">
 									{{ activity.NAME }} - {{ activity.BEGIN_DATE.replace(/ ([0-9]{2}:){2}[0-9]{2}$/, '') }}
 								</option>
 							</select>
+							<Spinner v-else />
 						</label>
-						<button type="button" v-on:click="fetchActivity" :disabled="!activityID">
-							Import
-						</button>
+						<div class="button-container">
+							<button type="button" v-on:click="fetchActivity" :disabled="!activityID">
+								Import
+							</button>
+						</div>
 					</form>
 				</div>
+				<Spinner v-else />
 			</div>
 		</div>
 	</div>
@@ -71,7 +50,8 @@
 <script>
 	/* global activeUser */
 	/* global notify */
-	import translations from '@/modules/4HDemographicsTranslation';
+	/* global swal */
+	import Spinner from 'vue-simple-spinner';
 	import { XIcon } from 'vue-feather-icons';
 	import {
 		get4HActivity,
@@ -81,21 +61,27 @@
 
 	export default {
 		name: 'FourHImport',
-		components: { XIcon },
+		components: {
+			Spinner,
+			XIcon
+		},
 		data () {
 			return {
 				activityID: null,
 				activities: [],
 				countyName: null,
 				counties: [],
-				displayModal: false
+				displayModal: false,
+				loadingActivity: false,
+				loadingActivityList: false
 			};
 		},
 		methods: {
-			closeModal () {
-				this.displayModal = false;
+			closeModal (event) {
+				if (event.target.matches('div.modal') || event.target.matches('span.close svg.feather')) this.displayModal = false;
 			},
 			fetchActivity () {
+				this.loadingActivity = true;
 				get4HActivity({ activityID: this.activityID }, (err, data) => {
 					if (err) {
 						console.error(err);
@@ -107,6 +93,7 @@
 				});
 			},
 			fetchActivityList () {
+				this.loadingActivityList = true;
 				get4HActivityList({ countyName: this.countyName }, (err, data) => {
 					if (err) {
 						console.error(err);
@@ -115,6 +102,7 @@
 					} else {
 						if (data.length < 1 && this.displayModal) this.notifyUserAboutNoActivities();
 						this.activities = data;
+						this.loadingActivityList = false;
 					}
 				});
 			},
@@ -149,50 +137,96 @@
 				if (countyIndex > -1) this.countyName = this.counties[countyIndex].COUNTYNAME;
 			},
 			setDemographics (data) {
-				// A function to handle assign records that have defined translations
-				const setAssociationRecordValue = (translation, value) => {
-					const association = translation.subschema ? this.$store.state.subschemas[translation.subschema][translation.association] : this.$store.state[translation.association];
-					const index = association.records.map(r => r[translation.identifier.key]).indexOf(translation.identifier.value);
-					console.log(index);
-					if (index !== -1) {
-						association.records[index][translation.key] = value;
-					}
+				// Contacts
+				const faceToFaceIndex = this.$store.state.contacts.records.map(r => r.TYPE_ID).indexOf(1);
+				if (faceToFaceIndex !== -1) this.$store.state.contacts.records[faceToFaceIndex].QUANTITY = data.CONTACTS;
+
+				// Racial Demographics
+				const raceMap = this.$store.state.racialDemographics.records.map(r => r.RACE_ID);
+				const races = {
+					WHITE: raceMap.indexOf(1),
+					BLACK: raceMap.indexOf(2),
+					ASIAN: raceMap.indexOf(3),
+					AMERICAN_INDIAN: raceMap.indexOf(4),
+					PACIFIC_ISLANDER: raceMap.indexOf(5)
 				};
-
-				// Handler function for the special cases (K-3 counts)
-				const handleK3 = (totalValue) => {
-					const k3TargetAudienceId = 24;
-					const association = this.$store.state.targetAudiences;
-					const index = association.records.map(r => r.TYPE_ID).indexOf(k3TargetAudienceId);
+				for (let key in races) {
+					const index = races[key];
 					if (index !== -1) {
-						association.records[index].QUANTITY = totalValue;
-					}
-				};
-
-				// Variable to hold K3 totals
-				let k3Total = 0;
-
-				// Loop through each key in the returned data
-				for (let key in data) {
-					console.log(key);
-					// And if it has a defined translation
-					if (translations[key]) {
-						// Set the correct record values
-						if (Array.isArray(translations[key])) {
-							translations[key].forEach((translation) => {
-								setAssociationRecordValue(translation, data[key]);
-							});
-						} else {
-							setAssociationRecordValue(translations[key], data[key]);
-						}
-					} else if (translations.k3Keys.indexOf(key) !== -1) {
-						k3Total += data[key];
-						console.log(k3Total);
+						['MALE', 'FEMALE'].forEach((gender) => {
+							this.$store.state.racialDemographics.records[index]['QUANTITY_' + gender] = data[key + '_' + gender];
+						});
 					}
 				}
 
-				// Also handle K-3
-				handleK3(k3Total);
+				// Ethnic Demographics
+				const hispanicIndex = this.$store.state.ethnicDemographics.records.map(r => r.ETHNICITY_ID).indexOf(1);
+				if (hispanicIndex !== -1) {
+					this.$store.state.ethnicDemographics.records[hispanicIndex].QUANTITY_MALE = data.HISPANIC_MALE;
+					this.$store.state.ethnicDemographics.records[hispanicIndex].QUANTITY_FEMALE = data.HISPANIC_FEMALE;
+				}
+
+				// Residence demographics
+				const residenceMap = this.$store.state.residenceDemographics.records.map(r => r.TYPE_ID);
+				const residences = {
+					FARM: residenceMap.indexOf(1),
+					RURAL: residenceMap.indexOf(2),
+					TOWN: residenceMap.indexOf(3),
+					SUBURBAN: residenceMap.indexOf(4),
+					CITY: residenceMap.indexOf(5)
+				};
+				for (let key in residences) {
+					const index = residences[key];
+					if (index !== -1) {
+						this.$store.state.residenceDemographics.records[index].QUANTITY = data[key];
+					}
+				}
+
+				// Target Audiences
+				const targAudMap = this.$store.state.targetAudiences.records.map(r => r.TYPE_ID);
+				const audiences = {
+					PRE_K: targAudMap.indexOf(23),
+					FOUR: targAudMap.indexOf(25),
+					FIVE: targAudMap.indexOf(26),
+					SIX: targAudMap.indexOf(27),
+					SEVEN: targAudMap.indexOf(28),
+					EIGHT: targAudMap.indexOf(29),
+					NINE: targAudMap.indexOf(30),
+					TEN: targAudMap.indexOf(31),
+					ELEVEN: targAudMap.indexOf(32),
+					TWELVE: targAudMap.indexOf(33),
+					COLLEGIATE: targAudMap.indexOf(34),
+					ADULT: targAudMap.indexOf(35),
+					UGA_STAFF: targAudMap.indexOf(37)
+				};
+				for (let key in audiences) {
+					const index = audiences[key];
+					if (index !== -1) {
+						this.$store.state.targetAudiences.records[index].QUANTITY = data[key];
+					}
+				}
+				const k3Index = targAudMap.indexOf(24);
+				this.$store.state.targetAudiences.records[k3Index].QUANTITY = data.KINDERGARTEN + data.ONE + data.TWO + data.THREE;
+
+				// Supplemental Data
+				const supMap = this.$store.state.supplementalData.records.map(r => r.FIELD_ID);
+				const supps = {
+					TOTAL_ADULT_VOLUNTEERS: supMap.indexOf(1),
+					TOTAL_VOLUNTEER_HOURS: supMap.indexOf(2),
+					TOTAL_YOUTH_VOLUNTEERS: supMap.indexOf(37),
+					MILITARY_CONTACTS: supMap.indexOf(35)
+				};
+				for (let key in supps) {
+					const index = supps[key];
+					if (index !== -1) {
+						this.$store.state.supplementalData.records[index].FIELD_VALUE = data[key];
+					}
+				}
+
+				// We're done loading content
+				this.loadingActivity = false;
+				this.displayModal = false;
+				swal('Success!', 'Your 4-H activity data has been imported.', 'success');
 			}
 		},
 		mounted () {
@@ -200,6 +234,7 @@
 		},
 		watch: {
 			countyName () {
+				this.activityID = null;
 				this.fetchActivityList();
 			}
 		}
@@ -250,13 +285,31 @@
 			form {
 				display: flex;
 				justify-content: center;
-				align-items: flex-end;
 				label {
 					margin-right: 2rem;
+					&.activity {
+						display: flex;
+						flex-direction: column;
+						div {
+							flex-grow: 1;
+							display: flex;
+							flex-direction: column;
+							justify-content: center;
+							width: 20rem;
+						}
+						select {
+							width: 20rem;
+						}
+					}
 				}
-				button[disabled=disabled] {
-					background: #ccc;
-					cursor: default;
+				div.button-container {
+					display: flex;
+					flex-direction: column;
+					justify-content: flex-end;
+					button[disabled=disabled] {
+						background: #ccc;
+						cursor: default;
+					}
 				}
 			}
 		}
