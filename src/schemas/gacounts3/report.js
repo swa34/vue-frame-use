@@ -642,19 +642,46 @@ const schema = {
 		},
 		{
 			title: 'Topics and Keywords',
-			order: 2
+			order: 2,
+			depends: {
+				associations: [
+					'Program Areas',
+					'Report Type'
+				]
+			}
 		},
 		{
 			title: 'Demographic Information',
-			order: 3
+			order: 3,
+			depends: {
+				associations: [
+					'Program Areas',
+					'Report Type',
+					'Topics'
+				]
+			}
 		},
 		{
 			title: 'Supplemental Data',
-			order: 4
+			order: 4,
+			depends: {
+				associations: [
+					'Program Areas',
+					'Report Type',
+					'Topics'
+				]
+			}
 		},
 		{
 			title: 'My Sub-Report',
-			order: 5
+			order: 5,
+			depends: {
+				associations: [
+					'Program Areas',
+					'Report Type',
+					'Topics'
+				]
+			}
 		},
 		{
 			title: 'Collaborators',

@@ -1,6 +1,12 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
   <main>
+		<div v-if="requestsInProgress" class="application-loading-overlay">
+			<div class="container">
+				<Spinner />
+				<p>Loading...</p>
+			</div>
+		</div>
 		<h1>
 			{{ schema.title }}
 		</h1>
@@ -11,7 +17,8 @@
 				{{ section.title }}
 			</h2>
 			<div v-if="sectionShouldBeDisplayed(section)">
-				<div v-for="area in section.areas" class="">
+				<div v-if="sectionDependenciesMet(section)">
+					<div v-for="area in section.areas" class="">
 					<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
 						<SmartInput
 							v-model="record[area.data.columnName]"
@@ -93,6 +100,12 @@
 						<component v-bind:is="area.data.customComponent" />
 					</div>
 				</div>
+				</div>
+				<div v-else>
+					<p>
+						In order to enter {{ section.title }}, you must first make a selection for <span v-html="getSectionDependsMessage(section)"></span>.
+					</p>
+				</div>
 			</div>
 		</section>
 		<!-- We use a data form component to display the main record -->
@@ -118,6 +131,7 @@
 	// Import required modules
 	import DetailMain from '@/views/DetailMain';
 	import SmartInput from '@/views/elements/SmartInput';
+	import Spinner from 'vue-simple-spinner';
 	import {
 		DataForm,
 		DataMultiSelect,
@@ -156,7 +170,8 @@
 			DataRadio,
 			DataTable,
 			DetailMain,
-			SmartInput
+			SmartInput,
+			Spinner
 		},
 		computed: {
 			columns: {
@@ -192,7 +207,10 @@
 		data () {
 			let sectionsToDisplay = [];
 			if (this.schema.sections.length > 0) sectionsToDisplay.push(this.schema.sections[0].title);
-			return { sectionsToDisplay };
+			return {
+				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
+				sectionsToDisplay
+			};
 		},
 		// The methods available to this component during render
 		methods: {
@@ -273,6 +291,50 @@
 					}
 				});
 			},
+			getSectionDependsMessage (section) {
+				let message = '';
+				let totalDependencies = 0;
+				let listedDependencies = 0;
+				if (section.depends.columns) totalDependencies += section.depends.columns.length;
+				if (section.depends.associations) totalDependencies += section.depends.associations.length;
+				if (section.depends.columns) {
+					section.depends.columns.forEach((column) => {
+						++listedDependencies;
+						if (listedDependencies < totalDependencies) {
+							message += 'a <strong>' + column + '</strong>, ';
+						} else {
+							message += 'and a <strong>' + column + '</strong>';
+						}
+					});
+				}
+				if (section.depends.associations) {
+					section.depends.associations.forEach((association) => {
+						++listedDependencies;
+						if (listedDependencies < totalDependencies) {
+							message += '<strong>' + association + '</strong>, ';
+						} else {
+							message += 'and <strong>' + association + '</strong>';
+						}
+					});
+				}
+				return message;
+			},
+			sectionDependenciesMet (section) {
+				if (!section.depends) return true;
+				let dependenciesMet = true;
+				if (section.depends.columns) {
+					section.depends.columns.forEach((column) => {
+						if (!this.record[column]) dependenciesMet = false;
+					});
+				}
+				if (section.depends.associations) {
+					section.depends.associations.forEach((association) => {
+						let camelTitle = stringFormats.camelCase(association);
+						if (this.$store.state[camelTitle].records.length < 1) dependenciesMet = false;
+					});
+				}
+				return dependenciesMet;
+			},
 			sectionShouldBeDisplayed (section) {
 				return this.sectionsToDisplay.indexOf(section.title) !== -1;
 			},
@@ -286,6 +348,13 @@
 			}
 		},
 		mounted () {
+			// Set up the watcher for pending requests
+			setInterval(() => {
+				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0)) {
+					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0;
+				}
+			}, 300);
+
 			const getConstraintData = () => {
 				this.columns.forEach((column) => {
 					// We only care about columns that have a constraint and a getValues
@@ -353,6 +422,26 @@
 </script>
 
 <style lang="scss">
+	div.application-loading-overlay {
+		background: rgba(255,255,255,.65);
+		position: fixed;
+		z-index: 10;
+		top: 0;
+		right: 0;
+		height: 100vh;
+		width: 100vw;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		div.container {
+			background: #fff;
+			text-align: center;
+			border-radius: .375rem;
+			padding: 2rem 3rem 1rem;
+			box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+		}
+	}
 	h2.section-heading {
 		cursor: pointer;
 		svg {

@@ -1,4 +1,3 @@
-// import { request } from '@/modules/utilities';
 import request from 'superagent';
 
 const apiPrefix = '/rest/gacounts-api/';
@@ -19,8 +18,14 @@ const serializeByColumns = (obj) => {
 };
 
 const makeGetRequest = (url, callback) => {
+	if (!window.pendingRequests) {
+		window.pendingRequests = 1;
+	} else {
+		++window.pendingRequests;
+	}
 	request.get(url)
 		.end((err, response) => {
+			--window.pendingRequests;
 			const data = response.body;
 			if (err) {
 				callback(err, null);
@@ -33,9 +38,15 @@ const makeGetRequest = (url, callback) => {
 };
 
 const makePostRequest = (url, dataToSend, callback) => {
+	if (!window.pendingRequests) {
+		window.pendingRequests = 1;
+	} else {
+		++window.pendingRequests;
+	}
 	request.post(url)
 		.send(dataToSend)
 		.end((err, response) => {
+			--window.pendingRequests;
 			const data = response.body;
 			if (err) {
 				callback(err, null);
@@ -48,9 +59,15 @@ const makePostRequest = (url, dataToSend, callback) => {
 };
 
 const makeSerializedPostRequest = (url, dataToSend, callback) => {
+	if (!window.pendingRequests) {
+		window.pendingRequests = 1;
+	} else {
+		++window.pendingRequests;
+	}
 	request.post(url)
 		.send(dataToSend)
 		.end((err, response) => {
+			--window.pendingRequests;
 			const data = serializeByColumns(response.body);
 			if (err) {
 				callback(err);

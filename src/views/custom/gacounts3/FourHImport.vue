@@ -94,7 +94,12 @@
 			},
 			fetchActivityList () {
 				this.loadingActivityList = true;
+				// Hijack pending requests since we'll already have a spinner wheel for
+				// this request
+				--window.pendingRequests;
 				get4HActivityList({ countyName: this.countyName }, (err, data) => {
+					// Fix our hijacked pending requests
+					++window.pendingRequests;
 					if (err) {
 						console.error(err);
 					} else if (data.Message) {
