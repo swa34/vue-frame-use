@@ -1,5 +1,13 @@
 <template lang="html">
-	<fieldset class="fuzzy-select">
+	<div class="fuzzy-select">
+		<input v-model="inputText" type="text" @input="debounceInput" />
+		<div class="options">
+			<span v-for="option in filteredOptions" :id="option.label" v-bind:key="option.key" v-on:click="setValue(option)">
+				{{ option.label }}
+			</span>
+		</div>
+	</div>
+	<!-- <fieldset class="fuzzy-select">
 		<input v-model="inputText" type="text" @input="debounceInput" />
 		<select v-model="computedValue" :disabled="filteredOptions.length < 1">
 			<input type="text" />
@@ -7,7 +15,7 @@
 				{{ option.label }}
 			</option>
 		</select>
-	</fieldset>
+	</fieldset> -->
 </template>
 
 <script>
@@ -54,7 +62,12 @@
 				});
 				this.filteredOptions = tempArr.length > 0 ? tempArr : this.options;
 				this.computedValue = searchText.length > 0 ? this.filteredOptions[0].key : this.computedValue;
-			}, 250)
+			}, 250),
+			setValue (option) {
+				this.computedValue = option.key;
+				this.inputText = option.label;
+				this.$el.querySelector('input').blur();
+			}
 		},
 		props: {
 			options: {
@@ -73,11 +86,49 @@
 </script>
 
 <style lang="scss" scoped>
-	fieldset.fuzzy-select {
-		border: none;
-		// display: flex;
-		input, select {
+	div.fuzzy-select {
+		position: relative;
+		width: 100%;
+		input {
 			width: 100%;
 		}
+		input + div.options {
+			display: none;
+		}
+		input:focus + div.options {
+			display: block;
+		}
+		div.options {
+			position: absolute;
+			z-index: 10;
+			width: 100%;
+			overflow: auto;
+			max-height: 15rem;
+			background: #fff;
+			border: 1px solid #333;
+			&:hover {
+				display: block;
+			}
+			span {
+				display: block;
+				cursor: pointer;
+				padding: .125rem .25rem;
+				&:hover {
+					background: #6666cc;
+					color: #fff;
+				}
+				&:active {
+					background: #fff;
+					color: #000;
+				}
+			}
+		}
 	}
+	// fieldset.fuzzy-select {
+	// 	border: none;
+	// 	// display: flex;
+	// 	input, select {
+	// 		width: 100%;
+	// 	}
+	// }
 </style>

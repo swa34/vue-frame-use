@@ -1,23 +1,21 @@
 <template lang="html">
   <div id="main">
-		<pre>{{ JSON.stringify(activityList, null, 2) }}</pre>
+		<select id="slim">
+			<option value="gabe">Gabe</option>
+			<option value="otis">Otis</option>
+			<option value="benson">Benson</option>
+		</select>
 	</div>
 </template>
 
 <script>
-	import { get4HActivityList } from '@/modules/caesdb';
+	/* global SlimSelect */
 
 	export default {
 		name: 'Test',
-		data () {
-			return {
-				activityList: {}
-			};
-		},
 		mounted () {
-			get4HActivityList('barrow', (err, data) => {
-				if (err) console.error(err);
-				if (data) this.activityList = data;
+			const slimSelect = new SlimSelect({
+				select: 'select#slim'
 			});
 		}
 	};

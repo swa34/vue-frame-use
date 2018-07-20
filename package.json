@@ -34,6 +34,7 @@
     "vue": "^2.5.16",
     "vue-feather-icons": "^4.7.1",
     "vue-loader": "^15.2.6",
+    "vue-select": "^2.4.0",
     "vue-simple-spinner": "^1.2.8",
     "vue-sweetalert2": "^1.5.0",
     "vue-template-compiler": "^2.5.16",
