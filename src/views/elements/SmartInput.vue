@@ -38,6 +38,15 @@
 				</option>
 			</select>
 			<input
+				v-else-if="fieldType === 'number'"
+				type="number"
+				v-bind:value="value"
+				v-on:input="$emit('input', $event.target.value)"
+				:required="field.required"
+				:disabled="field.immutable"
+				min="0"
+			/>
+			<input
 				v-else
 				:type="fieldType"
 				v-bind:value="value"

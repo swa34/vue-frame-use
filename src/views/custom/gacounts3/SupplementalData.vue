@@ -1,5 +1,5 @@
 <template lang="html">
-	<table v-if="dependenciesMet && records.length > 0">
+	<table v-if="dependenciesMet && records.length > 0 && reportFields.length > 0">
 		<caption>
 			Supplemental Data
 		</caption>
@@ -16,7 +16,7 @@
 		<tbody>
 			<tr v-for="record in records">
 				<td>
-					{{ reportFields[fieldIDs.indexOf(record.FIELD_ID)].REPORT_FIELD_LABEL }}
+					{{ getFieldLabel(record.FIELD_ID) }}
 				</td>
 				<td>
 					<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE">
@@ -24,7 +24,7 @@
 							{{ option.LABEL }}
 						</option>
 					</select>
-					<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" type="number" step="any" />
+					<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" type="number" min="0" step="any" />
 					<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" />
 				</td>
 			</tr>
@@ -159,10 +159,15 @@
 				});
 				return options;
 			},
+			getFieldLabel (fieldId) {
+				const index = this.fieldIDs.indexOf(fieldId);
+				if (index === -1) return '';
+				return this.reportFields[index].REPORT_FIELD_LABEL;
+			},
 			populateRecords () {
 				const generateRecord = (field, value = null) => {
 					return {
-						REPORT_ID: null,
+						REPORT_ID: this.reportID,
 						FIELD_ID: field.FIELD_ID,
 						FIELD_VALUE: value
 					};
@@ -221,7 +226,7 @@
 				if (data) this.fieldTypes = data;
 			});
 
-			const fetchExistingRecords = (reportID) => {
+			const fetchExistingRecords = () => {
 				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
 				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
 				getCriteriaStructure(tablePrefix, (err, data) => {
@@ -230,7 +235,7 @@
 						console.error(new Error(data.Message));
 					} else {
 						let critStruct = cfToJs(data);
-						critStruct.criteria_REPORT_ID_eq = reportID;
+						critStruct.criteria_REPORT_ID_eq = this.reportID;
 						getFields(jsToCf(critStruct), (err, data) => {
 							if (err) console.error(err);
 							if (data.Message) {
@@ -242,8 +247,7 @@
 					}
 				});
 			};
-			let reportID = url.getParam('PK_ID') || url.getParam('pk_id');
-			if (reportID && !url.getParam('new') && !this.forSubReport) fetchExistingRecords(reportID);
+			if (this.reportID && !url.getParam('new') && !this.forSubReport) fetchExistingRecords();
 		},
 		watch: {
 			fieldIDs (newFieldIDs, oldFieldIDs) {

@@ -163,4 +163,27 @@
 		background-color: lighten(#545959, 20%);
 		font-weight: 600;
 	}
+	td input {
+		width: 100%;
+	}
+	ul.checkbox {
+		list-style-type: none;
+		padding: 0;
+		column-count: 2;
+		column-width: 7.5rem;
+		li {
+			break-inside: avoid-column;
+			page-break-inside: avoid;
+			-webkit-column-break-inside: avoid;
+			margin-bottom: .75rem;
+			label {
+				display: flex;
+				span {
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+				}
+			}
+		}
+	}
 </style>

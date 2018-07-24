@@ -25,7 +25,7 @@
 						{{ group.name }}
 					</h4>
 					<!-- Then, create a list to hold each of the group's options -->
-					<transition-group name="list-complete" tag="ul">
+					<transition-group name="list-complete" tag="ul" class="checkbox">
 						<li v-for="option in group.options" v-bind:key="option[optionID]" class="list-complete-item">
 							<label>
 								<!--
@@ -496,26 +496,6 @@
 </script>
 
 <style lang="scss" scoped>
-	ul {
-		list-style-type: none;
-		padding: 0;
-		column-count: 2;
-		column-width: 7.5rem;
-		li {
-			break-inside: avoid-column;
-			page-break-inside: avoid;
-			-webkit-column-break-inside: avoid;
-			margin-bottom: .75rem;
-			label {
-				display: flex;
-				span {
-					display: flex;
-					flex-direction: column;
-					justify-content: center;
-				}
-			}
-		}
-	}
 	span.group-name {
 		font-size: .85rem;
 		font-weight: 600;

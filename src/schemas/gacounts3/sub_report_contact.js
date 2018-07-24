@@ -1,16 +1,34 @@
+import { enableConstraintValues } from '@/modules/schemaTools';
+import {
+	getContactTypes,
+	getSubReportContact
+} from '@/modules/caesdb';
+
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'SUB_REPORT_CONTACT',
+	title: 'Sub-Report Contacts',
+	tablePrefix: 'GC3_SUB_REPORT_CONTACT',
+	criteria: {
+		string: 'criteria_SUB_REPORT_ID_eq'
+	},
+	fetchExisting: getSubReportContact,
 	columns: [
 		{
 			columnName: 'SUB_REPORT_ID',
+			prettyName: 'Sub-Report',
 			type: 'int',
-			required: true
+			immutable: true,
+			automated: true
 		},
 		{
 			columnName: 'TYPE_ID',
+			prettyName: 'Contact Type',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				getValues: getContactTypes,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			}
 		},
 		{
 			columnName: 'QUANTITY',
@@ -20,4 +38,4 @@ const schema = {
 	]
 };
 
-export default schema;
+export default enableConstraintValues(schema);

@@ -7,7 +7,7 @@ const schema = {
 	title: 'Report Contacts',
 	tablePrefix: 'GC3_REPORT_CONTACT',
 	criteria: {
-		string: 'criteria_ID_eq'
+		string: 'criteria_REPORT_ID_eq'
 	},
 	fetchExisting: getReportContact,
 	columns: [
@@ -17,12 +17,6 @@ const schema = {
 			type: 'int',
 			immutable: true,
 			automated: true
-			// constraint: {
-			// 	database: 'GACOUNTS3',
-			// 	table: 'REPORT',
-			// 	foreignKey: 'ID',
-			// 	foreignLabel: 'TITLE'
-			// }
 		},
 		{
 			columnName: 'TYPE_ID',

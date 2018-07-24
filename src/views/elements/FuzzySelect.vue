@@ -2,7 +2,7 @@
 	<div class="fuzzy-select">
 		<input v-model="inputText" type="text" @input="debounceInput" />
 		<div class="options">
-			<span v-for="option in filteredOptions" :id="option.label" v-bind:key="option.key" v-on:click="setValue(option)">
+			<span v-for="(option, index) in filteredOptions" :id="option.label" v-bind:key="option.key" v-on:click="setValue(option)" @mouseover="setSelectionIndex(index)" :class="index === inputHandling.selectionIndex ? 'selected' : ''">
 				{{ option.label }}
 			</span>
 		</div>
@@ -22,6 +22,13 @@
 	import Fuse from 'fuse.js';
 	import debounce from 'debounce';
 
+	// Object holding keycodes for arrow keys
+	const keyCodes = {
+		up: 38,
+		down: 40,
+		enter: 13
+	};
+
 	export default {
 		name: 'FuzzySelect',
 		computed: {
@@ -35,6 +42,12 @@
 				set (val) {
 					this.$emit('input', val);
 				}
+			},
+			inputEl () {
+				return this.$el.querySelector('input');
+			},
+			inputList () {
+				return this.$el.querySelectorAll('div.options span');
 			}
 		},
 		data () {
@@ -50,6 +63,9 @@
 					threshold: 0.45
 				},
 				filteredOptions: this.options,
+				inputHandling: {
+					selectionIndex: -1
+				},
 				inputText: selectedOptionLabel
 			};
 		},
@@ -63,11 +79,35 @@
 				this.filteredOptions = tempArr.length > 0 ? tempArr : this.options;
 				this.computedValue = searchText.length > 0 ? this.filteredOptions[0].key : this.computedValue;
 			}, 250),
+			setSelectionIndex (index) {
+				this.inputHandling.selectionIndex = index;
+			},
 			setValue (option) {
 				this.computedValue = option.key;
 				this.inputText = option.label;
-				this.$el.querySelector('input').blur();
+				this.unfocusInput();
+				this.inputHandling.selectionIndex = -1;
+			},
+			unfocusInput () {
+				this.inputEl.blur();
+				this.$el.focus();
 			}
+		},
+		mounted () {
+			this.inputEl.onkeydown = (e) => {
+				const keyCode = e.keyCode;
+				switch (keyCode) {
+					case keyCodes.up:
+						if (this.inputHandling.selectionIndex > -1) --this.inputHandling.selectionIndex;
+						break;
+					case keyCodes.down:
+						if (this.inputHandling.selectionIndex < this.filteredOptions.length) ++this.inputHandling.selectionIndex;
+						break;
+					case keyCodes.enter:
+						if (this.inputHandling.selectionIndex >= 0) this.setValue(this.filteredOptions[this.inputHandling.selectionIndex]);
+						break;
+				}
+			};
 		},
 		props: {
 			options: {
@@ -113,7 +153,7 @@
 				display: block;
 				cursor: pointer;
 				padding: .125rem .25rem;
-				&:hover {
+				&.selected {
 					background: #6666cc;
 					color: #fff;
 				}

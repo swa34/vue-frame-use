@@ -149,6 +149,11 @@ const getAssociationSubReportField = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
+const getAssociationSubReportRole = (criteriaStructure, callback) => {
+	const url = generateURL('associationSubReportRole');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 const getAssociationTargetAudienceProgramArea = (callback) => {
 	const url = generateURL('associationTargetAudienceProgramArea');
 	makeGetRequest(url, callback);
@@ -291,6 +296,16 @@ const getStatePlannedPrograms = (callback) => {
 	makeGetRequest(url, callback);
 };
 
+const getSubReport = (criteriaStructure, callback) => {
+	const url = generateURL('subReport');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
+const getSubReportContact = (criteriaStructure, callback) => {
+	const url = generateURL('subReportContact');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 const getTargetAudiences = (callback) => {
 	const url = generateURL('targetAudiences');
 	makeGetRequest(url, callback);
@@ -316,6 +331,7 @@ export {
 	getAssociationReportTypeProgramArea,
 	getAssociationReportTypeRole,
 	getAssociationSubReportField,
+	getAssociationSubReportRole,
 	getAssociationTargetAudienceProgramArea,
 	getAssociationTopicArea,
 	getContactTypes,
@@ -343,6 +359,8 @@ export {
 	getResidenceDemographic,
 	getResidenceTypes,
 	getStatePlannedPrograms,
+	getSubReport,
+	getSubReportContact,
 	getTargetAudiences,
 	getTopics
 };
