@@ -266,11 +266,6 @@ const getReportPersonnel = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-const getReportPurposeAchievements = (criteriaStructure, callback) => {
-	const url = generateURL('reportPurposeAchievements');
-	makePostRequest(url, criteriaStructure, callback);
-};
-
 const getReportTargetAudience = (criteriaStructure, callback) => {
 	const url = generateURL('reportTargetAudience');
 	makePostRequest(url, criteriaStructure, callback);
@@ -303,6 +298,11 @@ const getSubReport = (criteriaStructure, callback) => {
 
 const getSubReportContact = (criteriaStructure, callback) => {
 	const url = generateURL('subReportContact');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
+const getSubReportPurposeAchievements = (criteriaStructure, callback) => {
+	const url = generateURL('subReportPurposeAchievements');
 	makePostRequest(url, criteriaStructure, callback);
 };
 
@@ -353,7 +353,6 @@ export {
 	getReportContact,
 	getReportFields,
 	getReportPersonnel,
-	getReportPurposeAchievements,
 	getReportTargetAudience,
 	getReportTypes,
 	getResidenceDemographic,
@@ -361,6 +360,7 @@ export {
 	getStatePlannedPrograms,
 	getSubReport,
 	getSubReportContact,
+	getSubReportPurposeAchievements,
 	getTargetAudiences,
 	getTopics
 };

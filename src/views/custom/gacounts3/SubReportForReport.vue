@@ -1,58 +1,62 @@
 <template lang="html">
 	<div>
 		<!-- Planned Program -->
-		<label>
-			<h3>
-				Type of Issue
-			</h3>
-			<select v-model="issueType">
-				<option value="local">
-					Local
-				</option>
-				<option value="state">
-					State
-				</option>
-			</select>
-		</label>
-		<label v-if="issueType === 'local'">
-			<h3>
-				Local Issue
-			</h3>
-			<select v-if="plannedPrograms.length > 0" v-model="record.PLANNED_PROGRAM_ID">
-				<option v-for="program in plannedPrograms" :value="program.ID">
-					{{ program.NAME }}
-				</option>
-			</select>
-			<p v-else>
-				<em>
-					There are no local issues associated with your account.
-				</em>
-			</p>
-		</label>
-		<label v-else-if="issueType === 'state'">
-			<h3>
-				State Issue
-			</h3>
-			<select v-model="record.STATE_PLANNED_PROGRAM_ID">
-				<option v-for="program in statePlannedPrograms" :value="program.ID">
-					{{ program.NAME }}
-				</option>
-			</select>
-		</label>
+		<div>
+			<label>
+				<h3>
+					Type of Issue
+				</h3>
+				<select v-model="issueType">
+					<option value="local">
+						Local
+					</option>
+					<option value="state">
+						State
+					</option>
+				</select>
+			</label>
+			<label v-if="issueType === 'local'">
+				<h3>
+					Local Issue
+				</h3>
+				<select v-if="plannedPrograms.length > 0" v-model="record.PLANNED_PROGRAM_ID">
+					<option v-for="program in plannedPrograms" :value="program.ID">
+						{{ program.NAME }}
+					</option>
+				</select>
+				<p v-else>
+					<em>
+						There are no local issues associated with your account.
+					</em>
+				</p>
+			</label>
+			<label v-else-if="issueType === 'state'">
+				<h3>
+					State Issue
+				</h3>
+				<select v-model="record.STATE_PLANNED_PROGRAM_ID">
+					<option v-for="program in statePlannedPrograms" :value="program.ID">
+						{{ program.NAME }}
+					</option>
+				</select>
+			</label>
+		</div>
 		<!-- Roles -->
-		<h3>
-			Roles
-		</h3>
-		<ul v-if="reportType !== -1" class="checkbox">
-			<li v-for="role in roleTypes">
-				<label>
-					<input type="checkbox" :value="generateRoleRecord(role)" v-model="roles" />
-					<span>
-						{{ role.SUB_REPORT_ROLE_LABEL }}
-					</span>
-				</label>
-			</li>
-		</ul>
+		<div>
+			<h3>
+				Roles
+			</h3>
+			<ul v-if="reportType !== -1" class="checkbox">
+				<li v-for="role in roleTypes">
+					<label>
+						<input type="checkbox" :value="generateRoleRecord(role)" v-model="roles" />
+						<span>
+							{{ role.SUB_REPORT_ROLE_LABEL }}
+						</span>
+					</label>
+				</li>
+			</ul>
+		</div>
 		<!-- Contacts  -->
 		<table v-if="contacts.length > 0">
 			<caption>
@@ -93,6 +97,17 @@
 		<SupplementalData
 			:forSubReport="true"
 		/>
+		<!-- Outcome, Impact, Achievements -->
+		<div>
+			<label>
+				<h3>
+					Outcome, Impact, and Achievements
+				</h3>
+				<div v-for="outcome in outcomes">
+					<textarea v-model="outcome.MEMO"></textarea>
+				</div>
+			</label>
+		</div>
 	</div>
 </template>
 
@@ -109,7 +124,8 @@
 		getPlannedPrograms,
 		getStatePlannedPrograms,
 		getSubReport,
-		getSubReportContact
+		getSubReportContact,
+		getSubReportPurposeAchievements
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
@@ -150,6 +166,14 @@
 					},
 					contacts: this.$store.state.contacts.records
 				};
+			},
+			outcomes: {
+				get () {
+					return this.$store.state.subschemas.subReport.outcomeImpactAndAchievements.records;
+				},
+				set (val) {
+					this.$store.state.subschemas.subReport.outcomeImpactAndAchievements.records = val;
+				}
 			},
 			record: {
 				get () {
@@ -245,6 +269,15 @@
 					});
 				}
 			},
+			populateOutcomeRecord () {
+				this.outcomes.push({
+					ID: null,
+					REPORT_ID: null,
+					USER_ID: null,
+					MEMO: null,
+					DATE_CREATED: null
+				});
+			},
 			importReportData () {
 				this.record = Object.assign(this.record, this.neededReportValues.report);
 			}
@@ -252,6 +285,7 @@
 		mounted () {
 			this.importReportData();
 			this.populateContactsRecords();
+			this.populateOutcomeRecord();
 			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
 				if (err) console.error(err);
 				if (data) {
@@ -401,11 +435,29 @@
 					});
 				};
 
+				const fetchOutcomes = () => {
+					console.log('fetching outcomes');
+					getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							const critStruct = cfToJs(data);
+							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
+							getSubReportPurposeAchievements(jsToCf(critStruct), (err, data) => {
+								if (err) console.error(err);
+								if (data) {
+									this.outcomes = data;
+								}
+							});
+						}
+					});
+				};
+
 				fetchSubReportCriteriaStructure(() => {
 					fetchSubReport(() => {
 						fetchRoles();
 						fetchContacts();
 						fetchSupplementalData();
+						fetchOutcomes();
 					});
 				});
 			};

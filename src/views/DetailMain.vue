@@ -206,7 +206,13 @@
 		},
 		data () {
 			let sectionsToDisplay = [];
-			if (this.schema.sections.length > 0) sectionsToDisplay.push(this.schema.sections[0].title);
+			if (this.identifier.value && !this.identifier.duplicate) {
+				sectionsToDisplay.push(this.schema.sections[0].title);
+				sectionsToDisplay.push(this.schema.sections[1].title);
+				// sectionsToDisplay = this.schema.sections.map(s => s.title);
+			} else if (this.schema.sections.length > 0) {
+				sectionsToDisplay.push(this.schema.sections[0].title);
+			}
 			return {
 				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
 				sectionsToDisplay

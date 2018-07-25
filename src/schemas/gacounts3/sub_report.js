@@ -114,6 +114,9 @@ const schema = {
 		},
 		{
 			title: 'Supplemental Data'
+		},
+		{
+			title: 'Outcome, Impact, and Achievements'
 		}
 	]
 };
