@@ -31,8 +31,12 @@
 
 	export default {
 		name: 'FuzzySelect',
+		beforeDestroy () {
+			delete this.fuse;
+		},
 		computed: {
 			fuse () {
+				delete this.fuse;
 				return new Fuse(this.options.map(o => o.label), this.fuseOptions);
 			},
 			computedValue: {

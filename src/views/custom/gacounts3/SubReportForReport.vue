@@ -132,6 +132,7 @@
 		filter,
 		jsToCf
 	} from '@/modules/criteriaUtils';
+	import { url } from '@/modules/utilities';
 
 	export default {
 		name: 'SubReportForReport',
@@ -344,7 +345,7 @@
 				const fetchSubReport = (callback) => {
 					console.log('fetching sub report');
 					const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
-					critStruct.criteria_REPORT_ID_eq = this.reportId;
+					critStruct.criteria_REPORT_ID_eq = this.reportId || url.getParam('duplicateID');
 					critStruct.criteria_USER_ID_eq = activeUserID;
 					getSubReport(jsToCf(critStruct), (err, data) => {
 						if (err) console.error(err);
@@ -461,7 +462,7 @@
 					});
 				});
 			};
-			if (this.reportId !== null) fetchExistingData();
+			if (this.reportId !== null || typeof url.getParam('duplicateID') === 'string') fetchExistingData();
 		},
 		watch: {
 			neededReportValues (values) {

@@ -287,14 +287,16 @@
 						column.constraint.getValues((err, data) => {
 							if (err) console.error(err);
 							if (data) {
+								let values = [];
 								data.forEach((result) => {
 									const value = {
 										key: result[column.constraint.foreignKey],
 										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
 										originalValue: result
 									};
-									column.constraint.values.push(value);
+									values.push(value);
 								});
+								column.constraint.values = values;
 							}
 						});
 					}

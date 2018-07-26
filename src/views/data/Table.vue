@@ -221,6 +221,7 @@
 							column.constraint.getValues((err, data) => {
 								if (err) console.error(err);
 								if (data) {
+									let values = [];
 									data.forEach((result) => {
 										let value = null;
 										if (column.constraint.generateValue) {
@@ -231,8 +232,9 @@
 												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
 											};
 										}
-										column.constraint.values.push(value);
+										values.push(value);
 									});
+									column.constraint.values = values;
 								}
 							});
 						}

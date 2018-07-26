@@ -64,10 +64,12 @@
 			},
 			computedRecord: {
 				get () {
-					return this.record;
+					return this.records[0] || null;
+					// return this.record;
 				},
 				set (val) {
-					this.record = val;
+					this.records[0] = val;
+					// this.record = val;
 				}
 			},
 			duplication () {
@@ -189,14 +191,16 @@
 									if (err) console.error(err);
 									if (data) {
 										component.unfilteredOptions = data;
+										let values = [];
 										data.forEach((result) => {
 											const value = {
 												key: result[column.constraint.foreignKey],
 												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
 												originalValue: result
 											};
-											column.constraint.values.push(value);
+											values.push(value);
 										});
+										column.constraint.values = values;
 									}
 									// if (data) component.unfilteredOptions = data;
 								});
@@ -207,14 +211,16 @@
 								if (err) console.error(err);
 								if (data) {
 									component.unfilteredOptions = data;
+									let values = [];
 									data.forEach((result) => {
 										const value = {
 											key: result[column.constraint.foreignKey],
 											label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
 											originalValue: result
 										};
-										column.constraint.values.push(value);
+										values.push(value);
 									});
+									column.constraint.values = values;
 								}
 								// if (data) component.unfilteredOptions = data;
 							});
