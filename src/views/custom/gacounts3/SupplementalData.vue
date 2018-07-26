@@ -227,6 +227,7 @@
 			});
 
 			const fetchExistingRecords = () => {
+				console.log('fetching existing supp data');
 				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
 				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
 				getCriteriaStructure(tablePrefix, (err, data) => {
@@ -235,7 +236,11 @@
 						console.error(new Error(data.Message));
 					} else {
 						let critStruct = cfToJs(data);
-						critStruct.criteria_REPORT_ID_eq = this.reportID;
+						if (this.forSubReport) {
+							critStruct.criteria_SUB_REPORT_ID_eq = this.$store.state.subschemas.subReport.subReport.ID || -1;
+						} else {
+							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
+						}
 						getFields(jsToCf(critStruct), (err, data) => {
 							if (err) console.error(err);
 							if (data.Message) {
@@ -247,9 +252,12 @@
 					}
 				});
 			};
-			if (this.reportID && !url.getParam('new') && !this.forSubReport) fetchExistingRecords();
+			if (this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) fetchExistingRecords();
 		},
 		watch: {
+			existingRecords () {
+				this.populateRecords();
+			},
 			fieldIDs (newFieldIDs, oldFieldIDs) {
 				// Populate records with updated fields
 				this.populateRecords();
