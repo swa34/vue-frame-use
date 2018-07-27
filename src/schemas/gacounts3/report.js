@@ -37,6 +37,7 @@ import {
 import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
 import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
+import SubReportCollaborators from '@/views/custom/gacounts3/SubReportCollaborators';
 
 // Gotta fetch activity locations
 let activityLocations = [
@@ -603,14 +604,6 @@ const schema = {
 				order: 1
 			}
 		},
-		// {
-		// 	title: 'Outcome, Impact, and Achievements',
-		// 	schema: reportPurposeAchievementsSchema,
-		// 	criteriaString: 'criteria_REPORT_ID_eq',
-		// 	localKey: 'ID',
-		// 	foreignKey: 'REPORT_ID',
-		// 	isAssignable: true
-		// },
 		{
 			title: 'Collaborators',
 			schema: reportPersonnelSchema,
@@ -619,7 +612,7 @@ const schema = {
 			associatedColumn: 'PERSONNEL_ID',
 			isAssignable: true,
 			grouping: {
-				section: 'Collaborators',
+				section: 'Sub-Reports',
 				order: 1
 			}
 		}
@@ -630,8 +623,8 @@ const schema = {
 			schema: subReportSchema,
 			customComponent: SubReportForReportComponent,
 			grouping: {
-				section: 'My Sub-Report',
-				order: 1
+				section: 'Sub-Reports',
+				order: 2
 			}
 		}
 	],
@@ -673,8 +666,9 @@ const schema = {
 			}
 		},
 		{
-			title: 'My Sub-Report',
+			title: 'Sub-Reports',
 			order: 5,
+			customComponent: SubReportCollaborators,
 			depends: {
 				associations: [
 					'Program Areas',
@@ -682,10 +676,6 @@ const schema = {
 					'Topics'
 				]
 			}
-		},
-		{
-			title: 'Collaborators',
-			order: 6
 		}
 	]
 };

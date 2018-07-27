@@ -18,88 +18,93 @@
 			</h2>
 			<div v-if="sectionShouldBeDisplayed(section)">
 				<div v-if="sectionDependenciesMet(section)">
-					<div v-for="area in section.areas" class="">
-					<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
-						<SmartInput
-							v-model="record[area.data.columnName]"
-							:field="area.data"
-						/>
+					<div v-if="section.customComponent">
+						<component v-bind:is="section.customComponent" />
 					</div>
-					<div v-else-if="area.type === 'association'">
-						<div v-if="area.data.isExternal && identifier.value">
-							<!-- Then just show the association title and link to edit it -->
-							<h3>
-								{{ area.data.title }}
-							</h3>
-							<p>
-								<a :href="area.data.source.url + (area.data.source.hasParams ? '&' : '?') + area.data.source.selector + '=' + identifier.value" class="button">
-									Edit
-								</a>
-							</p>
-						</div>
-						<!-- If it uses a custom component, render that component -->
-						<div v-else-if="area.data.customComponent">
-							<component v-if="dependencyMet(area.data)" v-bind:is="area.data.customComponent" />
-						</div>
-						<!-- If it's a multiselect association, use a data multi select component -->
-						<div v-else-if="area.data.multiSelect">
-							<DataMultiSelect
-								:allowEdit="true"
-								:associatedColumn="area.data.associatedColumn"
-								:filter="area.data.filter"
-								:groupBy="area.data.groupBy"
-								:groupLabel="area.data.groupLabel"
-								:groupsToShow="area.data.groupsToShow"
-								:identifier="generateIdentifier(area.data)"
-								:schema="area.data.schema"
-								:title="area.data.title"
-								:description="area.data.description"
-								:affects="area.data.affects"
-							/>
-						</div>
-						<!-- If multiple values are forbidden, use a data radio component -->
-						<div v-else-if="area.data.forbidMultiple">
-							<DataRadio
-								:title="area.data.title"
-								:schema="area.data.schema"
-								:allowEdit="true"
-								:associatedColumn="area.data.associatedColumn"
-								:identifier="generateIdentifier(area.data)"
-								:filter="area.data.filter"
-								:description="area.data.description"
-								:affects="area.data.affects"
-							/>
-						</div>
-						<div v-else-if="area.data.displayAllOptions">
-							<DataMultiTable
-								v-if="dependencyMet(area.data)"
-								:title="area.data.title"
-								:schema="area.data.schema"
-								:associatedColumn="area.data.associatedColumn"
-								:identifier="generateIdentifier(area.data)"
-								:allowEdit="true"
-								:optionColumnName="area.data.optionColumnName"
-								:filter="area.data.filter"
-								:showTotals="area.data.showTotals"
-								:depends="area.data.depends"
-							/>
-						</div>
-						<!-- Else, just use a data table component -->
-						<div v-else-if="!identifier.value ? area.data.isAssignable : true">
-							<DataTable
-								:title="area.data.title"
-								:schema="area.data.schema"
-								:associatedColumn="area.data.foreignKey"
-								:identifier="generateIdentifier(area.data)"
-								:allowInsert="true"
-								:allowEdit="true"
-							/>
+					<div v-else>
+						<div v-for="area in section.areas" class="">
+							<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
+								<SmartInput
+									v-model="record[area.data.columnName]"
+									:field="area.data"
+								/>
+							</div>
+							<div v-else-if="area.type === 'association'">
+								<div v-if="area.data.isExternal && identifier.value">
+									<!-- Then just show the association title and link to edit it -->
+									<h3>
+										{{ area.data.title }}
+									</h3>
+									<p>
+										<a :href="area.data.source.url + (area.data.source.hasParams ? '&' : '?') + area.data.source.selector + '=' + identifier.value" class="button">
+											Edit
+										</a>
+									</p>
+								</div>
+								<!-- If it uses a custom component, render that component -->
+								<div v-else-if="area.data.customComponent">
+									<component v-if="dependencyMet(area.data)" v-bind:is="area.data.customComponent" />
+								</div>
+								<!-- If it's a multiselect association, use a data multi select component -->
+								<div v-else-if="area.data.multiSelect">
+									<DataMultiSelect
+										:allowEdit="true"
+										:associatedColumn="area.data.associatedColumn"
+										:filter="area.data.filter"
+										:groupBy="area.data.groupBy"
+										:groupLabel="area.data.groupLabel"
+										:groupsToShow="area.data.groupsToShow"
+										:identifier="generateIdentifier(area.data)"
+										:schema="area.data.schema"
+										:title="area.data.title"
+										:description="area.data.description"
+										:affects="area.data.affects"
+									/>
+								</div>
+								<!-- If multiple values are forbidden, use a data radio component -->
+								<div v-else-if="area.data.forbidMultiple">
+									<DataRadio
+										:title="area.data.title"
+										:schema="area.data.schema"
+										:allowEdit="true"
+										:associatedColumn="area.data.associatedColumn"
+										:identifier="generateIdentifier(area.data)"
+										:filter="area.data.filter"
+										:description="area.data.description"
+										:affects="area.data.affects"
+									/>
+								</div>
+								<div v-else-if="area.data.displayAllOptions">
+									<DataMultiTable
+										v-if="dependencyMet(area.data)"
+										:title="area.data.title"
+										:schema="area.data.schema"
+										:associatedColumn="area.data.associatedColumn"
+										:identifier="generateIdentifier(area.data)"
+										:allowEdit="true"
+										:optionColumnName="area.data.optionColumnName"
+										:filter="area.data.filter"
+										:showTotals="area.data.showTotals"
+										:depends="area.data.depends"
+									/>
+								</div>
+								<!-- Else, just use a data table component -->
+								<div v-else-if="!identifier.value ? area.data.isAssignable : true">
+									<DataTable
+										:title="area.data.title"
+										:schema="area.data.schema"
+										:associatedColumn="area.data.foreignKey"
+										:identifier="generateIdentifier(area.data)"
+										:allowInsert="true"
+										:allowEdit="true"
+									/>
+								</div>
+							</div>
+							<div v-else-if="area.type === 'subschema'">
+								<component v-bind:is="area.data.customComponent" />
+							</div>
 						</div>
 					</div>
-					<div v-else-if="area.type === 'subschema'">
-						<component v-bind:is="area.data.customComponent" />
-					</div>
-				</div>
 				</div>
 				<div v-else>
 					<p>
