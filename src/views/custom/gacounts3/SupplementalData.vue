@@ -183,6 +183,7 @@
 							records.push(generateRecord(field));
 						}
 					} else {
+						if (indexOfExistingRecord !== -1) this.records[indexOfField] = this.existingRecords[indexOfExistingRecord];
 						records.push(this.records[indexOfField]);
 					}
 				});
@@ -227,7 +228,6 @@
 			});
 
 			const fetchExistingRecords = () => {
-				console.log('fetching existing supp data');
 				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
 				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
 				getCriteriaStructure(tablePrefix, (err, data) => {

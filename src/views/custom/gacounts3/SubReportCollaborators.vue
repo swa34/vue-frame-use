@@ -2,7 +2,7 @@
 	<div v-if="personnel.length > 0">
 		<div>
 			<h3>
-				Report Owner - {{ getPersonnelNameFromID(activeUserID) }}
+				Report Owner - {{ getPersonnelNameFromID(ownerID) }}
 			</h3>
 			<div v-if="editMode === 'owner'">
 				<!-- Planned Programs -->
@@ -39,8 +39,8 @@
 						<h4>
 							State Issue
 						</h4>
-						<select v-if="ownerState.statePlannedPrograms.length > 0" v-model="ownerSubReport.STATE_PLANNED_PROGRAM_ID">
-							<option v-for="program in ownerState.statePlannedPrograms" :value="program.ID">
+						<select v-if="statePlannedPrograms.length > 0" v-model="ownerSubReport.STATE_PLANNED_PROGRAM_ID">
+							<option v-for="program in statePlannedPrograms" :value="program.ID">
 								{{ program.NAME }}
 							</option>
 						</select>
@@ -98,6 +98,24 @@
 						</tr>
 					</tfoot>
 				</table>
+				<!-- Supplemental Data -->
+				<SupplementalData
+					:forSubReport="true"
+				/>
+				<!-- Outcome, Impact, Achievements -->
+				<div>
+					<label>
+						<h4>
+							Outcome, Impact, and Achievements
+						</h4>
+						<div v-for="outcome in ownerOutcomes">
+							<textarea v-model="outcome.MEMO"></textarea>
+						</div>
+					</label>
+				</div>
+			</div>
+			<div v-else-if="editMode === 'collaborator'">
+
 			</div>
 			<div v-else>
 
@@ -107,8 +125,19 @@
 			<h3>
 				Collaborators
 			</h3>
-			<div v-for="collaborator in collaborators">
-
+			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" class="outlined">
+				<h4>
+					{{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
+				</h4>
+				<p v-if="!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1">
+					<em>
+						No sub-report filed.
+					</em>
+				</p>
+				<SubReportPlainText
+					v-else
+					:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
+				/>
 			</div>
 			<div>
 				<fieldset>
@@ -131,25 +160,42 @@
 <script>
 	/* global activeUserID */
 	import FuzzySelect from '@/views/elements/FuzzySelect';
+	import SubReportPlainText from '@/views/custom/gacounts3/SubReportPlainText';
+	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
 	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
+		getAssociationSubReportRole,
 		getContactTypes,
 		getCriteriaStructure,
 		getPersonnel,
 		getPlannedPrograms,
-		getStatePlannedPrograms
+		getReportPersonnel,
+		getStatePlannedPrograms,
+		getSubReport,
+		getSubReportContact,
+		getSubReportPurposeAchievements
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
 		filter,
 		jsToCf
 	} from '@/modules/criteriaUtils';
+	import { url } from '@/modules/utilities';
 
 	export default {
 		name: 'SubReportCollaborators',
-		components: { FuzzySelect },
+		components: {
+			FuzzySelect,
+			SubReportPlainText,
+			SupplementalData
+		},
 		computed: {
+			allSubReportIDs () {
+				let subReportIDs = this.collaboratorRecords.subReports.map(r => r.ID);
+				subReportIDs.push(this.ownerSubReport.ID);
+				return subReportIDs;
+			},
 			collaborators: {
 				get () {
 					return this.$store.state.collaborators.records;
@@ -175,12 +221,13 @@
 				critStructs.associationReportTypeRole.criteria_TYPE_ID_eq.push(this.reportType);
 				return critStructs;
 			},
+			ownerID () { return this.$store.state.report.OWNER_ID || activeUserID; },
 			ownerOutcomes: {
 				get () {
-					return this.$store.state.subschemas.subReport.supplementalData.records;
+					return this.$store.state.subschemas.subReport.outcomeImpactAndAchievements.records;
 				},
 				set (val) {
-					this.$store.state.subschemas.subReport.supplementalData.records = val;
+					this.$store.state.subschemas.subReport.outcomeImpactAndAchievements.records = val;
 				}
 			},
 			ownerRoles: {
@@ -231,6 +278,7 @@
 				collaboratorRecords: {
 					contacts: [],
 					outcomes: [],
+					plannedPrograms: [],
 					roles: [],
 					subReports: [],
 					supplementalData: []
@@ -246,10 +294,10 @@
 				ownerState: {
 					issueType: 'local',
 					plannedPrograms: [],
-					statePlannedPrograms: [],
 					unfilteredRoleTypes: []
 				},
-				personnel: []
+				personnel: [],
+				statePlannedPrograms: []
 			};
 
 			return data;
@@ -258,6 +306,35 @@
 			addCollaborator () {
 				this.collaborators.push(Object.assign({}, this.newCollaborator));
 				this.newCollaborator = {};
+			},
+			getCollaboratorPlannedProgramFromID (id) {
+				const collabProgramsMap = this.collaboratorRecords.plannedPrograms.map(p => p.ID);
+				const index = collabProgramsMap.indexOf(id);
+				if (index === -1) return {};
+				return this.collaboratorRecords.plannedPrograms[index];
+			},
+			getCollaboratorSubReportDataFromID (id) {
+				const data = {
+					contacts: [],
+					outcomes: [],
+					roles: [],
+					subReport: {}
+				};
+				this.collaboratorRecords.subReports.forEach((subReport) => {
+					if (subReport.USER_ID === id) data.subReport = subReport;
+				});
+				this.collaboratorRecords.contacts.forEach((contact) => {
+					if (contact.SUB_REPORT_ID === data.subReport.ID) data.contacts.push(contact);
+				});
+				this.collaboratorRecords.outcomes.forEach((outcome) => {
+					if (outcome.USER_ID === id) data.outcomes.push(outcome);
+				});
+				this.collaboratorRecords.roles.forEach((role) => {
+					if (role.SUB_REPORT_ID === data.subReport.ID) data.roles.push(role);
+				});
+				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedPorgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
+				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getCollaboratorPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
+				return data;
 			},
 			getContactLabelFromID (id) {
 				const index = this.contactTypes.map(t => t.ID).indexOf(id);
@@ -269,6 +346,14 @@
 				if (index === -1) return 'Unknown';
 				const personnel = this.personnel[index];
 				return [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ');
+			},
+			getStatePlannedProgramFromID (id) {
+				let statePlannedProgram = {};
+				this.statePlannedPrograms.forEach((program) => {
+					if (program.ID === id) statePlannedProgram = program;
+				});
+
+				return statePlannedProgram;
 			},
 			generateRoleRecord (role) {
 				return {
@@ -304,6 +389,15 @@
 					});
 				}
 			},
+			populateOwnerOutcomeRecord () {
+				this.ownerOutcomes.push({
+					ID: null,
+					REPORT_ID: null,
+					USER_ID: null,
+					MEMO: null,
+					DATE_CREATED: null
+				});
+			},
 			sum (objArr, key) {
 				let sum = 0;
 				objArr.forEach((obj) => {
@@ -314,6 +408,13 @@
 		},
 		mounted () {
 			const fetchCriteriaStructures = () => {
+				getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						this.criteriaStructureTemplates.plannedProgram = cfToJs(data);
+					}
+				});
+
 				getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
 					if (err) console.error(err);
 					if (data) {
@@ -329,10 +430,89 @@
 				});
 			};
 
+			const fetchCollaboratorPlannedPrograms = () => {
+				const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+				this.collaboratorRecords.subReports.forEach((subReport) => {
+					if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
+				});
+				getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						this.collaboratorRecords.plannedPrograms = data;
+					}
+				});
+			};
+
+			const fetchCollaborators = () => {
+				getCriteriaStructure('GC3_REPORT_PERSONNEL', (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						const critStruct = cfToJs(data);
+						critStruct.criteria_REPORT_ID_eq = [this.reportID];
+						getReportPersonnel(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data) {
+								this.collaborators = data;
+							}
+						});
+					}
+				});
+			};
+
+			const fetchContacts = () => {
+				console.log('fetching contacts');
+				getCriteriaStructure('GC3_SUB_REPORT_CONTACT', (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						const critStruct = cfToJs(data);
+						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+						getSubReportContact(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data) {
+								const ownerContactsMap = this.ownerContacts.map(c => c.TYPE_ID);
+								data.forEach((record) => {
+									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+										const index = ownerContactsMap.indexOf(record.TYPE_ID);
+										if (index !== -1) {
+											this.ownerContacts[index].QUANTITY = record.QUANTITY;
+										}
+									} else {
+										this.collaboratorRecords.contacts.push(record);
+									}
+								});
+							}
+						});
+					}
+				});
+			};
+
 			const fetchContactTypes = () => {
 				getContactTypes((err, data) => {
 					if (err) console.error(err);
 					if (data) this.contactTypes = data;
+				});
+			};
+
+			const fetchOutcomes = () => {
+				console.log('fetching outcomes');
+				getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						const critStruct = cfToJs(data);
+						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+						getSubReportPurposeAchievements(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data) {
+								data.forEach((record) => {
+									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+										this.ownerOutcomes = [record];
+									} else {
+										this.collaboratorRecords.outcomes.push(record);
+									}
+								});
+							}
+						});
+					}
 				});
 			};
 
@@ -346,15 +526,48 @@
 			};
 
 			const fetchPlannedPrograms = () => {
-				getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+				if (!this.criteriaStructureTemplates.plannedProgram) {
+					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							let critStruct = cfToJs(data);
+							critStruct.criteria_USER_ID_eq.push(activeUserID);
+							getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+								if (err) console.error(err);
+								if (data) {
+									this.ownerState.plannedPrograms = data;
+								}
+							});
+						}
+					});
+				} else {
+					let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+					critStruct.criteria_USER_ID_eq.push(activeUserID);
+					getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+						if (err) console.error(err);
+						if (data) this.ownerState.plannedPrograms = data;
+					});
+				}
+			};
+
+			const fetchRoles = () => {
+				console.log('fetching roles');
+				getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						let critStruct = cfToJs(data);
-						critStruct.criteria_USER_ID_eq.push(activeUserID);
-						getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+						const critStruct = cfToJs(data);
+						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+						getAssociationSubReportRole(jsToCf(critStruct), (err, data) => {
 							if (err) console.error(err);
 							if (data) {
-								this.ownerState.plannedPrograms = data;
+								data.forEach((record) => {
+									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+										delete record.SUB_REPORT_ROLE_LABEL;
+										this.ownerRoles.push(record);
+									} else {
+										this.collaboratorRecords.roles.push(record);
+									}
+								});
 							}
 						});
 					}
@@ -373,7 +586,64 @@
 			const fetchStatePlannedPrograms = () => {
 				getStatePlannedPrograms((err, data) => {
 					if (err) console.error(err);
-					if (data) this.ownerState.statePlannedPrograms = data;
+					if (data) this.statePlannedPrograms = data;
+				});
+			};
+
+			const fetchSubReports = (callback) => {
+				console.log('fetching subreports');
+				const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
+				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
+				getSubReport(jsToCf(critStruct), (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						data.forEach((record) => {
+							const subReport = {};
+							[
+								'ID',
+								'USER_ID',
+								'ACTUAL_SUBMITTER_ID',
+								'REPORT_ID',
+								'PLANNED_PROGRAM_ID',
+								'STATE_PLANNED_PROGRAM_ID',
+								'IS_HIGHLIGHTED',
+								'DATE_CREATED',
+								'DATE_LAST_UPDATED'
+							].forEach((key) => {
+								if (record[key]) subReport[key] = record[key];
+							});
+							if (subReport.USER_ID === this.ownerID) {
+								this.ownerState.issueType = subReport.PLANNED_PROGRAM_ID ? 'local' : 'state';
+								this.ownerSubReport = subReport;
+							} else {
+								this.collaboratorRecords.subReports.push(subReport);
+							}
+						});
+						callback();
+					}
+				});
+			};
+
+			const fetchSubReportCriteriaStructure = (callback) => {
+				console.log('fetching subreport crit struct');
+				getCriteriaStructure('GC3_SUB_REPORT', (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						this.criteriaStructureTemplates.subReport = data;
+					}
+					callback();
+				});
+			};
+
+			const fetchExistingData = () => {
+				fetchCollaborators();
+				fetchSubReportCriteriaStructure(() => {
+					fetchSubReports(() => {
+						fetchContacts();
+						fetchOutcomes();
+						fetchCollaboratorPlannedPrograms();
+						fetchRoles();
+					});
 				});
 			};
 
@@ -385,7 +655,9 @@
 				fetchRoleTypes();
 				fetchContactTypes();
 				this.populateOwnerContactsRecords();
+				this.populateOwnerOutcomeRecord();
 			}
+			if (this.reportID !== null || typeof url.getParam('duplicateID') === 'string') fetchExistingData();
 		},
 		watch: {
 			reportContacts () {
