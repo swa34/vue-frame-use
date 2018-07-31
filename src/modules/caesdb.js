@@ -216,6 +216,31 @@ const getKeywords = (callback) => {
 	makeGetRequest(url, callback);
 };
 
+const getMediaDistributed = (criteriaStructure, callback) => {
+	const url = generateURL('mediaDistributed');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
+const getMediaProduction = (criteriaStructure, callback) => {
+	const url = generateURL('mediaProduction');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
+const getMediaReviewType = (callback) => {
+	const url = generateURL('mediaReviewType');
+	makeGetRequest(url, callback);
+};
+
+const getMediaType = (callback) => {
+	const url = generateURL('mediaType');
+	makeGetRequest(url, callback);
+};
+
+const getMediaTypeCategory = (callback) => {
+	const url = generateURL('mediaTypeCategory');
+	makeGetRequest(url, callback);
+};
+
 const getPersonnel = (callback) => {
 	const url = generateURL('personnel');
 	makeGetRequest(url, callback);
@@ -343,6 +368,11 @@ export {
 	getFieldTypes,
 	getGenders,
 	getKeywords,
+	getMediaDistributed,
+	getMediaProduction,
+	getMediaReviewType,
+	getMediaType,
+	getMediaTypeCategory,
 	getPersonnel,
 	getPlannedPrograms,
 	getProgramScopes,

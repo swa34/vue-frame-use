@@ -9,6 +9,8 @@ import {
 	associationReportTopicSchema,
 	associationReportTypeSchema,
 	ethnicDemographicSchema,
+	mediaProductionSchema,
+	mediaDistributedSchema,
 	racialDemographicSchema,
 	reportContactSchema,
 	reportPersonnelSchema,
@@ -592,6 +594,67 @@ const schema = {
 				getValues: getAssociationTargetAudienceProgramArea,
 				optionColumn: 'AUDIENCE_ID',
 				criteriaStructure: gc3TargetAudienceCriteriaStructure
+			}
+		},
+		{
+			title: 'Media Produced',
+			schema: mediaProductionSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			isAssignable: true,
+			grouping: {
+				section: 'Supplemental Data',
+				order: 2
+			},
+			depends: {
+				association: 'Report Type',
+				useValues: true,
+				test: (records, schema) => {
+					console.log('checking media produced');
+					let passes = false;
+					const associationsMap = schema.associations.map(a => a.title);
+					const association = schema.associations[associationsMap.indexOf('Report Type')];
+					const columnsMap = association.schema.columns.map(c => c.columnName);
+					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
+					const values = column.constraint.values;
+					const valuesIdMap = values.map(v => v.key);
+					const valuesUsesMediaProductionMap = values.map(v => v.originalValue.USES_MEDIA_PRODUCTION);
+					records.forEach((record) => {
+						if (valuesUsesMediaProductionMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+					});
+					return passes;
+				}
+			}
+		},
+		{
+			title: 'Media Distributed',
+			schema: mediaDistributedSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			isAssignable: true,
+			grouping: {
+				section: 'Supplemental Data',
+				order: 3
+			},
+			depends: {
+				association: 'Report Type',
+				useValues: true,
+				test: (records, schema) => {
+					let passes = false;
+					const associationsMap = schema.associations.map(a => a.title);
+					const association = schema.associations[associationsMap.indexOf('Report Type')];
+					const columnsMap = association.schema.columns.map(c => c.columnName);
+					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
+					const values = column.constraint.values;
+					const valuesIdMap = values.map(v => v.key);
+					const valuesUsesMediaDistributedMap = values.map(v => v.originalValue.USES_MEDIA_DISTRIBUTED);
+					records.forEach((record) => {
+						if (valuesUsesMediaDistributedMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+					});
+					return passes;
+				}
 			}
 		},
 		{

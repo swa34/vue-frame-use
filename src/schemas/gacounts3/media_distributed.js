@@ -1,25 +1,46 @@
+import {
+	getMediaDistributed,
+	getMediaTypeCategory
+} from '@/modules/caesdb';
+import { enableConstraintValues } from '@/modules/schemaTools';
+
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'MEDIA_DISTRIBUTED',
+	title: 'Media Distributed',
+	tablePrefix: 'GC3_MEDIA_DISTRIBUTED',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getMediaDistributed,
 	columns: [
 		{
 			columnName: 'ID',
+			prettyName: 'Media Distributed',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'REPORT_ID',
+			prettyName: 'Report',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'CATEGORY_ID',
+			prettyName: 'Category',
 			type: 'int',
-			required: true
+			required: true,
+			constraint: {
+				getValues: getMediaTypeCategory,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			}
 		},
 		{
 			columnName: 'PRODUCTION_ID',
-			type: 'int'
+			type: 'int',
+			automated: true
 		},
 		{
 			columnName: 'QUANTITY_UNIQUE_WORKS',
@@ -28,13 +49,15 @@ const schema = {
 		},
 		{
 			columnName: 'CIRCULATION',
+			prettyName: 'Direct Engagement',
 			type: 'int'
 		},
 		{
 			columnName: 'INDIRECT_CIRCULATION',
+			prettyName: 'Circulation',
 			type: 'int'
 		}
 	]
 };
 
-export default schema;
+export default enableConstraintValues(schema);

@@ -100,7 +100,7 @@
 							{{ record.REPORT_FIELD_LABEL }}
 						</td>
 						<td>
-							{{ record.FIELD_OPTION_LABEL || record.FIELD_VALUE }}
+							{{ fieldTypesWithLabels.indexOf(record.FIELD_TYPE_LABEL) !== -1 ? record.FIELD_OPTION_LABEL : record.FIELD_VALUE }}
 						</td>
 					</tr>
 				</tbody>
@@ -129,7 +129,10 @@
 		},
 		data () {
 			return {
-				plannedProgram: {}
+				fieldTypesWithLabels: [
+					'String Data',
+					'Option Data'
+				]
 			};
 		},
 		mounted () {

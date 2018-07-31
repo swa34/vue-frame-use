@@ -29,7 +29,11 @@ const schema = {
 				generateValue: (personnel) => {
 					return {
 						key: personnel.ID,
-						label: [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ')
+						label: [
+							personnel.FIRST_NAME,
+							personnel.MIDDLE_NAME,
+							personnel.LAST_NAME
+						].join(' ')
 					};
 				},
 				values: []
