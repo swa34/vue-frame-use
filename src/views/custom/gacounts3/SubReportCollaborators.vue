@@ -4,6 +4,7 @@
 			<h3>
 				Report Owner - {{ getPersonnelNameFromID(ownerID) }}
 			</h3>
+			<hr />
 			<div v-if="editMode === 'owner'">
 				<!-- Planned Programs -->
 				<div>
@@ -114,45 +115,48 @@
 					</label>
 				</div>
 			</div>
-			<div v-else-if="editMode === 'collaborator'">
-
-			</div>
 			<div v-else>
-
-			</div>
-		</div>
-		<div>
-			<h3>
-				Collaborators
-			</h3>
-			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" class="outlined">
-				<h4>
-					{{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
-				</h4>
-				<p v-if="!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1">
-					<em>
-						No sub-report filed.
-					</em>
-				</p>
 				<SubReportPlainText
-					v-else
-					:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
+					:data="getOwnerSubReportData()"
 				/>
 			</div>
-			<div>
-				<fieldset>
-					<h4>
-						Add Collaborator
-					</h4>
-					<FuzzySelect
-						v-model="newCollaborator.PERSONNEL_ID"
-						:options="personnelForFuzzySelect"
-					/>
-					<button v-on:click="addCollaborator" type="button" class="button">
-						Add
-					</button>
-				</fieldset>
-			</div>
+		</div>
+		<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID">
+			<h3>
+				Collaborator - {{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
+				<button v-if="editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1)" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
+					Remove
+				</button>
+			</h3>
+			<hr />
+			<p v-if="editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID">
+				<a :href="'https://devssl.caes.uga.edu/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
+					{{ collaborator.HAS_REPORTED ? 'Edit' : 'File Sub-Report' }}
+				</a>
+			</p>
+			<p v-if="!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1">
+				<em>
+					No sub-report filed.
+				</em>
+			</p>
+			<SubReportPlainText
+			v-else
+			:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
+			/>
+		</div>
+		<div v-if="editMode === 'owner'">
+			<fieldset>
+				<h4>
+					Add Collaborator
+				</h4>
+				<FuzzySelect
+				v-model="newCollaborator.PERSONNEL_ID"
+				:options="personnelForFuzzySelect"
+				/>
+				<button v-on:click="addCollaborator" type="button" class="button">
+					Add
+				</button>
+			</fieldset>
 		</div>
 	</div>
 </template>
@@ -165,6 +169,7 @@
 	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
+		getAssociationSubReportField,
 		getAssociationSubReportRole,
 		getContactTypes,
 		getCriteriaStructure,
@@ -203,6 +208,11 @@
 				set (val) {
 					this.$store.state.collaborators.records = val;
 				}
+			},
+			editMode () {
+				if (activeUserID === this.ownerID) return 'owner';
+				if (this.collaborators.map(c => c.PERSONNEL_ID).indexOf(activeUserID) !== -1) return 'collaborator';
+				return 'guest';
 			},
 			ownerContacts: {
 				get () {
@@ -285,15 +295,16 @@
 				},
 				contactTypes: [],
 				criteriaStructureTemplates: {},
-				editMode: 'owner',
 				newCollaborator: {
 					REPORT_ID: this.reportID || null,
 					PERSONNEL_ID: null,
 					IS_REJECTED: false
 				},
 				ownerState: {
+					contacts: [],
 					issueType: 'local',
 					plannedPrograms: [],
+					supplementalData: [],
 					unfilteredRoleTypes: []
 				},
 				personnel: [],
@@ -307,6 +318,9 @@
 				this.collaborators.push(Object.assign({}, this.newCollaborator));
 				this.newCollaborator = {};
 			},
+			removeCollaborator (collaborator) {
+				this.collaborators.splice(this.collaborators.indexOf(collaborator), 1);
+			},
 			getCollaboratorPlannedProgramFromID (id) {
 				const collabProgramsMap = this.collaboratorRecords.plannedPrograms.map(p => p.ID);
 				const index = collabProgramsMap.indexOf(id);
@@ -318,7 +332,8 @@
 					contacts: [],
 					outcomes: [],
 					roles: [],
-					subReport: {}
+					subReport: {},
+					supplementalData: []
 				};
 				this.collaboratorRecords.subReports.forEach((subReport) => {
 					if (subReport.USER_ID === id) data.subReport = subReport;
@@ -332,7 +347,10 @@
 				this.collaboratorRecords.roles.forEach((role) => {
 					if (role.SUB_REPORT_ID === data.subReport.ID) data.roles.push(role);
 				});
-				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedPorgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
+				this.collaboratorRecords.supplementalData.forEach((record) => {
+					if (record.SUB_REPORT_ID === data.subReport.ID) data.supplementalData.push(record);
+				});
+				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
 				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getCollaboratorPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
 				return data;
 			},
@@ -340,6 +358,18 @@
 				const index = this.contactTypes.map(t => t.ID).indexOf(id);
 				if (index === -1) return '';
 				return this.contactTypes[index].LABEL;
+			},
+			getOwnerSubReportData () {
+				const data = {
+					contacts: this.ownerState.contacts,
+					outcomes: this.ownerOutcomes,
+					roles: this.ownerRoles,
+					subReport: this.ownerSubReport,
+					supplementalData: this.ownerState.supplementalData
+				};
+				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
+				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getCollaboratorPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
+				return data;
 			},
 			getPersonnelNameFromID (id) {
 				let index = this.personnel.map(p => p.ID).indexOf(id);
@@ -408,12 +438,14 @@
 		},
 		mounted () {
 			const fetchCriteriaStructures = () => {
-				getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-					if (err) console.error(err);
-					if (data) {
-						this.criteriaStructureTemplates.plannedProgram = cfToJs(data);
-					}
-				});
+				if (!this.criteriaStructureTemplates.plannedProgram) {
+					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							this.criteriaStructureTemplates.plannedProgram = cfToJs(data);
+						}
+					});
+				}
 
 				getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
 					if (err) console.error(err);
@@ -430,17 +462,47 @@
 				});
 			};
 
-			const fetchCollaboratorPlannedPrograms = () => {
-				const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-				this.collaboratorRecords.subReports.forEach((subReport) => {
-					if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
-				});
-				getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-					if (err) console.error(err);
-					if (data) {
-						this.collaboratorRecords.plannedPrograms = data;
+			const fetchPlannedPrograms = () => {
+				if (this.criteriaStructureTemplates.plannedProgram) {
+					const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+					this.collaboratorRecords.subReports.forEach((subReport) => {
+						if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
+					});
+					if (this.ownerSubReport.PLANNED_PROGRAM_ID) critStruct.criteria_ID_eq.push(this.ownerSubReport.PLANNED_PROGRAM_ID);
+					if (critStruct.criteria_ID_eq.length > 0) {
+						getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+							if (err) console.error(err);
+							if (data) {
+								data.forEach((record) => {
+									if (record.ID === this.ownerSubReport.PLANNED_PROGRAM_ID) {
+										this.ownerState.plannedPrograms.push(record);
+									} else {
+										this.collaboratorRecords.plannedPrograms.push(record);
+									}
+								});
+							}
+						});
 					}
-				});
+				} else {
+					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							this.criteriaStructureTemplates.plannedProgram = cfToJs(data);
+							const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+							this.collaboratorRecords.subReports.forEach((subReport) => {
+								if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
+							});
+							if (critStruct.criteria_ID_eq.length > 0) {
+								getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+									if (err) console.error(err);
+									if (data) {
+										this.collaboratorRecords.plannedPrograms = data;
+									}
+								});
+							}
+						}
+					});
+				}
 			};
 
 			const fetchCollaborators = () => {
@@ -449,10 +511,34 @@
 					if (data) {
 						const critStruct = cfToJs(data);
 						critStruct.criteria_REPORT_ID_eq = [this.reportID];
-						getReportPersonnel(jsToCf(critStruct), (err, data) => {
+						if (critStruct.criteria_REPORT_ID_eq.length > 0) {
+							getReportPersonnel(jsToCf(critStruct), (err, data) => {
+								if (err) console.error(err);
+								if (data) {
+									this.collaborators = data;
+								}
+							});
+						}
+					}
+				});
+			};
+
+			const fetchSupplementalData = () => {
+				getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						const critStruct = cfToJs(data);
+						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+						getAssociationSubReportField(jsToCf(critStruct), (err, data) => {
 							if (err) console.error(err);
 							if (data) {
-								this.collaborators = data;
+								data.forEach((record) => {
+									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+										this.ownerState.supplementalData.push(record);
+									} else {
+										this.collaboratorRecords.supplementalData.push(record);
+									}
+								});
 							}
 						});
 					}
@@ -475,6 +561,8 @@
 										const index = ownerContactsMap.indexOf(record.TYPE_ID);
 										if (index !== -1) {
 											this.ownerContacts[index].QUANTITY = record.QUANTITY;
+										} else {
+											this.ownerState.contacts.push(record);
 										}
 									} else {
 										this.collaboratorRecords.contacts.push(record);
@@ -525,30 +613,30 @@
 				});
 			};
 
-			const fetchPlannedPrograms = () => {
-				if (!this.criteriaStructureTemplates.plannedProgram) {
-					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-						if (err) console.error(err);
-						if (data) {
-							let critStruct = cfToJs(data);
-							critStruct.criteria_USER_ID_eq.push(activeUserID);
-							getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-								if (err) console.error(err);
-								if (data) {
-									this.ownerState.plannedPrograms = data;
-								}
-							});
-						}
-					});
-				} else {
-					let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-					critStruct.criteria_USER_ID_eq.push(activeUserID);
-					getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-						if (err) console.error(err);
-						if (data) this.ownerState.plannedPrograms = data;
-					});
-				}
-			};
+			// const fetchPlannedPrograms = () => {
+			// 	if (!this.criteriaStructureTemplates.plannedProgram) {
+			// 		getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+			// 			if (err) console.error(err);
+			// 			if (data) {
+			// 				let critStruct = cfToJs(data);
+			// 				critStruct.criteria_USER_ID_eq.push(activeUserID);
+			// 				getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+			// 					if (err) console.error(err);
+			// 					if (data) {
+			// 						this.ownerState.plannedPrograms = data;
+			// 					}
+			// 				});
+			// 			}
+			// 		});
+			// 	} else {
+			// 		let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+			// 		critStruct.criteria_USER_ID_eq.push(activeUserID);
+			// 		getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+			// 			if (err) console.error(err);
+			// 			if (data) this.ownerState.plannedPrograms = data;
+			// 		});
+			// 	}
+			// };
 
 			const fetchRoles = () => {
 				console.log('fetching roles');
@@ -562,7 +650,7 @@
 							if (data) {
 								data.forEach((record) => {
 									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-										delete record.SUB_REPORT_ROLE_LABEL;
+										if (this.editMode === 'owner') delete record.SUB_REPORT_ROLE_LABEL;
 										this.ownerRoles.push(record);
 									} else {
 										this.collaboratorRecords.roles.push(record);
@@ -640,18 +728,20 @@
 				fetchSubReportCriteriaStructure(() => {
 					fetchSubReports(() => {
 						fetchContacts();
+						fetchPlannedPrograms();
+						fetchSupplementalData();
 						fetchOutcomes();
-						fetchCollaboratorPlannedPrograms();
 						fetchRoles();
 					});
 				});
 			};
 
+			fetchPersonnel();
+			fetchStatePlannedPrograms();
+
 			if (this.editMode === 'owner') {
 				fetchCriteriaStructures();
-				fetchPlannedPrograms();
-				fetchStatePlannedPrograms();
-				fetchPersonnel();
+				// fetchPlannedPrograms();
 				fetchRoleTypes();
 				fetchContactTypes();
 				this.populateOwnerContactsRecords();

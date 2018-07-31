@@ -186,8 +186,15 @@
 			}
 		}
 	}
-	div.outlined {
+	.outlined {
 		border: 1px solid #000;
+		padding: .5rem;
+	}
+	.margined {
+		margin: .5rem;
+	}
+	button.small {
+		font-size: .75rem;
 		padding: .5rem;
 	}
 </style>
