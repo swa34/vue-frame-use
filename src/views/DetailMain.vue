@@ -11,7 +11,7 @@
 			{{ schema.title }}
 		</h1>
 		<section v-for="section in schema.sections">
-			<h2 v-on:click="toggleSection(section)" class="section-heading">
+			<h2 v-on:click="toggleSection(section)" class="head section-heading">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" />
 				<ChevronRightIcon v-else />
 				{{ section.title }}
@@ -123,7 +123,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<button v-if="!identifier.value" v-on:click="submitData" type="button" class="button">
+		<button v-if="!identifier.value" v-on:click="validateData" type="button" class="button">
 			Submit
 		</button>
   </main>
@@ -132,6 +132,7 @@
 <!-- The script portion of the component -->
 <script>
 	/* global activeUserID */
+	/* global notify */
 	/* global swal */
 	// Import required modules
 	import DetailMain from '@/views/DetailMain';
@@ -225,6 +226,22 @@
 		},
 		// The methods available to this component during render
 		methods: {
+			// Run validation on the data
+			validateData () {
+				let isValid = true;
+				this.schema.sections.forEach((section) => {
+					section.areas.forEach((area) => {
+						if (area.data.validate) {
+							const validation = area.data.validate(this.$store.state);
+							if (validation.isValid !== true) {
+								notify.error(validation.message);
+								isValid = false;
+							};
+						}
+					});
+				});
+				if (isValid) this.submitData();
+			},
 			// Doesn't send anything yet, just pretends like it does
 			submitData () {
 				swal('Awesome!', 'Your entry has been saved successfully.', 'success');

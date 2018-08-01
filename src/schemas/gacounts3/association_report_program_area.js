@@ -31,7 +31,7 @@ const schema = {
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'PROGRAM_AREA',
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL',
+				foreignLabel: 'ABBREVIATION',
 				values: []
 			}
 		}

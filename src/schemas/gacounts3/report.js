@@ -221,6 +221,16 @@ const schema = {
 			grouping: {
 				section: 'Main Report Information',
 				order: 4
+			},
+			style: {
+				width: '100%'
+			},
+			validate (store) {
+				const title = store.report.TITLE;
+				return {
+					isValid: title && typeof title === 'string' && title.length > 3,
+					message: 'Your report title must contain more than three characters.'
+				};
 			}
 		},
 		{
@@ -239,6 +249,16 @@ const schema = {
 			grouping: {
 				section: 'Main Report Information',
 				order: 5
+			},
+			validate (store) {
+				if (store.report.SCOPE_ID) {
+					return { isValid: true };
+				} else {
+					return {
+						isValid: false,
+						message: 'You must select a value for the geographic reach of your activity.'
+					};
+				}
 			}
 		},
 		{
@@ -256,6 +276,16 @@ const schema = {
 			grouping: {
 				section: 'Main Report Information',
 				order: 6
+			},
+			validate (store) {
+				if (store.report.ACTIVITY_LOCATION_TYPE_ID) {
+					return { isValid: true };
+				} else {
+					return {
+						isValid: false,
+						message: 'You much select the location of your activity.'
+					};
+				}
 			}
 		},
 		{
@@ -310,6 +340,21 @@ const schema = {
 			grouping: {
 				section: 'Main Report Information',
 				order: 9
+			},
+			validate (store) {
+				const startDate = store.report.DATE_BEGIN ? new Date(store.report.DATE_BEGIN) : null;
+				if (startDate !== null && startDate instanceof Date && !isNaN(startDate)) {
+					// valid
+					return {
+						isValid: true
+					};
+				} else {
+					// invalid
+					return {
+						isValid: false,
+						message: 'You have entered an invalid date for the start date.'
+					};
+				}
 			}
 		},
 		{
@@ -320,6 +365,20 @@ const schema = {
 			grouping: {
 				section: 'Main Report Information',
 				order: 10
+			},
+			validate (store) {
+				if (store.report.DATE_END) {
+					const endDate = new Date(store.report.DATE_END).getTime();
+					const startDate = new Date(store.report.DATE_BEGIN).getTime();
+					return {
+						isValid: endDate >= startDate,
+						message: 'The end date for your report must be after the begin date.'
+					};
+				} else {
+					return {
+						isValid: true
+					};
+				}
 			}
 		},
 		{
@@ -363,6 +422,17 @@ const schema = {
 				],
 				showAlways: false
 			},
+			validate (store) {
+				const areas = store.programAreas.records;
+				if (areas.length > 0) {
+					return { isValid: true };
+				} else {
+					return {
+						isValid: false,
+						message: 'You must select at least one Program Area.'
+					};
+				}
+			},
 			description: 'Bacon ipsum dolor amet t-bone pork voluptate officia dolore prosciutto commodo pork loin jerky brisket hamburger. Dolore ullamco shoulder velit, nulla sausage kevin andouille shank sirloin pork chop. Cupim bresaola bacon kielbasa excepteur magna, consectetur exercitation. Cow nostrud filet mignon pork reprehenderit ut, ground round strip steak adipisicing.'
 		},
 		{
@@ -396,6 +466,17 @@ const schema = {
 					'Supplemental Data',
 					'Sub-Report Roles'
 				]
+			},
+			validate (store) {
+				const reportTypeRecords = store.reportType.records;
+				if (reportTypeRecords.length === 1) {
+					return { isValid: true };
+				} else {
+					return {
+						isValid: false,
+						message: 'You must select a report type.'
+					};
+				}
 			},
 			description: 'Bacon ipsum dolor amet tri-tip pancetta ea meatball spare ribs. Tenderloin porchetta velit pariatur ad. Pork loin exercitation excepteur cupim. Ground round deserunt pancetta, et bacon est jerky eiusmod tail sausage in dolor corned beef lorem. Pancetta aliqua rump pig boudin.'
 		},

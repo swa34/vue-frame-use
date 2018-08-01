@@ -12,6 +12,7 @@
 				v-on:input="$emit('input', $event.target.value)"
 				:required="field.required"
 				:disabled="field.immutable"
+				:style="field.style"
 			>
 				{{ value }}
 			</textarea>
@@ -26,6 +27,7 @@
 				v-on:input="$emit('input', $event.target.value)"
 				:required="field.required"
 				:disabled="field.immutable"
+				:style="field.style"
 			>
 				<option disabled selected value>
 					(Select One)
@@ -44,6 +46,7 @@
 				v-on:input="$emit('input', $event.target.value)"
 				:required="field.required"
 				:disabled="field.immutable"
+				:style="field.style"
 				min="0"
 			/>
 			<input
@@ -53,6 +56,7 @@
 				v-on:input="$emit('input', $event.target.value)"
 				:required="field.required"
 				:disabled="field.immutable"
+				:style="field.style"
 			/>
 		</label>
 	</div>
