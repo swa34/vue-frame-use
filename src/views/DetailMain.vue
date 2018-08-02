@@ -123,7 +123,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<button v-if="!identifier.value" v-on:click="validateData" type="button" class="button">
+		<button v-on:click="validateData" type="button" class="button">
 			Submit
 		</button>
   </main>
@@ -151,7 +151,8 @@
 		stringFormats
 	} from '@/modules/utilities';
 	import {
-		getCriteriaStructure
+		getCriteriaStructure,
+		postReportData
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
@@ -244,11 +245,18 @@
 			},
 			// Doesn't send anything yet, just pretends like it does
 			submitData () {
-				swal('Awesome!', 'Your entry has been saved successfully.', 'success');
-				console.log('Successfully sent this data to the server:');
+				// swal('Awesome!', 'Your entry has been saved successfully.', 'success');
 				const schemaLessStore = Object.assign({}, this.$store.state);
 				delete schemaLessStore.schema;
-				console.log(JSON.stringify(schemaLessStore, null, 2));
+				const reportData = {
+					report: schemaLessStore.report
+				};
+				postReportData(reportData, (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						console.log(data);
+					}
+				});
 			},
 			columnShouldBeDisplayed (column) {
 				if (!column.depends) {

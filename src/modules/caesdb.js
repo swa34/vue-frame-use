@@ -341,6 +341,11 @@ const getTopics = (callback) => {
 	makeGetRequest(url, callback);
 };
 
+const postReportData = (report, callback) => {
+	const url = generateURL('postReportData');
+	makePostRequest(url, report, callback);
+};
+
 export {
 	get4HActivity,
 	get4HActivityList,
@@ -392,5 +397,6 @@ export {
 	getSubReportContact,
 	getSubReportPurposeAchievements,
 	getTargetAudiences,
-	getTopics
+	getTopics,
+	postReportData
 };
