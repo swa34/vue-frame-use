@@ -1,5 +1,8 @@
+/* global caesCache */
+
+import { enableConstraintValues } from '@/modules/schemaTools';
 import {
-	getContactTypes,
+	// getContactTypes,
 	getReportContact
 } from '@/modules/caesdb';
 
@@ -24,11 +27,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getContactTypes,
-				database: 'GACOUNTS3',
-				table: 'CONTACT_TYPE',
+				// getValues: getContactTypes,
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignLabel: 'LABEL',
+				values: caesCache.data.gc3.contactType
 			}
 		},
 		{
@@ -39,8 +41,4 @@ const schema = {
 	]
 };
 
-schema.columns.forEach((column) => {
-	if (column.constraint) column.constraint.values = [];
-});
-
-export default schema;
+export default enableConstraintValues(schema);

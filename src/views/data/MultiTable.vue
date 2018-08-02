@@ -283,7 +283,18 @@
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
+					if (column.constraint && column.constraint.values && column.constraint.values.length > 0) {
+						let values = [];
+						column.constraint.values.forEach((result) => {
+							const value = {
+								key: result[column.constraint.foreignKey],
+								label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+								originalValue: result
+							};
+							values.push(value);
+						});
+						column.constraint.values = values;
+					} else if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
 						column.constraint.getValues((err, data) => {
 							if (err) console.error(err);
 							if (data) {

@@ -1,6 +1,9 @@
+/* global caesCache */
+
+import { enableConstraintValues } from '@/modules/schemaTools';
 import {
-	getReportTargetAudience,
-	getTargetAudiences
+	getReportTargetAudience
+	// getTargetAudiences
 } from '@/modules/caesdb';
 
 const schema = {
@@ -23,9 +26,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getTargetAudiences,
+				// getValues: getTargetAudiences,
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignLabel: 'LABEL',
+				values: caesCache.data.ccd.targetAudienceType
 			}
 		},
 		{
@@ -37,8 +41,4 @@ const schema = {
 	]
 };
 
-schema.columns.forEach((column) => {
-	if (column.constraint) column.constraint.values = [];
-});
-
-export default schema;
+export default enableConstraintValues(schema);

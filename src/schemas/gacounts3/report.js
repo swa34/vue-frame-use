@@ -1,5 +1,6 @@
 /* global activeUser */
 /* global actualUser */
+/* global caesCache */
 
 // Pull in required modules
 import {
@@ -27,38 +28,19 @@ import {
 	gc3TargetAudienceCriteriaStructure
 } from '@/criteriaStructures/gacounts3';
 import {
-	getActivityLocationTypes,
+	// getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
 	getAssociationReportTypeProgramArea,
 	getAssociationTargetAudienceProgramArea,
-	getCounties,
-	getProgramScopes,
+	// getCounties,
+	// getProgramScopes,
 	getReport
 } from '@/modules/caesdb';
 import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
 import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
 import SubReportCollaborators from '@/views/custom/gacounts3/SubReportCollaborators';
-
-// Gotta fetch activity locations
-let activityLocations = [
-	{
-		ID: 1,
-		LABEL: 'Inside Georgia',
-		USES_ALTERNATE_TEXT: 0
-	},
-	{
-		ID: 2,
-		LABEL: 'Outside Georgia, Inside U.S.',
-		USES_ALTERNATE_TEXT: 1
-	},
-	{
-		ID: 3,
-		LABEL: 'Outside U.S.',
-		USES_ALTERNATE_TEXT: 1
-	}
-];
 
 // Adjust the racial demographic schema to suit our needs
 const altRacialDemographicSchema = Object.assign({}, racialDemographicSchema);
@@ -153,7 +135,13 @@ const demographicsTest = (records, schema) => {
 	const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
 	const values = column.constraint.values;
 	const valuesIdMap = values.map(v => v.key);
-	const valuesUsesDemographicsMap = values.map(v => v.originalValue.USES_DEMOGRAPHICS);
+	const valuesUsesDemographicsMap = values.map((v) => {
+		if (v.originalValue) {
+			return v.originalValue.USES_DEMOGRAPHICS;
+		} else {
+			return v.USES_DEMOGRAPHICS;
+		}
+	});
 	records.forEach((record) => {
 		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 	});
@@ -239,12 +227,12 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getProgramScopes,
-				database: 'CAES_CENTRAL_DATABASE',
-				table: 'PROGRAM_SCOPE',
+				// getValues: getProgramScopes,
+				// database: 'CAES_CENTRAL_DATABASE',
+				// table: 'PROGRAM_SCOPE',
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
-				values: []
+				values: caesCache.data.ccd.programScope
 			},
 			grouping: {
 				section: 'Main Report Information',
@@ -266,12 +254,12 @@ const schema = {
 			prettyName: 'Location of Activity',
 			type: 'int',
 			constraint: {
-				getValues: getActivityLocationTypes,
-				database: 'GACOUNTS3',
-				table: 'ACTIVITY_LOCATION_TYPE',
+				// getValues: getActivityLocationTypes,
+				// database: 'GACOUNTS3',
+				// table: 'ACTIVITY_LOCATION_TYPE',
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
-				values: []
+				values: caesCache.data.gc3.activityLocationType
 			},
 			grouping: {
 				section: 'Main Report Information',
@@ -295,19 +283,19 @@ const schema = {
 			required: true,
 			default: activeUser.COUNTYLISTID,
 			constraint: {
-				getValues: getCounties,
-				database: 'Portal',
-				table: 'CountyList',
+				// getValues: getCounties,
+				// database: 'Portal',
+				// table: 'CountyList',
 				foreignKey: 'COUNTYLISTID',
 				foreignLabel: 'COUNTYNAME',
-				values: []
+				values: caesCache.data.pdb.countyList
 			},
 			depends: {
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
 				test (val) {
-					const activityLocationMap = activityLocations.map(location => location.ID);
+					const activityLocationMap = caesCache.data.gc3.activityLocationType.map(location => location.ID);
 					const activityLocationIndex = activityLocationMap.indexOf(Number(val));
-					return activityLocationIndex !== -1 && !activityLocations[activityLocationIndex].USES_ALTERNATE_TEXT;
+					return activityLocationIndex !== -1 && !caesCache.data.gc3.activityLocationType[activityLocationIndex].USES_ALTERNATE_TEXT;
 				}
 			},
 			grouping: {
@@ -322,9 +310,9 @@ const schema = {
 			depends: {
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
 				test (val) {
-					const activityLocationMap = activityLocations.map(location => location.ID);
+					const activityLocationMap = caesCache.data.gc3.activityLocationType.map(location => location.ID);
 					const activityLocationIndex = activityLocationMap.indexOf(Number(val));
-					return activityLocationIndex !== -1 && activityLocations[activityLocationIndex].USES_ALTERNATE_TEXT;
+					return activityLocationIndex !== -1 && caesCache.data.gc3.activityLocationType[activityLocationIndex].USES_ALTERNATE_TEXT;
 				}
 			},
 			grouping: {
@@ -643,7 +631,13 @@ const schema = {
 					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
 					const values = column.constraint.values;
 					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesResidenceMap = values.map(v => v.originalValue.USES_RESIDENCE);
+					const valuesUsesResidenceMap = values.map((v) => {
+						if (v.originalValue) {
+							return v.originalValue.USES_RESIDENCE;
+						} else {
+							return v.USES_RESIDENCE;
+						}
+					});
 					records.forEach((record) => {
 						if (valuesUsesResidenceMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
@@ -700,7 +694,13 @@ const schema = {
 					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
 					const values = column.constraint.values;
 					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesMediaProductionMap = values.map(v => v.originalValue.USES_MEDIA_PRODUCTION);
+					const valuesUsesMediaProductionMap = values.map((v) => {
+						if (v.originalValue) {
+							return v.originalValue.USES_MEDIA_PRODUCTION;
+						} else {
+							return v.USES_MEDIA_PRODUCTION;
+						}
+					});
 					records.forEach((record) => {
 						if (valuesUsesMediaProductionMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
@@ -730,7 +730,13 @@ const schema = {
 					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
 					const values = column.constraint.values;
 					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesMediaDistributedMap = values.map(v => v.originalValue.USES_MEDIA_DISTRIBUTED);
+					const valuesUsesMediaDistributedMap = values.map((v) => {
+						if (v.originalValue) {
+							return v.originalValue.USES_MEDIA_DISTRIBUTED;
+						} else {
+							return v.USES_MEDIA_DISTRIBUTED;
+						}
+					});
 					records.forEach((record) => {
 						if (valuesUsesMediaDistributedMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});

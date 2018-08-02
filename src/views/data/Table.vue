@@ -204,7 +204,22 @@
 
 			const getConstraintData = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.constraint && column.constraint.getValues) {
+					if (column.constraint && column.constraint.values && column.constraint.values.length > 0) {
+						let values = [];
+						column.constraint.values.forEach((result) => {
+							let value = null;
+							if (column.constraint.generateValue) {
+								value = column.constraint.generateValue(result);
+							} else {
+								value = {
+									key: result[column.constraint.foreignKey],
+									label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+								};
+							}
+							values.push(value);
+						});
+						column.constraint.values = values;
+					} else if (column.constraint && column.constraint.getValues) {
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							// structure first, then send our request

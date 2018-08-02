@@ -181,7 +181,19 @@
 
 			const getOptions = () => {
 				component.schema.columns.forEach((column) => {
-					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
+					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.values && column.constraint.values.length > 0) {
+						component.unfilteredOptions = column.constraint.values;
+						let values = [];
+						column.constraint.values.forEach((result) => {
+							const value = {
+								key: result[column.constraint.foreignKey],
+								label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+								originalValue: result
+							};
+							values.push(value);
+						});
+						column.constraint.values = values;
+					} else if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
@@ -225,7 +237,7 @@
 								// if (data) component.unfilteredOptions = data;
 							});
 						}
-					} else if (column.columnName === component.associatedColumn) {
+					} else if (column.columnName === component.associatedColumn && column.constraint.values.length < 1) {
 						console.error('ID Column does not have necessary constraint information.');
 					}
 				});

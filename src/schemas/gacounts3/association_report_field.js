@@ -1,3 +1,4 @@
+import { enableConstraintValues } from '@/modules/schemaTools';
 import {
 	getReportFields
 } from '@/modules/caesdb';
@@ -32,8 +33,4 @@ const schema = {
 	]
 };
 
-schema.columns.forEach((column) => {
-	if (column.constraint) column.constraint.values = [];
-});
-
-export default schema;
+export default enableConstraintValues(schema);

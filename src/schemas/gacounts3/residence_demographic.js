@@ -1,6 +1,8 @@
+/* global caesCache */
+
 import {
-	getResidenceDemographic,
-	getResidenceTypes
+	getResidenceDemographic
+	// getResidenceTypes
 } from '@/modules/caesdb';
 import { enableConstraintValues } from '@/modules/schemaTools';
 
@@ -25,9 +27,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getResidenceTypes,
+				// getValues: getResidenceTypes,
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignLabel: 'LABEL',
+				values: caesCache.data.gc3.residenceType
 			}
 		},
 		{

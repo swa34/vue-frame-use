@@ -1,7 +1,9 @@
+/* global caesCache */
+
 import {
-	getEthnicDemographic,
-	getEthnicities,
-	getGenders
+	getEthnicDemographic
+	// getEthnicities
+	// getGenders
 } from '@/modules/caesdb';
 import { enableConstraintValues } from '@/modules/schemaTools';
 
@@ -26,9 +28,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getEthnicities,
+				// getValues: getEthnicities,
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignLabel: 'LABEL',
+				values: caesCache.data.ccd.ethnicity
 			}
 		},
 		{
@@ -37,9 +40,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getGenders,
+				// getValues: getGenders,
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignLabel: 'LABEL',
+				values: caesCache.data.ccd.gender
 			}
 		},
 		{

@@ -1,6 +1,8 @@
+/* global caesCache */
+
 import {
-	getAssociationReportKeyword,
-	getKeywords
+	getAssociationReportKeyword
+	// getKeywords
 } from '@/modules/caesdb';
 
 const schema = {
@@ -17,8 +19,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				database: 'GACOUNTS3',
-				table: 'REPORT',
 				foreignKey: 'ID',
 				foreignLabel: 'TITLE',
 				values: []
@@ -30,12 +30,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getKeywords,
-				database: 'CAES_CENTRAL_DATABASE',
-				table: 'KEYWORD',
+				// getValues: getKeywords,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
-				values: []
+				values: caesCache.data.ccd.keyword
 			}
 		}
 	]

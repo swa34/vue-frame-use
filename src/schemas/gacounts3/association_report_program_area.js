@@ -1,6 +1,8 @@
+/* global caesCache */
+
 import {
-	getAssociationReportProgramArea,
-	getProgramAreas
+	getAssociationReportProgramArea
+	// getProgramAreas
 } from '@/modules/caesdb';
 
 const schema = {
@@ -16,8 +18,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				database: 'GACOUNTS3',
-				table: 'REPORT',
 				foreignKey: 'ID',
 				values: []
 			}
@@ -27,12 +27,10 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getProgramAreas,
-				database: 'CAES_CENTRAL_DATABASE',
-				table: 'PROGRAM_AREA',
+				// getValues: getProgramAreas,
 				foreignKey: 'ID',
 				foreignLabel: 'ABBREVIATION',
-				values: []
+				values: caesCache.data.ccd.programArea
 			}
 		}
 	]

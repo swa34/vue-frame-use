@@ -374,7 +374,9 @@
 				// Loop through the schema's columns looking for the associated column
 				// with a constraint
 				component.schema.columns.forEach((column) => {
-					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
+					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.values && column.constraint.values.length > 0) {
+						component.options = column.constraint.values;
+					} else if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
