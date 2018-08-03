@@ -1,3 +1,4 @@
+import deepObjectAssign from './deepObjectAssign';
 import formatDates from './formatDates';
 import recursiveAssign from './recursiveAssign';
 import request from './request';
@@ -14,6 +15,7 @@ const getPrettyColumnName = (name) => {
 };
 
 export {
+	deepObjectAssign,
 	formatDates,
 	getPrettyColumnName,
 	recursiveAssign,

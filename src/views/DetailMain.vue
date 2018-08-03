@@ -146,6 +146,7 @@
 		DataTable
 	} from '@/views/data';
 	import {
+		deepObjectAssign,
 		formatDates,
 		sqlToHtml,
 		stringFormats
@@ -230,31 +231,34 @@
 			// Run validation on the data
 			validateData () {
 				let isValid = true;
-				this.schema.sections.forEach((section) => {
-					section.areas.forEach((area) => {
-						if (area.data.validate) {
-							const validation = area.data.validate(this.$store.state);
-							if (validation.isValid !== true) {
-								notify.error(validation.message);
-								isValid = false;
-							};
-						}
-					});
-				});
+				// this.schema.sections.forEach((section) => {
+				// 	section.areas.forEach((area) => {
+				// 		if (area.data.validate) {
+				// 			const validation = area.data.validate(this.$store.state);
+				// 			if (validation.isValid !== true) {
+				// 				notify.error(validation.message);
+				// 				isValid = false;
+				// 			};
+				// 		}
+				// 	});
+				// });
 				if (isValid) this.submitData();
 			},
 			// Doesn't send anything yet, just pretends like it does
 			submitData () {
-				// swal('Awesome!', 'Your entry has been saved successfully.', 'success');
-				const schemaLessStore = Object.assign({}, this.$store.state);
+				const schemaLessStore = deepObjectAssign({}, this.$store.state);
 				delete schemaLessStore.schema;
-				const reportData = {
-					report: schemaLessStore.report
-				};
-				postReportData(reportData, (err, data) => {
+				for (let key in schemaLessStore.report) {
+					if (schemaLessStore.report[key] === null) schemaLessStore.report[key] = '';
+				}
+				postReportData(schemaLessStore, (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						console.log(data);
+						if (data.SUCCESS) {
+							swal('Awesome!', 'Your entry has been saved successfully.', 'success');
+						} else {
+							notify.error(data.MESSAGES);
+						}
 					}
 				});
 			},

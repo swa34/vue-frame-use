@@ -89,9 +89,9 @@
 			},
 			value: {
 				type: [
-					Boolean,
 					Number,
-					String
+					String,
+					Boolean
 				]
 			}
 		}

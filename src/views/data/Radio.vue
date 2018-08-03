@@ -64,12 +64,12 @@
 			},
 			computedRecord: {
 				get () {
-					return this.records[0] || null;
+					return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records[0] || null;
 					// return this.record;
 				},
 				set (val) {
-					this.records[0] = val;
-					// this.record = val;
+					if (this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records.length > 0) this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records.pop();
+					this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records.push(val);
 				}
 			},
 			duplication () {
@@ -97,18 +97,6 @@
 						if (validOptionValues.indexOf(option[this.associatedColumnSchema.constraint.foreignKey]) !== -1) options.push(option);
 					});
 					return options;
-				}
-			},
-			records: {
-				get () {
-					return this.$store ? this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records : this.localRecords;
-				},
-				set (val) {
-					if (this.$store) {
-						this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
-					} else {
-						this.localRecords = val;
-					}
 				}
 			}
 		},
@@ -182,16 +170,23 @@
 			const getOptions = () => {
 				component.schema.columns.forEach((column) => {
 					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.values && column.constraint.values.length > 0) {
-						component.unfilteredOptions = column.constraint.values;
 						let values = [];
-						column.constraint.values.forEach((result) => {
-							const value = {
-								key: result[column.constraint.foreignKey],
-								label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
-								originalValue: result
-							};
-							values.push(value);
+						let unfilteredOptions = [];
+						column.constraint.values.forEach((value) => {
+							if (value.originalValue) {
+								unfilteredOptions.push(value.originalValue);
+								values.push(value);
+							} else {
+								const newValue = {
+									key: value[column.constraint.foreignKey],
+									label: column.constraint.foreignLabel ? value[column.constraint.foreignLabel] : value[column.constraint.foreignKey],
+									originalValue: value
+								};
+								values.push(newValue);
+								unfilteredOptions.push(value);
+							}
 						});
+						component.unfilteredOptions = unfilteredOptions;
 						column.constraint.values = values;
 					} else if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
 						if (column.constraint.tablePrefix) {
@@ -289,9 +284,9 @@
 			}
 		},
 		watch: {
-			computedRecord (val) {
-				this.records = [val];
-			},
+			// computedRecord (val) {
+			// 	this.records = [val];
+			// },
 			duplication: {
 				handler () {
 					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
