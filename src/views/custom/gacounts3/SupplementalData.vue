@@ -19,13 +19,13 @@
 					{{ getFieldLabel(record.FIELD_ID) }}
 				</td>
 				<td>
-					<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE">
+					<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
 						<option v-for="option in getFieldOptions(record)" :value="option.ID">
 							{{ option.LABEL }}
 						</option>
 					</select>
-					<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" type="number" min="0" step="any" />
-					<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" />
+					<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
+					<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
 				</td>
 			</tr>
 		</tbody>
@@ -148,6 +148,10 @@
 			};
 		},
 		methods: {
+			fieldIsRequired (record) {
+				const field = this.getFieldFromRecord(record);
+				return field.IS_REQUIRED;
+			},
 			getFieldFromRecord (record) {
 				return this.reportFields[this.fieldIDs.indexOf(record.FIELD_ID)];
 			},

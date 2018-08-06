@@ -59,7 +59,8 @@ const schema = {
 			columnName: 'STATUS_ID',
 			type: 'int',
 			required: true,
-			automated: true
+			automated: true,
+			default: 3	// Published
 		}
 	]
 };

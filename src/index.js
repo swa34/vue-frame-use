@@ -7,3 +7,7 @@ const app = new Vue({
 	render: h => h(GACountsReport)
 	// render: h => h(Test)
 });
+
+document.querySelector('form').addEventListener('submit', () => {
+	return false;
+});

@@ -716,8 +716,8 @@
 								if (record[key]) subReport[key] = record[key];
 							});
 							if (subReport.USER_ID === this.ownerID) {
-								this.ownerSubReport.ISSUE_TYPE = subReport.PLANNED_PROGRAM_ID ? 'local' : 'state';
 								this.ownerSubReport = subReport;
+								this.ownerSubReport.ISSUE_TYPE = subReport.PLANNED_PROGRAM_ID ? 'local' : 'state';
 							} else {
 								this.collaboratorRecords.subReports.push(subReport);
 							}

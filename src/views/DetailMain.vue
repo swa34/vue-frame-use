@@ -1,6 +1,6 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
-  <main>
+  <div>
 		<div v-if="requestsInProgress" class="application-loading-overlay">
 			<div class="container">
 				<Spinner />
@@ -127,7 +127,7 @@
 		<button v-on:click="cleanUpData" type="button" class="button">
 			Submit
 		</button>
-  </main>
+  </div>
 </template>
 
 <!-- The script portion of the component -->
