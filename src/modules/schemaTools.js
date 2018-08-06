@@ -155,6 +155,8 @@ const getSortedSchema = (schema) => {
 		tablePrefix: schema.tablePrefix,
 		criteria: schema.criteria,
 		fetchExisting: schema.fetchExisting,
+		cleanUpData: schema.cleanUpData,
+		processSubmission: schema.processSubmission,
 		sections: sortedSections
 	};
 	return sortedSchema;

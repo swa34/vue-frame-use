@@ -91,6 +91,7 @@
 								<!-- Else, just use a data table component -->
 								<div v-else-if="!identifier.value ? area.data.isAssignable : true">
 									<DataTable
+										v-if="dependencyMet(area.data)"
 										:title="area.data.title"
 										:schema="area.data.schema"
 										:associatedColumn="area.data.foreignKey"
@@ -123,7 +124,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<button v-on:click="validateData" type="button" class="button">
+		<button v-on:click="cleanUpData" type="button" class="button">
 			Submit
 		</button>
   </main>
@@ -151,10 +152,7 @@
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
-	import {
-		getCriteriaStructure,
-		postReportData
-	} from '@/modules/caesdb';
+	import { getCriteriaStructure } from '@/modules/caesdb';
 	import {
 		cfToJs,
 		jsToCf
@@ -228,13 +226,22 @@
 		},
 		// The methods available to this component during render
 		methods: {
+			// Clean up any extra data that no longer applies based on current
+			// selections/entries
+			cleanUpData () {
+				const schemaLessStore = deepObjectAssign({}, this.$store.state);
+				delete schemaLessStore.schema;
+				const cleanedUpStore = this.schema.cleanUpData(schemaLessStore);
+				this.validateData(cleanedUpStore);
+			},
 			// Run validation on the data
-			validateData () {
+			validateData (store) {
+				// console.log(store);
 				let isValid = true;
 				// this.schema.sections.forEach((section) => {
 				// 	section.areas.forEach((area) => {
 				// 		if (area.data.validate) {
-				// 			const validation = area.data.validate(this.$store.state);
+				// 			const validation = area.data.validate(store);
 				// 			if (validation.isValid !== true) {
 				// 				notify.error(validation.message);
 				// 				isValid = false;
@@ -242,16 +249,14 @@
 				// 		}
 				// 	});
 				// });
-				if (isValid) this.submitData();
+				if (isValid) this.submitData(store);
 			},
 			// Doesn't send anything yet, just pretends like it does
-			submitData () {
-				const schemaLessStore = deepObjectAssign({}, this.$store.state);
-				delete schemaLessStore.schema;
-				for (let key in schemaLessStore.report) {
-					if (schemaLessStore.report[key] === null) schemaLessStore.report[key] = '';
+			submitData (store) {
+				for (let key in store.report) {
+					if (store.report[key] === null) store.report[key] = '';
 				}
-				postReportData(schemaLessStore, (err, data) => {
+				this.schema.processSubmission(store, (err, data) => {
 					if (err) console.error(err);
 					if (data) {
 						if (data.SUCCESS) {

@@ -38,6 +38,13 @@ const schema = {
 			automated: true
 		},
 		{
+			columnName: 'ISSUE_TYPE',
+			type: 'bit',
+			immutable: true,
+			automated: true,
+			default: 'local'
+		},
+		{
 			columnName: 'PLANNED_PROGRAM_ID',
 			prettyName: 'Local Issue',
 			type: 'int',

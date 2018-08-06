@@ -211,10 +211,14 @@
 							if (column.constraint.generateValue) {
 								value = column.constraint.generateValue(result);
 							} else {
-								value = {
-									key: result[column.constraint.foreignKey],
-									label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
-								};
+								if (result.originalValue) {
+									value = result;
+								} else {
+									value = {
+										key: result[column.constraint.foreignKey],
+										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+									};
+								}
 							}
 							values.push(value);
 						});
@@ -244,7 +248,8 @@
 										} else {
 											value = {
 												key: result[column.constraint.foreignKey],
-												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+												originalValue: result
 											};
 										}
 										values.push(value);

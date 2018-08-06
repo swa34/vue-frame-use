@@ -35,7 +35,8 @@ import {
 	getAssociationTargetAudienceProgramArea,
 	// getCounties,
 	// getProgramScopes,
-	getReport
+	getReport,
+	postReportData
 } from '@/modules/caesdb';
 import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
@@ -156,6 +157,27 @@ const schema = {
 		string: 'criteria_ID_eq'
 	},
 	fetchExisting: getReport,
+	processSubmission: postReportData,
+	cleanUpData: (store) => {
+		// Remove media distribution/production records if report type does not need
+		// them.
+		const selectedReportType = store.reportType.records[0] || null;
+		if (selectedReportType) {
+			const selectedReportTypeId = selectedReportType.TYPE_ID;
+			const reportTypeIdMap = caesCache.data.gc3.reportType.map(t => t.ID);
+			const index = reportTypeIdMap.indexOf(selectedReportTypeId);
+			if (index !== -1) {
+				const reportType = caesCache.data.gc3.reportType[index];
+				if (!reportType.USES_MEDIA_PRODUCTION) store.mediaProduced.records = [];
+				if (!reportType.USES_MEDIA_DISTRIBUTION) store.mediaDistributed.records = [];
+			}
+		}
+		// Sub-Report must only have a local or state issue, not both.
+		const subReport = store.subschemas.subReport.subReport;
+		if (subReport.ISSUE_TYPE === 'local' && subReport.STATE_PLANNED_PROGRAM_ID !== null) subReport.STATE_PLANNED_PROGRAM_ID = null;
+		if (subReport.ISSUE_TYPE === 'state' && subReport.PLANNED_PROGRAM_ID !== null) subReport.PLANNED_PROGRAM_ID = null;
+		return store;
+	},
 	columns: [
 		{
 			columnName: 'ID',
@@ -686,7 +708,6 @@ const schema = {
 				association: 'Report Type',
 				useValues: true,
 				test: (records, schema) => {
-					console.log('checking media produced');
 					let passes = false;
 					const associationsMap = schema.associations.map(a => a.title);
 					const association = schema.associations[associationsMap.indexOf('Report Type')];
@@ -732,9 +753,9 @@ const schema = {
 					const valuesIdMap = values.map(v => v.key);
 					const valuesUsesMediaDistributedMap = values.map((v) => {
 						if (v.originalValue) {
-							return v.originalValue.USES_MEDIA_DISTRIBUTED;
+							return v.originalValue.USES_MEDIA_DISTRIBUTION;
 						} else {
-							return v.USES_MEDIA_DISTRIBUTED;
+							return v.USES_MEDIA_DISTRIBUTION;
 						}
 					});
 					records.forEach((record) => {

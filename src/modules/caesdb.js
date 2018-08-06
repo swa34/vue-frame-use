@@ -342,7 +342,7 @@ const getTopics = (callback) => {
 };
 
 const postReportData = (report, callback) => {
-	const url = generateURL('postReportData');
+	const url = generateURL('processReport');
 	makePostRequest(url, report, callback);
 };
 

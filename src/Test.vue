@@ -1,22 +1,28 @@
 <template lang="html">
   <div id="main">
-		<select id="slim">
-			<option value="gabe">Gabe</option>
-			<option value="otis">Otis</option>
-			<option value="benson">Benson</option>
-		</select>
+		<input type="text" v-model="useNumber ? number : text" />
+		<button type="button" v-on:click="toggleType">
+			Toggle
+		</button>
+		<span>Number: {{ number }}</span>
+		<span>Text: {{ text }}</span>
 	</div>
 </template>
 
 <script>
-	/* global SlimSelect */
-
 	export default {
 		name: 'Test',
-		mounted () {
-			const slimSelect = new SlimSelect({
-				select: 'select#slim'
-			});
+		data () {
+			return {
+				number: '5',
+				text: 'string',
+				useNumber: true
+			};
+		},
+		methods: {
+			toggleType () {
+				this.useNumber = !this.useNumber;
+			}
 		}
 	};
 </script>

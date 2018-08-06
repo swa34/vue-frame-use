@@ -140,6 +140,10 @@
 				existingRecords: [],
 				fieldOptions: [],
 				fieldTypes: [],
+				fieldTypesWithLabels: [
+					'String Data',
+					'Option Data'
+				],
 				reportFields: []
 			};
 		},
@@ -178,12 +182,23 @@
 					const indexOfExistingRecord = this.existingRecords.map(r => r.FIELD_ID).indexOf(field.FIELD_ID);
 					if (indexOfField === -1) {
 						if (indexOfExistingRecord !== -1) {
-							records.push(generateRecord(field, this.existingRecords[indexOfExistingRecord].FIELD_VALUE));
+							const existingRecord = this.existingRecords[indexOfExistingRecord];
+							if (this.fieldTypesWithLabels.indexOf(existingRecord.FIELD_TYPE_LABEL) !== -1) {
+								records.push(generateRecord(field, existingRecord.FIELD_OPTION_LABEL));
+							} else {
+								records.push(generateRecord(field, existingRecord.FIELD_VALUE));
+							}
 						} else {
 							records.push(generateRecord(field));
 						}
 					} else {
-						if (indexOfExistingRecord !== -1) this.records[indexOfField] = this.existingRecords[indexOfExistingRecord];
+						if (indexOfExistingRecord !== -1) {
+							const existingRecord = this.existingRecords[indexOfExistingRecord];
+							this.records[indexOfField] = this.existingRecords[indexOfExistingRecord];
+							if (existingRecord.FIELD_TYPE_LABEL && this.fieldTypesWithLabels.indexOf(existingRecord.FIELD_TYPE_LABEL) !== -1) {
+								this.records[indexOfField].FIELD_VALUE = existingRecord.FIELD_OPTION_LABEL;
+							}
+						}
 						records.push(this.records[indexOfField]);
 					}
 				});
