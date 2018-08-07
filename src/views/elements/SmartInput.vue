@@ -4,7 +4,13 @@
 			<legend>
 				<h3>
 					{{ fieldName }}
+					<a v-if="field.helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+						<HelpCircleIcon />
+					</a>
 				</h3>
+				<p v-if="field.description">
+					{{ field.description }}
+				</p>
 			</legend>
 			<textarea
 				v-if="fieldType === 'textarea'"
@@ -68,11 +74,13 @@
 		getPrettyColumnName,
 		sqlToHtml
 	} from '@/modules/utilities';
+	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	export default {
 		name: 'SmartInput',
 		components: {
-			Editor
+			Editor,
+			HelpCircleIcon
 		},
 		computed: {
 			fieldName () {

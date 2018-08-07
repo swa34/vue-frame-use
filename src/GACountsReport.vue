@@ -177,7 +177,7 @@
 			-webkit-column-break-inside: avoid;
 			margin-bottom: .75rem;
 			label {
-				display: flex;
+				display: inline-flex;
 				span {
 					display: flex;
 					flex-direction: column;
@@ -196,5 +196,14 @@
 	button.small {
 		font-size: .75rem;
 		padding: .5rem;
+	}
+	a.help-link {
+		cursor: pointer;
+		svg {
+			vertical-align: text-bottom;
+		}
+	}
+	table caption a.help-link svg {
+		color: #fff;
 	}
 </style>

@@ -29,7 +29,7 @@ const schema = {
 			constraint: {
 				// getValues: getProgramAreas,
 				foreignKey: 'ID',
-				foreignLabel: 'ABBREVIATION',
+				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.programArea
 			}
 		}

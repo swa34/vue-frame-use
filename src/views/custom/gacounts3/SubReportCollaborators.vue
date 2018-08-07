@@ -11,6 +11,9 @@
 					<label>
 						<h4>
 							Type of Issue
+							<a v-on:click="$emit('show-help', { helpMessageName: 'NewReportPlanOfWork' })" class="help-link">
+								<HelpCircleIcon />
+							</a>
 						</h4>
 						<select v-model="ownerSubReport.ISSUE_TYPE">
 							<option value="local">
@@ -48,10 +51,20 @@
 					</label>
 				</div>
 				<!-- Roles -->
-				<div>
+				<!--
+					We only want to render the list of roles once we have the criteria
+					structures needed to filter out role types that don't apply
+				-->
+				<div v-if="criteriaStructureTemplates.associationReportTypeRole">
 					<h4>
 						Roles
+						<a v-on:click="$emit('show-help', { helpMessageName: 'ReportRole' })" class="help-link">
+							<HelpCircleIcon />
+						</a>
 					</h4>
+					<p>
+						Please select the role(s) which best describe your involvement in the reported activities.
+					</p>
 					<ul v-if="reportType !== -1" class="checkbox">
 						<li v-for="role in ownerRoleTypes">
 							<label>
@@ -67,6 +80,9 @@
 				<table v-if="ownerContacts.length > 0">
 					<caption>
 						Contacts
+						<a v-on:click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })" class="help-link">
+							<HelpCircleIcon />
+						</a>
 					</caption>
 					<thead>
 						<tr>
@@ -107,6 +123,7 @@
 				-->
 				<SupplementalData
 					v-if="!needExistingData || ownerSubReport.ID !== null"
+					v-on:show-help="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })"
 					:forSubReport="true"
 				/>
 				<!-- Outcome, Impact, Achievements -->
@@ -194,11 +211,13 @@
 		jsToCf
 	} from '@/modules/criteriaUtils';
 	import { url } from '@/modules/utilities';
+	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	export default {
 		name: 'SubReportCollaborators',
 		components: {
 			FuzzySelect,
+			HelpCircleIcon,
 			SubReportPlainText,
 			SupplementalData
 		},

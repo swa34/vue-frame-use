@@ -1,28 +1,30 @@
 <template lang="html">
   <div id="main">
-		<input type="text" v-model="useNumber ? number : text" />
-		<button type="button" v-on:click="toggleType">
-			Toggle
+		<button type="button" v-on:click="helpMessage.show = true">
+			Show Message
 		</button>
-		<span>Number: {{ number }}</span>
-		<span>Text: {{ text }}</span>
+		<ContextualHelpMessage
+			:messageName="helpMessage.name"
+			v-on:close-modal="helpMessage.show = false"
+			v-if="helpMessage.show"
+		/>
 	</div>
 </template>
 
 <script>
+	import ContextualHelpMessage from '@/views/data/ContextualHelpMessage';
 	export default {
 		name: 'Test',
+		components: {
+			ContextualHelpMessage
+		},
 		data () {
 			return {
-				number: '5',
-				text: 'string',
-				useNumber: true
+				helpMessage: {
+					show: false,
+					name: 'NewReportScope'
+				}
 			};
-		},
-		methods: {
-			toggleType () {
-				this.useNumber = !this.useNumber;
-			}
 		}
 	};
 </script>

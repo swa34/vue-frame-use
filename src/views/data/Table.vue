@@ -3,6 +3,9 @@
 		<table v-if="schema.columns">
 			<caption v-if="title || schema.title">
 				{{ title || schema.title }}
+				<a v-if="helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+					<HelpCircleIcon />
+				</a>
 			</caption>
 			<thead>
 				<tr>
@@ -76,7 +79,9 @@
 				</tr>
 			</transition-group>
 		</table>
-		<pre v-if="!$store">{{ $data }}</pre>
+		<p v-if="description">
+			{{ description }}
+		</p>
 	</div>
 </template>
 
@@ -95,11 +100,13 @@
 		cfToJs,
 		jsToCf
 	} from '@/modules/criteriaUtils';
+	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	export default {
 		name: 'DataTable',
 		components: {
-			FuzzySelect
+			FuzzySelect,
+			HelpCircleIcon
 		},
 		computed: {
 			duplication () {
@@ -276,11 +283,17 @@
 			'associatedColumn': {
 				type: String
 			},
+			'description': {
+				type: String
+			},
 			'fieldsToDisplay': {
 				type: Array
 			},
 			'fieldsToEdit': {
 				type: Array
+			},
+			'helpMessageName': {
+				type: String
 			},
 			'identifier': {
 				type: Object

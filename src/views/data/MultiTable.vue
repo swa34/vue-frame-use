@@ -3,6 +3,9 @@
 		<table v-if="schema.columns && records.length > 0">
 			<caption v-if="title || schema.title">
 				{{ title || schema.title }}
+				<a v-if="helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+					<HelpCircleIcon />
+				</a>
 			</caption>
 			<thead>
 				<tr>
@@ -48,6 +51,9 @@
 				</tr>
 			</tfoot>
 		</table>
+		<p v-if="description">
+			{{ description }}
+		</p>
 	</div>
 </template>
 
@@ -64,9 +70,11 @@
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
+	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	export default {
 		name: 'DataMultiTable',
+		components: { HelpCircleIcon },
 		computed: {
 			duplication () {
 				return this.$store.state.duplication;
@@ -152,8 +160,6 @@
 						this.$store.commit(stringFormats.camelCase(this.title || this.schema.title) + '/setRecords', {
 							records: val
 						});
-						// Vue.set(this.$store.state[stringFormats.camelCase(this.title || this.schema.title)], 'records', val);
-						// this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
 					} else {
 						this.localRecords = val;
 					}
@@ -286,12 +292,16 @@
 					if (column.constraint && column.constraint.values && column.constraint.values.length > 0) {
 						let values = [];
 						column.constraint.values.forEach((result) => {
-							const value = {
-								key: result[column.constraint.foreignKey],
-								label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
-								originalValue: result
-							};
-							values.push(value);
+							if (result.originalValue) {
+								values.push(result);
+							} else {
+								const value = {
+									key: result[column.constraint.foreignKey],
+									label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+									originalValue: result
+								};
+								values.push(value);
+							}
 						});
 						column.constraint.values = values;
 					} else if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
@@ -339,8 +349,14 @@
 			'associatedColumn': {
 				type: String
 			},
+			'description': {
+				type: String
+			},
 			'filter': {
 				type: Object
+			},
+			'helpMessageName': {
+				type: String
 			},
 			'identifier': {
 				type: Object

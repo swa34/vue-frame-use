@@ -248,6 +248,7 @@ const schema = {
 			prettyName: 'Geographic Reach of Activity',
 			type: 'int',
 			required: true,
+			helpMessageName: 'NewReportScope',
 			constraint: {
 				// getValues: getProgramScopes,
 				// database: 'CAES_CENTRAL_DATABASE',
@@ -304,6 +305,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			default: activeUser.COUNTYLISTID,
+			helpMessageName: 'NewReportCounty',
 			constraint: {
 				// getValues: getCounties,
 				// database: 'Portal',
@@ -372,6 +374,7 @@ const schema = {
 			prettyName: 'End Date',
 			type: 'datetime',
 			required: true,
+			description: 'If left blank, end date will be the same as the begin date.',
 			grouping: {
 				section: 'Main Report Information',
 				order: 10
@@ -416,6 +419,7 @@ const schema = {
 		{
 			title: 'Program Areas',
 			schema: associationReportProgramAreaSchema,
+			helpMessageName: 'NewReportProgramArea',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'AREA_ID',
@@ -442,12 +446,12 @@ const schema = {
 						message: 'You must select at least one Program Area.'
 					};
 				}
-			},
-			description: 'Bacon ipsum dolor amet t-bone pork voluptate officia dolore prosciutto commodo pork loin jerky brisket hamburger. Dolore ullamco shoulder velit, nulla sausage kevin andouille shank sirloin pork chop. Cupim bresaola bacon kielbasa excepteur magna, consectetur exercitation. Cow nostrud filet mignon pork reprehenderit ut, ground round strip steak adipisicing.'
+			}
 		},
 		{
 			title: 'Report Type',
 			schema: associationReportTypeSchema,
+			helpMessageName: 'NewReportReportType',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'TYPE_ID',
@@ -487,12 +491,12 @@ const schema = {
 						message: 'You must select a report type.'
 					};
 				}
-			},
-			description: 'Bacon ipsum dolor amet tri-tip pancetta ea meatball spare ribs. Tenderloin porchetta velit pariatur ad. Pork loin exercitation excepteur cupim. Ground round deserunt pancetta, et bacon est jerky eiusmod tail sausage in dolor corned beef lorem. Pancetta aliqua rump pig boudin.'
+			}
 		},
 		{
 			title: 'Topics',
 			schema: associationReportTopicSchema,
+			helpMessageName: 'NewReportTopic',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'TOPIC_ID',
@@ -509,12 +513,12 @@ const schema = {
 			},
 			affects: {
 				titles: [ 'Keywords' ]
-			},
-			description: 'Bacon ipsum dolor amet id aliqua sed sint magna short ribs, velit shankle pastrami laborum in lorem corned beef anim. Ut officia voluptate bresaola esse enim alcatra ham pork loin spare ribs drumstick chicken. Reprehenderit ut ground round aliqua andouille turducken nulla filet mignon flank ball tip. Jerky quis biltong, id picanha salami turducken qui elit. Tri-tip incididunt chuck, qui officia pig pork belly kevin turkey spare ribs kielbasa nisi. Cow ball tip dolore incididunt chuck hamburger.\n\nPancetta pork proident, elit chuck drumstick porchetta chicken exercitation tri-tip ut. Mollit shank picanha prosciutto incididunt kielbasa. Andouille mollit kielbasa, aliquip sirloin ut magna aute deserunt. Frankfurter duis aute, et est tail jerky pariatur burgdoggen. Nisi venison porchetta ullamco.'
+			}
 		},
 		{
 			title: 'Keywords',
 			schema: associationReportKeywordSchema,
+			helpMessageName: 'ReportKeyword',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'KEYWORD_ID',
@@ -540,7 +544,7 @@ const schema = {
 				optionColumn: 'KEYWORD_ID',
 				criteriaStructure: ccdAssociationKeywordTopicCriteriaStructure
 			},
-			description: 'Bacon ipsum dolor amet aliqua bresaola ipsum, beef ribs dolore filet mignon pork laboris tongue. Adipisicing commodo officia tenderloin shank rump jerky minim landjaeger andouille. Est cillum proident shoulder fugiat. Non bacon aute tempor beef kevin boudin short loin tri-tip chicken. Landjaeger dolor in officia pork belly magna commodo turducken id kielbasa nostrud flank strip steak eu. Duis velit quis pig qui sausage, tempor cow. Occaecat minim in sed, excepteur aliquip pork chop shank ground round dolore sunt reprehenderit voluptate.'
+			description: 'Please select the 1 to 6 keywords that best apply to the reported activities.'
 		},
 		{
 			title: '4H Import',
@@ -561,6 +565,7 @@ const schema = {
 		{
 			title: 'Contacts',
 			schema: reportContactSchema,
+			helpMessageName: 'CONTACTS_HEADER',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',
@@ -585,12 +590,12 @@ const schema = {
 				table: 'ASSOCIATION_REPORT_TYPE_CONTACT_TYPE',
 				optionColumn: 'CONTACT_TYPE_ID',
 				criteriaStructure: gc3AssociationReportTypeContactTypeCriteriaStructure
-			},
-			description: 'Turkey bresaola fugiat, minim landjaeger do andouille ham. Ut tri-tip landjaeger fugiat. Non sed sunt, meatloaf lorem strip steak jowl reprehenderit. Nulla tempor laborum fugiat kevin, shank dolore sed ea ipsum rump hamburger incididunt. Esse adipisicing kielbasa corned beef venison nulla. Shankle laboris short loin turducken minim. Meatball sunt shankle, swine excepteur lorem ball tip occaecat sirloin enim reprehenderit eiusmod.'
+			}
 		},
 		{
 			title: 'Racial Demographics',
 			schema: altRacialDemographicSchema,
+			helpMessageName: 'RACIAL_HEADER',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',
@@ -611,6 +616,7 @@ const schema = {
 		{
 			title: 'Ethnic Demographics',
 			schema: altEthnicDemographicSchema,
+			helpMessageName: 'ETHNIC_HEADER',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',
@@ -631,6 +637,7 @@ const schema = {
 		{
 			title: 'Residence Demographics',
 			schema: residenceDemographicSchema,
+			// description: 'Please balance Residence Demographics to Face to Face numbers.',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',
@@ -669,7 +676,9 @@ const schema = {
 		},
 		{
 			title: 'Target Audiences',
+			// description: 'Please balance Target Audience to Face To Face numbers for each selected program area.',
 			schema: targetAudienceSchema,
+			helpMessageName: 'TARGET_AUDIENCE_HEADER',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',
@@ -769,6 +778,7 @@ const schema = {
 			title: 'Supplemental Data',
 			schema: associationReportFieldSchema,
 			customComponent: SupplementalDataComponent,
+			helpMessageName: 'ReportSupplementalData',
 			isAssignable: true,
 			grouping: {
 				section: 'Supplemental Data',

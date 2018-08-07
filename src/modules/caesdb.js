@@ -169,6 +169,18 @@ const getContactTypes = (callback) => {
 	makeGetRequest(url, callback);
 };
 
+const getContextualHelpMessageHTML = (messageName, callback) => {
+	if (!messageName) {
+		console.error(new Error('Cannot fetch contextual help message HTML: messageName is undefined.'));
+		return;
+	}
+	const url = apiPrefix + 'contextualHelpMessageHTML?messageName=' + messageName;
+	request.get(url)
+		.end((err, response) => {
+			callback(err, response.text);
+		});
+};
+
 const getCounties = (callback) => {
 	const url = generateURL('counties');
 	makeGetRequest(url, callback);
@@ -365,6 +377,7 @@ export {
 	getAssociationTargetAudienceProgramArea,
 	getAssociationTopicArea,
 	getContactTypes,
+	getContextualHelpMessageHTML,
 	getCounties,
 	getCriteriaStructure,
 	getEthnicDemographic,

@@ -1,6 +1,11 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
   <div>
+		<ContextualHelpMessage
+			:messageName="helpMessage.name"
+			v-on:close-modal="hideHelp"
+			v-if="helpMessage.show"
+		/>
 		<div v-if="requestsInProgress" class="application-loading-overlay">
 			<div class="container">
 				<Spinner />
@@ -19,91 +24,116 @@
 			<div v-if="sectionShouldBeDisplayed(section)">
 				<div v-if="sectionDependenciesMet(section)">
 					<div v-if="section.customComponent">
-						<component v-bind:is="section.customComponent" />
+						<component
+							v-bind:is="section.customComponent"
+							v-on:show-help="showHelp"
+						/>
 					</div>
 					<div v-else>
-						<div v-for="area in section.areas" class="">
-							<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
-								<SmartInput
-									v-model="record[area.data.columnName]"
-									:field="area.data"
-								/>
-							</div>
-							<div v-else-if="area.type === 'association'">
-								<div v-if="area.data.isExternal && identifier.value">
-									<!-- Then just show the association title and link to edit it -->
-									<h3>
-										{{ area.data.title }}
-									</h3>
-									<p>
-										<a :href="area.data.source.url + (area.data.source.hasParams ? '&' : '?') + area.data.source.selector + '=' + identifier.value" class="button">
-											Edit
-										</a>
-									</p>
-								</div>
-								<!-- If it uses a custom component, render that component -->
-								<div v-else-if="area.data.customComponent">
-									<component v-if="dependencyMet(area.data)" v-bind:is="area.data.customComponent" />
-								</div>
-								<!-- If it's a multiselect association, use a data multi select component -->
-								<div v-else-if="area.data.multiSelect">
-									<DataMultiSelect
-										:allowEdit="true"
-										:associatedColumn="area.data.associatedColumn"
-										:filter="area.data.filter"
-										:groupBy="area.data.groupBy"
-										:groupLabel="area.data.groupLabel"
-										:groupsToShow="area.data.groupsToShow"
-										:identifier="generateIdentifier(area.data)"
-										:schema="area.data.schema"
-										:title="area.data.title"
-										:description="area.data.description"
-										:affects="area.data.affects"
+						<div v-for="area in section.areas">
+							<transition appear name="fade">
+								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
+									<SmartInput
+										v-model="record[area.data.columnName]"
+										:field="area.data"
+										v-on:show-help="showHelp(area.data)"
 									/>
 								</div>
-								<!-- If multiple values are forbidden, use a data radio component -->
-								<div v-else-if="area.data.forbidMultiple">
-									<DataRadio
-										:title="area.data.title"
-										:schema="area.data.schema"
-										:allowEdit="true"
-										:associatedColumn="area.data.associatedColumn"
-										:identifier="generateIdentifier(area.data)"
-										:filter="area.data.filter"
-										:description="area.data.description"
-										:affects="area.data.affects"
+								<div v-else-if="area.type === 'association'">
+									<div v-if="area.data.isExternal && identifier.value && dependencyMet(area.data)">
+										<!-- Then just show the association title and link to edit it -->
+										<h3>
+											{{ area.data.title }}
+										</h3>
+										<p>
+											<a :href="area.data.source.url + (area.data.source.hasParams ? '&' : '?') + area.data.source.selector + '=' + identifier.value" class="button">
+												Edit
+											</a>
+										</p>
+									</div>
+									<!-- If it uses a custom component, render that component -->
+									<div v-else-if="area.data.customComponent">
+										<component
+											v-if="dependencyMet(area.data)"
+											v-bind:is="area.data.customComponent"
+											v-on:show-help="showHelp"
+										/>
+									</div>
+									<!-- If it's a multiselect association, use a data multi select component -->
+									<div v-else-if="area.data.multiSelect">
+										<DataMultiSelect
+											v-if="dependencyMet(area.data)"
+											v-on:show-help="showHelp(area.data)"
+											:allowEdit="true"
+											:associatedColumn="area.data.associatedColumn"
+											:filter="area.data.filter"
+											:groupBy="area.data.groupBy"
+											:groupLabel="area.data.groupLabel"
+											:groupsToShow="area.data.groupsToShow"
+											:identifier="generateIdentifier(area.data)"
+											:schema="area.data.schema"
+											:title="area.data.title"
+											:description="area.data.description"
+											:affects="area.data.affects"
+											:helpMessageName="area.data.helpMessageName"
+										/>
+									</div>
+									<!-- If multiple values are forbidden, use a data radio component -->
+									<div v-else-if="area.data.forbidMultiple">
+										<DataRadio
+											v-if="dependencyMet(area.data)"
+											v-on:show-help="showHelp(area.data)"
+											:title="area.data.title"
+											:schema="area.data.schema"
+											:allowEdit="true"
+											:associatedColumn="area.data.associatedColumn"
+											:identifier="generateIdentifier(area.data)"
+											:filter="area.data.filter"
+											:description="area.data.description"
+											:affects="area.data.affects"
+											:helpMessageName="area.data.helpMessageName"
+										/>
+									</div>
+									<div v-else-if="area.data.displayAllOptions">
+										<DataMultiTable
+											v-if="dependencyMet(area.data)"
+											v-on:show-help="showHelp(area.data)"
+											:title="area.data.title"
+											:schema="area.data.schema"
+											:associatedColumn="area.data.associatedColumn"
+											:identifier="generateIdentifier(area.data)"
+											:allowEdit="true"
+											:optionColumnName="area.data.optionColumnName"
+											:filter="area.data.filter"
+											:showTotals="area.data.showTotals"
+											:depends="area.data.depends"
+											:description="area.data.description"
+											:helpMessageName="area.data.helpMessageName"
+										/>
+									</div>
+									<!-- Else, just use a data table component -->
+									<div v-else-if="!identifier.value ? area.data.isAssignable : true">
+										<DataTable
+											v-if="dependencyMet(area.data)"
+											v-on:show-help="showHelp(area.data)"
+											:title="area.data.title"
+											:schema="area.data.schema"
+											:associatedColumn="area.data.foreignKey"
+											:identifier="generateIdentifier(area.data)"
+											:allowInsert="true"
+											:allowEdit="true"
+											:description="area.data.description"
+											:helpMessageName="area.data.helpMessageName"
+										/>
+									</div>
+								</div>
+								<div v-else-if="area.type === 'subschema'">
+									<component
+										v-bind:is="area.data.customComponent"
+										v-on:show-help="showHelp"
 									/>
 								</div>
-								<div v-else-if="area.data.displayAllOptions">
-									<DataMultiTable
-										v-if="dependencyMet(area.data)"
-										:title="area.data.title"
-										:schema="area.data.schema"
-										:associatedColumn="area.data.associatedColumn"
-										:identifier="generateIdentifier(area.data)"
-										:allowEdit="true"
-										:optionColumnName="area.data.optionColumnName"
-										:filter="area.data.filter"
-										:showTotals="area.data.showTotals"
-										:depends="area.data.depends"
-									/>
-								</div>
-								<!-- Else, just use a data table component -->
-								<div v-else-if="!identifier.value ? area.data.isAssignable : true">
-									<DataTable
-										v-if="dependencyMet(area.data)"
-										:title="area.data.title"
-										:schema="area.data.schema"
-										:associatedColumn="area.data.foreignKey"
-										:identifier="generateIdentifier(area.data)"
-										:allowInsert="true"
-										:allowEdit="true"
-									/>
-								</div>
-							</div>
-							<div v-else-if="area.type === 'subschema'">
-								<component v-bind:is="area.data.customComponent" />
-							</div>
+							</transition>
 						</div>
 					</div>
 				</div>
@@ -137,6 +167,7 @@
 	/* global swal */
 	// Import required modules
 	import DetailMain from '@/views/DetailMain';
+	import ContextualHelpMessage from '@/views/ContextualHelpMessage';
 	import SmartInput from '@/views/elements/SmartInput';
 	import Spinner from 'vue-simple-spinner';
 	import {
@@ -170,6 +201,7 @@
 		components: {
 			ChevronDownIcon,
 			ChevronRightIcon,
+			ContextualHelpMessage,
 			DataForm,
 			DataMultiSelect,
 			DataMultiTable,
@@ -220,12 +252,26 @@
 				sectionsToDisplay.push(this.schema.sections[0].title);
 			}
 			return {
+				helpMessage: {
+					show: false,
+					name: ''
+				},
 				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
 				sectionsToDisplay
 			};
 		},
 		// The methods available to this component during render
 		methods: {
+			showHelp (area) {
+				if (area.helpMessageName) {
+					this.helpMessage.name = area.helpMessageName;
+					this.helpMessage.show = true;
+				}
+			},
+			hideHelp () {
+				this.helpMessage.show = false;
+				this.helpMessage.name = '';
+			},
 			// Clean up any extra data that no longer applies based on current
 			// selections/entries
 			cleanUpData () {
@@ -253,6 +299,7 @@
 			},
 			// Doesn't send anything yet, just pretends like it does
 			submitData (store) {
+				notify.clear();
 				for (let key in store.report) {
 					if (store.report[key] === null) store.report[key] = '';
 				}

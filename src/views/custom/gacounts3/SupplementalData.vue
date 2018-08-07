@@ -1,35 +1,46 @@
 <template lang="html">
-	<table v-if="dependenciesMet && records.length > 0 && reportFields.length > 0">
-		<caption>
-			Supplemental Data
-		</caption>
-		<thead>
-			<tr>
-				<th>
-					Field
-				</th>
-				<th>
-					Value
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr v-for="record in records">
-				<td>
-					{{ getFieldLabel(record.FIELD_ID) }}
-				</td>
-				<td>
-					<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
-						<option v-for="option in getFieldOptions(record)" :value="option.ID">
-							{{ option.LABEL }}
-						</option>
-					</select>
-					<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
-					<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<div>
+		<table v-if="dependenciesMet && records.length > 0 && reportFields.length > 0">
+			<caption>
+				Supplemental Data
+				<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+					<HelpCircleIcon />
+				</a>
+			</caption>
+			<thead>
+				<tr>
+					<th>
+						Field
+					</th>
+					<th>
+						Value
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="record in records">
+					<td>
+						{{ getFieldLabel(record.FIELD_ID) }}
+					</td>
+					<td>
+						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
+							<option v-for="option in getFieldOptions(record)" :value="option.ID">
+								{{ option.LABEL }}
+							</option>
+						</select>
+						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
+						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- <p v-if="!forSubReport">
+			This set of supplemental data fields is for data pertaining to those reported activities that you were personally involved in.
+		</p>
+		<p v-else>
+			This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.
+		</p> -->
+	</div>
 </template>
 
 <script>
@@ -47,6 +58,7 @@
 		jsToCf
 	} from '@/modules/criteriaUtils';
 	import { url } from '@/modules/utilities';
+	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	// An object containing input types corresponding to field types
 	const fieldTypeInputTypes = {
@@ -66,6 +78,7 @@
 				default: false
 			}
 		},
+		components: { HelpCircleIcon },
 		computed: {
 			dependenciesMet () {
 				return this.programAreas.length > 0 && this.reportType !== null && this.topics.length > 0;
