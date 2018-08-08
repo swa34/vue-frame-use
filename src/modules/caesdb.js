@@ -238,6 +238,11 @@ const getMediaProduction = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
+const getMediaReview = (criteriaStructure, callback) => {
+	const url = generateURL('mediaReview');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 const getMediaReviewType = (callback) => {
 	const url = generateURL('mediaReviewType');
 	makeGetRequest(url, callback);
@@ -388,6 +393,7 @@ export {
 	getKeywords,
 	getMediaDistributed,
 	getMediaProduction,
+	getMediaReview,
 	getMediaReviewType,
 	getMediaType,
 	getMediaTypeCategory,

@@ -49,7 +49,7 @@
 					if (err) console.error(err);
 					if (data) {
 						if (data.length < 1) this.$emit('close-modal');
-						this.helpMessageHTML = data.replace('<p><strong>Note</strong>: this message is being displayed in a new window; to return to the previous screen, please close this window.</p>', '');
+						this.helpMessageHTML = data.trim();
 					}
 				});
 			}
@@ -71,17 +71,6 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		span.close {
-			display: block;
-			text-align: right;
-			float: right;
-			div {
-				padding: .5rem;
-				svg {
-					cursor: pointer;
-				}
-			}
-		}
 		div.modal {
 			background: #fff;
 			max-width: 960px;
@@ -93,8 +82,16 @@
 			text-align: left;
 			max-height: 75vh;
 			overflow: auto;
-			h2 {
-				margin-top: 0;
+			span.close {
+				display: block;
+				text-align: right;
+				float: right;
+				div {
+					padding: .5rem;
+					svg {
+						cursor: pointer;
+					}
+				}
 			}
 		}
 	}

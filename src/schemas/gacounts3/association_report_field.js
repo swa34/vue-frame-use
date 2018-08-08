@@ -1,7 +1,6 @@
+/* global caesCache */
+
 import { enableConstraintValues } from '@/modules/schemaTools';
-import {
-	getReportFields
-} from '@/modules/caesdb';
 
 const schema = {
 	database: 'GACOUNTS3',
@@ -18,9 +17,9 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getReportFields,
 				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignLabel: 'LABEL',
+				values: caesCache.data.gc3.reportField
 			}
 		},
 		{
@@ -30,7 +29,20 @@ const schema = {
 			required: true,
 			min: 0
 		}
-	]
+	],
+	prepareForSubmit: (records) => {
+		let preparedRecords = [];
+		records.forEach((record) => {
+			let newRecord = Object.assign({}, record);
+			if (newRecord.ACTUAL_FIELD_VALUE) {
+				newRecord.FIELD_OPTION_LABEL = newRecord.FIELD_VALUE;
+				newRecord.FIELD_VALUE = newRecord.ACTUAL_FIELD_VALUE;
+				delete newRecord.ACTUAL_FIELD_VALUE;
+			}
+			preparedRecords.push(newRecord);
+		});
+		return preparedRecords;
+	}
 };
 
 export default enableConstraintValues(schema);

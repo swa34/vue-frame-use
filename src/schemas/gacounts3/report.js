@@ -12,6 +12,7 @@ import {
 	ethnicDemographicSchema,
 	mediaProductionSchema,
 	mediaDistributedSchema,
+	mediaReviewSchema,
 	racialDemographicSchema,
 	reportContactSchema,
 	reportPersonnelSchema,
@@ -114,6 +115,7 @@ altEthnicDemographicSchema.columns.push({
 	prettyName: 'Female',
 	type: 'int'
 });
+altEthnicDemographicSchema.prepareForSubmit = altRacialDemographicSchema.prepareForSubmit;
 altEthnicDemographicSchema.prepareFromRetrieval = (existingRecords, componentRecords) => {
 	existingRecords.forEach((record) => {
 		let componentRecordsEthnicMap = componentRecords.map(r => r.ETHNICITY_ID);
@@ -769,6 +771,33 @@ const schema = {
 					});
 					records.forEach((record) => {
 						if (valuesUsesMediaDistributedMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+					});
+					return passes;
+				}
+			}
+		},
+		{
+			title: 'Media Reviewed',
+			schema: mediaReviewSchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			isAssignable: true,
+			grouping: {
+				section: 'Supplemental Data',
+				order: 4
+			},
+			depends: {
+				association: 'Report Type',
+				useValues: true,
+				test: (records, schema) => {
+					let passes = false;
+					const valuesIdMap = caesCache.data.gc3.reportType.map(t => t.ID);
+					const valuesUsesMediaReviewMap = caesCache.data.gc3.reportType.map((t) => {
+						return t.USES_MEDIA_REVIEW;
+					});
+					records.forEach((record) => {
+						if (valuesUsesMediaReviewMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
 					return passes;
 				}

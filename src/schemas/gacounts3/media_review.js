@@ -1,24 +1,44 @@
+import {
+	getMediaReview,
+	getMediaTypeCategory
+} from '@/modules/caesdb';
+import { enableConstraintValues } from '@/modules/schemaTools';
+
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'MEDIA_REVIEW',
+	title: 'Media Reviewed',
+	tablePrefix: 'GC3_MEDIA_REVIEW',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getMediaReview,
 	columns: [
 		{
 			columnName: 'ID',
+			prettyName: 'Media Reviewed',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'REPORT_ID',
 			type: 'int',
-			required: true
+			required: true,
+			automated: true
 		},
 		{
 			columnName: 'CATEGORY_ID',
-			type: 'int'
+			prettyName: 'Category',
+			type: 'int',
+			constraint: {
+				getValues: getMediaTypeCategory,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			}
 		},
 		{
 			columnName: 'PRODUCTION_ID',
-			type: 'int'
+			type: 'int',
+			automated: true
 		},
 		{
 			columnName: 'PUBLICATION_TITLE',
@@ -40,4 +60,4 @@ const schema = {
 	]
 };
 
-export default schema;
+export default enableConstraintValues(schema);

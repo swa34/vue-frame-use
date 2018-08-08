@@ -206,4 +206,12 @@
 	table caption a.help-link svg {
 		color: #fff;
 	}
+	div.modal-container div.modal div.help-message  {
+		h2 {
+			margin-top: 0;
+		}
+		p.new-window-note {
+			display: none;
+		}
+	}
 </style>

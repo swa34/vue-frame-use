@@ -278,6 +278,24 @@
 				const schemaLessStore = deepObjectAssign({}, this.$store.state);
 				delete schemaLessStore.schema;
 				const cleanedUpStore = this.schema.cleanUpData(schemaLessStore);
+				this.schema.sections.forEach((section) => {
+					section.areas.forEach((area) => {
+						const areaCamelTitle = stringFormats.camelCase(area.data.title);
+						if (area.data.schema && area.data.schema.prepareForSubmit) {
+							const records = schemaLessStore[areaCamelTitle].records;
+							schemaLessStore[areaCamelTitle].records = area.data.schema.prepareForSubmit(records);
+						}
+						if (area.type === 'subschema') {
+							area.data.schema.associations.forEach((subArea) => {
+								if (subArea.schema && subArea.schema.prepareForSubmit) {
+									const subAreaCamelTitle = stringFormats.camelCase(subArea.title);
+									const records = schemaLessStore.subschemas[areaCamelTitle][subAreaCamelTitle].records;
+									schemaLessStore.subschemas[areaCamelTitle][subAreaCamelTitle].records = subArea.schema.prepareForSubmit(records);
+								}
+							});
+						}
+					});
+				});
 				this.validateData(cleanedUpStore);
 			},
 			// Run validation on the data

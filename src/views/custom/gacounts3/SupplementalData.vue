@@ -44,13 +44,13 @@
 </template>
 
 <script>
+	/* global caesCache */
 	import {
 		getAssociationReportField,
 		getAssociationReportTypeField,
 		getAssociationSubReportField,
 		getCriteriaStructure,
-		getFieldOptions,
-		getFieldTypes
+		getFieldOptions
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
@@ -152,7 +152,7 @@
 				},
 				existingRecords: [],
 				fieldOptions: [],
-				fieldTypes: [],
+				fieldTypes: caesCache.data.gc3.fieldType,
 				fieldTypesWithLabels: [
 					'String Data',
 					'Option Data'
@@ -186,11 +186,12 @@
 				return this.reportFields[index].REPORT_FIELD_LABEL;
 			},
 			populateRecords () {
-				const generateRecord = (field, value = null) => {
+				const generateRecord = (field, value = null, actualValue = false) => {
 					return {
 						REPORT_ID: this.reportID,
 						FIELD_ID: field.FIELD_ID,
-						FIELD_VALUE: value
+						FIELD_VALUE: value,
+						ACTUAL_FIELD_VALUE: actualValue
 					};
 				};
 				let records = [];
@@ -201,7 +202,7 @@
 						if (indexOfExistingRecord !== -1) {
 							const existingRecord = this.existingRecords[indexOfExistingRecord];
 							if (this.fieldTypesWithLabels.indexOf(existingRecord.FIELD_TYPE_LABEL) !== -1) {
-								records.push(generateRecord(field, existingRecord.FIELD_OPTION_LABEL));
+								records.push(generateRecord(field, existingRecord.FIELD_OPTION_LABEL, existingRecord.FIELD_VALUE));
 							} else {
 								records.push(generateRecord(field, existingRecord.FIELD_VALUE));
 							}
@@ -213,6 +214,7 @@
 							const existingRecord = this.existingRecords[indexOfExistingRecord];
 							this.records[indexOfField] = this.existingRecords[indexOfExistingRecord];
 							if (existingRecord.FIELD_TYPE_LABEL && this.fieldTypesWithLabels.indexOf(existingRecord.FIELD_TYPE_LABEL) !== -1) {
+								this.records[indexOfField].ACTUAL_FIELD_VALUE = this.records[indexOfField].FIELD_VALUE;
 								this.records[indexOfField].FIELD_VALUE = existingRecord.FIELD_OPTION_LABEL;
 							}
 						}
@@ -253,10 +255,6 @@
 				if (err) console.error(err);
 				if (data) this.criteriaStructureTemplates.reportField = cfToJs(data);
 				this.populateReportFields();
-			});
-			getFieldTypes((err, data) => {
-				if (err) console.error(err);
-				if (data) this.fieldTypes = data;
 			});
 
 			const fetchExistingRecords = () => {

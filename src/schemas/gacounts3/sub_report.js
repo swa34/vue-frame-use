@@ -1,3 +1,6 @@
+/* global activeUserID */
+/* global actualUserID */
+
 import associationSubReportRoleSchema from '@/schemas/gacounts3/association_sub_report_role';
 import {
 	getPlannedPrograms,
@@ -21,14 +24,16 @@ const schema = {
 			prettyName: 'User ID',
 			type: 'int',
 			immutable: true,
-			automated: true
+			automated: true,
+			default: activeUserID
 		},
 		{
 			columnName: 'ACTUAL_SUBMITTER_ID',
 			prettyName: 'Actual Submitter ID',
 			type: 'int',
 			immutable: true,
-			automated: true
+			automated: true,
+			default: actualUserID
 		},
 		{
 			columnName: 'REPORT_ID',
@@ -91,7 +96,9 @@ const schema = {
 		},
 		{
 			columnName: 'IS_HIGHLIGHTED',
-			type: 'bit'
+			type: 'bit',
+			automated: true,
+			default: false
 		},
 		{
 			columnName: 'DATE_CREATED',
@@ -120,7 +127,22 @@ const schema = {
 			associatedColumn: 'TYPE_ID'
 		},
 		{
-			title: 'Supplemental Data'
+			title: 'Supplemental Data',
+			schema: {
+				prepareForSubmit: (records) => {
+					let preparedRecords = [];
+					records.forEach((record) => {
+						let newRecord = Object.assign({}, record);
+						if (newRecord.ACTUAL_FIELD_VALUE) {
+							newRecord.FIELD_OPTION_LABEL = newRecord.FIELD_VALUE;
+							newRecord.FIELD_VALUE = newRecord.ACTUAL_FIELD_VALUE;
+							delete newRecord.ACTUAL_FIELD_VALUE;
+						}
+						preparedRecords.push(newRecord);
+					});
+					return preparedRecords;
+				}
+			}
 		},
 		{
 			title: 'Outcome, Impact, and Achievements'
