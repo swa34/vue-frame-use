@@ -281,11 +281,14 @@
 				this.schema.sections.forEach((section) => {
 					section.areas.forEach((area) => {
 						const areaCamelTitle = stringFormats.camelCase(area.data.title);
-						if (area.data.schema && area.data.schema.prepareForSubmit) {
+						if (area.type === 'association' && area.data.schema && area.data.schema.prepareForSubmit) {
 							const records = schemaLessStore[areaCamelTitle].records;
 							schemaLessStore[areaCamelTitle].records = area.data.schema.prepareForSubmit(records);
 						}
 						if (area.type === 'subschema') {
+							if (area.data.schema.prepareForSubmit) {
+								schemaLessStore.subschemas[areaCamelTitle][areaCamelTitle] = area.data.schema.prepareForSubmit(schemaLessStore.subschemas[areaCamelTitle][areaCamelTitle]);
+							}
 							area.data.schema.associations.forEach((subArea) => {
 								if (subArea.schema && subArea.schema.prepareForSubmit) {
 									const subAreaCamelTitle = stringFormats.camelCase(subArea.title);

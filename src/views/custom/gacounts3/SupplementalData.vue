@@ -23,13 +23,13 @@
 						{{ getFieldLabel(record.FIELD_ID) }}
 					</td>
 					<td>
-						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
+						<select v-if="getFieldInputType(record) === 'select'" v-model="record.VALUE_DISPLAYED_TO_USER" :required="fieldIsRequired(record)">
 							<option v-for="option in getFieldOptions(record)" :value="option.ID">
 								{{ option.LABEL }}
 							</option>
 						</select>
-						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
-						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
+						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.VALUE_DISPLAYED_TO_USER" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
+						<input v-else v-model="record.VALUE_DISPLAYED_TO_USER" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
 					</td>
 				</tr>
 			</tbody>
@@ -157,6 +157,10 @@
 					'String Data',
 					'Option Data'
 				],
+				fieldTypeIDsWithLabels: [
+					2,	// String data
+					4		// Option data
+				],
 				reportFields: []
 			};
 		},
@@ -186,41 +190,91 @@
 				return this.reportFields[index].REPORT_FIELD_LABEL;
 			},
 			populateRecords () {
-				const generateRecord = (field, value = null, actualValue = false) => {
+				// Generates a record from a field, an optional value
+				const generateRecord = (field, value = null, label = null, fieldUsesOptionLabel = false) => {
 					return {
 						REPORT_ID: this.reportID,
 						FIELD_ID: field.FIELD_ID,
 						FIELD_VALUE: value,
-						ACTUAL_FIELD_VALUE: actualValue
+						FIELD_OPTION_LABEL: label,
+						VALUE_DISPLAYED_TO_USER: fieldUsesOptionLabel ? label : value,
+						FIELD_USES_OPTION_LABEL: fieldUsesOptionLabel
 					};
 				};
+				// Create an empty array to hold processed records, that will eventually
+				// be assigned to the component's records
 				let records = [];
+				// Loop through each of the applicable report fields fetched from the DB
 				this.reportFields.forEach((field) => {
-					const indexOfField = this.recordFieldIDs.indexOf(field.FIELD_ID);
-					const indexOfExistingRecord = this.existingRecords.map(r => r.FIELD_ID).indexOf(field.FIELD_ID);
-					if (indexOfField === -1) {
-						if (indexOfExistingRecord !== -1) {
-							const existingRecord = this.existingRecords[indexOfExistingRecord];
-							if (this.fieldTypesWithLabels.indexOf(existingRecord.FIELD_TYPE_LABEL) !== -1) {
-								records.push(generateRecord(field, existingRecord.FIELD_OPTION_LABEL, existingRecord.FIELD_VALUE));
-							} else {
-								records.push(generateRecord(field, existingRecord.FIELD_VALUE));
-							}
+					const indexOfFieldInComponentRecords = this.recordFieldIDs.indexOf(field.FIELD_ID);
+					const fieldIsAlreadyPresentInComponentRecords = indexOfFieldInComponentRecords !== -1;
+					const indexOfFieldInRecordsFetchedFromDB = this.existingRecords.map(r => r.FIELD_ID).indexOf(field.FIELD_ID);
+					const fieldIsUsedByRecordsFetchedFromDB = indexOfFieldInRecordsFetchedFromDB !== -1;
+					const fieldUsesOptionLabel = this.fieldTypeIDsWithLabels.indexOf(field.REPORT_FIELD_TYPE_ID) !== -1;
+
+					if (fieldIsAlreadyPresentInComponentRecords) {
+						const componentRecord = this.records[indexOfFieldInComponentRecords];
+						// If the field is already in the component's records, we need to
+						// update that record's FIELD_VALUE or FIELD_OPTION_LABEL to the
+						// value now set by the user
+						let recordLabel = componentRecord.FIELD_OPTION_LABEL;
+						let recordValue = componentRecord.FIELD_VALUE;
+						if (fieldUsesOptionLabel) {
+							recordLabel = componentRecord.VALUE_DISPLAYED_TO_USER;
 						} else {
-							records.push(generateRecord(field));
+							recordValue = componentRecord.VALUE_DISPLAYED_TO_USER;
+						}
+
+						if (fieldIsUsedByRecordsFetchedFromDB) {
+							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
+
+							// If the existing component record has no value/label, use the
+							// values fetched from the DB
+							if (recordLabel === null || recordLabel === '') {
+								recordLabel = recordFetchedFromDB.FIELD_OPTION_LABEL;
+							}
+							if (recordValue === null) {
+								recordValue = recordFetchedFromDB.FIELD_VALUE;
+							}
+
+							records.push(
+								generateRecord(
+									field,
+									recordValue,
+									recordLabel,
+									fieldUsesOptionLabel
+								)
+							);
+						} else {
+							// Field is not used by records fetched from the DB
+							records.push(
+								generateRecord(
+									field,
+									recordValue,
+									recordLabel,
+									fieldUsesOptionLabel
+								)
+							);
 						}
 					} else {
-						if (indexOfExistingRecord !== -1) {
-							const existingRecord = this.existingRecords[indexOfExistingRecord];
-							this.records[indexOfField] = this.existingRecords[indexOfExistingRecord];
-							if (existingRecord.FIELD_TYPE_LABEL && this.fieldTypesWithLabels.indexOf(existingRecord.FIELD_TYPE_LABEL) !== -1) {
-								this.records[indexOfField].ACTUAL_FIELD_VALUE = this.records[indexOfField].FIELD_VALUE;
-								this.records[indexOfField].FIELD_VALUE = existingRecord.FIELD_OPTION_LABEL;
-							}
+						// Field is not already present in component records
+						if (fieldIsUsedByRecordsFetchedFromDB) {
+							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
+							records.push(
+								generateRecord(
+									field,
+									recordFetchedFromDB.FIELD_VALUE,
+									recordFetchedFromDB.FIELD_OPTION_LABEL,
+									fieldUsesOptionLabel
+								)
+							);
+						} else {
+							// Field is not used by records fetched from DB
+							records.push(generateRecord(field, null, null, fieldUsesOptionLabel));
 						}
-						records.push(this.records[indexOfField]);
 					}
 				});
+
 				this.records = records;
 			},
 			populateReportFields () {
@@ -286,7 +340,11 @@
 		},
 		watch: {
 			existingRecords () {
-				this.populateRecords();
+				// We only want to run populate records here if we already know our
+				// valid fields.  Else, we might lose the user's changes to existing
+				// records.  Ask Gabe to tell you the tale of how he arrived at this
+				// conclusion.
+				if (this.reportFields.length > 0) this.populateRecords();
 			},
 			fieldIDs (newFieldIDs, oldFieldIDs) {
 				// Populate records with updated fields

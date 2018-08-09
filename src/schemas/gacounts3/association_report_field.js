@@ -34,10 +34,10 @@ const schema = {
 		let preparedRecords = [];
 		records.forEach((record) => {
 			let newRecord = Object.assign({}, record);
-			if (newRecord.ACTUAL_FIELD_VALUE) {
-				newRecord.FIELD_OPTION_LABEL = newRecord.FIELD_VALUE;
-				newRecord.FIELD_VALUE = newRecord.ACTUAL_FIELD_VALUE;
-				delete newRecord.ACTUAL_FIELD_VALUE;
+			if (newRecord.FIELD_USES_OPTION_LABEL) {
+				newRecord.FIELD_OPTION_LABEL = newRecord.VALUE_DISPLAYED_TO_USER;
+			} else {
+				newRecord.FIELD_VALUE = Number(newRecord.VALUE_DISPLAYED_TO_USER);
 			}
 			preparedRecords.push(newRecord);
 		});
