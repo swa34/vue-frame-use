@@ -359,7 +359,7 @@ const getTopics = (callback) => {
 };
 
 const postReportData = (report, callback) => {
-	const url = generateURL('processReport');
+	const url = generateURL('processSinglePageReport');
 	makePostRequest(url, report, callback);
 };
 

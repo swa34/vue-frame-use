@@ -53,9 +53,9 @@
 				<!-- Roles -->
 				<!--
 					We only want to render the list of roles once we have the criteria
-					structures needed to filter out role types that don't apply
+					structure needed to filter out role types that don't apply
 				-->
-				<div v-if="criteriaStructureTemplates.associationReportTypeRole">
+				<div v-if="ownerCriteriaStructures.associationReportTypeRole">
 					<h4>
 						Roles
 						<a v-on:click="$emit('show-help', { helpMessageName: 'ReportRole' })" class="help-link">
@@ -252,17 +252,16 @@
 				}
 			},
 			ownerCriteriaStructures () {
-				if (this.criteriaStructureTemplates.associationReportTypeContactType && this.criteriaStructureTemplates.associationReportTypeRole) {
-					const critStructs = {
-						associationReportTypeContactType: Object.assign({}, this.criteriaStructureTemplates.associationReportTypeContactType),
-						associationReportTypeRole: Object.assign({}, this.criteriaStructureTemplates.associationReportTypeRole)
-					};
+				const critStructs = {};
+				if (this.criteriaStructureTemplates.associationReportTypeContactType) {
+					critStructs.associationReportTypeContactType = Object.assign({}, this.criteriaStructureTemplates.associationReportTypeContactType);
 					critStructs.associationReportTypeContactType.criteria_REPORT_TYPE_ID_eq = [this.reportType];
-					critStructs.associationReportTypeRole.criteria_TYPE_ID_eq = [this.reportType];
-					return critStructs;
-				} else {
-					return {};
 				}
+				if (this.criteriaStructureTemplates.associationReportTypeRole) {
+					critStructs.associationReportTypeRole = Object.assign({}, this.criteriaStructureTemplates.associationReportTypeRole);
+					critStructs.associationReportTypeRole.criteria_TYPE_ID_eq = [this.reportType];
+				}
+				return critStructs;
 			},
 			ownerID () { return this.$store.state.report.OWNER_ID || activeUserID; },
 			ownerOutcomes: {
@@ -328,7 +327,10 @@
 				},
 				contactTypes: [],
 				criteriaStructureTemplates: {
-					associationReportTypeRole: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeRole)
+					associationReportTypeContactType: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeContactType),
+					associationReportTypeRole: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeRole),
+					plannedProgram: cfToJs(caesCache.criteriaStructures.fpw.plannedProgram),
+					subReport: cfToJs(caesCache.criteriaStructures.gc3.subReport)
 				},
 				newCollaborator: {
 					REPORT_ID: this.reportID || null,
@@ -471,108 +473,52 @@
 			}
 		},
 		mounted () {
-			const fetchCriteriaStructures = () => {
-				if (!this.criteriaStructureTemplates.plannedProgram) {
-					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-						if (err) console.error(err);
-						if (data) {
-							this.criteriaStructureTemplates.plannedProgram = cfToJs(data);
-						}
-					});
-				}
-
-				getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
-					if (err) console.error(err);
-					if (data) {
-						this.criteriaStructureTemplates.associationReportTypeContactType = cfToJs(data);
-					}
-				});
-
-				// getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
-				// 	if (err) console.error(err);
-				// 	if (data) {
-				// 		this.criteriaStructureTemplates.associationReportTypeRole = cfToJs(data);
-				// 	}
-				// });
-			};
-
 			const fetchPlannedPrograms = () => {
-				if (this.criteriaStructureTemplates.plannedProgram) {
-					const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-					this.collaboratorRecords.subReports.forEach((subReport) => {
-						if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
-					});
-					if (this.ownerSubReport.PLANNED_PROGRAM_ID) critStruct.criteria_ID_eq.push(this.ownerSubReport.PLANNED_PROGRAM_ID);
-					if (critStruct.criteria_ID_eq.length > 0) {
-						getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-							if (err) console.error(err);
-							if (data) {
-								data.forEach((record) => {
-									if (record.ID === this.ownerSubReport.PLANNED_PROGRAM_ID) {
-										this.ownerState.plannedPrograms.push(record);
-									} else {
-										this.collaboratorRecords.plannedPrograms.push(record);
-									}
-								});
-							}
-						});
-					}
-				} else {
-					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+				const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+				this.collaboratorRecords.subReports.forEach((subReport) => {
+					if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
+				});
+				if (this.ownerSubReport.PLANNED_PROGRAM_ID) critStruct.criteria_ID_eq.push(this.ownerSubReport.PLANNED_PROGRAM_ID);
+				if (critStruct.criteria_ID_eq.length > 0) {
+					getPlannedPrograms(jsToCf(critStruct), (err, data) => {
 						if (err) console.error(err);
 						if (data) {
-							this.criteriaStructureTemplates.plannedProgram = cfToJs(data);
-							const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-							this.collaboratorRecords.subReports.forEach((subReport) => {
-								if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
+							data.forEach((record) => {
+								if (record.ID === this.ownerSubReport.PLANNED_PROGRAM_ID) {
+									this.ownerState.plannedPrograms.push(record);
+								} else {
+									this.collaboratorRecords.plannedPrograms.push(record);
+								}
 							});
-							if (critStruct.criteria_ID_eq.length > 0) {
-								getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-									if (err) console.error(err);
-									if (data) {
-										this.collaboratorRecords.plannedPrograms = data;
-									}
-								});
-							}
 						}
 					});
 				}
 			};
 
 			const fetchCollaborators = () => {
-				getCriteriaStructure('GC3_REPORT_PERSONNEL', (err, data) => {
-					if (err) console.error(err);
-					if (data) {
-						const critStruct = cfToJs(data);
-						critStruct.criteria_REPORT_ID_eq = [this.reportID];
-						if (critStruct.criteria_REPORT_ID_eq.length > 0) {
-							getReportPersonnel(jsToCf(critStruct), (err, data) => {
-								if (err) console.error(err);
-								if (data) {
-									this.collaborators = data;
-								}
-							});
+				const critStruct = cfToJs(caesCache.criteriaStructures.gc3.reportPersonnel);
+				critStruct.criteria_REPORT_ID_eq = [this.reportID];
+				if (critStruct.criteria_REPORT_ID_eq.length > 0) {
+					getReportPersonnel(jsToCf(critStruct), (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							this.collaborators = data;
 						}
-					}
-				});
+					});
+				}
 			};
 
 			const fetchSupplementalData = () => {
-				getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
+				const critStruct = cfToJs(caesCache.criteriaStructures.gc3.associationSubReportField);
+				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+				getAssociationSubReportField(jsToCf(critStruct), (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						const critStruct = cfToJs(data);
-						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-						getAssociationSubReportField(jsToCf(critStruct), (err, data) => {
-							if (err) console.error(err);
-							if (data) {
-								data.forEach((record) => {
-									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-										this.ownerState.supplementalData.push(record);
-									} else {
-										this.collaboratorRecords.supplementalData.push(record);
-									}
-								});
+						data.forEach((record) => {
+							if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+								this.ownerState.supplementalData.push(record);
+							} else {
+								this.collaboratorRecords.supplementalData.push(record);
 							}
 						});
 					}
@@ -580,27 +526,22 @@
 			};
 
 			const fetchContacts = () => {
-				getCriteriaStructure('GC3_SUB_REPORT_CONTACT', (err, data) => {
+				const critStruct = cfToJs(caesCache.criteriaStructures.gc3.subReportContact);
+				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+				getSubReportContact(jsToCf(critStruct), (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						const critStruct = cfToJs(data);
-						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-						getSubReportContact(jsToCf(critStruct), (err, data) => {
-							if (err) console.error(err);
-							if (data) {
-								const ownerContactsMap = this.ownerContacts.map(c => c.TYPE_ID);
-								data.forEach((record) => {
-									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-										const index = ownerContactsMap.indexOf(record.TYPE_ID);
-										if (index !== -1) {
-											this.ownerContacts[index].QUANTITY = record.QUANTITY;
-										} else {
-											this.ownerState.contacts.push(record);
-										}
-									} else {
-										this.collaboratorRecords.contacts.push(record);
-									}
-								});
+						const ownerContactsMap = this.ownerContacts.map(c => c.TYPE_ID);
+						data.forEach((record) => {
+							if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+								const index = ownerContactsMap.indexOf(record.TYPE_ID);
+								if (index !== -1) {
+									this.ownerContacts[index].QUANTITY = record.QUANTITY;
+								} else {
+									this.ownerState.contacts.push(record);
+								}
+							} else {
+								this.collaboratorRecords.contacts.push(record);
 							}
 						});
 					}
@@ -646,51 +587,29 @@
 			};
 
 			const fetchOwnerPlannedPrograms = () => {
-				if (!this.criteriaStructureTemplates.plannedProgram) {
-					getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-						if (err) console.error(err);
-						if (data) {
-							let critStruct = cfToJs(data);
-							critStruct.criteria_USER_ID_eq.push(activeUserID);
-							getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-								if (err) console.error(err);
-								if (data) {
-									if (data.length < 1) this.ownerSubReport.ISSUE_TYPE = 'state';
-									this.ownerState.plannedPrograms = data;
-								}
-							});
-						}
-					});
-				} else {
-					let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-					critStruct.criteria_USER_ID_eq.push(activeUserID);
-					getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-						if (err) console.error(err);
-						if (data) {
-							if (data.length < 1) this.ownerSubReport.ISSUE_TYPE = 'state';
-							this.ownerState.plannedPrograms = data;
-						};
-					});
-				}
+				let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+				critStruct.criteria_USER_ID_eq.push(activeUserID);
+				getPlannedPrograms(jsToCf(critStruct), (err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						if (data.length < 1) this.ownerSubReport.ISSUE_TYPE = 'state';
+						this.ownerState.plannedPrograms = data;
+					};
+				});
 			};
 
 			const fetchRoles = () => {
-				getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
+				const critStruct = cfToJs(caesCache.criteriaStructures.gc3.associationSubReportRole);
+				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+				getAssociationSubReportRole(jsToCf(critStruct), (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						const critStruct = cfToJs(data);
-						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-						getAssociationSubReportRole(jsToCf(critStruct), (err, data) => {
-							if (err) console.error(err);
-							if (data) {
-								data.forEach((record) => {
-									if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-										if (this.editMode === 'owner') delete record.SUB_REPORT_ROLE_LABEL;
-										this.ownerRoles.push(record);
-									} else {
-										this.collaboratorRecords.roles.push(record);
-									}
-								});
+						data.forEach((record) => {
+							if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+								if (this.editMode === 'owner') delete record.SUB_REPORT_ROLE_LABEL;
+								this.ownerRoles.push(record);
+							} else {
+								this.collaboratorRecords.roles.push(record);
 							}
 						});
 					}
@@ -746,26 +665,14 @@
 				});
 			};
 
-			const fetchSubReportCriteriaStructure = (callback) => {
-				getCriteriaStructure('GC3_SUB_REPORT', (err, data) => {
-					if (err) console.error(err);
-					if (data) {
-						this.criteriaStructureTemplates.subReport = data;
-					}
-					callback();
-				});
-			};
-
 			const fetchExistingData = () => {
 				fetchCollaborators();
-				fetchSubReportCriteriaStructure(() => {
-					fetchSubReports(() => {
-						fetchContacts();
-						fetchPlannedPrograms();
-						fetchSupplementalData();
-						fetchOutcomes();
-						fetchRoles();
-					});
+				fetchSubReports(() => {
+					fetchContacts();
+					fetchPlannedPrograms();
+					fetchSupplementalData();
+					fetchOutcomes();
+					fetchRoles();
 				});
 			};
 
@@ -773,14 +680,12 @@
 			fetchStatePlannedPrograms();
 
 			if (this.editMode === 'owner') {
-				fetchCriteriaStructures();
 				fetchOwnerPlannedPrograms();
 				fetchRoleTypes();
 				fetchContactTypes();
 				this.populateOwnerContactsRecords();
 				this.populateOwnerOutcomeRecord();
 			}
-			// if (this.reportID !== null || typeof url.getParam('duplicateID') === 'string') fetchExistingData();
 			if (this.needExistingData) fetchExistingData();
 		},
 		watch: {

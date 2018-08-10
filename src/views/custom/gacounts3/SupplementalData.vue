@@ -23,13 +23,13 @@
 						{{ getFieldLabel(record.FIELD_ID) }}
 					</td>
 					<td>
-						<select v-if="getFieldInputType(record) === 'select'" v-model="record.VALUE_DISPLAYED_TO_USER" :required="fieldIsRequired(record)">
+						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
 							<option v-for="option in getFieldOptions(record)" :value="option.ID">
 								{{ option.LABEL }}
 							</option>
 						</select>
-						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.VALUE_DISPLAYED_TO_USER" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
-						<input v-else v-model="record.VALUE_DISPLAYED_TO_USER" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
+						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
+						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
 					</td>
 				</tr>
 			</tbody>
@@ -158,8 +158,8 @@
 					'Option Data'
 				],
 				fieldTypeIDsWithLabels: [
-					2,	// String data
-					4		// Option data
+					2	// String data
+					// 4		// Option data
 				],
 				reportFields: []
 			};
@@ -191,14 +191,11 @@
 			},
 			populateRecords () {
 				// Generates a record from a field, an optional value
-				const generateRecord = (field, value = null, label = null, fieldUsesOptionLabel = false) => {
+				const generateRecord = (field, value = null) => {
 					return {
-						REPORT_ID: this.reportID,
 						FIELD_ID: field.FIELD_ID,
 						FIELD_VALUE: value,
-						FIELD_OPTION_LABEL: label,
-						VALUE_DISPLAYED_TO_USER: fieldUsesOptionLabel ? label : value,
-						FIELD_USES_OPTION_LABEL: fieldUsesOptionLabel
+						IS_STRING_DATA: typeof value === 'string'
 					};
 				};
 				// Create an empty array to hold processed records, that will eventually
@@ -214,64 +211,27 @@
 
 					if (fieldIsAlreadyPresentInComponentRecords) {
 						const componentRecord = this.records[indexOfFieldInComponentRecords];
-						// If the field is already in the component's records, we need to
-						// update that record's FIELD_VALUE or FIELD_OPTION_LABEL to the
-						// value now set by the user
-						let recordLabel = componentRecord.FIELD_OPTION_LABEL;
-						let recordValue = componentRecord.FIELD_VALUE;
-						if (fieldUsesOptionLabel) {
-							recordLabel = componentRecord.VALUE_DISPLAYED_TO_USER;
-						} else {
-							recordValue = componentRecord.VALUE_DISPLAYED_TO_USER;
-						}
+						let fieldValue = componentRecord.FIELD_VALUE;
 
-						if (fieldIsUsedByRecordsFetchedFromDB) {
+						if (fieldValue === null && fieldIsUsedByRecordsFetchedFromDB) {
 							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
-
-							// If the existing component record has no value/label, use the
-							// values fetched from the DB
-							if (recordLabel === null || recordLabel === '') {
-								recordLabel = recordFetchedFromDB.FIELD_OPTION_LABEL;
-							}
-							if (recordValue === null) {
-								recordValue = recordFetchedFromDB.FIELD_VALUE;
-							}
-
-							records.push(
-								generateRecord(
-									field,
-									recordValue,
-									recordLabel,
-									fieldUsesOptionLabel
-								)
-							);
-						} else {
-							// Field is not used by records fetched from the DB
-							records.push(
-								generateRecord(
-									field,
-									recordValue,
-									recordLabel,
-									fieldUsesOptionLabel
-								)
-							);
+							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
 						}
+
+						records.push(
+							generateRecord(
+								field,
+								fieldValue
+							)
+						);
 					} else {
 						// Field is not already present in component records
+						let fieldValue = null;
 						if (fieldIsUsedByRecordsFetchedFromDB) {
 							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
-							records.push(
-								generateRecord(
-									field,
-									recordFetchedFromDB.FIELD_VALUE,
-									recordFetchedFromDB.FIELD_OPTION_LABEL,
-									fieldUsesOptionLabel
-								)
-							);
-						} else {
-							// Field is not used by records fetched from DB
-							records.push(generateRecord(field, null, null, fieldUsesOptionLabel));
+							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
 						}
+						records.push(generateRecord(field, fieldValue));
 					}
 				});
 

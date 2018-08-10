@@ -29,20 +29,20 @@ const schema = {
 			required: true,
 			min: 0
 		}
-	],
-	prepareForSubmit: (records) => {
-		let preparedRecords = [];
-		records.forEach((record) => {
-			let newRecord = Object.assign({}, record);
-			if (newRecord.FIELD_USES_OPTION_LABEL) {
-				newRecord.FIELD_OPTION_LABEL = newRecord.VALUE_DISPLAYED_TO_USER;
-			} else {
-				newRecord.FIELD_VALUE = Number(newRecord.VALUE_DISPLAYED_TO_USER);
-			}
-			preparedRecords.push(newRecord);
-		});
-		return preparedRecords;
-	}
+	]
+	// prepareForSubmit: (records) => {
+	// 	let preparedRecords = [];
+	// 	records.forEach((record) => {
+	// 		let newRecord = Object.assign({}, record);
+	// 		if (newRecord.FIELD_USES_OPTION_LABEL) {
+	// 			newRecord.FIELD_OPTION_LABEL = newRecord.VALUE_BOUND_TO_INPUT;
+	// 		} else {
+	// 			newRecord.FIELD_VALUE = Number(newRecord.VALUE_BOUND_TO_INPUT);
+	// 		}
+	// 		preparedRecords.push(newRecord);
+	// 	});
+	// 	return preparedRecords;
+	// }
 };
 
 export default enableConstraintValues(schema);
