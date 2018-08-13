@@ -14,10 +14,14 @@ const getPrettyColumnName = (name) => {
 	return name.replace(/_/g, ' ').replace(/\w\S*/g, replacer);
 };
 
+// Function for validating modes of interaction with components
+const modeValidator = mode => ['edit', 'view'].indexOf(mode) !== -1;
+
 export {
 	deepObjectAssign,
 	formatDates,
 	getPrettyColumnName,
+	modeValidator,
 	recursiveAssign,
 	request,
 	sqlToHtml,

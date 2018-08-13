@@ -1,40 +1,35 @@
-const ccdAssociationKeywordTopicCriteriaStructure	= require('./src/criteriaStructures/caes_central_database/association_report_keyword.js');
-const filter = require('./src/modules/criteriaFilter.js');
+const prepareForCf = require('./src/modules/prepareForCf');
 
-const critStruct = ccdAssociationKeywordTopicCriteriaStructure;
-
-critStruct.criteria_KEYWORD_ID_eq = '1,3';
-critStruct.criteria_AREA_ID_lt = 5;
-critStruct.criteria_TOPIC_ID_gt = 3;
-
-const records = [
-	// Should be accepted
-	{
-		KEYWORD_ID: 1,
-		AREA_ID: 4,
-		TOPIC_ID: 4,
-		shouldPass: true
+const myObj = {
+	report: {
+		main: {
+			one: null,
+			two: 'three',
+			four: 5,
+			six: [
+				7,
+				8,
+				9
+			]
+		},
+		other: [
+			{
+				value: null,
+				types: [
+					'one',
+					'two'
+				]
+			}
+		]
 	},
-	{
-		KEYWORD_ID: 3,
-		AREA_ID: 1,
-		TOPIC_ID: 8,
-		shouldPass: true
-	},
-	// Should be rejected
-	{
-		KEYWORD_ID: 2,
-		AREA_ID: 5,
-		TOPIC_ID: 3,
-		shouldPass: false
-	},
-	{
-		KEYWORD_ID: 3,
-		TOPIC_ID: 8,
-		shouldPass: false
+	sub: {
+		contacts: [
+			{
+				typeID: null,
+				name: null
+			}
+		]
 	}
-];
+};
 
-const filteredRecords = filter(records, critStruct);
-
-console.log(filteredRecords);
+console.log(JSON.stringify(prepareForCf(myObj), null, 4));

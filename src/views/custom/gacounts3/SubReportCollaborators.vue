@@ -125,6 +125,7 @@
 					v-if="!needExistingData || ownerSubReport.ID !== null"
 					v-on:show-help="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })"
 					:forSubReport="true"
+					:mode="mode"
 				/>
 				<!-- Outcome, Impact, Achievements -->
 				<div>
@@ -144,29 +145,31 @@
 				/>
 			</div>
 		</div>
-		<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID">
-			<h3>
-				Collaborator - {{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
-				<button v-if="editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1)" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
-					Remove
-				</button>
-			</h3>
-			<hr />
-			<p v-if="editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID">
-				<a :href="'https://devssl.caes.uga.edu/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
-					{{ collaborator.HAS_REPORTED ? 'Edit' : 'File Sub-Report' }}
-				</a>
-			</p>
-			<p v-if="!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1">
-				<em>
-					No sub-report filed.
-				</em>
-			</p>
-			<SubReportPlainText
-			v-else
-			:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
-			/>
-		</div>
+		<transition-group appear name="fade">
+			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
+				<h3>
+					Collaborator - {{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
+					<button v-if="editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1)" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
+						Remove
+					</button>
+				</h3>
+				<hr />
+				<p v-if="editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID">
+					<a :href="'https://devssl.caes.uga.edu/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
+						{{ collaborator.HAS_REPORTED ? 'Edit' : 'File Sub-Report' }}
+					</a>
+				</p>
+				<p v-if="!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1">
+					<em>
+						No sub-report filed.
+					</em>
+				</p>
+				<SubReportPlainText
+				v-else
+				:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
+				/>
+			</div>
+		</transition-group>
 		<div v-if="editMode === 'owner'">
 			<fieldset>
 				<h4>
@@ -210,7 +213,10 @@
 		filter,
 		jsToCf
 	} from '@/modules/criteriaUtils';
-	import { url } from '@/modules/utilities';
+	import {
+		modeValidator,
+		url
+	} from '@/modules/utilities';
 	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	export default {
@@ -428,32 +434,22 @@
 				};
 			},
 			populateOwnerContactsRecords () {
-				if (this.reportContacts.length > 0) {
-					const contacts = [];
-					this.reportContacts.forEach((record) => {
-						let newRecord = Object.assign({}, record);
-						delete newRecord.REPORT_ID;
-						newRecord.SUB_REPORT_ID = this.ownerSubReport.ID || null;
-						newRecord.QUANTITY = null;
-						contacts.push(newRecord);
-					});
-					this.ownerContacts = contacts;
-				} else if (this.ownerContacts.length < 1) {
-					getAssociationReportTypeContactType((err, data) => {
-						if (err) console.error(err);
-						if (data) {
-							data.forEach((record) => {
-								if (record.REPORT_TYPE_ID === this.reportType) {
+				getAssociationReportTypeContactType((err, data) => {
+					if (err) console.error(err);
+					if (data) {
+						data.forEach((record) => {
+							if (record.REPORT_TYPE_ID === this.reportType) {
+								if (this.ownerContacts.map(c => c.TYPE_ID).indexOf(record.CONTACT_TYPE_ID) === -1) {
 									this.ownerContacts.push({
 										SUB_REPORT_ID: this.ownerSubReport.ID || null,
 										TYPE_ID: record.CONTACT_TYPE_ID,
 										QUANTITY: null
 									});
 								}
-							});
-						}
-					});
-				}
+							}
+						});
+					}
+				});
 			},
 			populateOwnerOutcomeRecord () {
 				this.ownerOutcomes = [{
@@ -687,6 +683,13 @@
 				this.populateOwnerOutcomeRecord();
 			}
 			if (this.needExistingData) fetchExistingData();
+		},
+		props: {
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
+			}
 		},
 		watch: {
 			reportContacts () {

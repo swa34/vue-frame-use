@@ -3,7 +3,7 @@
 		<!-- If there's a title, show it -->
 		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
-			<a v-if="helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 				<HelpCircleIcon />
 			</a>
 		</h3>
@@ -12,10 +12,10 @@
 			{{ description }}
 		</p>
 		<!-- A list to hold each of the options -->
-		<transition-group name="list-complete" tag="ul">
-			<li v-for="option in options" v-bind:key="option[optionID]" class="list-complete-item">
+		<transition-group name="list-complete" tag="ul" :class="mode === 'edit' ? 'plain' : ''">
+			<li v-for="option in options" v-bind:key="option[optionID]" v-if="mode === 'edit' || (computedRecord && computedRecord[associatedColumn] === option[optionID])" class="list-complete-item">
 				<!-- Create a label to hold the option elements -->
-				<label>
+				<label v-if="mode === 'edit'">
 					<!--
 						A radio input for the option, props as follows:
 						name: All options use the schema title so that only one can be checked
@@ -23,7 +23,7 @@
 						v-model: Tells vue to store the value in the component's records array
 						disabled: Bound to whether editing is allowed or not
 					-->
-					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="computedRecord" v-on:click="notifyOfChanges" :disabled="!allowEdit" />
+					<input type="radio" :name="schema.title" :value="generateRecord(option)" v-model="computedRecord" v-on:click="notifyOfChanges" />
 					<!-- Option's label or ID -->
 					<span>
 						{{ option[optionLabel || optionID] }}
@@ -33,6 +33,14 @@
 						: {{ option[optionDescription] }}
 					</span>
 				</label>
+				<div v-else>
+					<span>
+						{{ option[optionLabel || optionID] }}
+					</span>
+					<span v-if="optionDescription">
+						: {{ option[optionDescription] }}
+					</span>
+				</div>
 			</li>
 		</transition-group>
 	</div>
@@ -44,7 +52,10 @@
 
 	// Import required modules
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import { stringFormats } from '@/modules/utilities';
+	import {
+		modeValidator,
+		stringFormats
+	} from '@/modules/utilities';
 	import {
 		cfToJs,
 		jsToCf
@@ -264,9 +275,6 @@
 			'affects': {
 				type: Object
 			},
-			'allowEdit': {
-				type: Boolean
-			},
 			'associatedColumn': {
 				type: String,
 				required: true
@@ -282,6 +290,11 @@
 			},
 			'identifier': {
 				type: Object
+			},
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
 			},
 			'schema': {
 				type: Object,
@@ -308,7 +321,7 @@
 </script>
 
 <style lang="scss" scoped>
-	ul {
+	ul.plain {
 		list-style-type: none;
 		padding: 0;
 	}

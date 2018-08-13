@@ -3,7 +3,7 @@
 		<table v-if="schema.columns && records.length > 0">
 			<caption v-if="title || schema.title">
 				{{ title || schema.title }}
-				<a v-if="helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+				<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 					<HelpCircleIcon />
 				</a>
 			</caption>
@@ -20,7 +20,7 @@
 						<span v-if="column.columnName === optionColumnName">
 							{{ getOptionLabel(record[optionColumnName]) }}
 						</span>
-						<label v-else-if="allowEdit && columnShouldBeEditable(column)">
+						<label v-else-if="mode === 'edit' && columnShouldBeEditable(column)">
 							<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
 								<option v-for="value in column.constraint.values" :value="value.key">
 									{{ value.label }}
@@ -67,6 +67,7 @@
 	import {
 		// formatDates,
 		getPrettyColumnName,
+		modeValidator,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
@@ -266,6 +267,9 @@
 				});
 				return sum;
 			},
+			recordExistsForId (id) {
+				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;
+			},
 			sqlToHtml
 		},
 		mounted () {
@@ -333,7 +337,7 @@
 				});
 			};
 
-			if (component.allowEdit) getConstraintData();
+			getConstraintData();
 			if (component.filter) {
 				getFilterRecords();
 				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
@@ -343,9 +347,6 @@
 			}
 		},
 		props: {
-			'allowEdit': {
-				type: Boolean
-			},
 			'associatedColumn': {
 				type: String
 			},
@@ -360,6 +361,11 @@
 			},
 			'identifier': {
 				type: Object
+			},
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
 			},
 			'optionColumnName': {
 				type: String,

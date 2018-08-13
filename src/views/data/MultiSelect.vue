@@ -3,7 +3,7 @@
 		<!-- Show the title if there is one -->
 		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
-			<a v-if="helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 				<HelpCircleIcon />
 			</a>
 		</h3>
@@ -28,16 +28,16 @@
 						{{ group.name }}
 					</h4>
 					<!-- Then, create a list to hold each of the group's options -->
-					<transition-group name="list-complete" tag="ul" class="checkbox">
-						<li v-for="option in group.options" v-bind:key="option[optionID]" class="list-complete-item">
-							<label>
+					<transition-group name="list-complete" tag="ul" :class="mode === 'edit' ? 'checkbox' : ''">
+						<li v-for="option in group.options" v-bind:key="option[optionID]" v-if="mode === 'edit' || recordExistsForId(option[optionID])" class="list-complete-item">
+							<label v-if="mode === 'edit'">
 								<!--
 									Show a checkbox for the option, here's prop explanations:
 									value: Set to a generated record object from the option
 									v-model: Says where to store the record when checked
 									disabled: Depends on whether editing is enabled or not.
 								-->
-								<input type="checkbox" :value="generateRecord(option)" v-model="records" v-on:click="notifyOfChanges" :disabled="!allowEdit" />
+								<input type="checkbox" :value="generateRecord(option)" v-model="records" v-on:click="notifyOfChanges" />
 								<!-- The option's label -->
 								<span>
 									{{ option[optionLabel || optionID] }}
@@ -47,10 +47,18 @@
 									: {{ option[optionDescription] }}
 								</span>
 							</label>
+							<div v-else>
+								<span>
+									{{ option[optionLabel || optionID] }}
+								</span>
+								<span v-if="optionDescription">
+									: {{ option[optionDescription] }}
+								</span>
+							</div>
 						</li>
 					</transition-group>
 					<!-- If editing is allowed, show the check/uncheck all buttons -->
-					<!-- <div v-if="allowEdit">
+					<!-- <div v-if="mode === 'edit'">
 						<button v-on:click="checkAll(group)" class="button">
 							Check All
 						</button>
@@ -69,7 +77,10 @@
 	/* global notify */
 	// Import required modules
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import { stringFormats } from '@/modules/utilities';
+	import {
+		modeValidator,
+		stringFormats
+	} from '@/modules/utilities';
 	import {
 		cfToJs,
 		filter,
@@ -86,10 +97,6 @@
 		props: {
 			'affects': {
 				type: Object
-			},
-			// Should editing be enabled?
-			'allowEdit': {
-				type: Boolean
 			},
 			// The column of the records to use as the value for the checkboxes
 			'associatedColumn': {
@@ -126,6 +133,12 @@
 			// An identifier, used when viewing an existing record
 			'identifier': {
 				type: Object
+			},
+			// The display mode
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
 			},
 			// The main schema for the data
 			'schema': {
@@ -364,6 +377,9 @@
 						});
 					}
 				});
+			},
+			recordExistsForId (id) {
+				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;
 			},
 			notifyOfChanges () {
 				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {

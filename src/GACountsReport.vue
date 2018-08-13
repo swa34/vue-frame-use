@@ -8,6 +8,7 @@
 			v-if="isNew || identifier !== null"
 			:schema="schema"
 			:identifier="identifier || false"
+			:mode="displayMode"
 		/>
 		<div v-else>
 			<h2>
@@ -45,6 +46,7 @@
 </template>
 
 <script>
+	/* global activeUserID */
 	/* global notify */
 
 	// Import required modules
@@ -85,6 +87,10 @@
 		},
 		computed: {
 			...getComputed(schema),
+			displayMode () {
+				if (this.identifier === null) return 'edit';
+				return this.OWNER_ID === activeUserID ? 'edit' : 'view';
+			},
 			duplication () {
 				return this.$store.state.duplication;
 			},
@@ -184,6 +190,11 @@
 					justify-content: center;
 				}
 			}
+		}
+	}
+	h1, h2, h3, h4, h5, h6 {
+		&.inline {
+			display: inline;
 		}
 	}
 	.outlined {

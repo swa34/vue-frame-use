@@ -3,7 +3,7 @@
 		<table v-if="schema.columns">
 			<caption v-if="title || schema.title">
 				{{ title || schema.title }}
-				<a v-if="helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+				<a v-if="helpMessageName && allowEdit" v-on:click="$emit('show-help')" class="help-link">
 					<HelpCircleIcon />
 				</a>
 			</caption>
@@ -36,9 +36,14 @@
 							</select>
 							<input v-else :type="column.inputType || sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
-						<span v-else>
-							{{ record[column.columnName] }}
-						</span>
+						<div v-else>
+							<span v-if="column.inputType === 'select' || sqlToHtml(column) === 'select'">
+								{{ column.constraint.values[column.constraint.values.map(v => v.key).indexOf(record[column.columnName])].label }}
+							</span>
+							<span v-else>
+								{{ record[column.columnName] }}
+							</span>
+						</div>
 					</td>
 					<td v-if="allowEdit && !schema.disableUpdate">
 						<button v-if="!$store" v-on:click="updateRecord(record)" type="button" class="button">
@@ -48,13 +53,13 @@
 							Delete
 						</button>
 					</td>
-					<td v-else-if="allowInsert && !schema.disableInsert">
+					<td v-else-if="allowInsert && allowEdit && !schema.disableInsert">
 						<!--
 							No content here, just need empty space for the 'save field' column
 						-->
 					</td>
 				</tr>
-				<tr v-if="allowInsert && !schema.disableInsert" v-bind:key="'new-record'">
+				<tr v-if="allowInsert && allowEdit && !schema.disableInsert" v-bind:key="'new-record'">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label>
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
@@ -93,6 +98,7 @@
 	import {
 		formatDates,
 		getPrettyColumnName,
+		modeValidator,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
@@ -109,6 +115,7 @@
 			HelpCircleIcon
 		},
 		computed: {
+			allowEdit () { return this.mode === 'edit'; },
 			duplication () {
 				return this.$store.state.duplication;
 			},
@@ -274,9 +281,6 @@
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		},
 		props: {
-			'allowEdit': {
-				type: Boolean
-			},
 			'allowInsert': {
 				type: Boolean
 			},
@@ -297,6 +301,11 @@
 			},
 			'identifier': {
 				type: Object
+			},
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
 			},
 			'schema': {
 				type: Object,

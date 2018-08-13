@@ -22,7 +22,7 @@
 					<td>
 						{{ getFieldLabel(record.FIELD_ID) }}
 					</td>
-					<td>
+					<td v-if="mode === 'edit'">
 						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
 							<option v-for="option in getFieldOptions(record)" :value="option.ID">
 								{{ option.LABEL }}
@@ -30,6 +30,14 @@
 						</select>
 						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
 						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
+					</td>
+					<td v-else-if="record.FIELD_VALUE">
+						<span v-if="getFieldInputType(record) === 'select'">
+							{{ getFieldOptionLabel(record.FIELD_VALUE) }}
+						</span>
+						<span v-else>
+							{{ record.FIELD_VALUE }}
+						</span>
 					</td>
 				</tr>
 			</tbody>
@@ -57,7 +65,10 @@
 		filter,
 		jsToCf
 	} from '@/modules/criteriaUtils';
-	import { url } from '@/modules/utilities';
+	import {
+		modeValidator,
+		url
+	} from '@/modules/utilities';
 	import { HelpCircleIcon } from 'vue-feather-icons';
 
 	// An object containing input types corresponding to field types
@@ -76,6 +87,11 @@
 			forSubReport: {
 				type: Boolean,
 				default: false
+			},
+			mode: {
+				type: String,
+				default: 'view',
+				validator: modeValidator
 			}
 		},
 		components: { HelpCircleIcon },
@@ -176,6 +192,17 @@
 				const field = this.reportFields[this.fieldIDs.indexOf(record.FIELD_ID)];
 				return this.fieldTypesIndexedByID[field.REPORT_FIELD_TYPE_ID].inputType;
 			},
+			getFieldLabel (fieldId) {
+				const index = this.fieldIDs.indexOf(fieldId);
+				if (index === -1) return '';
+				return this.reportFields[index].REPORT_FIELD_LABEL;
+			},
+			getFieldOptionLabel (optionID) {
+				const index = this.fieldOptions.map(o => o.ID).indexOf(optionID);
+				console.log(index);
+				if (index !== -1) return this.fieldOptions[index].LABEL;
+				return '';
+			},
 			getFieldOptions (record) {
 				const field = this.getFieldFromRecord(record);
 				let options = [];
@@ -183,11 +210,6 @@
 					if (option.FIELD_ID === field.FIELD_ID) options.push(option);
 				});
 				return options;
-			},
-			getFieldLabel (fieldId) {
-				const index = this.fieldIDs.indexOf(fieldId);
-				if (index === -1) return '';
-				return this.reportFields[index].REPORT_FIELD_LABEL;
 			},
 			populateRecords () {
 				// Generates a record from a field, an optional value

@@ -425,6 +425,7 @@ const schema = {
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'AREA_ID',
+			disallowEditOfExisting: true,
 			multiSelect: true,
 			grouping: {
 				section: 'Main Report Information',
@@ -457,6 +458,7 @@ const schema = {
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'TYPE_ID',
+			disallowEditOfExisting: true,
 			isAssignable: true,
 			forbidMultiple: true,
 			grouping: {
@@ -502,6 +504,7 @@ const schema = {
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'TOPIC_ID',
+			disallowEditOfExisting: true,
 			multiSelect: true,
 			grouping: {
 				section: 'Topics and Keywords',

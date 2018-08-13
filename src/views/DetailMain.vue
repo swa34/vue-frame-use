@@ -27,6 +27,7 @@
 						<component
 							v-bind:is="section.customComponent"
 							v-on:show-help="showHelp"
+							:mode="mode"
 						/>
 					</div>
 					<div v-else>
@@ -34,10 +35,22 @@
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
 									<SmartInput
+										v-if="mode === 'edit'"
 										v-model="record[area.data.columnName]"
 										:field="area.data"
 										v-on:show-help="showHelp(area.data)"
 									/>
+									<div v-else>
+										<h3 class="inline">
+											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
+										</h3>
+										<span v-if="area.data.inputType === 'select' || sqlToHtml(area.data) === 'select'">
+											{{ area.data.constraint.values[area.data.constraint.values.map(v => v[area.data.constraint.foreignKey]).indexOf(record[area.data.columnName])][area.data.constraint.foreignLabel] }}
+										</span>
+										<span v-else>
+											{{ record[area.data.columnName] }}
+										</span>
+									</div>
 								</div>
 								<div v-else-if="area.type === 'association'">
 									<div v-if="area.data.isExternal && identifier.value && dependencyMet(area.data)">
@@ -57,6 +70,7 @@
 											v-if="dependencyMet(area.data)"
 											v-bind:is="area.data.customComponent"
 											v-on:show-help="showHelp"
+											:mode="getMode(area.data)"
 										/>
 									</div>
 									<!-- If it's a multiselect association, use a data multi select component -->
@@ -64,7 +78,6 @@
 										<DataMultiSelect
 											v-if="dependencyMet(area.data)"
 											v-on:show-help="showHelp(area.data)"
-											:allowEdit="true"
 											:associatedColumn="area.data.associatedColumn"
 											:filter="area.data.filter"
 											:groupBy="area.data.groupBy"
@@ -76,6 +89,7 @@
 											:description="area.data.description"
 											:affects="area.data.affects"
 											:helpMessageName="area.data.helpMessageName"
+											:mode="getMode(area.data)"
 										/>
 									</div>
 									<!-- If multiple values are forbidden, use a data radio component -->
@@ -85,13 +99,13 @@
 											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:allowEdit="true"
 											:associatedColumn="area.data.associatedColumn"
 											:identifier="generateIdentifier(area.data)"
 											:filter="area.data.filter"
 											:description="area.data.description"
 											:affects="area.data.affects"
 											:helpMessageName="area.data.helpMessageName"
+											:mode="getMode(area.data)"
 										/>
 									</div>
 									<div v-else-if="area.data.displayAllOptions">
@@ -102,13 +116,13 @@
 											:schema="area.data.schema"
 											:associatedColumn="area.data.associatedColumn"
 											:identifier="generateIdentifier(area.data)"
-											:allowEdit="true"
 											:optionColumnName="area.data.optionColumnName"
 											:filter="area.data.filter"
 											:showTotals="area.data.showTotals"
 											:depends="area.data.depends"
 											:description="area.data.description"
 											:helpMessageName="area.data.helpMessageName"
+											:mode="getMode(area.data)"
 										/>
 									</div>
 									<!-- Else, just use a data table component -->
@@ -124,6 +138,7 @@
 											:allowEdit="true"
 											:description="area.data.description"
 											:helpMessageName="area.data.helpMessageName"
+											:mode="getMode(area.data)"
 										/>
 									</div>
 								</div>
@@ -131,6 +146,7 @@
 									<component
 										v-bind:is="area.data.customComponent"
 										v-on:show-help="showHelp"
+										:mode="getMode(area.data)"
 									/>
 								</div>
 							</transition>
@@ -138,8 +154,11 @@
 					</div>
 				</div>
 				<div v-else>
-					<p>
+					<p v-if="mode === 'edit'">
 						In order to enter {{ section.title }}, you must first make a selection for <span v-html="getSectionDependsMessage(section)"></span>.
+					</p>
+					<p v-else>
+						In order to see {{ section.title }}, please expand the <span v-html="getSectionDependsMessage(section)"></span> section(s).
 					</p>
 				</div>
 			</div>
@@ -154,7 +173,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<button v-on:click="cleanUpData" type="button" class="button">
+		<button v-if="mode === 'edit'" v-on:click="cleanUpData" type="button" class="button">
 			Submit
 		</button>
   </div>
@@ -170,6 +189,7 @@
 	import ContextualHelpMessage from '@/views/ContextualHelpMessage';
 	import SmartInput from '@/views/elements/SmartInput';
 	import Spinner from 'vue-simple-spinner';
+	import prepareForCf from '@/modules/prepareForCf';
 	import {
 		DataForm,
 		DataMultiSelect,
@@ -180,6 +200,7 @@
 	import {
 		deepObjectAssign,
 		formatDates,
+		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
@@ -245,9 +266,9 @@
 		data () {
 			let sectionsToDisplay = [];
 			if (this.identifier.value && !this.identifier.duplicate) {
-				sectionsToDisplay.push(this.schema.sections[0].title);
-				sectionsToDisplay.push(this.schema.sections[1].title);
-				// sectionsToDisplay = this.schema.sections.map(s => s.title);
+				this.schema.sections.forEach((section) => {
+					sectionsToDisplay.push(section.title);
+				});
 			} else if (this.schema.sections.length > 0) {
 				sectionsToDisplay.push(this.schema.sections[0].title);
 			}
@@ -262,6 +283,7 @@
 		},
 		// The methods available to this component during render
 		methods: {
+			getPrettyColumnName,
 			showHelp (area) {
 				if (area.helpMessageName) {
 					this.helpMessage.name = area.helpMessageName;
@@ -321,14 +343,25 @@
 			// Doesn't send anything yet, just pretends like it does
 			submitData (store) {
 				notify.clear();
-				for (let key in store.report) {
-					if (store.report[key] === null) store.report[key] = '';
-				}
+				// for (let key in store.report) {
+				// 	if (store.report[key] === null) store.report[key] = '';
+				// }
+				// store.subschemas.subReport.supplementalData.records.forEach((record) => {
+				// 	// Convert booleans to 1s and 0s
+				// 	console.log(record);
+				// 	console.log(typeof record.FIELD_VALUE);
+				// 	console.log(record.FIELD_VALUE);
+				// 	if (typeof record.FIELD_VALUE === 'boolean') record.FIELD_VALUE = record.FIELD_VALUE ? 1 : 0;
+				// });
+				store = prepareForCf(store);
 				this.schema.processSubmission(store, (err, data) => {
-					if (err) console.error(err);
+					if (err) notify.error(err);
 					if (data) {
 						if (data.SUCCESS) {
-							swal('Awesome!', 'Your entry has been saved successfully.', 'success');
+							swal('Awesome!', 'Your entry has been saved successfully.', 'success')
+								.then((result) => {
+									window.location = 'https://devssl.caes.uga.edu/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID;
+								});
 						} else {
 							notify.error(data.MESSAGES);
 						}
@@ -404,6 +437,14 @@
 					}
 				});
 			},
+			getMode (area) {
+				if (area.disallowEditOfExisting) {
+					if (!this.identifier) return this.mode;
+					return 'view';
+				} else {
+					return this.mode;
+				}
+			},
 			getSectionDependsMessage (section) {
 				let message = '';
 				let totalDependencies = 0;
@@ -451,6 +492,7 @@
 			sectionShouldBeDisplayed (section) {
 				return this.sectionsToDisplay.indexOf(section.title) !== -1;
 			},
+			sqlToHtml,
 			toggleSection (section) {
 				const index = this.sectionsToDisplay.indexOf(section.title);
 				if (index === -1) {
@@ -511,6 +553,15 @@
 					Object,
 					Boolean
 				]
+			},
+			// Display mode
+			'mode': {
+				type: String,
+				required: true,
+				default: 'view',
+				validator (value) {
+					return ['edit', 'view'].indexOf(value) !== -1;
+				}
 			},
 			// Should associations be rendered too?
 			'includeAssociations': {

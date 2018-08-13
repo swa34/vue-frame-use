@@ -1,5 +1,5 @@
 <template lang="html">
-	<div>
+	<div v-if="mode === 'edit'">
 		<button type="button" v-on:click="openModal" class="load-modal">
 			<img src="/global/images/4h-logo-white-transparent.svg" /> Import 4-H Enrollment Activity Demographics
 		</button>
@@ -236,6 +236,15 @@
 		},
 		mounted () {
 			this.fetchCountyList();
+		},
+		props: {
+			'mode': {
+				type: String,
+				default: 'view',
+				validator (value) {
+					return ['edit', 'view'].indexOf(value) !== -1;
+				}
+			}
 		},
 		watch: {
 			countyName () {
