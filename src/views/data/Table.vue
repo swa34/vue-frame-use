@@ -135,7 +135,7 @@
 		data () {
 			let newRecord = {};
 			this.schema.columns.forEach((column) => {
-				newRecord[column.columnName] = this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : null;
+				newRecord[column.columnName] = this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : column.default || null;
 			});
 			return {
 				localRecords: [],

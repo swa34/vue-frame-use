@@ -42,6 +42,9 @@
 				</tr>
 			</tbody>
 		</table>
+		<p v-else>
+			(There are no supplemental data fields available for reports of this type.)
+		</p>
 		<!-- <p v-if="!forSubReport">
 			This set of supplemental data fields is for data pertaining to those reported activities that you were personally involved in.
 		</p>
@@ -139,6 +142,7 @@
 				criteriaStructure.criteria_TYPE_ID_eq = [this.reportType];
 				criteriaStructure.criteria_AREA_ID_eq = this.programAreas;
 				criteriaStructure.criteria_TOPIC_ID_eq = this.topics;
+				criteriaStructure.criteria_QueryMode = 'NORMAL';
 				if (this.forSubReport) {
 					criteriaStructure.criteria_FOR_SUB_REPORT_eq = [1];
 				} else {

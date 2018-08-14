@@ -15,7 +15,7 @@ const schema = {
 	columns: [
 		{
 			columnName: 'REPORT_ID',
-			prettyName: 'Report ID',
+			prettyName: 'Report',
 			type: 'int',
 			required: true,
 			constraint: {
@@ -26,7 +26,7 @@ const schema = {
 		},
 		{
 			columnName: 'KEYWORD_ID',
-			prettyName: 'Keyword ID',
+			prettyName: 'Keyword',
 			type: 'int',
 			required: true,
 			constraint: {

@@ -31,6 +31,7 @@
 				v-else-if="fieldType === 'select'"
 				v-bind:value="value"
 				v-on:input="$emit('input', $event.target.value)"
+				v-on:change="$emit('input', $event.target.value)"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
@@ -88,6 +89,11 @@
 			},
 			fieldType () {
 				return this.field.inputType || sqlToHtml(this.field);
+			}
+		},
+		methods: {
+			updateValue (val) {
+
 			}
 		},
 		props: {

@@ -516,7 +516,11 @@
 					if (validOptionsIndex !== -1) validRecords.push(record);
 				});
 				// Finally, set the component's records equal to the valid records.
-				this.records = validRecords;
+				// TODO: This is a nasty hack that prevents records from being lost.
+				// Ideally, those records *should* be lost if valid options is empty,
+				// however for somereason valid options is empty when it shouldn't be.
+				// This hackishly fixes it.
+				if (this.validOptions.length > 0) this.records = validRecords;
 			}
 		}
 	};

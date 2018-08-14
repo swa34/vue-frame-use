@@ -12,9 +12,6 @@
 				<p>Loading...</p>
 			</div>
 		</div>
-		<h1>
-			{{ schema.title }}
-		</h1>
 		<section v-for="section in schema.sections">
 			<h2 v-on:click="toggleSection(section)" class="head section-heading">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" />
@@ -44,8 +41,8 @@
 										<h3 class="inline">
 											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
 										</h3>
-										<span v-if="area.data.inputType === 'select' || sqlToHtml(area.data) === 'select'">
-											{{ area.data.constraint.values[area.data.constraint.values.map(v => v[area.data.constraint.foreignKey]).indexOf(record[area.data.columnName])][area.data.constraint.foreignLabel] }}
+										<span v-if="(area.data.inputType === 'select' || sqlToHtml(area.data) === 'select')">
+											{{ getOptionLabel(area.data.constraint, record[area.data.columnName]) }}
 										</span>
 										<span v-else>
 											{{ record[area.data.columnName] }}
@@ -254,6 +251,7 @@
 			duplication () {
 				return this.$store.state.duplication;
 			},
+			isNew () { return this.identifier === null || this.identifier === false || this.identifier.duplicate; },
 			record: {
 				get () {
 					return this.$store.state[stringFormats.camelCase(this.schema.title)];
@@ -360,7 +358,7 @@
 						if (data.SUCCESS) {
 							swal('Awesome!', 'Your entry has been saved successfully.', 'success')
 								.then((result) => {
-									window.location = 'https://devssl.caes.uga.edu/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID;
+									window.location = 'https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID;
 								});
 						} else {
 							notify.error(data.MESSAGES);
@@ -439,11 +437,20 @@
 			},
 			getMode (area) {
 				if (area.disallowEditOfExisting) {
-					if (!this.identifier) return this.mode;
+					if (this.isNew) return this.mode;
 					return 'view';
 				} else {
 					return this.mode;
 				}
+			},
+			getOptionLabel (constraint, value) {
+				if (constraint.values.length < 1) return '';
+				const constraintValuesMap = constraint.values.map(v => v[constraint.foreignKey]);
+				const index = constraintValuesMap.indexOf(value);
+				const option = constraint.values[index];
+				if (!option) return '';
+				const label = option[constraint.foreignLabel];
+				return label;
 			},
 			getSectionDependsMessage (section) {
 				let message = '';
@@ -572,6 +579,10 @@
 			'includeSubSchemas': {
 				type: Boolean,
 				default: true
+			},
+			'userIsOwner': {
+				type: Boolean,
+				default: false
 			}
 		},
 		watch: {

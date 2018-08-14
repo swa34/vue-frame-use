@@ -1,5 +1,18 @@
 <template lang="html">
   <div id="main">
+		<div class="heading-container">
+			<h1>Report</h1>
+			<div class="spacer"></div>
+			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button">
+				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
+			</button>
+			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button">
+				Duplicate
+			</button>
+			<button v-if="!isNew && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="highlight">
+				{{ userCollaboratorRecord.HAS_REPORTED === 0 ? 'File' : 'Edit' }} Sub-Report
+			</button>
+		</div>
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
 			:duplicationSchema="duplicationSchema"
@@ -8,7 +21,8 @@
 			v-if="isNew || identifier !== null"
 			:schema="schema"
 			:identifier="identifier || false"
-			:mode="displayMode"
+			:mode="mode"
+			:userIsOwner="userIsOwner"
 		/>
 		<div v-else>
 			<h2>
@@ -105,7 +119,17 @@
 					}
 					return schemaLessStore;
 				}
-			}
+			},
+			userCanFileSubReport () {
+				return !this.userCollaboratorRecord.IS_REJECTED;
+			},
+			userCollaboratorRecord () {
+				const userCollaboratorRecordIndex = this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID);
+				if (userCollaboratorRecordIndex === -1) return {};
+				const userCollaboratorRecord = this.$store.state.collaborators.records[userCollaboratorRecordIndex];
+				return userCollaboratorRecord;
+			},
+			userIsOwner () { return this.OWNER_ID === activeUserID; }
 		},
 		data () {
 			// Determine if entering new record
@@ -118,6 +142,7 @@
 				identifier: null,
 				inputID: null,
 				isNew,
+				mode: 'view',
 				schema: sortedSchema,
 				watchedFieldsChangeCount: 0,
 				watchedFieldsNotified: []
@@ -143,9 +168,20 @@
 				};
 			}
 
+			// Set the mode to edit if applicable
+			if (isNew) {
+				data.mode = 'edit';
+			}
+
 			return data;
 		},
 		methods: {
+			redirectToDuplication () {
+				window.location = 'https://' + window.location.hostname + '/gacounts3?referenceInterface=REPORT&subInterface=detail_main&new&duplicateID=' + this.ID;
+			},
+			redirectToSubReportEntry () {
+				window.location = 'https://' + window.location.hostname + '/gacounts3?function=NewSubReport&REPORT_ID=' + this.ID + '&PERSONNEL_ID=' + activeUserID;
+			},
 			reloadPage () {
 				if (this.inputID !== null) {
 					// Send to existing report
@@ -154,10 +190,18 @@
 					// Send to new report
 					window.location.href = window.location.href + '&new';
 				}
+			},
+			toggleMode () {
+				if (this.mode === 'edit') {
+					this.mode = 'view';
+				} else if (this.mode === 'view') {
+					this.mode = 'edit';
+				}
 			}
 		},
 		mounted () {
 			this.watchFields = true;
+			if (this.userIsOwner) this.mode = 'edit';
 		},
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
@@ -223,6 +267,19 @@
 		}
 		p.new-window-note {
 			display: none;
+		}
+	}
+	div.heading-container {
+		display: flex;
+		align-items: center;
+		div.spacer {
+			flex-grow: 1;
+		}
+		button {
+			margin-left: 1rem;
+			&.highlight {
+				background: green;
+			}
 		}
 	}
 </style>

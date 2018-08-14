@@ -79,7 +79,7 @@
 				<!-- Contacts -->
 				<table v-if="ownerContacts.length > 0">
 					<caption>
-						Contacts
+						{{ ownerID === activeUserID ? 'Your' : getPersonnelNameFromID(ownerID) + '\'s' }} Contacts
 						<a v-on:click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })" class="help-link">
 							<HelpCircleIcon />
 						</a>
@@ -176,8 +176,8 @@
 					Add Collaborator
 				</h4>
 				<FuzzySelect
-				v-model="newCollaborator.PERSONNEL_ID"
-				:options="personnelForFuzzySelect"
+					v-model="newCollaborator.PERSONNEL_ID"
+					:options="personnelForFuzzySelect"
 				/>
 				<button v-on:click="addCollaborator" type="button" class="button">
 					Add
@@ -357,8 +357,14 @@
 		},
 		methods: {
 			addCollaborator () {
-				this.collaborators.push(Object.assign({}, this.newCollaborator));
-				this.newCollaborator = {};
+				if (this.newCollaborator.PERSONNEL_ID) {
+					this.collaborators.push(Object.assign({}, this.newCollaborator));
+					this.newCollaborator = {
+						REPORT_ID: this.reportID || null,
+						PERSONNEL_ID: null,
+						IS_REJECTED: false
+					};
+				}
 			},
 			removeCollaborator (collaborator) {
 				this.collaborators.splice(this.collaborators.indexOf(collaborator), 1);
