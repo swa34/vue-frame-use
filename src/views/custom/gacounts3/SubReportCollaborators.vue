@@ -5,7 +5,7 @@
 				Report Owner - {{ getPersonnelNameFromID(ownerID) }}
 			</h3>
 			<hr />
-			<div v-if="editMode === 'owner'">
+			<div v-if="mode === 'edit' && editMode === 'owner'">
 				<!-- Planned Programs -->
 				<div>
 					<label>
@@ -15,6 +15,9 @@
 								<HelpCircleIcon />
 							</a>
 						</h4>
+						<p>
+							Please select the issue to which this sub-report best applies.
+						</p>
 						<select v-model="ownerSubReport.ISSUE_TYPE">
 							<option value="local">
 								Local
@@ -77,44 +80,49 @@
 					</ul>
 				</div>
 				<!-- Contacts -->
-				<table v-if="ownerContacts.length > 0">
-					<caption>
+				<div v-if="ownerContacts.length > 0">
+					<h4>
 						{{ ownerID === activeUserID ? 'Your' : getPersonnelNameFromID(ownerID) + '\'s' }} Contacts
 						<a v-on:click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })" class="help-link">
 							<HelpCircleIcon />
 						</a>
-					</caption>
-					<thead>
-						<tr>
-							<th>
-								Contact Type
-							</th>
-							<th>
-								Quantity
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="contact in ownerContacts">
-							<td>
-								{{ getContactLabelFromID(contact.TYPE_ID) }}
-							</td>
-							<td>
-								<input type="number" v-model.number="contact.QUANTITY" min="0" />
-							</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr>
-							<td>
-								Total
-							</td>
-							<td>
-								{{ sum(ownerContacts, 'QUANTITY') }}
-							</td>
-						</tr>
-					</tfoot>
-				</table>
+					</h4>
+					<p>
+						Use this section to enter only those contacts you personally made.
+					</p>
+					<table>
+						<thead>
+							<tr>
+								<th>
+									Contact Type
+								</th>
+								<th>
+									Quantity
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="contact in ownerContacts">
+								<td>
+									{{ getContactLabelFromID(contact.TYPE_ID) }}
+								</td>
+								<td>
+									<input type="number" v-model.number="contact.QUANTITY" min="0" />
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td>
+									Total
+								</td>
+								<td>
+									{{ sum(ownerContacts, 'QUANTITY') }}
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
 				<!-- Supplemental Data -->
 				<!--
 					If working with an existing report/subreport, we only want to render
@@ -142,6 +150,7 @@
 			<div v-else>
 				<SubReportPlainText
 					:data="getOwnerSubReportData()"
+					:roleTypes="ownerRoleTypes"
 				/>
 			</div>
 		</div>
@@ -149,7 +158,7 @@
 			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
 				<h3>
 					Collaborator - {{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
-					<button v-if="editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1)" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
+					<button v-if="mode === 'edit' && editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1)" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
 						Remove
 					</button>
 				</h3>
@@ -170,18 +179,19 @@
 				/>
 			</div>
 		</transition-group>
-		<div v-if="editMode === 'owner'">
+		<div v-if="mode === 'edit' && editMode === 'owner'">
 			<fieldset>
 				<h4>
 					Add Collaborator
 				</h4>
 				<FuzzySelect
 					v-model="newCollaborator.PERSONNEL_ID"
+					v-on:addCollaborator="addCollaborator"
 					:options="personnelForFuzzySelect"
 				/>
-				<button v-on:click="addCollaborator" type="button" class="button">
+				<!-- <button v-on:click="addCollaborator" type="button" class="button">
 					Add
-				</button>
+				</button> -->
 			</fieldset>
 		</div>
 	</div>
@@ -245,6 +255,17 @@
 				if (activeUserID === this.ownerID) return 'owner';
 				if (this.collaborators.map(c => c.PERSONNEL_ID).indexOf(activeUserID) !== -1) return 'collaborator';
 				return 'guest';
+			},
+			fetched: {
+				get () { return this.$store.state.subschemas.subReport.fetched; },
+				set (val) {
+					this.$store.state.subschemas.subReport.fetched = val;
+					for (let key in this.$store.state.subschemas.subReport) {
+						if (key !== 'subReport' && key !== 'fetched') {
+							this.$store.state.subschemas.subReport[key].fetched = val;
+						}
+					}
+				}
 			},
 			needExistingData () {
 				return this.reportID !== null || typeof url.getParam('duplicateID') === 'string';
@@ -458,13 +479,15 @@
 				});
 			},
 			populateOwnerOutcomeRecord () {
-				this.ownerOutcomes = [{
-					ID: null,
-					REPORT_ID: null,
-					USER_ID: null,
-					MEMO: null,
-					DATE_CREATED: null
-				}];
+				if (this.ownerOutcomes.length < 1) {
+					this.ownerOutcomes = [{
+						ID: null,
+						REPORT_ID: null,
+						USER_ID: null,
+						MEMO: null,
+						DATE_CREATED: null
+					}];
+				}
 			},
 			sum (objArr, key) {
 				let sum = 0;
@@ -499,7 +522,7 @@
 
 			const fetchCollaborators = () => {
 				const critStruct = cfToJs(caesCache.criteriaStructures.gc3.reportPersonnel);
-				critStruct.criteria_REPORT_ID_eq = [this.reportID];
+				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
 				if (critStruct.criteria_REPORT_ID_eq.length > 0) {
 					getReportPersonnel(jsToCf(critStruct), (err, data) => {
 						if (err) console.error(err);
@@ -594,7 +617,6 @@
 				getPlannedPrograms(jsToCf(critStruct), (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						if (data.length < 1) this.ownerSubReport.ISSUE_TYPE = 'state';
 						this.ownerState.plannedPrograms = data;
 					};
 				});
@@ -676,6 +698,7 @@
 					fetchOutcomes();
 					fetchRoles();
 				});
+				this.fetched = true;
 			};
 
 			fetchPersonnel();
@@ -688,7 +711,7 @@
 				this.populateOwnerContactsRecords();
 				this.populateOwnerOutcomeRecord();
 			}
-			if (this.needExistingData) fetchExistingData();
+			if (this.needExistingData && !this.fetched) fetchExistingData();
 		},
 		props: {
 			'mode': {

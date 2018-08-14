@@ -1,5 +1,5 @@
 <template lang="html">
-	<div v-if="mode === 'edit'">
+	<div v-if="isNew">
 		<button type="button" v-on:click="openModal" class="load-modal">
 			<img src="/global/images/4h-logo-white-transparent.svg" /> Import 4-H Enrollment Activity Demographics
 		</button>
@@ -58,12 +58,16 @@
 		get4HActivityList,
 		getCounties
 	} from '@/modules/caesdb';
+	import { url } from '@/modules/utilities';
 
 	export default {
 		name: 'FourHImport',
 		components: {
 			Spinner,
 			XIcon
+		},
+		computed: {
+			isNew () { return url.getParam('new') !== null; }
 		},
 		data () {
 			return {

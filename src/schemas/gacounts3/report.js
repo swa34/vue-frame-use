@@ -499,6 +499,7 @@ const schema = {
 		},
 		{
 			title: 'Topics',
+			description: 'Please select at least one topic for each program area you have selected.',
 			schema: associationReportTopicSchema,
 			helpMessageName: 'NewReportTopic',
 			localKey: 'ID',
@@ -522,6 +523,7 @@ const schema = {
 		},
 		{
 			title: 'Keywords',
+			description: 'Please select the 1 to 6 keywords that best apply to the reported activities.',
 			schema: associationReportKeywordSchema,
 			helpMessageName: 'ReportKeyword',
 			localKey: 'ID',
@@ -548,8 +550,7 @@ const schema = {
 				table: 'ASSOCIATION_KEYWORD_TOPIC',
 				optionColumn: 'KEYWORD_ID',
 				criteriaStructure: ccdAssociationKeywordTopicCriteriaStructure
-			},
-			description: 'Please select the 1 to 6 keywords that best apply to the reported activities.'
+			}
 		},
 		{
 			title: '4H Import',
@@ -569,6 +570,7 @@ const schema = {
 		},
 		{
 			title: 'Contacts',
+			description: 'Please enter the total number of contacts for the entire activity here.  You\'ll have an opportunity later to enter only the contacts you personally made.',
 			schema: reportContactSchema,
 			helpMessageName: 'CONTACTS_HEADER',
 			localKey: 'ID',
@@ -641,8 +643,8 @@ const schema = {
 		},
 		{
 			title: 'Residence Demographics',
+			description: 'Please balance Residence Demographics to Face to Face numbers.',
 			schema: residenceDemographicSchema,
-			// description: 'Please balance Residence Demographics to Face to Face numbers.',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',
@@ -681,7 +683,7 @@ const schema = {
 		},
 		{
 			title: 'Target Audiences',
-			// description: 'Please balance Target Audience to Face To Face numbers for each selected program area.',
+			description: 'Please balance Target Audience to Face To Face numbers for each selected program area.',
 			schema: targetAudienceSchema,
 			helpMessageName: 'TARGET_AUDIENCE_HEADER',
 			localKey: 'ID',
@@ -718,6 +720,7 @@ const schema = {
 				section: 'Supplemental Data',
 				order: 2
 			},
+			limit: 1,
 			depends: {
 				association: 'Report Type',
 				useValues: true,
@@ -808,6 +811,7 @@ const schema = {
 		},
 		{
 			title: 'Supplemental Data',
+			description: 'This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.',
 			schema: associationReportFieldSchema,
 			customComponent: SupplementalDataComponent,
 			helpMessageName: 'ReportSupplementalData',

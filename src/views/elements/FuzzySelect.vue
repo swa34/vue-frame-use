@@ -88,9 +88,10 @@
 			},
 			setValue (option) {
 				this.computedValue = option.key;
-				this.inputText = option.label;
+				// this.inputText = option.label;
 				this.unfocusInput();
 				this.inputHandling.selectionIndex = -1;
+				this.$emit('addCollaborator');
 			},
 			unfocusInput () {
 				this.inputEl.blur();
@@ -124,6 +125,11 @@
 					Number,
 					Boolean
 				]
+			}
+		},
+		watch: {
+			value () {
+				if (this.value === null) this.inputText = '';
 			}
 		}
 	};

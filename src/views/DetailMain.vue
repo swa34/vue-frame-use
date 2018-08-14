@@ -136,6 +136,7 @@
 											:description="area.data.description"
 											:helpMessageName="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											:recordLimit="area.data.limit"
 										/>
 									</div>
 								</div>
@@ -170,9 +171,21 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<button v-if="mode === 'edit'" v-on:click="cleanUpData" type="button" class="button">
-			Submit
-		</button>
+		<div v-if="mode === 'edit'" class="submit">
+			<hr />
+			<p>
+				<strong>
+					Finished?
+				</strong>
+				<span>
+					Click the button below to submit your {{ isNew ? schema.title : 'changes' }}.
+				</span>
+				<br />
+				<button v-on:click="cleanUpData" type="button" class="button">
+					Save My {{ schema.title }}
+				</button>
+			</p>
+		</div>
   </div>
 </template>
 
@@ -356,7 +369,7 @@
 					if (err) notify.error(err);
 					if (data) {
 						if (data.SUCCESS) {
-							swal('Awesome!', 'Your entry has been saved successfully.', 'success')
+							swal('Awesome!', 'Your ' + this.schema.title + ' has been saved successfully.', 'success')
 								.then((result) => {
 									window.location = 'https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID;
 								});
@@ -597,6 +610,24 @@
 </script>
 
 <style lang="scss">
+	div.submit {
+		hr {
+			margin-top: 2rem;
+		}
+		p {
+			text-align: center;
+			button {
+				background: cornflowerblue;
+				max-width: 100%;
+				width: 32rem;
+				font-size: 1.25rem;
+				// text-transform: uppercase;
+				&:hover {
+					background: darken(cornflowerblue, 20%);
+				}
+			}
+		}
+	}
 	div.application-loading-overlay {
 		background: rgba(255,255,255,.65);
 		position: fixed;

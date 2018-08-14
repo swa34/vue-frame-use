@@ -1,4 +1,4 @@
-import GACountsReport from '@/GACountsReport.vue';
+import GACountsReport from '@/GACountsReport';
 // import Test from '@/Test';
 import Vue from 'vue';
 

@@ -1,12 +1,21 @@
 <template lang="html">
   <div>
+		<h3 v-if="title || schema.title">
+			{{ title || schema.title }}
+			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
+				<HelpCircleIcon />
+			</a>
+		</h3>
+		<p v-if="description && mode === 'edit'">
+			{{ description }}
+		</p>
 		<table v-if="schema.columns && records.length > 0">
-			<caption v-if="title || schema.title">
+			<!-- <caption v-if="title || schema.title">
 				{{ title || schema.title }}
 				<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 					<HelpCircleIcon />
 				</a>
-			</caption>
+			</caption> -->
 			<thead>
 				<tr>
 					<th v-for="column in filteredColumns">
@@ -26,7 +35,7 @@
 									{{ value.label }}
 								</option>
 							</select>
-							<input v-else-if="sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :min="column.min" :disabled="column.immutable" />
+							<input v-else-if="sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :min="column.min || 0" :disabled="column.immutable" />
 							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<span v-else>
@@ -51,9 +60,6 @@
 				</tr>
 			</tfoot>
 		</table>
-		<p v-if="description">
-			{{ description }}
-		</p>
 	</div>
 </template>
 
@@ -75,10 +81,33 @@
 
 	export default {
 		name: 'DataMultiTable',
+		beforeDestroy () {
+			if (this.depends) {
+				if (this.depends.column) {
+					if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.$store.state.schema.title || this.$store.state.schema.table)][this.depends.column])) {
+						this.records = [];
+					}
+				} else if (this.depends.association) {
+					if (this.depends.useValues) {
+						if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.depends.association)].records, this.$store.state.schema)) {
+							this.records = [];
+						}
+					} else {
+						if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.depends.association)].records)) {
+							this.records = [];
+						}
+					}
+				}
+			}
+		},
 		components: { HelpCircleIcon },
 		computed: {
 			duplication () {
 				return this.$store.state.duplication;
+			},
+			fetched: {
+				get () { return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched; },
+				set (val) { this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched = val; }
 			},
 			filteredColumns: {
 				get () {
@@ -236,12 +265,13 @@
 										this.records.forEach((record) => {
 											if (record[this.optionColumn.columnName] === existingRecord[this.optionColumn.columnName]) {
 												for (let key in record) {
-													if (existingRecord.hasOwnProperty(key)) record[key] = existingRecord[key];
+													if (existingRecord.hasOwnProperty(key) && record[key] === null) record[key] = existingRecord[key];
 												}
 											}
 										});
 									});
 								}
+								this.fetched = true;
 							}
 						});
 					}
@@ -343,12 +373,15 @@
 				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
 			}
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				this.getExistingRecords();
+				if (!this.fetched) this.getExistingRecords();
 			}
 		},
 		props: {
 			'associatedColumn': {
 				type: String
+			},
+			'depends': {
+				type: Object
 			},
 			'description': {
 				type: String
@@ -391,7 +424,7 @@
 				},
 				deep: true
 			},
-			filteredOptions () {
+			filteredOptions (oldOptions, newOptions) {
 				const populateRecords = () => {
 					this.filteredOptions.forEach((option) => {
 						this.records.push(this.generateRecord(option));
@@ -399,18 +432,23 @@
 				};
 
 				const updateRecords = () => {
-					const records = [];
-					// const optionsMap = this.filteredOptions.map(o => o.key);
-					const recordsMap = this.records.map(r => r[this.optionColumnName]);
-					this.filteredOptions.forEach((option) => {
-						const record = this.generateRecord(option);
-						const existingRecord = this.records[recordsMap.indexOf(option.key)];
-						for (let key in existingRecord) {
-							if (key !== this.optionColumnName && existingRecord[key] !== null) record[key] = existingRecord[key];
-						}
-						records.push(record);
-					});
-					this.records = records;
+					let shouldUpdate = true;
+					if (this.filter && this.filterRecords.length < 1) shouldUpdate = false;
+
+					if (shouldUpdate) {
+						const records = [];
+						// const optionsMap = this.filteredOptions.map(o => o.key);
+						const recordsMap = this.records.map(r => r[this.optionColumnName]);
+						this.filteredOptions.forEach((option) => {
+							const record = this.generateRecord(option);
+							const existingRecord = this.records[recordsMap.indexOf(option.key)];
+							for (let key in existingRecord) {
+								if (key !== this.optionColumnName && existingRecord[key] !== null) record[key] = existingRecord[key];
+							}
+							records.push(record);
+						});
+						this.records = records;
+					}
 				};
 
 				this.records.length > 0 ? updateRecords() : populateRecords();

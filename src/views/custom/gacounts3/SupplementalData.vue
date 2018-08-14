@@ -1,12 +1,20 @@
 <template lang="html">
 	<div>
+		<h3>
+			Supplemental Data
+			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+				<HelpCircleIcon />
+			</a>
+		</h3>
+		<p v-if="mode === 'edit'">
+			<span v-if="forSubReport">
+				This set of supplemental data fields is for data pertaining to those reported activities that you were personally involved in.
+			</span>
+			<span v-else>
+				This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.
+			</span>
+		</p>
 		<table v-if="dependenciesMet && records.length > 0 && reportFields.length > 0">
-			<caption>
-				Supplemental Data
-				<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
-					<HelpCircleIcon />
-				</a>
-			</caption>
 			<thead>
 				<tr>
 					<th>
@@ -101,6 +109,16 @@
 		computed: {
 			dependenciesMet () {
 				return this.programAreas.length > 0 && this.reportType !== null && this.topics.length > 0;
+			},
+			fetched: {
+				get () { return this.forSubReport ? this.$store.state.supplementalData.fetched : this.$store.state.subschemas.subReport.supplementalData.fetched; },
+				set (val) {
+					if (this.forSubReport) {
+						this.$store.state.subschemas.subReport.supplementalData.fetched = val;
+					} else {
+						this.$store.state.supplementalData.fetched = val;
+					}
+				}
 			},
 			fieldIDs () {
 				return this.reportFields.map(f => f.FIELD_ID);
@@ -322,7 +340,7 @@
 					}
 				});
 			};
-			if (this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) fetchExistingRecords();
+			if ((this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) && !this.fetched) fetchExistingRecords();
 		},
 		watch: {
 			existingRecords () {

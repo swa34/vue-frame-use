@@ -63,6 +63,7 @@ const getStoreConfig = (schema, isNew = false) => {
 				namespaced: true,
 				state: {
 					ready: false,
+					reportID: null,
 					columns: {},
 					associations: {},
 					subschemas: {}
@@ -100,6 +101,7 @@ const getStoreConfig = (schema, isNew = false) => {
 							}
 						},
 						state: {
+							fetched: false,
 							records: []
 						}
 					};
@@ -112,7 +114,10 @@ const getStoreConfig = (schema, isNew = false) => {
 	if (schema.subschemas) {
 		config.modules.subschemas = {
 			modules: {},
-			namespaced: true
+			namespaced: true,
+			state: {
+				fetched: false
+			}
 		};
 		schema.subschemas.forEach((subschema) => {
 			const subSchemaCamelTitle = stringFormats.camelCase(subschema.title);

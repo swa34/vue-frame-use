@@ -8,7 +8,7 @@
 			</a>
 		</h3>
 		<!-- Show the description if there's one of those too -->
-		<p v-if="description">
+		<p v-if="description && mode === 'edit'">
 			{{ description }}
 		</p>
 		<!-- If no groups are present, say so -->
@@ -156,6 +156,10 @@
 		computed: {
 			duplication () {
 				return this.$store.state.duplication;
+			},
+			fetched: {
+				get () { return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched; },
+				set (val) { this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched = val; }
 			},
 			// Records is used to hold the checked options
 			records: {
@@ -373,6 +377,7 @@
 									convertedRecords.push(convertedRecord);
 								});
 								this.records = convertedRecords;
+								this.fetched = true;
 							}
 						});
 					}
@@ -443,7 +448,7 @@
 			getOptions();
 			// If an identifier is present, get the existing records
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				this.getRecords();
+				if (!this.fetched) this.getRecords();
 			}
 			// If a filter was specified, get the filter records
 			if (component.filter) getFilterRecords();

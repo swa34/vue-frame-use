@@ -8,7 +8,7 @@
 			</a>
 		</h3>
 		<!-- Same deal with description -->
-		<p v-if="description">
+		<p v-if="description && mode === 'edit'">
 			{{ description }}
 		</p>
 		<!-- A list to hold each of the options -->
@@ -91,6 +91,10 @@
 			duplication () {
 				return this.$store.state.duplication;
 			},
+			fetched: {
+				get () { return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched; },
+				set (val) { this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched = val; }
+			},
 			filterLoaded: {
 				get () {
 					return this.filterRecords.length > 0;
@@ -168,6 +172,7 @@
 									convertedRecord[column.columnName] = data[0][column.columnName];
 								});
 								this.computedRecord = convertedRecord;
+								this.fetched = true;
 							}
 						});
 					}
@@ -267,7 +272,7 @@
 
 			getOptions();
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				this.getRecords();
+				if (!this.fetched) this.getRecords();
 			}
 			if (component.filter) getFilterRecords();
 		},

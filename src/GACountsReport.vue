@@ -9,8 +9,11 @@
 			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button">
 				Duplicate
 			</button>
-			<button v-if="!isNew && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="highlight">
+			<button v-if="!isNew && !userIsOwner && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="file-sub-report">
 				{{ userCollaboratorRecord.HAS_REPORTED === 0 ? 'File' : 'Edit' }} Sub-Report
+			</button>
+			<button v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0" v-on:click="redirectToSubReportRejection" type="button" class="reject-sub-report">
+				Decline Sub-Report
 			</button>
 		</div>
 		<DuplicationModal
@@ -138,6 +141,7 @@
 
 			// Create our data object to return
 			const data = {
+				breadCrumbsHaveNotBeenSet: true,
 				duplicationSchema,
 				identifier: null,
 				inputID: null,
@@ -182,6 +186,9 @@
 			redirectToSubReportEntry () {
 				window.location = 'https://' + window.location.hostname + '/gacounts3?function=NewSubReport&REPORT_ID=' + this.ID + '&PERSONNEL_ID=' + activeUserID;
 			},
+			redirectToSubReportRejection () {
+				window.location = 'https://' + window.location.hostname + '/gacounts3?function=RefuseSubReportInvitation&REPORT_ID=' + this.ID;
+			},
 			reloadPage () {
 				if (this.inputID !== null) {
 					// Send to existing report
@@ -190,6 +197,19 @@
 					// Send to new report
 					window.location.href = window.location.href + '&new';
 				}
+			},
+			setBreadCrumbs () {
+				const breadCrumbList = document.querySelector('ul.breadcrumbs');
+				const addListItem = (url, text) => {
+					const item = document.createElement('li');
+					const link = document.createElement('a');
+					link.setAttribute('href', url);
+					link.innerHTML = text + ' ';
+					item.appendChild(link);
+					breadCrumbList.appendChild(item);
+				};
+				addListItem('https://' + window.location.hostname + '/gacounts3/index.cfm?function=reporting_index', 'Reports');
+				addListItem(window.location, this.TITLE);
 			},
 			toggleMode () {
 				if (this.mode === 'edit') {
@@ -203,7 +223,15 @@
 			this.watchFields = true;
 			if (this.userIsOwner) this.mode = 'edit';
 		},
-		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
+		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
+		watch: {
+			TITLE () {
+				if (!this.isNew && this.breadCrumbsHaveNotBeenSet && this.TITLE !== null && this.TITLE !== '') {
+					this.setBreadCrumbs();
+					this.breadCrumbsHaveNotBeenSet = false;
+				}
+			}
+		}
 	};
 </script>
 
@@ -255,7 +283,8 @@
 	a.help-link {
 		cursor: pointer;
 		svg {
-			vertical-align: text-bottom;
+			height: 1.125rem;
+			vertical-align: sub;
 		}
 	}
 	table caption a.help-link svg {
@@ -277,8 +306,11 @@
 		}
 		button {
 			margin-left: 1rem;
-			&.highlight {
+			&.file-sub-report {
 				background: green;
+			}
+			&.reject-sub-report {
+				background: firebrick;
 			}
 		}
 	}

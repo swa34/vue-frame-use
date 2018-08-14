@@ -34,6 +34,7 @@
 									{{ value.label }}
 								</option>
 							</select>
+							<input v-else-if="column.inputType === 'number' || sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :min="column.min || 0" :disabled="column.immutable" />
 							<input v-else :type="column.inputType || sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
 						</label>
 						<div v-else>
@@ -50,7 +51,7 @@
 							Save
 						</button>
 						<button v-on:click="deleteRecord(record)" type="button" class="button red">
-							Delete
+							Remove
 						</button>
 					</td>
 					<td v-else-if="allowInsert && allowEdit && !schema.disableInsert">
@@ -59,7 +60,7 @@
 						-->
 					</td>
 				</tr>
-				<tr v-if="allowInsert && allowEdit && !schema.disableInsert" v-bind:key="'new-record'">
+				<tr v-if="allowInsert && allowEdit && !schema.disableInsert && (!recordLimit || records.length < recordLimit)" v-bind:key="'new-record'">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label>
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)"></textarea>
@@ -118,6 +119,10 @@
 			allowEdit () { return this.mode === 'edit'; },
 			duplication () {
 				return this.$store.state.duplication;
+			},
+			fetched: {
+				get () { return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched; },
+				set (val) { this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched = val; }
 			},
 			records: {
 				get () {
@@ -203,6 +208,7 @@
 							} else {
 								this.records = data;
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.records);
+								this.fetched = true;
 							}
 						});
 					}
@@ -276,7 +282,7 @@
 				});
 			};
 			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				this.getMainData();
+				if (!this.fetched) this.getMainData();
 			}
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		},
@@ -306,6 +312,9 @@
 				type: String,
 				default: 'view',
 				validator: modeValidator
+			},
+			'recordLimit': {
+				type: Number
 			},
 			'schema': {
 				type: Object,

@@ -33,6 +33,7 @@
 
 <script>
 	import { XIcon } from 'vue-feather-icons';
+	import { url } from '@/modules/utilities';
 	export default {
 		name: 'DuplicationModal',
 		props: {
@@ -101,6 +102,7 @@
 					}
 				}
 				this.duplication.ready = true;
+				this.duplication.reportID = url.getParam('duplicateID');
 			}
 		},
 		watch: {

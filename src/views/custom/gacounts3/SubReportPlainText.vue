@@ -25,7 +25,7 @@
 			</strong>
 			<ul v-if="data.roles.length > 0">
 				<li v-for="role in data.roles">
-					{{ role.SUB_REPORT_ROLE_LABEL }}
+					{{ role.SUB_REPORT_ROLE_LABEL ? role.SUB_REPORT_ROLE_LABEL : getRoleLabelFromTypeID(role.ROLE_ID) }}
 				</li>
 			</ul>
 			<p v-else>
@@ -125,6 +125,9 @@
 			data: {
 				type: Object,
 				required: true
+			},
+			roleTypes: {
+				type: Array
 			}
 		},
 		data () {
@@ -134,6 +137,13 @@
 					'Option Data'
 				]
 			};
+		},
+		methods: {
+			getRoleLabelFromTypeID (id) {
+				const index = this.roleTypes.map(t => t.ROLE_ID).indexOf(id);
+				if (index === -1) return '';
+				return this.roleTypes[index].SUB_REPORT_ROLE_LABEL;
+			}
 		},
 		mounted () {
 			// const fetchPlannedProgram = () => {
