@@ -3,17 +3,17 @@
 		<div class="heading-container">
 			<h1>Report</h1>
 			<div class="spacer"></div>
-			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button">
-				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
-			</button>
-			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button">
-				Duplicate
-			</button>
 			<button v-if="!isNew && !userIsOwner && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="file-sub-report">
 				{{ userCollaboratorRecord.HAS_REPORTED === 0 ? 'File' : 'Edit' }} Sub-Report
 			</button>
 			<button v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0" v-on:click="redirectToSubReportRejection" type="button" class="reject-sub-report">
 				Decline Sub-Report
+			</button>
+			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button">
+				Duplicate
+			</button>
+			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button">
+				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
 		</div>
 		<DuplicationModal
@@ -58,7 +58,7 @@
 				</fieldset>
 			</form>
 		</div>
-		<pre>{{ schemaLessStore }}</pre>
+		<!-- <pre>{{ schemaLessStore }}</pre> -->
 	</div>
 </template>
 
@@ -252,7 +252,6 @@
 			break-inside: avoid-column;
 			page-break-inside: avoid;
 			-webkit-column-break-inside: avoid;
-			margin-bottom: .75rem;
 			label {
 				display: inline-flex;
 				span {
@@ -306,10 +305,10 @@
 		button {
 			margin-left: 1rem;
 			&.file-sub-report {
-				background: green;
+				background: #406242;
 			}
 			&.reject-sub-report {
-				background: firebrick;
+				background: #6C3129;
 			}
 		}
 	}

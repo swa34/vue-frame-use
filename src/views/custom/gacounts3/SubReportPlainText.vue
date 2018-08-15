@@ -20,42 +20,48 @@
 		</div>
 		<!-- Roles -->
 		<div class="row">
-			<strong>
-				Role(s):
-			</strong>
-			<ul v-if="data.roles.length > 0">
-				<li v-for="role in data.roles">
-					{{ role.SUB_REPORT_ROLE_LABEL ? role.SUB_REPORT_ROLE_LABEL : getRoleLabelFromTypeID(role.ROLE_ID) }}
-				</li>
-			</ul>
-			<p v-else>
+			<div v-if="data.roles.length > 0">
+				<strong>
+					Role(s):
+				</strong>
+				<span v-for="(role, index) in data.roles">
+					{{ role.SUB_REPORT_ROLE_LABEL ? role.SUB_REPORT_ROLE_LABEL : getRoleLabelFromTypeID(role.ROLE_ID) }}{{ index !== data.roles.length - 1 ? ',' : '' }}
+				</span>
+			</div>
+			<div v-else>
+				<strong>
+					Role(s):
+				</strong>
 				<em>
 					(None)
 				</em>
-			</p>
+			</div>
 		</div>
 		<!-- Outcomes, Impacts, and Achievements -->
 		<div class="row">
-			<strong>
-				Outcome, Impact, &amp; Achievements:
-			</strong>
 			<div v-if="data.outcomes.length > 0">
-				<p v-for="outcome in data.outcomes">
+				<strong>
+					Outcome, Impact, &amp; Achievements:
+				</strong>
+				<span v-for="outcome in data.outcomes">
 					{{ outcome.MEMO }}
-				</p>
+				</span>
 			</div>
-			<p v-else>
+			<div v-else>
+				<strong>
+					Outcome, Impact, &amp; Achievements:
+				</strong>
 				<em>
 					(None)
 				</em>
-			</p>
+			</div>
 		</div>
 		<!-- Contacts -->
 		<div class="row" v-if="data.contacts.length > 0">
+			<h4>
+				Contacts
+			</h4>
 			<table>
-				<caption>
-					Contacts
-				</caption>
 				<thead>
 					<tr>
 						<th>
@@ -80,10 +86,10 @@
 		</div>
 		<!-- Supplemental Data -->
 		<div class="row" v-if="data.supplementalData.length > 0">
+			<h4>
+				Supplemental Data
+			</h4>
 			<table>
-				<caption>
-					Supplemental Data
-				</caption>
 				<thead>
 					<tr>
 						<th>
@@ -166,7 +172,3 @@
 		}
 	};
 </script>
-
-<style lang="scss" scoped>
-
-</style>

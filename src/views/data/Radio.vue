@@ -1,7 +1,7 @@
 <template lang="html">
   <div v-if="options.length > 0">
 		<!-- If there's a title, show it -->
-		<h3 v-if="title || schema.title">
+		<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
 			{{ title || schema.title }}
 			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 				<HelpCircleIcon />

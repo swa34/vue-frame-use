@@ -1,12 +1,18 @@
 <template lang="html">
 	<div>
-		<h3>
+		<h4 v-if="forSubReport">
+			Supplemental Data
+			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+				<HelpCircleIcon />
+			</a>
+		</h4>
+		<h3 v-else>
 			Supplemental Data
 			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
 				<HelpCircleIcon />
 			</a>
 		</h3>
-		<p v-if="mode === 'edit'">
+		<p v-if="mode === 'edit' && records.length > 0">
 			<span v-if="forSubReport">
 				This set of supplemental data fields is for data pertaining to those reported activities that you were personally involved in.
 			</span>
@@ -47,6 +53,7 @@
 							{{ record.FIELD_VALUE }}
 						</span>
 					</td>
+					<td v-else></td>
 				</tr>
 			</tbody>
 		</table>

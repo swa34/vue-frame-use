@@ -239,7 +239,7 @@
 			}
 		},
 		mounted () {
-			this.fetchCountyList();
+			if (this.isNew) this.fetchCountyList();
 		},
 		props: {
 			'mode': {

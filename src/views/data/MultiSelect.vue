@@ -1,7 +1,7 @@
 <template lang="html">
   <div v-if="displayedGroups.length > 0 && filteredOptions.length > 0">
 		<!-- Show the title if there is one -->
-		<h3 v-if="title || schema.title">
+		<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
 			{{ title || schema.title }}
 			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 				<HelpCircleIcon />
@@ -22,7 +22,7 @@
 				made the cut...
 			-->
 			<transition appear name="fade">
-				<div v-if="!groupsToShow || displayedGroups.indexOf(group.id) !== -1">
+				<div v-if="!groupsToShow || displayedGroups.indexOf(group.id) !== -1" class="group">
 					<!-- Show the group's name if there is one -->
 					<h4 v-if="group.name">
 						{{ group.name }}
@@ -532,6 +532,9 @@
 </script>
 
 <style lang="scss" scoped>
+	div.group {
+		padding: 0 1rem;
+	}
 	span.group-name {
 		font-size: .85rem;
 		font-weight: 600;

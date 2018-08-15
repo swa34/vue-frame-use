@@ -276,7 +276,7 @@
 		},
 		data () {
 			let sectionsToDisplay = [];
-			if (this.identifier.value && !this.identifier.duplicate) {
+			if (this.identifier.value) {
 				this.schema.sections.forEach((section) => {
 					sectionsToDisplay.push(section.title);
 				});
@@ -617,14 +617,14 @@
 		p {
 			text-align: center;
 			button {
-				background: cornflowerblue;
+				// background: cornflowerblue;
 				max-width: 100%;
 				width: 32rem;
 				font-size: 1.25rem;
 				// text-transform: uppercase;
-				&:hover {
-					background: darken(cornflowerblue, 20%);
-				}
+				// &:hover {
+				// 	background: darken(cornflowerblue, 20%);
+				// }
 			}
 		}
 	}
@@ -652,12 +652,6 @@
 		cursor: pointer;
 		svg {
 			vertical-align: middle;
-		}
-	}
-	section {
-		border-bottom: 1px solid #000;
-		&:last-of-type {
-			border-bottom: none;
 		}
 	}
 	.fade-enter-active, .fade-leave-active {
