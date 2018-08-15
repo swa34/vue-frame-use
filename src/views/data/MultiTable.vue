@@ -1,5 +1,5 @@
 <template lang="html">
-  <div>
+  <div v-if="schema.columns && records.length > 0">
 		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
 			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
@@ -9,7 +9,7 @@
 		<p v-if="description && mode === 'edit'">
 			{{ description }}
 		</p>
-		<table v-if="schema.columns && records.length > 0">
+		<table>
 			<!-- <caption v-if="title || schema.title">
 				{{ title || schema.title }}
 				<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">

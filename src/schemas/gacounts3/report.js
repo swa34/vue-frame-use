@@ -40,6 +40,7 @@ import {
 	postReportData
 } from '@/modules/caesdb';
 import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
+import MediaProducedComponent from '@/views/custom/gacounts3/MediaProduced';
 import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
 import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
 import SubReportCollaborators from '@/views/custom/gacounts3/SubReportCollaborators';
@@ -197,7 +198,7 @@ const schema = {
 			type: 'int',
 			required: true,
 			automated: true,
-			default: activeUser.PERSONNEL_ID,
+			// default: activeUser.PERSONNEL_ID,
 			constraint: {
 				database: 'CAES_CENTRAL_DATABASE',
 				table: 'PERSONNEL',
@@ -683,7 +684,7 @@ const schema = {
 		},
 		{
 			title: 'Target Audiences',
-			description: 'Please balance Target Audience to Face To Face numbers for each selected program area.',
+			description: 'Please balance Target Audience to Face-to-Face numbers.',
 			schema: targetAudienceSchema,
 			helpMessageName: 'TARGET_AUDIENCE_HEADER',
 			localKey: 'ID',
@@ -712,15 +713,16 @@ const schema = {
 		{
 			title: 'Media Produced',
 			schema: mediaProductionSchema,
-			localKey: 'ID',
-			foreignKey: 'REPORT_ID',
-			associatedColumn: 'REPORT_ID',
-			isAssignable: true,
+			customComponent: MediaProducedComponent,
+			// localKey: 'ID',
+			// foreignKey: 'REPORT_ID',
+			// associatedColumn: 'REPORT_ID',
+			// isAssignable: true,
 			grouping: {
 				section: 'Supplemental Data',
 				order: 2
 			},
-			limit: 1,
+			// limit: 1,
 			depends: {
 				association: 'Report Type',
 				useValues: true,

@@ -16,7 +16,7 @@
 							</a>
 						</h4>
 						<p>
-							Please select the issue to which this sub-report best applies.
+							Please select a local or state issue type.
 						</p>
 						<select v-model="ownerSubReport.ISSUE_TYPE">
 							<option value="local">
@@ -31,11 +31,16 @@
 						<h4>
 							Local Issue
 						</h4>
-						<select v-if="ownerState.plannedPrograms.length > 0" v-model="ownerSubReport.PLANNED_PROGRAM_ID">
-							<option v-for="program in ownerState.plannedPrograms" :value="program.ID">
-								{{ program.NAME }}
-							</option>
-						</select>
+						<div v-if="ownerState.plannedPrograms.length > 0">
+							<p>
+								Please select the local issue to which this sub-report best applies.
+							</p>
+							<select v-model="ownerSubReport.PLANNED_PROGRAM_ID">
+								<option v-for="program in ownerState.plannedPrograms" :value="program.ID">
+									{{ program.NAME }}
+								</option>
+							</select>
+						</div>
 						<p v-else>
 							<em>
 								There are no local issues associated with your account.
@@ -46,6 +51,9 @@
 						<h4>
 							State Issue
 						</h4>
+						<p>
+							Please select the state issue to which this sub-report best applies.
+						</p>
 						<select v-if="statePlannedPrograms.length > 0" v-model="ownerSubReport.STATE_PLANNED_PROGRAM_ID">
 							<option v-for="program in statePlannedPrograms" :value="program.ID">
 								{{ program.NAME }}

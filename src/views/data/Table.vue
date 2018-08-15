@@ -1,12 +1,15 @@
 <template lang="html">
 	<div>
+		<h3 v-if="title || schema.title">
+			{{ title || schema.title }}
+			<a v-if="helpMessageName && allowEdit" v-on:click="$emit('show-help')" class="help-link">
+				<HelpCircleIcon />
+			</a>
+		</h3>
+		<p v-if="description">
+			{{ description }}
+		</p>
 		<table v-if="schema.columns">
-			<caption v-if="title || schema.title">
-				{{ title || schema.title }}
-				<a v-if="helpMessageName && allowEdit" v-on:click="$emit('show-help')" class="help-link">
-					<HelpCircleIcon />
-				</a>
-			</caption>
 			<thead>
 				<tr>
 					<th v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
@@ -74,6 +77,7 @@
 									{{ value.label }}
 								</option>
 							</select>
+							<input v-else-if="column.inputType === 'number' || sqlToHtml(column) === 'number'"  type="number" v-model="newRecord[column.columnName]" :min="column.min || 0" :disabled="!columnShouldBeEditable(column)" />
 							<input v-else :type="column.inputType || sqlToHtml(column)" v-model="newRecord[column.columnName]" :disabled="!columnShouldBeEditable(column)" />
 						</label>
 					</td>

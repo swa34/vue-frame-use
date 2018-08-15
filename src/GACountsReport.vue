@@ -104,10 +104,6 @@
 		},
 		computed: {
 			...getComputed(schema),
-			displayMode () {
-				if (this.identifier === null) return 'edit';
-				return this.OWNER_ID === activeUserID ? 'edit' : 'view';
-			},
 			duplication () {
 				return this.$store.state.duplication;
 			},
@@ -132,7 +128,9 @@
 				const userCollaboratorRecord = this.$store.state.collaborators.records[userCollaboratorRecordIndex];
 				return userCollaboratorRecord;
 			},
-			userIsOwner () { return this.OWNER_ID === activeUserID; }
+			userIsOwner () {
+				return this.OWNER_ID === activeUserID;
+			}
 		},
 		data () {
 			// Determine if entering new record
@@ -222,6 +220,7 @@
 		mounted () {
 			this.watchFields = true;
 			if (this.userIsOwner) this.mode = 'edit';
+			if (url.getParam('new') !== null) this.OWNER_ID = activeUserID;
 		},
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
 		watch: {
