@@ -850,11 +850,13 @@ const schema = {
 	sections: [
 		{
 			title: 'Main Report Information',
-			order: 1
+			order: 1,
+			required: true
 		},
 		{
 			title: 'Topics and Keywords',
 			order: 2,
+			required: true,
 			depends: {
 				associations: [
 					'Program Areas',
@@ -887,6 +889,7 @@ const schema = {
 		{
 			title: 'Sub-Reports',
 			order: 5,
+			required: true,
 			customComponent: SubReportCollaborators,
 			depends: {
 				associations: [

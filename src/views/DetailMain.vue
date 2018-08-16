@@ -17,6 +17,9 @@
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" />
 				<ChevronRightIcon v-else />
 				{{ section.title }}
+				<em v-if="section.required" class="required-label">
+					(Required)
+				</em>
 			</h2>
 			<div v-if="sectionShouldBeDisplayed(section)">
 				<div v-if="sectionDependenciesMet(section)">
@@ -652,6 +655,11 @@
 		cursor: pointer;
 		svg {
 			vertical-align: middle;
+		}
+		em.required-label {
+			font-size: .75rem;
+			line-height: 1.6rem;
+			margin-left: .5rem;
 		}
 	}
 	.fade-enter-active, .fade-leave-active {

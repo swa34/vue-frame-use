@@ -191,6 +191,9 @@
 			<h3>
 				Add Collaborator
 			</h3>
+			<p>
+				Begin entering the name of the person you'd like to add, then simply select their name from the list to add them to your report as a collaborator.
+			</p>
 			<FuzzySelect
 			v-model="newCollaborator.PERSONNEL_ID"
 			v-on:addCollaborator="addCollaborator"

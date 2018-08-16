@@ -10,7 +10,7 @@ const { VueLoaderPlugin }	= require('vue-loader');
 const resolve = dir => path.join(__dirname, dir);
 
 const commonConfig = {
-	entry: './src/index.js',
+	entry: ['./src/index.js'],
 	devtool: 'source-map',
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
@@ -39,19 +39,8 @@ const commonConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [
-							[
-								'env',
-								{
-									targets: {
-										browsers: [
-											'last 2 versions',
-											'ie >= 11'
-										]
-									}
-								}
-							]
-						]
+						presets: ['@babel/preset-env'],
+						plugins: [require('@babel/plugin-proposal-object-rest-spread')]
 					}
 				}
 			},
@@ -77,7 +66,7 @@ const commonConfig = {
 		]
 	},
 	output: {
-		filename: 'bundle.js',
+		filename: 'gacounts.singlepage.bundle.js',
 		path: path.resolve(__dirname, 'dist')
 	}
 };
