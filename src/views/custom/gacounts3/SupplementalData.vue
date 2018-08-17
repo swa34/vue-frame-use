@@ -87,7 +87,7 @@
 		modeValidator,
 		url
 	} from '@/modules/utilities';
-	import { HelpCircleIcon } from 'vue-feather-icons';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
 	// An object containing input types corresponding to field types
 	const fieldTypeInputTypes = {

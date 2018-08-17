@@ -52,7 +52,7 @@
 	/* global notify */
 	/* global swal */
 	import Spinner from 'vue-simple-spinner';
-	import { XIcon } from 'vue-feather-icons';
+	import XIcon from 'vue-feather-icons/icons/XIcon';
 	import {
 		get4HActivity,
 		get4HActivityList,

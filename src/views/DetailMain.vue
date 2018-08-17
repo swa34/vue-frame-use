@@ -203,6 +203,8 @@
 	import SmartInput from '@/views/elements/SmartInput';
 	import Spinner from 'vue-simple-spinner';
 	import prepareForCf from '@/modules/prepareForCf';
+	import ChevronDownIcon from 'vue-feather-icons/icons/ChevronDownIcon';
+	import ChevronRightIcon from 'vue-feather-icons/icons/ChevronRightIcon';
 	import {
 		DataForm,
 		DataMultiSelect,
@@ -222,10 +224,10 @@
 		cfToJs,
 		jsToCf
 	} from '@/modules/criteriaUtils';
-	import {
-		ChevronDownIcon,
-		ChevronRightIcon
-	} from 'vue-feather-icons';
+	// import {
+	// 	ChevronDownIcon,
+	// 	ChevronRightIcon
+	// } from 'vue-feather-icons';
 
 	// Export the actual component
 	export default {

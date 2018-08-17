@@ -75,7 +75,7 @@
 		getPrettyColumnName,
 		sqlToHtml
 	} from '@/modules/utilities';
-	import { HelpCircleIcon } from 'vue-feather-icons';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
 	export default {
 		name: 'SmartInput',

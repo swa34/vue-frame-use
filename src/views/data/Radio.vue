@@ -61,7 +61,7 @@
 		jsToCf
 	} from '@/modules/criteriaUtils';
 	import { constructNotificationMessage } from '@/modules/notifications';
-	import { HelpCircleIcon } from 'vue-feather-icons';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
 	// Export the actual component
 	export default {

@@ -32,7 +32,7 @@
 </template>
 
 <script>
-	import { XIcon } from 'vue-feather-icons';
+	import XIcon from 'vue-feather-icons/icons/XIcon';
 	import { url } from '@/modules/utilities';
 	export default {
 		name: 'DuplicationModal',

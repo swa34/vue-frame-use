@@ -111,7 +111,7 @@
 		cfToJs,
 		jsToCf
 	} from '@/modules/criteriaUtils';
-	import { HelpCircleIcon } from 'vue-feather-icons';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
 	export default {
 		name: 'DataTable',
