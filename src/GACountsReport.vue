@@ -15,6 +15,9 @@
 			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button">
 				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
+			<button v-if="!isNew && duplicateRecord.hasBeenFetched" v-on:click="updateReportTemplateStatus" type="button" class="favorite">
+				{{ duplicateRecord.IS_TEMPLATE ? '★ Unfavorite' : '☆ Favorite' }}
+			</button>
 		</div>
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
@@ -67,6 +70,10 @@
 	/* global notify */
 
 	// Import required modules
+	import DetailMain from '@/views/DetailMain';
+	import DuplicationModal from '@/views/DuplicationModal';
+	import schema from '@/schemas/gacounts3/report';
+	import duplicationSchema from '@/schemas/gacounts3/duplication/report';
 	import {
 		getComputed,
 		getStore
@@ -76,10 +83,15 @@
 		url
 	} from '@/modules/utilities';
 	import { getSortedSchema } from '@/modules/schemaTools';
-	import DetailMain from '@/views/DetailMain';
-	import DuplicationModal from '@/views/DuplicationModal';
-	import schema from '@/schemas/gacounts3/report';
-	import duplicationSchema from '@/schemas/gacounts3/duplication/report';
+	import {
+		getCriteriaStructure,
+		getDuplicatedReport,
+		postReportTemplateStatus
+	} from '@/modules/caesdb';
+	import {
+		cfToJs,
+		jsToCf
+	} from '@/modules/criteriaUtils';
 
 	// Configure notifications
 	notify.setOptions({
@@ -140,6 +152,12 @@
 			// Create our data object to return
 			const data = {
 				breadCrumbsHaveNotBeenSet: true,
+				duplicateRecord: {
+					PERSONNEL_ID: activeUserID,
+					REPORT_ID: null,
+					IS_TEMPLATE: false,
+					hasBeenFetched: false
+				},
 				duplicationSchema,
 				identifier: null,
 				inputID: null,
@@ -215,6 +233,18 @@
 				} else if (this.mode === 'view') {
 					this.mode = 'edit';
 				}
+			},
+			updateReportTemplateStatus () {
+				const duplicateRecord = Object.assign({}, this.duplicateRecord);
+				duplicateRecord.IS_TEMPLATE = !this.duplicateRecord.IS_TEMPLATE;
+				postReportTemplateStatus(duplicateRecord, (err, data) => {
+					if (err) console.error(err);
+					if (data.SUCCESS) {
+						this.duplicateRecord.IS_TEMPLATE = duplicateRecord.IS_TEMPLATE;
+					} else {
+						notify.error(data.messages);
+					}
+				});
 			}
 		},
 		mounted () {
@@ -224,6 +254,26 @@
 		},
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
 		watch: {
+			ID () {
+				// Once we have a report ID, we need to check if the user has a
+				// duplicated report record for this report
+				if (!isNaN(this.ID)) {
+					getCriteriaStructure('GC3_DUPLICATED_REPORT', (err, data) => {
+						if (err) console.error(err);
+						if (data) {
+							let critStruct = cfToJs(data);
+							critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
+							critStruct.criteria_REPORT_ID_eq.push(this.ID);
+							getDuplicatedReport(jsToCf(critStruct), (err, data) => {
+								if (err) console.error(err);
+								this.duplicateRecord.REPORT_ID = this.ID;
+								if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
+								this.duplicateRecord.hasBeenFetched = true;
+							});
+						}
+					});
+				}
+			},
 			TITLE () {
 				if (!this.isNew && this.breadCrumbsHaveNotBeenSet && this.TITLE !== null && this.TITLE !== '') {
 					this.setBreadCrumbs();
@@ -309,6 +359,9 @@
 			}
 			&.reject-sub-report {
 				background: #6C3129;
+			}
+			&.favorite {
+				background: #F7B538;
 			}
 		}
 	}

@@ -374,12 +374,36 @@
 					if (err) notify.error(err);
 					if (data) {
 						if (data.SUCCESS) {
-							swal('Awesome!', 'Your ' + this.schema.title + ' has been saved successfully.', 'success')
-								.then((result) => {
-									window.location = 'https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID;
+							if (this.isNew) {
+								swal({
+									type: 'success',
+									title: 'Awesome!',
+									text: 'Your ' + this.schema.title.toLowerCase() + ' has been saved successfully.',
+									showCancelButton: true,
+									confirmButtonText: 'OK',
+									cancelButtonText: 'Duplicate this ' + this.schema.title.toLowerCase()
+								}).then((result) => {
+									console.log(result);
+									if (result.value) {
+										// They clicked OK
+										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
+									} else if (result.dismiss === swal.DismissReason.cancel) {
+										// They clicked duplicate
+										window.location.assign(window.location + '&duplicateID=' + data.REPORT_ID);
+									}
 								});
+							} else {
+								swal('Awesome!', 'Your changes have been saved successfully.', 'success')
+									.then((result) => {
+										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
+									});
+							}
 						} else {
-							notify.error(data.MESSAGES);
+							swal({
+								type: 'error',
+								title: 'Oops!',
+								html: '<p>Your ' + (this.isNew ? this.schema.title.toLowerCase() + ' was' : 'changes were') + ' unable to be saved due to the following issues:</p><div style="text-align: left;">' + data.MESSAGES + '</div>'
+							});
 						}
 					}
 				});

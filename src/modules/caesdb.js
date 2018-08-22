@@ -198,6 +198,11 @@ const getCriteriaStructure = (tablePrefix, callback) => {
 		});
 };
 
+const getDuplicatedReport = (criteriaStructure, callback) => {
+	const url = generateURL('duplicatedReport');
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 const getEthnicDemographic = (criteriaStructure, callback) => {
 	const url = generateURL('ethnicDemographic');
 	makePostRequest(url, criteriaStructure, callback);
@@ -363,6 +368,11 @@ const postReportData = (report, callback) => {
 	makePostRequest(url, report, callback);
 };
 
+const postReportTemplateStatus = (duplicatedReportRecord, callback) => {
+	const url = generateURL('modifyReportTemplateStatus');
+	makePostRequest(url, duplicatedReportRecord, callback);
+};
+
 export {
 	get4HActivity,
 	get4HActivityList,
@@ -385,6 +395,7 @@ export {
 	getContextualHelpMessageHTML,
 	getCounties,
 	getCriteriaStructure,
+	getDuplicatedReport,
 	getEthnicDemographic,
 	getEthnicities,
 	getFieldOptions,
@@ -417,5 +428,6 @@ export {
 	getSubReportPurposeAchievements,
 	getTargetAudiences,
 	getTopics,
-	postReportData
+	postReportData,
+	postReportTemplateStatus
 };
