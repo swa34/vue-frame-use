@@ -133,7 +133,7 @@ const schema = {
 			title: 'Images',
 			isExternal: true,
 			source: {
-				url: 'https://devssl.caes.uga.edu/news/admin/index.cfm?referenceInterface=STORY&subInterface=detail_ASSOCIATION_STORY_IMAGE',
+				url: 'https://' + window.location.hostname + '/news/admin/index.cfm?referenceInterface=STORY&subInterface=detail_ASSOCIATION_STORY_IMAGE',
 				selector: 'PK_ID',
 				hasParams: true
 			}

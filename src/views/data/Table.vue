@@ -107,10 +107,6 @@
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
-	import {
-		cfToJs,
-		jsToCf
-	} from '@/modules/criteriaUtils';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
 	export default {
@@ -200,16 +196,12 @@
 			getMainData () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
-						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
+							if (data) {
 								this.records = data;
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.records);
 								this.fetched = true;

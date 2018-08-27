@@ -183,6 +183,9 @@
 				<span>
 					Click the button below to submit your {{ isNew ? schema.title : 'changes' }}.
 				</span>
+				<span v-if="!isNew">
+					If you would like to, you may also <a id="delete-link" v-on:click="deleteRecord" >delete your {{ schema.title }}</a>.
+				</span>
 				<br />
 				<button v-on:click="cleanUpData" type="button" class="button">
 					Save My {{ schema.title }}
@@ -220,14 +223,6 @@
 		stringFormats
 	} from '@/modules/utilities';
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import {
-		cfToJs,
-		jsToCf
-	} from '@/modules/criteriaUtils';
-	// import {
-	// 	ChevronDownIcon,
-	// 	ChevronRightIcon
-	// } from 'vue-feather-icons';
 
 	// Export the actual component
 	export default {
@@ -310,6 +305,36 @@
 				this.helpMessage.show = false;
 				this.helpMessage.name = '';
 			},
+			deleteRecord () {
+				swal({
+					title: 'Are you sure?',
+					text: "You won't be able to undo this!",
+					type: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Yes, delete it!'
+				}).then((result) => {
+					if (result.value) {
+						this.schema.deleteExisting(this.identifier.value, (err, data) => {
+							if (err) console.error(err);
+							if (data.SUCCESS) {
+								swal(
+									'Deleted!',
+									'Your ' + this.schema.title + ' has been deleted.',
+									'success'
+								).then(() => {
+									window.location.assign('https://' + window.location.hostname + '/gacounts3');
+								});
+							} else {
+								swal(
+									'Oops!',
+									'Something went wrong on our end and your ' + this.schema.title + ' could not be deleted.',
+									'error'
+								);
+							}
+						});
+					}
+				});
+			},
 			// Clean up any extra data that no longer applies based on current
 			// selections/entries
 			cleanUpData () {
@@ -359,16 +384,6 @@
 			// Doesn't send anything yet, just pretends like it does
 			submitData (store) {
 				notify.clear();
-				// for (let key in store.report) {
-				// 	if (store.report[key] === null) store.report[key] = '';
-				// }
-				// store.subschemas.subReport.supplementalData.records.forEach((record) => {
-				// 	// Convert booleans to 1s and 0s
-				// 	console.log(record);
-				// 	console.log(typeof record.FIELD_VALUE);
-				// 	console.log(record.FIELD_VALUE);
-				// 	if (typeof record.FIELD_VALUE === 'boolean') record.FIELD_VALUE = record.FIELD_VALUE ? 1 : 0;
-				// });
 				store = prepareForCf(store);
 				this.schema.processSubmission(store, (err, data) => {
 					if (err) notify.error(err);
@@ -451,16 +466,12 @@
 			getMainData () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						critStruct[this.schema.criteria.string] = this.identifier.value;
-						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
+							if (data && data.length > 0) {
 								let existingRecord = data[0];
 								for (let key in this.record) {
 									if ((this.identifier.duplicate && this.duplication.columns[key]) || !this.identifier.duplicate) {
@@ -655,6 +666,7 @@
 				// 	background: darken(cornflowerblue, 20%);
 				// }
 			}
+			a#delete-link { cursor: pointer; }
 		}
 	}
 	div.application-loading-overlay {

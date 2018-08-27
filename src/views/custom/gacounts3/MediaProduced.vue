@@ -63,10 +63,6 @@
 		getMediaReviewType,
 		getMediaType
 	} from '@/modules/caesdb';
-	import {
-		cfToJs,
-		jsToCf
-	} from '@/modules/criteriaUtils';
 	import { modeValidator } from '@/modules/utilities';
 
 	export default {
@@ -129,9 +125,9 @@
 				getCriteriaStructure('GC3_MEDIA_PRODUCTION', (err, data) => {
 					if (err) console.error(err);
 					if (data) {
-						const critStruct = cfToJs(data);
+						const critStruct = data;
 						critStruct.criteria_REPORT_ID_eq = [this.reportID];
-						getMediaProduction(jsToCf(critStruct), (err, data) => {
+						getMediaProduction(critStruct, (err, data) => {
 							if (err) console.error(err);
 							if (data) {
 								if (data.length < 1) {

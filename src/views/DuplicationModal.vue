@@ -8,9 +8,9 @@
 				{{ duplicationSchema.title }}
 			</h2>
 			<div>
-				<strong class="instruction">
+				<p class="instruction">
 					{{ duplicationSchema.instruction }}
-				</strong>
+				</p>
 				<ul>
 					<li v-for="(section, title) in duplicationSchema.sections">
 						<label>
@@ -147,9 +147,9 @@
 			text-align: center;
 			display: inline-block;
 			border-radius: .375rem;
-			strong.instruction {
-				display: block;
+			p.instruction {
 				padding: 0 2rem;
+				text-align: left;
 			}
 			ul {
 				list-style-type: none;

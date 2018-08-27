@@ -89,9 +89,7 @@
 				get4HActivity({ activityID: this.activityID }, (err, data) => {
 					if (err) {
 						console.error(err);
-					} else if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
+					} else if (data && data.length > 0) {
 						this.setDemographics(data[0]);
 					}
 				});
@@ -106,9 +104,7 @@
 					++window.pendingRequests;
 					if (err) {
 						console.error(err);
-					} else if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
+					} else if (data) {
 						if (data.length < 1 && this.displayModal) this.notifyUserAboutNoActivities();
 						this.activities = data;
 						this.loadingActivityList = false;
@@ -119,9 +115,7 @@
 				getCounties((err, data) => {
 					if (err) {
 						console.error(err);
-					} else if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
+					} else if (data) {
 						this.counties = data;
 						if (this.$store.state.report.COUNTY_ID) {
 							this.setCountyName(this.$store.state.report.COUNTY_ID);
@@ -302,7 +296,8 @@
 			}
 			form {
 				display: flex;
-				justify-content: center;
+				flex-wrap: wrap;
+				// justify-content: center;
 				label {
 					margin-right: 2rem;
 					&.activity {

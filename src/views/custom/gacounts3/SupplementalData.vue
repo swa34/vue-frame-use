@@ -78,11 +78,7 @@
 		getCriteriaStructure,
 		getFieldOptions
 	} from '@/modules/caesdb';
-	import {
-		cfToJs,
-		filter,
-		jsToCf
-	} from '@/modules/criteriaUtils';
+	import { filter } from '@/modules/criteriaUtils';
 	import {
 		modeValidator,
 		url
@@ -176,7 +172,7 @@
 				return criteriaStructure;
 			},
 			reportFieldCriteriaStructureForCF () {
-				return jsToCf(this.reportFieldCriteriaStructure);
+				return this.reportFieldCriteriaStructure;
 			},
 			reportID () {
 				return this.$store.state.report.ID;
@@ -314,11 +310,11 @@
 			// Fetch some things we need
 			getCriteriaStructure('GC3_FIELD_OPTION', (err, data) => {
 				if (err) console.error(err);
-				if (data) this.criteriaStructureTemplates.fieldOption = cfToJs(data);
+				if (data) this.criteriaStructureTemplates.fieldOption = data;
 			});
 			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
 				if (err) console.error(err);
-				if (data) this.criteriaStructureTemplates.reportField = cfToJs(data);
+				if (data) this.criteriaStructureTemplates.reportField = data;
 				this.populateReportFields();
 			});
 
@@ -327,22 +323,16 @@
 				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
 				getCriteriaStructure(tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						if (this.forSubReport) {
 							critStruct.criteria_SUB_REPORT_ID_eq = this.$store.state.subschemas.subReport.subReport.ID || -1;
 						} else {
 							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
 						}
-						getFields(jsToCf(critStruct), (err, data) => {
+						getFields(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
-								this.existingRecords = data;
-							}
+							if (data) this.existingRecords = data;
 						});
 					}
 				});
@@ -364,7 +354,7 @@
 				const fetchOptions = (fieldsThatNeedOptions) => {
 					const criteriaStructure = Object.assign({}, this.criteriaStructureTemplates.fieldOption);
 					criteriaStructure.criteria_FIELD_ID_eq = fieldsThatNeedOptions;
-					getFieldOptions(jsToCf(criteriaStructure), (err, data) => {
+					getFieldOptions(criteriaStructure, (err, data) => {
 						if (err) console.error(err);
 						if (data) {
 							data.forEach((fieldOption) => {
@@ -410,7 +400,7 @@
 						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
 						criteriaStructure.criteria_AREA_ID_eq = newAreas.filter(val => oldAreas.indexOf(val) === -1);
 						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
-						getAssociationReportTypeField(jsToCf(criteriaStructure), (err, data) => {
+						getAssociationReportTypeField(criteriaStructure, (err, data) => {
 							if (err) console.error(err);
 							if (data) {
 								data.forEach((field) => {
@@ -441,7 +431,7 @@
 						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
 						criteriaStructure.criteria_TOPIC_ID_eq = newTopics.filter(val => oldTopics.indexOf(val) === -1);
 						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
-						getAssociationReportTypeField(jsToCf(criteriaStructure), (err, data) => {
+						getAssociationReportTypeField(criteriaStructure, (err, data) => {
 							if (err) console.error(err);
 							if (data) {
 								data.forEach((field) => {

@@ -1,6 +1,6 @@
 const reportDuplication = {
 	title: 'Report Duplication',
-	instruction: 'Please select which sections you would like to copy into your new report:',
+	instruction: 'Please select below which sections you would like to copy into your new report.  Note that duplicating some sections requires duplication of others.  If you do not wish to use the sections required by a section you do wish to use, you may change that section after duplication.',
 	sections: {
 		'Title': {
 			duplicate: false,

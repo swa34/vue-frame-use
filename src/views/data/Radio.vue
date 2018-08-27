@@ -2,7 +2,7 @@
   <div v-if="options.length > 0">
 		<!-- If there's a title, show it -->
 		<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
-			{{ title || schema.title }}
+			{{ (title || schema.title) + (mode === 'view' ? ':' : '') }}
 			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 				<HelpCircleIcon />
 			</a>
@@ -12,10 +12,10 @@
 			{{ description }}
 		</p>
 		<!-- A list to hold each of the options -->
-		<transition-group name="list-complete" tag="ul" :class="mode === 'edit' ? 'plain' : ''">
-			<li v-for="option in options" v-bind:key="option[optionID]" v-if="mode === 'edit' || (computedRecord && computedRecord[associatedColumn] === option[optionID])" class="list-complete-item">
+		<transition-group v-if="mode === 'edit'" name="list-complete" tag="ul" class="plain">
+			<li v-for="option in options" v-bind:key="option[optionID]" class="list-complete-item">
 				<!-- Create a label to hold the option elements -->
-				<label v-if="mode === 'edit'">
+				<label>
 					<!--
 						A radio input for the option, props as follows:
 						name: All options use the schema title so that only one can be checked
@@ -33,16 +33,13 @@
 						: {{ option[optionDescription] }}
 					</span>
 				</label>
-				<div v-else>
-					<span>
-						{{ option[optionLabel || optionID] }}
-					</span>
-					<span v-if="optionDescription">
-						: {{ option[optionDescription] }}
-					</span>
-				</div>
 			</li>
 		</transition-group>
+		<div v-else class="inline">
+			<span v-for="option in options" v-bind:key="option[optionID]" v-if="computedRecord && computedRecord[associatedColumn] === option[optionID]">
+				{{ option[optionLabel || optionID] }}
+			</span>
+		</div>
 	</div>
 </template>
 
@@ -56,10 +53,6 @@
 		modeValidator,
 		stringFormats
 	} from '@/modules/utilities';
-	import {
-		cfToJs,
-		jsToCf
-	} from '@/modules/criteriaUtils';
 	import { constructNotificationMessage } from '@/modules/notifications';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
@@ -156,16 +149,12 @@
 			getRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
-						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
+							if (data) {
 								if (data.length > 1) console.warn('More than one record retrieved, when only one record should be allowed.  The first record retrieved will be used.');
 								let convertedRecord = {};
 								this.schema.columns.forEach((column) => {

@@ -2,7 +2,7 @@
   <div v-if="displayedGroups.length > 0 && filteredOptions.length > 0">
 		<!-- Show the title if there is one -->
 		<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
-			{{ title || schema.title }}
+			{{ (title || schema.title) + (mode === 'view' ? ':' : '') }}
 			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
 				<HelpCircleIcon />
 			</a>
@@ -23,49 +23,50 @@
 			-->
 			<transition appear name="fade">
 				<div v-if="!groupsToShow || displayedGroups.indexOf(group.id) !== -1" class="group">
-					<!-- Show the group's name if there is one -->
-					<h4 v-if="group.name">
-						{{ group.name }}
-					</h4>
-					<!-- Then, create a list to hold each of the group's options -->
-					<transition-group name="list-complete" tag="ul" :class="mode === 'edit' ? 'checkbox' : ''">
-						<li v-for="option in group.options" v-bind:key="option[optionID]" v-if="mode === 'edit' || recordExistsForId(option[optionID])" class="list-complete-item">
-							<label v-if="mode === 'edit'">
-								<!--
-									Show a checkbox for the option, here's prop explanations:
-									value: Set to a generated record object from the option
-									v-model: Says where to store the record when checked
-									disabled: Depends on whether editing is enabled or not.
-								-->
-								<input type="checkbox" :value="generateRecord(option)" v-model="records" v-on:click="notifyOfChanges" />
-								<!-- The option's label -->
-								<span>
-									{{ option[optionLabel || optionID] }}
-								</span>
-								<!-- And the option's description if it has one -->
-								<span v-if="optionDescription">
-									: {{ option[optionDescription] }}
-								</span>
-							</label>
-							<div v-else>
-								<span>
-									{{ option[optionLabel || optionID] }}
-								</span>
-								<span v-if="optionDescription">
-									: {{ option[optionDescription] }}
-								</span>
-							</div>
-						</li>
-					</transition-group>
-					<!-- If editing is allowed, show the check/uncheck all buttons -->
-					<!-- <div v-if="mode === 'edit'">
-						<button v-on:click="checkAll(group)" class="button">
-							Check All
-						</button>
-						<button v-on:click="uncheckAll(group)" class="button">
-							Uncheck All
-						</button>
-					</div> -->
+					<div v-if="mode === 'edit'">
+						<!-- Show the group's name if there is one -->
+						<h4 v-if="group.name">
+							{{ group.name }}
+						</h4>
+						<!-- Then, create a list to hold each of the group's options -->
+						<transition-group name="list-complete" tag="ul" class="checkbox">
+							<li v-for="option in group.options" v-bind:key="option[optionID]" class="list-complete-item">
+								<label>
+									<!--
+										Show a checkbox for the option, here's prop explanations:
+										value: Set to a generated record object from the option
+										v-model: Says where to store the record when checked
+										disabled: Depends on whether editing is enabled or not.
+									-->
+									<input type="checkbox" :value="generateRecord(option)" v-model="records" v-on:click="notifyOfChanges" />
+									<!-- The option's label -->
+									<span>
+										{{ option[optionLabel || optionID] }}
+									</span>
+									<!-- And the option's description if it has one -->
+									<span v-if="optionDescription">
+										: {{ option[optionDescription] }}
+									</span>
+								</label>
+								<!-- <div v-else>
+									<span>
+										{{ option[optionLabel || optionID] }}
+									</span>
+									<span v-if="optionDescription">
+										: {{ option[optionDescription] }}
+									</span>
+								</div> -->
+							</li>
+						</transition-group>
+					</div>
+					<div v-else>
+						<strong v-if="group.name">
+							{{ group.name }}:
+						</strong>
+						<span v-for="(option, index) in getOptionsThatHaveRecords(group.options)" v-bind:key="option[optionID]">
+							{{ option[optionLabel || optionID] + (index < getOptionsThatHaveRecords(group.options).length - 1 ? ',' : '') }}
+						</span>
+					</div>
 				</div>
 			</transition>
 		</div>
@@ -81,11 +82,7 @@
 		modeValidator,
 		stringFormats
 	} from '@/modules/utilities';
-	import {
-		cfToJs,
-		filter,
-		jsToCf
-	} from '@/modules/criteriaUtils';
+	import { filter } from '@/modules/criteriaUtils';
 	import { constructNotificationMessage } from '@/modules/notifications';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
@@ -338,6 +335,13 @@
 					if (recordIndex !== -1) this.records.splice(recordIndex, 1);
 				});
 			},
+			getOptionsThatHaveRecords (options) {
+				let newOptions = [];
+				options.forEach((option) => {
+					if (this.recordExistsForId(option[this.optionID])) newOptions.push(option);
+				});
+				return newOptions;
+			},
 			// Generates a record from an option, to be stored in the component's
 			// records array
 			generateRecord (option) {
@@ -358,16 +362,12 @@
 			getRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
-						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
+							if (data) {
 								let convertedRecords = [];
 								data.forEach((record) => {
 									let convertedRecord = {};

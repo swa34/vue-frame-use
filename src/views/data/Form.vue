@@ -54,10 +54,6 @@
 		stringFormats
 	} from '@/modules/utilities';
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import {
-		cfToJs,
-		jsToCf
-	} from '@/modules/criteriaUtils';
 
 	// Export the actual component
 	export default {
@@ -151,16 +147,12 @@
 			const getMainData = () => {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						critStruct[this.schema.criteria.string] = this.identifier.value;
-						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
+							if (data) {
 								let existingRecord = data[0];
 								for (let key in this.record) {
 									if (existingRecord.hasOwnProperty(key)) {

@@ -15,8 +15,29 @@
 			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button">
 				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
-			<button v-if="!isNew && duplicateRecord.hasBeenFetched" v-on:click="updateReportTemplateStatus" type="button" class="favorite">
-				{{ duplicateRecord.IS_TEMPLATE ? '★ Unfavorite' : '☆ Favorite' }}
+			<button
+				v-if="!isNew && duplicateRecord.hasBeenFetched"
+				v-on:click="updateReportTemplateStatus"
+				type="button"
+				:class="'favorite' + (duplicateRecord.IS_TEMPLATE ? ' filled-in' : '')"
+				title="Making a report a favorite will pin it to your GACounts homepage, allowing for easier duplication."
+			>
+				<div v-if="duplicateRecord.IS_TEMPLATE">
+					<span class="icon-wrapper">
+						★
+					</span>
+					<span>
+						Favorite
+					</span>
+				</div>
+				<div v-else>
+					<span class="icon-wrapper">
+						☆
+					</span>
+					<span>
+						Make a Favorite
+					</span>
+				</div>
 			</button>
 		</div>
 		<DuplicationModal
@@ -88,10 +109,6 @@
 		getDuplicatedReport,
 		postReportTemplateStatus
 	} from '@/modules/caesdb';
-	import {
-		cfToJs,
-		jsToCf
-	} from '@/modules/criteriaUtils';
 
 	// Configure notifications
 	notify.setOptions({
@@ -261,10 +278,10 @@
 					getCriteriaStructure('GC3_DUPLICATED_REPORT', (err, data) => {
 						if (err) console.error(err);
 						if (data) {
-							let critStruct = cfToJs(data);
+							let critStruct = data;
 							critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
 							critStruct.criteria_REPORT_ID_eq.push(this.ID);
-							getDuplicatedReport(jsToCf(critStruct), (err, data) => {
+							getDuplicatedReport(critStruct, (err, data) => {
 								if (err) console.error(err);
 								this.duplicateRecord.REPORT_ID = this.ID;
 								if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
@@ -361,8 +378,27 @@
 				background: #6C3129;
 			}
 			&.favorite {
-				background: #F7B538;
+				&.filled-in {
+					background: #F7B538;
+					box-shadow: none;
+					color: #fff;
+				}
+				background: transparent;
+				box-shadow: inset 0 0 0 .125rem #f7b538;
+				color: #000;
+				width: 10rem;
+				div {
+					display: flex;
+					span {
+						&:last-of-type { flex-grow: 1; }
+						display: flex;
+						flex-direction: column;
+						justify-content: center;
+						align-items: center;
+					}
+				}
 			}
 		}
 	}
+	div.inline { display: inline-block; }
 </style>

@@ -65,11 +65,7 @@
 
 <script>
 	import { getCriteriaStructure } from '@/modules/caesdb';
-	import {
-		cfToJs,
-		filter,
-		jsToCf
-	} from '@/modules/criteriaUtils';
+	import { filter } from '@/modules/criteriaUtils';
 	import {
 		// formatDates,
 		getPrettyColumnName,
@@ -248,16 +244,12 @@
 			getExistingRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
 					if (err) console.error(err);
-					if (data.Message) {
-						console.error(new Error(data.Message));
-					} else {
-						let critStruct = cfToJs(data);
+					if (data) {
+						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
-						this.schema.fetchExisting(jsToCf(critStruct), (err, data) => {
+						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) console.error(err);
-							if (data.Message) {
-								console.error(new Error(data.Message));
-							} else {
+							if (data) {
 								if (this.schema.prepareFromRetrieval) {
 									this.schema.prepareFromRetrieval(data, this.records);
 								} else {

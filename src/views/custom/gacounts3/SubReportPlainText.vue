@@ -116,15 +116,6 @@
 </template>
 
 <script>
-	// import {
-	// 	cfToJs,
-	// 	jsToCf
-	// } from '@/modules/criteriaUtils';
-	// import {
-	// 	getCriteriaStructure,
-	// 	getPlannedPrograms
-	// } from '@/modules/caesdb';
-
 	export default {
 		name: 'SubReportPlainText',
 		props: {
@@ -150,25 +141,6 @@
 				if (index === -1) return '';
 				return this.roleTypes[index].SUB_REPORT_ROLE_LABEL;
 			}
-		},
-		mounted () {
-			// const fetchPlannedProgram = () => {
-			// 	getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-			// 		if (err) console.error(err);
-			// 		if (data) {
-			// 			let critStruct = cfToJs(data);
-			// 			critStruct.criteria_ID_eq = [this.data.subReport.PLANNED_PROGRAM_ID];
-			// 			getPlannedPrograms(jsToCf(critStruct), (err, data) => {
-			// 				if (err) console.error(err);
-			// 				if (data) {
-			// 					this.plannedProgram = data[0];
-			// 				}
-			// 			});
-			// 		}
-			// 	});
-			// };
-			//
-			// if (this.data.subReport) fetchPlannedProgram();
 		}
 	};
 </script>

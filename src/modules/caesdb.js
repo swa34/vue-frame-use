@@ -1,21 +1,25 @@
 import request from 'superagent';
+import {
+	cfToJs,
+	jsToCf
+} from '@/modules/criteriaUtils';
 
 const apiPrefix = '/rest/gacounts-api/';
 
 const generateURL = str => apiPrefix + str + '.json';
 
-const serializeByColumns = (obj) => {
-	if (!obj.COLUMNS || !obj.DATA) return obj;
-	let newArr = [];
-	obj.DATA.forEach((item) => {
-		let newObj = {};
-		item.forEach((field, i) => {
-			newObj[obj.COLUMNS[i]] = field;
-		});
-		newArr.push(newObj);
-	});
-	return newArr;
-};
+// const serializeByColumns = (obj) => {
+// 	if (!obj.COLUMNS || !obj.DATA) return obj;
+// 	let newArr = [];
+// 	obj.DATA.forEach((item) => {
+// 		let newObj = {};
+// 		item.forEach((field, i) => {
+// 			newObj[obj.COLUMNS[i]] = field;
+// 		});
+// 		newArr.push(newObj);
+// 	});
+// 	return newArr;
+// };
 
 const makeGetRequest = (url, callback) => {
 	if (!window.pendingRequests) {
@@ -37,14 +41,14 @@ const makeGetRequest = (url, callback) => {
 		});
 };
 
-const makePostRequest = (url, dataToSend, callback) => {
+const makePostRequest = (url, dataToSend, callback, isCriteriaStructure = true) => {
 	if (!window.pendingRequests) {
 		window.pendingRequests = 1;
 	} else {
 		++window.pendingRequests;
 	}
 	request.post(url)
-		.send(dataToSend)
+		.send(isCriteriaStructure ? jsToCf(dataToSend) : dataToSend)
 		.end((err, response) => {
 			--window.pendingRequests;
 			const data = response.body;
@@ -58,35 +62,40 @@ const makePostRequest = (url, dataToSend, callback) => {
 		});
 };
 
-const makeSerializedPostRequest = (url, dataToSend, callback) => {
-	if (!window.pendingRequests) {
-		window.pendingRequests = 1;
-	} else {
-		++window.pendingRequests;
-	}
-	request.post(url)
-		.send(dataToSend)
-		.end((err, response) => {
-			--window.pendingRequests;
-			const data = serializeByColumns(response.body);
-			if (err) {
-				callback(err);
-			} else if (data.Message) {
-				callback(new Error(data.Message), null);
-			} else {
-				callback(null, data);
-			}
-		});
+// const makeSerializedPostRequest = (url, dataToSend, callback) => {
+// 	if (!window.pendingRequests) {
+// 		window.pendingRequests = 1;
+// 	} else {
+// 		++window.pendingRequests;
+// 	}
+// 	request.post(url)
+// 		.send(dataToSend)
+// 		.end((err, response) => {
+// 			--window.pendingRequests;
+// 			const data = serializeByColumns(response.body);
+// 			if (err) {
+// 				callback(err);
+// 			} else if (data.Message) {
+// 				callback(new Error(data.Message), null);
+// 			} else {
+// 				callback(null, data);
+// 			}
+// 		});
+// };
+
+const deleteReport = (reportID, callback) => {
+	const url = generateURL('deleteReport');
+	makePostRequest(url, { reportID }, callback, false);
 };
 
 const get4HActivity = (activityID, callback) => {
 	const url = generateURL('4HActivity');
-	makePostRequest(url, activityID, callback);
+	makePostRequest(url, activityID, callback, false);
 };
 
 const get4HActivityList = (countyName, callback) => {
 	const url = generateURL('4HActivityList');
-	makePostRequest(url, countyName, callback);
+	makePostRequest(url, countyName, callback, false);
 };
 
 const getActivityLocationTypes = (callback) => {
@@ -194,7 +203,7 @@ const getCriteriaStructure = (tablePrefix, callback) => {
 	const url = apiPrefix + 'criteriaStructure?TablePrefix=' + tablePrefix;
 	request.get(url)
 		.end((err, response) => {
-			callback(err, JSON.parse(response.text));
+			callback(err, cfToJs(JSON.parse(response.text)));
 		});
 };
 
@@ -363,17 +372,25 @@ const getTopics = (callback) => {
 	makeGetRequest(url, callback);
 };
 
+const logError = (err) => {
+	console.error(err);
+	// const url = generateURL('errorLog');
+	// const callback = () => {};
+	// makePostRequest(url, err, callback, false);
+};
+
 const postReportData = (report, callback) => {
 	const url = generateURL('processSinglePageReport');
-	makePostRequest(url, report, callback);
+	makePostRequest(url, report, callback, false);
 };
 
 const postReportTemplateStatus = (duplicatedReportRecord, callback) => {
 	const url = generateURL('modifyReportTemplateStatus');
-	makePostRequest(url, duplicatedReportRecord, callback);
+	makePostRequest(url, duplicatedReportRecord, callback, false);
 };
 
 export {
+	deleteReport,
 	get4HActivity,
 	get4HActivityList,
 	getActivityLocationTypes,
@@ -428,6 +445,7 @@ export {
 	getSubReportPurposeAchievements,
 	getTargetAudiences,
 	getTopics,
+	logError,
 	postReportData,
 	postReportTemplateStatus
 };

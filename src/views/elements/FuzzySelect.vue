@@ -141,6 +141,7 @@
 		width: 100%;
 		input {
 			width: 100%;
+			margin-bottom: 0;
 		}
 		input + div.options {
 			display: none;

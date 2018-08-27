@@ -29,6 +29,7 @@ import {
 	gc3TargetAudienceCriteriaStructure
 } from '@/criteriaStructures/gacounts3';
 import {
+	deleteReport,
 	// getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
@@ -159,6 +160,7 @@ const schema = {
 	criteria: {
 		string: 'criteria_ID_eq'
 	},
+	deleteExisting: deleteReport,
 	fetchExisting: getReport,
 	processSubmission: postReportData,
 	cleanUpData: (store) => {
