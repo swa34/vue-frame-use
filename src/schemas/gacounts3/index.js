@@ -16,7 +16,7 @@ import racialDemographicSchema from './racial_demographic';
 import reportContactSchema from './report_contact';
 import reportSchema from './report';
 import reportPersonnelSchema from './report_personnel';
-import reportPurposeAchievementsSchema from './report_purpose_achievements';
+// import reportPurposeAchievementsSchema from './report_purpose_achievements';
 import residenceDemographicSchema from './residence_demographic';
 // import subReportCommentSchema from './sub_report_comment';
 // import subReportContactSchema from './sub_report_contact';
@@ -42,7 +42,7 @@ export {
 	reportContactSchema,
 	reportSchema,
 	reportPersonnelSchema,
-	reportPurposeAchievementsSchema,
+	// reportPurposeAchievementsSchema,
 	residenceDemographicSchema,
 	// subReportCommentSchema,
 	// subReportContactSchema,

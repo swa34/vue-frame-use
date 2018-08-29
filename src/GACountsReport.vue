@@ -1,5 +1,6 @@
 <template lang="html">
   <div id="main">
+		{{ dummyThingToCrashVue }}
 		<div class="heading-container">
 			<h1>Report</h1>
 			<div class="spacer"></div>

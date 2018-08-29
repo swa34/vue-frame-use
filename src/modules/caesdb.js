@@ -1,3 +1,6 @@
+/* global applicationName */
+/* global URL */
+import prepareForCf from '@/modules/prepareForCf';
 import request from 'superagent';
 import {
 	cfToJs,
@@ -52,8 +55,8 @@ const makePostRequest = (url, dataToSend, callback, isCriteriaStructure = true) 
 		.end((err, response) => {
 			--window.pendingRequests;
 			const data = response.body;
-			if (err) {
-				callback(err, null);
+			if (err || !data) {
+				callback(err || new Error('No data returned'), null);
 			} else if (data.Message) {
 				callback(new Error(data.Message), null);
 			} else {
@@ -372,11 +375,46 @@ const getTopics = (callback) => {
 	makeGetRequest(url, callback);
 };
 
-const logError = (err) => {
-	console.error(err);
-	// const url = generateURL('errorLog');
-	// const callback = () => {};
-	// makePostRequest(url, err, callback, false);
+const logError = (err, dump = {}, trace = null) => {
+	const currentUrl = new URL(window.location);
+	const errObj = {
+		ID: null,
+		APPLICATION_ID: 1,
+		FIXED_DEVELOPMENT: false,
+		FIXED_PRODUCTION: false,
+		DATE_CREATED: null,
+		DATE_LAST_UPDATED: null,
+		BROWSER: navigator.userAgent,
+		ERROR_DATETIME: (new Date()).toUTCString(),
+		DETAIL: (typeof err === 'string' ? err : JSON.stringify(err)) + (trace ? '\n' + trace : ''),
+		ERROR_DIAGNOSTICS: null,
+		ERROR_CODE: null,
+		EXTENDED_INFO: null,
+		HTTP_REFERER: currentUrl.href,
+		MAIL_TO: null,
+		MESSAGE: null,
+		NATIVE_ERROR_CODE: null,
+		QUERY_STRING: currentUrl.search,
+		REMOTE_ADDRESS: null,
+		ERROR_SQLSTATE: null,
+		TAG_CONTEXT: null,
+		TEMPLATE: currentUrl.pathname,
+		TYPE: 'javascript/vue',
+		SQL_STATEMENT: null,
+		SESSION_DUMP: null,
+		URL_DUMP: null,
+		FORM_DUMP: null,
+		CGI_DUMP: null,
+		APPLICATION_DUMP: null,
+		REQUEST_DUMP: null
+	};
+	let url = '/rest/oittools/logError.json';
+	if (applicationName) url += `?applicationName=${applicationName}`;
+	const callback = (err, data) => {
+		if (err) console.error(err);
+		console.log(data);
+	};
+	makePostRequest(url, prepareForCf(errObj), callback, false);
 };
 
 const postReportData = (report, callback) => {
