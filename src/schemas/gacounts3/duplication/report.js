@@ -84,6 +84,9 @@ const reportDuplication = {
 			duplicate: false,
 			areas: {
 				associations: [
+					'mediaDistributed',
+					'mediaProduced',
+					'mediaReviewed',
 					'supplementalData'
 				]
 			},

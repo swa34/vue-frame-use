@@ -70,6 +70,8 @@
 											v-if="dependencyMet(area.data)"
 											v-bind:is="area.data.customComponent"
 											v-on:show-help="showHelp"
+											v-on:expand-section="expandSection"
+											v-on:collapse-section="collapseSection"
 											:mode="getMode(area.data)"
 										/>
 									</div>
@@ -222,7 +224,10 @@
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
-	import { getCriteriaStructure } from '@/modules/caesdb';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
 
 	// Export the actual component
 	export default {
@@ -275,21 +280,21 @@
 			}
 		},
 		data () {
-			let sectionsToDisplay = [];
-			if (this.identifier.value) {
-				this.schema.sections.forEach((section) => {
-					sectionsToDisplay.push(section.title);
-				});
-			} else if (this.schema.sections.length > 0) {
-				sectionsToDisplay.push(this.schema.sections[0].title);
-			}
+			// let sectionsToDisplay = [];
+			// if (this.identifier.value) {
+			// 	this.schema.sections.forEach((section) => {
+			// 		sectionsToDisplay.push(section.title);
+			// 	});
+			// } else if (this.schema.sections.length > 0) {
+			// 	sectionsToDisplay.push(this.schema.sections[0].title);
+			// }
 			return {
 				helpMessage: {
 					show: false,
 					name: ''
 				},
 				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
-				sectionsToDisplay
+				sectionsToDisplay: this.schema.sections.map(s => s.title)
 			};
 		},
 		// The methods available to this component during render
@@ -315,7 +320,7 @@
 				}).then((result) => {
 					if (result.value) {
 						this.schema.deleteExisting(this.identifier.value, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data.SUCCESS) {
 								swal(
 									'Deleted!',
@@ -452,25 +457,25 @@
 				}
 				// If no column or association were specified, we're in an error state
 				// so say so and consider the dependency unmet.
-				console.error('Dependency information missing for association: ' + association.title);
+				logError(new Error(`Dependency information missing for association: ${association.title}`));
 				return false;
 			},
 			generateIdentifier (association) {
 				return {
 					key: association.foreignKey,
 					value: this.identifier.value,
-					criteriaString: association.criteriaString || 'criteria_' + association.foreignKey + '_eq',
+					criteriaString: association.criteriaString || `criteria_${association.foreignKey}_eq`,
 					duplicate: this.identifier.duplicate || false
 				};
 			},
 			getMainData () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
 						critStruct[this.schema.criteria.string] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data && data.length > 0) {
 								let existingRecord = data[0];
 								for (let key in this.record) {
@@ -553,6 +558,11 @@
 				return this.sectionsToDisplay.indexOf(section.title) !== -1;
 			},
 			sqlToHtml,
+			expandSection (sectionTitle) { if (this.sectionsToDisplay.indexOf(sectionTitle) === -1) this.sectionsToDisplay.push(sectionTitle); },
+			collapseSection (sectionTitle) {
+				const index = this.sectionsToDisplay.indexOf(sectionTitle);
+				if (index !== -1) this.sectionsToDisplay.splice(index, 1);
+			},
 			toggleSection (section) {
 				const index = this.sectionsToDisplay.indexOf(section.title);
 				if (index === -1) {
@@ -579,17 +589,17 @@
 							// If the constraint has a tablePrefix, we need to get a criteria
 							// structure first, then send our request
 							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) console.error(err);
+									if (err) logError(err);
 									if (data) column.constraint.values = data;
 								});
 							});
 						} else {
 							// If no table prefix, just fetch the data
 							column.constraint.getValues((err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) column.constraint.values = data;
 							});
 						}

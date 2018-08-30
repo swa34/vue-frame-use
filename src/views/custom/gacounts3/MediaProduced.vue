@@ -61,13 +61,15 @@
 		getCriteriaStructure,
 		getMediaProduction,
 		getMediaReviewType,
-		getMediaType
+		getMediaType,
+		logError
 	} from '@/modules/caesdb';
 	import { modeValidator } from '@/modules/utilities';
 
 	export default {
 		name: 'MediaProduced',
 		computed: {
+			duplication () { return this.$store.state.duplication; },
 			fetched: {
 				get () { return this.$store.state.mediaProduced.fetched; },
 				set (val) { this.$store.state.mediaProduced.fetched = val; }
@@ -123,12 +125,12 @@
 		mounted () {
 			const fetchExisting = () => {
 				getCriteriaStructure('GC3_MEDIA_PRODUCTION', (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						const critStruct = data;
-						critStruct.criteria_REPORT_ID_eq = [this.reportID];
+						critStruct.criteria_REPORT_ID_eq = [this.reportID || this.duplication.reportID];
 						getMediaProduction(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								if (data.length < 1) {
 									this.populateRecord();
@@ -143,7 +145,7 @@
 
 			const getMediaTypes = () => {
 				getMediaType((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						this.mediaTypes = data;
 						this.mediaTypes.unshift({
@@ -156,7 +158,7 @@
 
 			const getReviewTypes = () => {
 				getMediaReviewType((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						this.reviewTypes = data;
 						this.reviewTypes.unshift({
@@ -169,7 +171,7 @@
 
 			getMediaTypes();
 			getReviewTypes();
-			if (this.reportID !== null && !this.fetched) fetchExisting();
+			if ((this.reportID !== null || this.duplication.associations.mediaProduced) && !this.fetched) fetchExisting();
 			if (this.reportID === null && !this.fetched) this.populateRecord();
 		},
 		props: {

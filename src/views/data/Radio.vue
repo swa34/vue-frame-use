@@ -48,7 +48,10 @@
 	/* global notify */
 
 	// Import required modules
-	import { getCriteriaStructure } from '@/modules/caesdb';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
 	import {
 		modeValidator,
 		stringFormats
@@ -148,12 +151,12 @@
 			},
 			getRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								if (data.length > 1) console.warn('More than one record retrieved, when only one record should be allowed.  The first record retrieved will be used.');
 								let convertedRecord = {};
@@ -202,10 +205,10 @@
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) console.error(err);
+									if (err) logError(err);
 									if (data) {
 										component.unfilteredOptions = data;
 										let values = [];
@@ -225,7 +228,7 @@
 						} else {
 							// If no table prefix, just fetch the data
 							column.constraint.getValues((err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) {
 									component.unfilteredOptions = data;
 									let values = [];
@@ -243,7 +246,7 @@
 							});
 						}
 					} else if (column.columnName === component.associatedColumn && column.constraint.values.length < 1) {
-						console.error('ID Column does not have necessary constraint information.');
+						logError(new Error('ID Column does not have necessary constraint information.'));
 					}
 				});
 			};
@@ -251,11 +254,11 @@
 			const getFilterRecords = () => {
 				if (component.filter.getValues) {
 					component.filter.getValues((err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) component.filterRecords = data;
 					});
 				} else {
-					console.error('Filter does not contain function to get values');
+					logError(new Error('Filter does not contain function to get values'));
 				}
 			};
 

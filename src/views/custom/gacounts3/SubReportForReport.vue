@@ -125,7 +125,8 @@
 		getStatePlannedPrograms,
 		getSubReport,
 		getSubReportContact,
-		getSubReportPurposeAchievements
+		getSubReportPurposeAchievements,
+		logError
 	} from '@/modules/caesdb';
 	import { filter } from '@/modules/criteriaUtils';
 	import { url } from '@/modules/utilities';
@@ -251,7 +252,7 @@
 					this.contacts = contacts;
 				} else if (this.contacts.length < 1) {
 					getAssociationReportTypeContactType((err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							data.forEach((record) => {
 								if (record.REPORT_TYPE_ID === this.reportType) {
@@ -284,36 +285,36 @@
 			this.populateContactsRecords();
 			this.populateOutcomeRecord();
 			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) {
 					this.criteriaStructureTemplates.associationReportTypeContactType = data;
 				}
 			});
 			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) {
 					this.criteriaStructureTemplates.associationReportTypeRole = data;
 				}
 			});
 			getContactTypes((err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) {
 					this.contactTypes = data;
 				}
 			});
 			getAssociationReportTypeRole((err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) {
 					this.unfilteredRoleTypes = data;
 				}
 			});
 			getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) {
 					let critStruct = data;
 					critStruct.criteria_USER_ID_eq.push(activeUserID);
 					getPlannedPrograms(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							this.plannedPrograms = data;
 						}
@@ -321,7 +322,7 @@
 				}
 			});
 			getStatePlannedPrograms((err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) {
 					this.statePlannedPrograms = data;
 				}
@@ -331,7 +332,7 @@
 				const fetchSubReportCriteriaStructure = (callback) => {
 					console.log('fetching subreport crit struct');
 					getCriteriaStructure('GC3_SUB_REPORT', (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							this.criteriaStructureTemplates.subReport = data;
 							callback();
@@ -344,7 +345,7 @@
 					critStruct.criteria_REPORT_ID_eq = this.reportId || url.getParam('duplicateID');
 					critStruct.criteria_USER_ID_eq = activeUserID;
 					getSubReport(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							const existingSubReport = data[0];
 							[
@@ -373,12 +374,12 @@
 				const fetchRoles = () => {
 					console.log('fetch subreport roles');
 					getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
 							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
 							getAssociationSubReportRole(critStruct, (err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) {
 									data.forEach((record) => {
 										delete record.SUB_REPORT_ROLE_LABEL;
@@ -393,12 +394,12 @@
 				const fetchContacts = () => {
 					console.log('fetching contacts');
 					getCriteriaStructure('GC3_SUB_REPORT_CONTACT', (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
 							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
 							getSubReportContact(critStruct, (err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) {
 									const contactsMap = this.contacts.map(c => c.TYPE_ID);
 									data.forEach((record) => {
@@ -414,12 +415,12 @@
 				const fetchSupplementalData = () => {
 					console.log('fetching supplemental data');
 					getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
 							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
 							getAssociationSubReportField(critStruct, (err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) {
 									const suppDataMap = this.supplementalData.map(d => d.FIELD_ID);
 									data.forEach((record) => {
@@ -435,12 +436,12 @@
 				const fetchOutcomes = () => {
 					console.log('fetching outcomes');
 					getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
 							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
 							getSubReportPurposeAchievements(critStruct, (err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) {
 									this.outcomes = data;
 								}

@@ -1,6 +1,8 @@
+import { logError } from '@/modules/caesdb';
+
 const constructNotificationMessage = (name, titles) => {
 	if (titles.length < 1) {
-		console.error('Titles are missing from a schema component that affects other areas.');
+		logError(new Error('Titles are missing from a schema component that affects other areas.'));
 		return;
 	}
 	const before = 'You have changed the ' + name + '. This affects ';

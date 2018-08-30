@@ -53,7 +53,10 @@
 		sqlToHtml,
 		stringFormats
 	} from '@/modules/utilities';
-	import { getCriteriaStructure } from '@/modules/caesdb';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
 
 	// Export the actual component
 	export default {
@@ -146,12 +149,12 @@
 			// Our main data grabbing function, grabs data for the main schema
 			const getMainData = () => {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
 						critStruct[this.schema.criteria.string] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								let existingRecord = data[0];
 								for (let key in this.record) {
@@ -179,17 +182,17 @@
 							// If the constraint has a tablePrefix, we need to get a criteria
 							// structure first, then send our request
 							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) console.error(err);
+									if (err) logError(err);
 									if (data) column.constraint.values = data;
 								});
 							});
 						} else {
 							// If no table prefix, just fetch the data
 							column.constraint.getValues((err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) column.constraint.values = data;
 							});
 						}

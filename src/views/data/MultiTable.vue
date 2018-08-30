@@ -64,7 +64,10 @@
 </template>
 
 <script>
-	import { getCriteriaStructure } from '@/modules/caesdb';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
 	import { filter } from '@/modules/criteriaUtils';
 	import {
 		// formatDates,
@@ -166,7 +169,7 @@
 						const column = this.schema.columns[i];
 						if (column.columnName === this.optionColumnName) return column;
 						if (i === this.schema.columns.length - 1) {
-							console.error('Could not find option column');
+							logError(new Error('Could not find option column'));
 							return null;
 						}
 					}
@@ -243,12 +246,12 @@
 			},
 			getExistingRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								if (this.schema.prepareFromRetrieval) {
 									this.schema.prepareFromRetrieval(data, this.records);
@@ -305,11 +308,11 @@
 			const getFilterRecords = () => {
 				if (component.filter.getValues) {
 					component.filter.getValues((err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) component.filterRecords = data;
 					});
 				} else {
-					console.error('Filter does not contain function to get values');
+					logError(new Error('Filter does not contain function to get values'));
 				}
 			};
 
@@ -332,7 +335,7 @@
 						column.constraint.values = values;
 					} else if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
 						column.constraint.getValues((err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								let values = [];
 								data.forEach((result) => {
@@ -352,7 +355,7 @@
 
 			const fetchCriteriaStructure = () => {
 				getCriteriaStructure(component.filter.tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						component.criteriaStructure = data;
 					}

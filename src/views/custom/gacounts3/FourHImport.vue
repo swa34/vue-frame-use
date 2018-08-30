@@ -56,7 +56,8 @@
 	import {
 		get4HActivity,
 		get4HActivityList,
-		getCounties
+		getCounties,
+		logError
 	} from '@/modules/caesdb';
 	import { url } from '@/modules/utilities';
 
@@ -88,7 +89,7 @@
 				this.loadingActivity = true;
 				get4HActivity({ activityID: this.activityID }, (err, data) => {
 					if (err) {
-						console.error(err);
+						logError(err);
 					} else if (data && data.length > 0) {
 						this.setDemographics(data[0]);
 					}
@@ -103,7 +104,7 @@
 					// Fix our hijacked pending requests
 					++window.pendingRequests;
 					if (err) {
-						console.error(err);
+						logError(err);
 					} else if (data) {
 						if (data.length < 1 && this.displayModal) this.notifyUserAboutNoActivities();
 						this.activities = data;
@@ -114,7 +115,7 @@
 			fetchCountyList () {
 				getCounties((err, data) => {
 					if (err) {
-						console.error(err);
+						logError(err);
 					} else if (data) {
 						this.counties = data;
 						if (this.$store.state.report.COUNTY_ID) {
@@ -130,6 +131,7 @@
 			},
 			openModal () {
 				if (!this.dataImported) {
+					this.$emit('expand-section', 'Supplemental Data');
 					this.displayModal = true;
 					if (this.countyName && this.counties.length < 1) this.notifyUserAboutNoActivities();
 				}

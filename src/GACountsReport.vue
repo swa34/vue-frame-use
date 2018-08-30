@@ -1,8 +1,7 @@
 <template lang="html">
   <div id="main">
-		{{ dummyThingToCrashVue }}
 		<div class="heading-container">
-			<h1>Report</h1>
+			<h1>Activity Report</h1>
 			<div class="spacer"></div>
 			<button v-if="!isNew && !userIsOwner && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="file-sub-report">
 				{{ userCollaboratorRecord.HAS_REPORTED === 0 ? 'File' : 'Edit' }} Sub-Report
@@ -108,6 +107,7 @@
 	import {
 		getCriteriaStructure,
 		getDuplicatedReport,
+		logError,
 		postReportTemplateStatus
 	} from '@/modules/caesdb';
 
@@ -196,7 +196,7 @@
 						duplicate: false
 					};
 				} else {
-					console.error('Neither the "new" parameter or a pkid were found');
+					logError(new Error('Neither the "new" parameter or a pkid were found when attempting to view an existing report.  This state should not be possible, so it must mean something has really gone wrong.'));
 				}
 			} else if (duplicateId) {
 				data.identifier = {
@@ -256,7 +256,7 @@
 				const duplicateRecord = Object.assign({}, this.duplicateRecord);
 				duplicateRecord.IS_TEMPLATE = !this.duplicateRecord.IS_TEMPLATE;
 				postReportTemplateStatus(duplicateRecord, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data.SUCCESS) {
 						this.duplicateRecord.IS_TEMPLATE = duplicateRecord.IS_TEMPLATE;
 					} else {
@@ -277,13 +277,13 @@
 				// duplicated report record for this report
 				if (!isNaN(this.ID)) {
 					getCriteriaStructure('GC3_DUPLICATED_REPORT', (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							let critStruct = data;
 							critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
 							critStruct.criteria_REPORT_ID_eq.push(this.ID);
 							getDuplicatedReport(critStruct, (err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								this.duplicateRecord.REPORT_ID = this.ID;
 								if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
 								this.duplicateRecord.hasBeenFetched = true;

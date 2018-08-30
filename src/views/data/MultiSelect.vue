@@ -77,7 +77,10 @@
 	/* global activeUserID */
 	/* global notify */
 	// Import required modules
-	import { getCriteriaStructure } from '@/modules/caesdb';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
 	import {
 		modeValidator,
 		stringFormats
@@ -185,11 +188,11 @@
 					if (!this.groupsToShow.association || !this.groupsToShow.column) {
 						// If groupsToShow has an association without a specified column,
 						// we're in an error state so log it to the console.
-						console.error('Groups to show must either be an array or an object containing an association and a column.');
+						logError(new Error('Groups to show must either be an array or an object containing an association and a column.'));
 					} else if (!this.$store) {
 						// If no datastore is present, we're in an error state since we need
 						// to be able to access data outside this component's scope
-						console.error('Cannot restrict displayed groups when not using a data store.');
+						logError(new Error('Cannot restrict displayed groups when not using a data store.'));
 					} else {
 						// Else, we're good.  We just need to create a mapped array from the
 						// component's group records
@@ -361,12 +364,12 @@
 			},
 			getRecords () {
 				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								let convertedRecords = [];
 								data.forEach((record) => {
@@ -410,24 +413,24 @@
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) console.error(err);
+									if (err) logError(err);
 									if (data) component.options = data;
 								});
 							});
 						} else {
 							// If no table prefix, just fetch the data
 							column.constraint.getValues((err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) component.options = data;
 							});
 						}
 					} else if (column.columnName === component.associatedColumn) {
 						// If we find the associated column but it doesn't have a constraint
 						// we're in an error condition, so log it to the console.
-						console.error('ID Column does not have necessary constraint information.');
+						logError(new Error('ID Column does not have necessary constraint information.'));
 					}
 				});
 			};
@@ -436,11 +439,11 @@
 			const getFilterRecords = () => {
 				if (component.filter.getValues) {
 					component.filter.getValues((err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) component.filterRecords = data;
 					});
 				} else {
-					console.error('Filter does not contain function to get values');
+					logError(new Error('Filter does not contain function to get values'));
 				}
 			};
 

@@ -76,7 +76,8 @@
 		getAssociationReportTypeField,
 		getAssociationSubReportField,
 		getCriteriaStructure,
-		getFieldOptions
+		getFieldOptions,
+		logError
 	} from '@/modules/caesdb';
 	import { filter } from '@/modules/criteriaUtils';
 	import {
@@ -286,7 +287,7 @@
 			},
 			populateReportFields () {
 				getAssociationReportTypeField(this.reportFieldCriteriaStructureForCF, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let uniqueFields = [];
 						let newReportFields = [];
@@ -309,11 +310,11 @@
 		mounted () {
 			// Fetch some things we need
 			getCriteriaStructure('GC3_FIELD_OPTION', (err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) this.criteriaStructureTemplates.fieldOption = data;
 			});
 			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
-				if (err) console.error(err);
+				if (err) logError(err);
 				if (data) this.criteriaStructureTemplates.reportField = data;
 				this.populateReportFields();
 			});
@@ -322,7 +323,7 @@
 				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
 				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
 				getCriteriaStructure(tablePrefix, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
 						if (this.forSubReport) {
@@ -331,7 +332,7 @@
 							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
 						}
 						getFields(critStruct, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) this.existingRecords = data;
 						});
 					}
@@ -355,7 +356,7 @@
 					const criteriaStructure = Object.assign({}, this.criteriaStructureTemplates.fieldOption);
 					criteriaStructure.criteria_FIELD_ID_eq = fieldsThatNeedOptions;
 					getFieldOptions(criteriaStructure, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							data.forEach((fieldOption) => {
 								if (this.fieldOptions.map(o => o.ID).indexOf(fieldOption.ID) === -1) this.fieldOptions.push(fieldOption);
@@ -401,7 +402,7 @@
 						criteriaStructure.criteria_AREA_ID_eq = newAreas.filter(val => oldAreas.indexOf(val) === -1);
 						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
 						getAssociationReportTypeField(criteriaStructure, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								data.forEach((field) => {
 									if (this.fieldIDs.indexOf(field.FIELD_ID) === -1) this.reportFields.push(field);
@@ -432,7 +433,7 @@
 						criteriaStructure.criteria_TOPIC_ID_eq = newTopics.filter(val => oldTopics.indexOf(val) === -1);
 						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
 						getAssociationReportTypeField(criteriaStructure, (err, data) => {
-							if (err) console.error(err);
+							if (err) logError(err);
 							if (data) {
 								data.forEach((field) => {
 									if (this.fieldIDs.indexOf(field.FIELD_ID) === -1) this.reportFields.push(field);

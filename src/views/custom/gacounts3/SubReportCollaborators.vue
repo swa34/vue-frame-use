@@ -164,7 +164,7 @@
 		<transition-group appear name="fade">
 			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
 				<h3>
-					{{ getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
+					{{ collaborator.LAST_NAME ? [collaborator.FIRST_NAME, collaborator.LAST_NAME].join(' ') : getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
 					<button v-if="!needExistingData || (needExistingData && mode === 'edit' && editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
 						Remove
 					</button>
@@ -222,7 +222,8 @@
 		getStatePlannedPrograms,
 		getSubReport,
 		getSubReportContact,
-		getSubReportPurposeAchievements
+		getSubReportPurposeAchievements,
+		logError
 	} from '@/modules/caesdb';
 	import {
 		cfToJs,
@@ -385,6 +386,7 @@
 					unfilteredRoleTypes: []
 				},
 				personnel: [],
+				retiredPersonnel: [],
 				statePlannedPrograms: []
 			};
 
@@ -483,7 +485,7 @@
 			},
 			populateOwnerContactsRecords () {
 				getAssociationReportTypeContactType((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						data.forEach((record) => {
 							if (record.REPORT_TYPE_ID === this.reportType) {
@@ -527,7 +529,7 @@
 				if (this.ownerSubReport.PLANNED_PROGRAM_ID) critStruct.criteria_ID_eq.push(this.ownerSubReport.PLANNED_PROGRAM_ID);
 				if (critStruct.criteria_ID_eq.length > 0) {
 					getPlannedPrograms(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							data.forEach((record) => {
 								if (record.ID === this.ownerSubReport.PLANNED_PROGRAM_ID) {
@@ -546,7 +548,7 @@
 				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
 				if (critStruct.criteria_REPORT_ID_eq.length > 0) {
 					getReportPersonnel(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							this.collaborators = data;
 						}
@@ -559,7 +561,7 @@
 				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
 				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
 					getAssociationSubReportField(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							data.forEach((record) => {
 								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
@@ -578,7 +580,7 @@
 				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
 				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
 					getSubReportContact(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							const ownerContactsMap = this.ownerContacts.map(c => c.TYPE_ID);
 							data.forEach((record) => {
@@ -600,20 +602,20 @@
 
 			const fetchContactTypes = () => {
 				getContactTypes((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) this.contactTypes = data;
 				});
 			};
 
 			const fetchOutcomes = () => {
 				getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						const critStruct = data;
 						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
 						if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
 							getSubReportPurposeAchievements(critStruct, (err, data) => {
-								if (err) console.error(err);
+								if (err) logError(err);
 								if (data) {
 									data.forEach((record) => {
 										if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
@@ -631,7 +633,7 @@
 
 			const fetchPersonnel = () => {
 				getPersonnel((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						this.personnel = data;
 					}
@@ -642,19 +644,23 @@
 				let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
 				critStruct.criteria_PersonnelMayFileUnder = activeUserID;
 				getPlannedPrograms(critStruct, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						this.ownerState.plannedPrograms = data;
 					};
 				});
 			};
 
+			// const fetchRetiredPersonnel = () => {
+			//
+			// };
+
 			const fetchRoles = () => {
 				const critStruct = caesCache.criteriaStructures.gc3.associationSubReportRole;
 				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
 				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
 					getAssociationSubReportRole(critStruct, (err, data) => {
-						if (err) console.error(err);
+						if (err) logError(err);
 						if (data) {
 							data.forEach((record) => {
 								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
@@ -671,7 +677,7 @@
 
 			const fetchRoleTypes = () => {
 				getAssociationReportTypeRole((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						this.ownerState.unfilteredRoleTypes = data;
 					}
@@ -680,7 +686,7 @@
 
 			const fetchStatePlannedPrograms = () => {
 				getStatePlannedPrograms((err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) this.statePlannedPrograms = data;
 				});
 			};
@@ -689,7 +695,7 @@
 				const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
 				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
 				getSubReport(critStruct, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						data.forEach((record) => {
 							const subReport = { ISSUE_TYPE: null };

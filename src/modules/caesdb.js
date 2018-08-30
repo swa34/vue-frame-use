@@ -183,7 +183,7 @@ const getContactTypes = (callback) => {
 
 const getContextualHelpMessageHTML = (messageName, callback) => {
 	if (!messageName) {
-		console.error(new Error('Cannot fetch contextual help message HTML: messageName is undefined.'));
+		logError(new Error('Cannot fetch contextual help message HTML: messageName is undefined.'));
 		return;
 	}
 	const url = apiPrefix + 'contextualHelpMessageHTML?messageName=' + messageName;
@@ -200,7 +200,7 @@ const getCounties = (callback) => {
 
 const getCriteriaStructure = (tablePrefix, callback) => {
 	if (!tablePrefix) {
-		console.error(new Error('Cannot fetch criteria structure: table prefix is undefined'));
+		logError(new Error('Cannot fetch criteria structure: table prefix is undefined'));
 		return;
 	}
 	const url = apiPrefix + 'criteriaStructure?TablePrefix=' + tablePrefix;
@@ -278,6 +278,11 @@ const getMediaTypeCategory = (callback) => {
 const getPersonnel = (callback) => {
 	const url = generateURL('personnel');
 	makeGetRequest(url, callback);
+};
+
+const getPersonnelWithCriteria = (criteriaStructure, callback) => {
+	const url = generateURL('personnelWithCriteria');
+	makePostRequest(url, criteriaStructure, callback);
 };
 
 const getPlannedPrograms = (criteriaStructure, callback) => {
@@ -376,7 +381,12 @@ const getTopics = (callback) => {
 };
 
 const logError = (err, dump = {}, trace = null) => {
+	// If in development mode, log the error to the console
+	if (process.env.NODE_ENV === 'development') console.error(err);
+
+	// Grab the current url
 	const currentUrl = new URL(window.location);
+	// Create an object that mirrors our error log table
 	const errObj = {
 		ID: null,
 		APPLICATION_ID: 1,
@@ -408,12 +418,13 @@ const logError = (err, dump = {}, trace = null) => {
 		APPLICATION_DUMP: null,
 		REQUEST_DUMP: null
 	};
+	// The url for the error logging endpoint
 	let url = '/rest/oittools/logError.json';
+	// Optionally provide a url param specifying the application name
 	if (applicationName) url += `?applicationName=${applicationName}`;
-	const callback = (err, data) => {
-		if (err) console.error(err);
-		console.log(data);
-	};
+	// Dummy callback that don't do nothin
+	const callback = () => {};
+	// Send it off!
 	makePostRequest(url, prepareForCf(errObj), callback, false);
 };
 
@@ -464,6 +475,7 @@ export {
 	getMediaType,
 	getMediaTypeCategory,
 	getPersonnel,
+	getPersonnelWithCriteria,
 	getPlannedPrograms,
 	getProgramScopes,
 	getProgramAreas,

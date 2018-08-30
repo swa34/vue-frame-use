@@ -16,8 +16,11 @@
 
 <script>
 	import Spinner from 'vue-simple-spinner';
-	import { getContextualHelpMessageHTML } from '@/modules/caesdb';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
+	import {
+		getContextualHelpMessageHTML,
+		logError
+	} from '@/modules/caesdb';
 
 	export default {
 		name: 'ContextualHelpMessage',
@@ -46,7 +49,7 @@
 				this.$emit('close-modal');
 			} else {
 				getContextualHelpMessageHTML(this.messageName, (err, data) => {
-					if (err) console.error(err);
+					if (err) logError(err);
 					if (data) {
 						if (data.length < 1) this.$emit('close-modal');
 						this.helpMessageHTML = data.trim();
