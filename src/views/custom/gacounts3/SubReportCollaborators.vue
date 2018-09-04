@@ -104,7 +104,7 @@
 									Contact Type
 								</th>
 								<th>
-									Quantity
+									Your Quantity
 								</th>
 							</tr>
 						</thead>

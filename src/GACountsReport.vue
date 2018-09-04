@@ -112,11 +112,19 @@
 	} from '@/modules/caesdb';
 
 	// Configure notifications
-	notify.setOptions({
-		autoHideLogs: true,
+	notify.configure({
+		autoHide: {
+			log: true
+		},
+		colors: {
+			error: '#eba6a9',
+			warn: '#f8fcda',
+			log: '#63adf2'
+		},
 		messageHeadings: {
 			log: 'Note:'
-		}
+		},
+		squareCorners: true
 	});
 
 	// Hacky fix for schemas without titles
@@ -179,6 +187,7 @@
 				duplicationSchema,
 				identifier: null,
 				inputID: null,
+				isDuplicate: duplicateId !== false,
 				isNew,
 				mode: 'view',
 				schema: sortedSchema,
@@ -269,6 +278,14 @@
 			this.watchFields = true;
 			if (this.userIsOwner) this.mode = 'edit';
 			if (url.getParam('new') !== null) this.OWNER_ID = activeUserID;
+			// Set the page title
+			if (this.isNew && this.isDuplicate) {
+				document.title = `Duplicate Activity Report | ${document.title}`;
+			} else if (this.isNew) {
+				document.title = `New Activity Report | ${document.title}`;
+			} else {
+				document.title = `View Activity Report | ${document.title}`;
+			}
 		},
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
 		watch: {

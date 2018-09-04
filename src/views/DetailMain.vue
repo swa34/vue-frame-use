@@ -701,6 +701,7 @@
 	}
 	h2.section-heading {
 		cursor: pointer;
+		user-select: none;
 		svg {
 			vertical-align: middle;
 		}

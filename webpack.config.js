@@ -48,14 +48,26 @@ const commonConfig = {
 				test: /\.css$/,
 				use: [
 					'vue-style-loader',
-					'css-loader'
+					{
+						loader: 'css-loader',
+						options: {
+							importLoaders: 1
+						}
+					},
+					'postcss-loader'
 				]
 			},
 			{
 				test: /\.scss$/,
 				use: [
 					'vue-style-loader',
-					'css-loader',
+					{
+						loader: 'css-loader',
+						options: {
+							importLoaders: 1
+						}
+					},
+					'postcss-loader',
 					'sass-loader'
 				]
 			},
