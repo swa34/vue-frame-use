@@ -24,7 +24,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="record in records" v-bind:key="record[optionColumnName]">
+				<tr v-for="record in records" v-bind:key="record[optionColumnName]" :class="mode === 'view' && !recordHasValue(record) ? 'hide-on-print' : ''">
 					<td v-for="column in filteredColumns">
 						<span v-if="column.columnName === optionColumnName">
 							{{ getOptionLabel(record[optionColumnName]) }}
@@ -294,6 +294,13 @@
 			},
 			recordExistsForId (id) {
 				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;
+			},
+			recordHasValue (record) {
+				let hasValue = false;
+				this.filteredColumns.forEach((column) => {
+					if (column.columnName !== this.optionColumnName && this.columnShouldBeEditable(column) && record[column.columnName] !== null && record[column.columnName] !== '') hasValue = true;
+				});
+				return hasValue;
 			},
 			sqlToHtml
 		},

@@ -1,6 +1,6 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
-  <div>
+  <div :class="`${mode}-mode`">
 		<ContextualHelpMessage
 			:messageName="helpMessage.name"
 			v-on:close-modal="hideHelp"
@@ -14,10 +14,10 @@
 		</div>
 		<section v-for="section in schema.sections">
 			<h2 v-on:click="toggleSection(section)" class="head section-heading">
-				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" />
-				<ChevronRightIcon v-else />
+				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
+				<ChevronRightIcon v-else class="hide-on-print" />
 				{{ section.title }}
-				<em v-if="section.required" class="required-label">
+				<em v-if="section.required" class="required-label hide-on-print">
 					(Required)
 				</em>
 			</h2>
@@ -30,8 +30,8 @@
 							:mode="mode"
 						/>
 					</div>
-					<div v-else>
-						<div v-for="area in section.areas">
+					<div v-else :class="!section.disableFlex ? 'flex-section' : ''">
+						<div v-for="area in section.areas" :class="`area ${area.data.customClasses ? area.data.customClasses.join(' ') : ''}`">
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
 									<SmartInput
@@ -727,5 +727,35 @@
 	}
 	li.list-complete-leave-active {
 		position: absolute;
+	}
+	div.view-mode {
+		div.flex-section {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			div.area {
+				margin: 0 .5rem;
+				flex-grow: 1;
+				&.full-width { flex-basis: 100%; }
+			}
+		}
+	}
+	@media print {
+		div.view-mode div.flex-section {
+			justify-content: flex-start;
+			div.area {
+				flex-grow: 0;
+				table {
+					width: auto;
+					border-collapse: collapse;
+				}
+				table, th, td { border: 1px solid #000; }
+			}
+		}
+		h2.section-heading { margin-bottom: 0; }
+		div.area h3 {
+			margin-top: .25em;
+			margin-bottom: .25em;
+		}
 	}
 </style>

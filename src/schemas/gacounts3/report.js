@@ -557,6 +557,7 @@ const schema = {
 		},
 		{
 			title: '4H Import',
+			customClasses: ['full-width'],
 			customComponent: FourHImportComponent,
 			isAssignable: true,
 			depends: {
@@ -615,7 +616,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 4
+				order: 3
 			},
 			depends: {
 				association: 'Contacts',
@@ -636,7 +637,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 5
+				order: 4
 			},
 			depends: {
 				association: 'Contacts',
@@ -657,7 +658,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 6
+				order: 5
 			},
 			depends: {
 				association: 'Report Type',
@@ -687,6 +688,7 @@ const schema = {
 		{
 			title: 'Target Audiences',
 			description: 'Please balance Target Audience to Face-to-Face numbers.',
+			customClasses: ['full-width'],
 			schema: targetAudienceSchema,
 			helpMessageName: 'TARGET_AUDIENCE_HEADER',
 			localKey: 'ID',
@@ -698,7 +700,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 3
+				order: 6
 			},
 			filter: {
 				associations: [
@@ -816,6 +818,7 @@ const schema = {
 		{
 			title: 'Supplemental Data',
 			description: 'This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.',
+			customClasses: ['full-width'],
 			schema: associationReportFieldSchema,
 			customComponent: SupplementalDataComponent,
 			helpMessageName: 'ReportSupplementalData',
@@ -853,7 +856,8 @@ const schema = {
 		{
 			title: 'Main Report Information',
 			order: 1,
-			required: true
+			required: true,
+			disableFlex: true
 		},
 		{
 			title: 'Topics and Keywords',

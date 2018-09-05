@@ -32,7 +32,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="record in records">
+				<tr v-for="record in records" :class="mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''">
 					<td>
 						{{ getFieldLabel(record.FIELD_ID) }}
 					</td>

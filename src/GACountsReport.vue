@@ -3,23 +3,23 @@
 		<div class="heading-container">
 			<h1>Activity Report</h1>
 			<div class="spacer"></div>
-			<button v-if="!isNew && !userIsOwner && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="file-sub-report">
+			<button v-if="!isNew && !userIsOwner && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="file-sub-report hide-on-print">
 				{{ userCollaboratorRecord.HAS_REPORTED === 0 ? 'File' : 'Edit' }} Sub-Report
 			</button>
-			<button v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0" v-on:click="redirectToSubReportRejection" type="button" class="reject-sub-report">
+			<button v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0" v-on:click="redirectToSubReportRejection" type="button" class="reject-sub-report hide-on-print">
 				Decline Sub-Report
 			</button>
-			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button">
+			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button" class="hide-on-print">
 				Duplicate
 			</button>
-			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button">
+			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button" class="hide-on-print">
 				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
 			<button
 				v-if="!isNew && duplicateRecord.hasBeenFetched"
 				v-on:click="updateReportTemplateStatus"
 				type="button"
-				:class="'favorite' + (duplicateRecord.IS_TEMPLATE ? ' filled-in' : '')"
+				:class="`favorite ${duplicateRecord.IS_TEMPLATE ? 'filled-in': ''} hide-on-print`"
 				title="Making a report a favorite will pin it to your GACounts homepage, allowing for easier duplication."
 			>
 				<div v-if="duplicateRecord.IS_TEMPLATE">
@@ -383,7 +383,8 @@
 	}
 	div.heading-container {
 		display: flex;
-		align-items: center;
+		align-items: stretch;
+		h1 { align-self: center; }
 		div.spacer {
 			flex-grow: 1;
 		}

@@ -109,13 +109,11 @@ const prodConfig = Object.assign(prodPatch, commonConfig);
 prodConfig.plugins.push(new webpack.optimize.AggressiveMergingPlugin());
 prodConfig.plugins.push(new webpack.optimize.OccurrenceOrderPlugin());
 prodConfig.plugins.push(new CompressionPlugin({
-	asset: '[path].gz[query]',
-	algorithm: 'gzip',
 	test: /\.js$|\.css$|\.html$/,
-	threshold: 10240,
-	minRatio: 0
+	minRatio: 0.8
 }));
 
 module.exports = (env, argv) => {
+	console.log(argv['mode']);
 	return argv['mode'] === 'production' ? prodConfig : devConfig;
 };
