@@ -7,7 +7,7 @@ import {
 	jsToCf
 } from '@/modules/criteriaUtils';
 
-const apiPrefix = '/rest/gacounts-api/';
+const apiPrefix = '/rest/gacounts/';
 
 const generateURL = str => apiPrefix + str + '.json';
 

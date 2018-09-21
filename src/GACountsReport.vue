@@ -12,6 +12,9 @@
 			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button" class="hide-on-print">
 				Duplicate
 			</button>
+			<button v-if="userIsOwner && !isNew && mode === 'edit'" v-on:click="deleteReport" type="button" class="hide-on-print delete">
+				Delete
+			</button>
 			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button" class="hide-on-print">
 				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
@@ -89,6 +92,7 @@
 <script>
 	/* global activeUserID */
 	/* global notify */
+	/* global swal */
 
 	// Import required modules
 	import DetailMain from '@/views/DetailMain';
@@ -223,6 +227,36 @@
 			return data;
 		},
 		methods: {
+			deleteReport () {
+				swal({
+					title: 'Are you sure?',
+					text: "You won't be able to undo this!",
+					type: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Yes, delete it!'
+				}).then((result) => {
+					if (result.value) {
+						this.schema.deleteExisting(this.identifier.value, (err, data) => {
+							if (err) logError(err);
+							if (data.SUCCESS) {
+								swal(
+									'Deleted!',
+									'Your ' + this.schema.title + ' has been deleted.',
+									'success'
+								).then(() => {
+									window.location.assign('https://' + window.location.hostname + '/gacounts3');
+								});
+							} else {
+								swal(
+									'Oops!',
+									'Something went wrong on our end and your ' + this.schema.title + ' could not be deleted.',
+									'error'
+								);
+							}
+						});
+					}
+				});
+			},
 			redirectToDuplication () {
 				window.location = 'https://' + window.location.hostname + '/gacounts3?referenceInterface=REPORT&subInterface=detail_main&new&duplicateID=' + this.ID;
 			},
@@ -390,12 +424,9 @@
 		}
 		button {
 			margin-left: 1rem;
-			&.file-sub-report {
-				background: #406242;
-			}
-			&.reject-sub-report {
-				background: #6C3129;
-			}
+			&.file-sub-report { background: #406242; }
+			&.reject-sub-report { background: #6C3129; }
+			&.delete { background: #C44536; }
 			&.favorite {
 				&.filled-in {
 					background: #F7B538;

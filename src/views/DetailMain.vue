@@ -185,9 +185,9 @@
 				<span>
 					Click the button below to submit your {{ isNew ? schema.title : 'changes' }}.
 				</span>
-				<span v-if="!isNew">
+				<!-- <span v-if="!isNew">
 					If you would like to, you may also <a id="delete-link" v-on:click="deleteRecord" >delete your {{ schema.title }}</a>.
-				</span>
+				</span> -->
 				<br />
 				<button v-on:click="cleanUpData" type="button" class="button">
 					Save My {{ schema.title }}
