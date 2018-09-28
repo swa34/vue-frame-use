@@ -396,7 +396,7 @@ const logError = (err, dump = {}, trace = null) => {
 		DATE_LAST_UPDATED: null,
 		BROWSER: navigator.userAgent,
 		ERROR_DATETIME: (new Date()).toUTCString(),
-		DETAIL: (typeof err === 'string' ? err : JSON.stringify(err)) + (trace ? '\n' + trace : ''),
+		DETAIL: null,
 		ERROR_DIAGNOSTICS: null,
 		ERROR_CODE: null,
 		EXTENDED_INFO: null,
@@ -418,6 +418,29 @@ const logError = (err, dump = {}, trace = null) => {
 		APPLICATION_DUMP: null,
 		REQUEST_DUMP: null
 	};
+	// (typeof err === 'string' ? err : JSON.stringify(err, null, 2)) + (trace ? '\n' + JSON.stringify(trace, null, 2) : '')
+	if (err.status) {
+		let response = null;
+		try {
+			response = JSON.parse(err.response.text);
+		} catch (e) {
+			// Do nothing
+		}
+		errObj.DETAIL = `<pre>${JSON.stringify({
+			url: err.response.req.url,
+			data: err.response.req._data,
+			status: err.status,
+			method: err.response.req.method,
+			response
+		}, null, 4)}</pre>`;
+	} else {
+		if (typeof err === 'object') {
+			errObj.DETAIL = `<pre>${JSON.stringify(err, null, 4)}</pre>`;
+		} else {
+			errObj.DETAIL = err;
+		}
+		if (dump && dump !== '') errObj.APPLICATION_DUMP = JSON.stringify(dump, null, 4);
+	}
 	// The url for the error logging endpoint
 	let url = '/rest/oittools/logError.json';
 	// Optionally provide a url param specifying the application name
