@@ -136,6 +136,10 @@
 									this.populateRecord();
 								} else {
 									this.record = data[0];
+									if (!this.reportID && this.duplication.reportID) {
+										this.record.ID = null;
+										this.record.REPORT_ID = null;
+									}
 								}
 							}
 						});
