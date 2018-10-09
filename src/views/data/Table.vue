@@ -205,6 +205,12 @@
 							if (data) {
 								this.records = data;
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.records);
+								if (this.identifier.duplicate) {
+									this.records.forEach((record) => {
+										if (record.ID) record.ID = null;
+										record[this.associatedColumn] = null;
+									});
+								}
 								this.fetched = true;
 							}
 						});
