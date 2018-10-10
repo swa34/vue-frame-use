@@ -619,8 +619,18 @@
 								if (data) {
 									data.forEach((record) => {
 										if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+											if (this.duplication.getSubReport) {
+												record.ID = null;
+												record.SUB_REPORT_ID = null;
+												record.REPORT_ID = null;
+											}
 											this.ownerOutcomes = [record];
 										} else if (this.needExistingData) {
+											if (this.duplication.getSubReport) {
+												record.ID = null;
+												record.SUB_REPORT_ID = null;
+												record.REPORT_ID = null;
+											}
 											this.collaboratorRecords.outcomes.push(record);
 										}
 									});
