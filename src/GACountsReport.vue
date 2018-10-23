@@ -12,10 +12,10 @@
 			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button" class="hide-on-print">
 				Duplicate
 			</button>
-			<button v-if="userIsOwner && !isNew && mode === 'edit'" v-on:click="deleteReport" type="button" class="hide-on-print delete">
+			<button v-if="(userIsOwner || userIsAdmin) && !isNew && mode === 'edit'" v-on:click="deleteReport" type="button" class="hide-on-print delete">
 				Delete
 			</button>
-			<button v-if="userIsOwner && !isNew" v-on:click="toggleMode" type="button" class="hide-on-print">
+			<button v-if="(userIsOwner || userIsAdmin) && !isNew" v-on:click="toggleMode" type="button" class="hide-on-print">
 				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
 			<button
@@ -90,6 +90,7 @@
 </template>
 
 <script>
+	/* global activeUser */
 	/* global activeUserID */
 	/* global notify */
 	/* global swal */
@@ -162,13 +163,16 @@
 				}
 			},
 			userCanFileSubReport () {
-				return !this.userCollaboratorRecord.IS_REJECTED;
+				return this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID) !== -1 && !this.userCollaboratorRecord.IS_REJECTED;
 			},
 			userCollaboratorRecord () {
 				const userCollaboratorRecordIndex = this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID);
 				if (userCollaboratorRecordIndex === -1) return {};
 				const userCollaboratorRecord = this.$store.state.collaborators.records[userCollaboratorRecordIndex];
 				return userCollaboratorRecord;
+			},
+			userIsAdmin () {
+				return Boolean(activeUser.IS_ADMINISTRATOR);
 			},
 			userIsOwner () {
 				return this.OWNER_ID === activeUserID;
