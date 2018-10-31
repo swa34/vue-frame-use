@@ -181,8 +181,8 @@
 						</em>
 					</p>
 					<SubReportPlainText
-					v-else
-					:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
+						v-else
+						:data="getCollaboratorSubReportDataFromID(collaborator.PERSONNEL_ID)"
 					/>
 				</div>
 			</div>
@@ -453,12 +453,17 @@
 			},
 			getOwnerSubReportData () {
 				const data = {
-					contacts: this.ownerState.contacts,
+					contacts: this.ownerContacts,
 					outcomes: this.ownerOutcomes,
 					roles: this.ownerRoles,
 					subReport: this.ownerSubReport,
 					supplementalData: this.ownerState.supplementalData
 				};
+				data.contacts.forEach((contact) => {
+					this.contactTypes.forEach((type) => {
+						if (type.ID === contact.TYPE_ID) contact.CONTACT_TYPE_LABEL = type.LABEL;
+					});
+				});
 				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
 				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getOwnerPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
 				return data;
