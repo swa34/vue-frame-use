@@ -153,6 +153,13 @@ const demographicsTest = (records, schema) => {
 	return passes;
 };
 
+// Function to determine if a county id is required
+const countyIdRequired = (val) => {
+	const activityLocationMap = caesCache.data.gc3.activityLocationType.map(location => location.ID);
+	const activityLocationIndex = activityLocationMap.indexOf(Number(val));
+	return activityLocationIndex !== -1 && !caesCache.data.gc3.activityLocationType[activityLocationIndex].USES_ALTERNATE_TEXT;
+};
+
 // And finally define the schema itself
 const schema = {
 	title: 'Report',
@@ -177,6 +184,8 @@ const schema = {
 				if (!reportType.USES_MEDIA_DISTRIBUTION) store.mediaDistributed.records = [];
 			}
 		}
+		// Remove county ID if not required
+		if (!countyIdRequired(store.report.ACTIVITY_LOCATION_TYPE_ID)) store.report.COUNTY_ID = null;
 		// Sub-Report must only have a local or state issue, not both.
 		const subReport = store.subschemas.subReport.subReport;
 		if (subReport.ISSUE_TYPE === 'local' && subReport.STATE_PLANNED_PROGRAM_ID !== null) subReport.STATE_PLANNED_PROGRAM_ID = null;
@@ -321,11 +330,7 @@ const schema = {
 			},
 			depends: {
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
-				test (val) {
-					const activityLocationMap = caesCache.data.gc3.activityLocationType.map(location => location.ID);
-					const activityLocationIndex = activityLocationMap.indexOf(Number(val));
-					return activityLocationIndex !== -1 && !caesCache.data.gc3.activityLocationType[activityLocationIndex].USES_ALTERNATE_TEXT;
-				}
+				test: countyIdRequired
 			},
 			grouping: {
 				section: 'Main Report Information',
