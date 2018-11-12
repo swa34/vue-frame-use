@@ -33,7 +33,7 @@
 			</thead>
 			<tbody>
 				<tr
-					v-for="record in records"
+					v-for="record in recordsSortedBySortOrder"
 					:class="`${mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''} ${isHeaderField(record.FIELD_ID) ? 'supplemental-subheading' : ''}`"
 				>
 					<td>
@@ -164,6 +164,13 @@
 					}
 				}
 			},
+			recordsSortedBySortOrder () {
+				return this.records.sort((r1, r2) => {
+					const sortOrder1 = this.getFieldSortOrder(r1.FIELD_ID);
+					const sortOrder2 = this.getFieldSortOrder(r2.FIELD_ID);
+					return sortOrder1 > sortOrder2;
+				});
+			},
 			recordFieldIDs () {
 				return this.records.map(r => r.FIELD_ID);
 			},
@@ -244,6 +251,12 @@
 					if (option.FIELD_ID === field.FIELD_ID) options.push(option);
 				});
 				return options;
+			},
+			getFieldSortOrder (fieldId) {
+				const fieldIndex = this.fieldIDs.indexOf(fieldId);
+				if (fieldIndex === -1) return 0;
+				const field = this.reportFields[fieldIndex];
+				return field.REPORT_FIELD_SORT_ORDER;
 			},
 			isHeaderField (fieldId) {
 				const fieldIndex = this.fieldIDs.indexOf(fieldId);
