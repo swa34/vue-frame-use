@@ -32,11 +32,19 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="record in records" :class="mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''">
+				<tr
+					v-for="record in records"
+					:class="`${mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''} ${isHeaderField(record.FIELD_ID) ? 'supplemental-subheading' : ''}`"
+				>
 					<td>
-						{{ getFieldLabel(record.FIELD_ID) }}
+						<strong v-if="isHeaderField(record.FIELD_ID)">
+							{{ getFieldLabel(record.FIELD_ID) }}
+						</strong>
+						<span v-else>
+							{{ getFieldLabel(record.FIELD_ID) }}
+						</span>
 					</td>
-					<td v-if="mode === 'edit'">
+					<td v-if="mode === 'edit' && !isHeaderField(record.FIELD_ID)">
 						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
 							<option v-for="option in getFieldOptions(record)" :value="option.ID">
 								{{ option.LABEL }}
@@ -45,7 +53,7 @@
 						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
 						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
 					</td>
-					<td v-else-if="record.FIELD_VALUE">
+					<td v-else-if="record.FIELD_VALUE && !isHeaderField(record.FIELD_ID)">
 						<span v-if="getFieldInputType(record) === 'select'">
 							{{ getFieldOptionLabel(record.FIELD_VALUE) }}
 						</span>
@@ -236,6 +244,15 @@
 					if (option.FIELD_ID === field.FIELD_ID) options.push(option);
 				});
 				return options;
+			},
+			isHeaderField (fieldId) {
+				const fieldIndex = this.fieldIDs.indexOf(fieldId);
+				if (fieldIndex === -1) return false;
+				const field = this.reportFields[fieldIndex];
+				const typeIndex = this.fieldTypes.map(t => t.ID).indexOf(field.REPORT_FIELD_TYPE_ID);
+				if (typeIndex === -1) return false;
+				const fieldType = this.fieldTypes[typeIndex];
+				return fieldType.LABEL === 'Header Field';
 			},
 			populateRecords () {
 				// Generates a record from a field, an optional value
@@ -446,3 +463,10 @@
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	table tbody tr.supplemental-subheading {
+		color: #fff;
+		background: #405b68;
+	}
+</style>
