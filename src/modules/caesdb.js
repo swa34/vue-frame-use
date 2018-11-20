@@ -1,4 +1,5 @@
 /* global applicationName */
+/* global notify */
 /* global URL */
 import prepareForCf from '@/modules/prepareForCf';
 import request from 'superagent';
@@ -449,6 +450,9 @@ const logError = (err, dump = {}, trace = null) => {
 	const callback = () => {};
 	// Send it off!
 	makePostRequest(url, prepareForCf(errObj), callback, false);
+
+	// Notify the user
+	notify.error(`An error has occurred.  If this persists, please email <a href="mailto:caesweb@uga.edu">caesweb@uga.edu</a> and include the following error message:<br /><br />${err}`);
 };
 
 const postReportData = (report, callback) => {
