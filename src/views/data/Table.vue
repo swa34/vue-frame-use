@@ -142,7 +142,7 @@
 		data () {
 			let newRecord = {};
 			this.schema.columns.forEach((column) => {
-				newRecord[column.columnName] = this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : column.default || null;
+				newRecord[column.columnName] = !this.identifier.duplicate && this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : column.default || null;
 			});
 			return {
 				localRecords: [],
@@ -277,7 +277,7 @@
 										}
 										values.push(value);
 									});
-									column.constraint.values = values;
+									column.constraint.values = values.sort((a, b) => { return a.label > b.label; });
 								}
 							});
 						}

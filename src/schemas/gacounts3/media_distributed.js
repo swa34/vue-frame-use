@@ -1,6 +1,6 @@
 import {
 	getMediaDistributed,
-	getMediaTypeCategory
+	getMediaType
 } from '@/modules/caesdb';
 import { enableConstraintValues } from '@/modules/schemaTools';
 
@@ -27,12 +27,12 @@ const schema = {
 			automated: true
 		},
 		{
-			columnName: 'CATEGORY_ID',
-			prettyName: 'Category',
+			columnName: 'TYPE_ID',
+			prettyName: 'Type',
 			type: 'int',
 			required: true,
 			constraint: {
-				getValues: getMediaTypeCategory,
+				getValues: getMediaType,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL'
 			}
