@@ -4,7 +4,7 @@
 			<h3>
 				{{ getPersonnelNameFromID(ownerID) }} (Owner)
 			</h3>
-			<div v-if="mode === 'edit' && editMode === 'owner'" class="subreport-section">
+			<div v-if="mode === 'edit' && (editMode === 'owner' || editMode === 'admin')" class="subreport-section">
 				<!-- Planned Programs -->
 				<div>
 					<label>
@@ -165,12 +165,12 @@
 			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
 				<h3>
 					{{ collaborator.LAST_NAME ? [collaborator.FIRST_NAME, collaborator.LAST_NAME].join(' ') : getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
-					<button v-if="!needExistingData || (needExistingData && mode === 'edit' && editMode === 'owner' && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
+					<button v-if="!needExistingData || (needExistingData && mode === 'edit' && (editMode === 'owner' || editMode === 'admin') && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
 						Remove
 					</button>
 				</h3>
 				<div class="subreport-section">
-					<p v-if="editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID">
+					<p v-if="(editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID) || editMode === 'admin'">
 						<a :href="'https://' + hostname + '/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
 							{{ collaborator.HAS_REPORTED ? 'Edit' : 'File Sub-Report' }}
 						</a>
@@ -187,7 +187,7 @@
 				</div>
 			</div>
 		</transition-group>
-		<div v-if="mode === 'edit' && editMode === 'owner'">
+		<div v-if="mode === 'edit' && (editMode === 'owner' || editMode === 'admin')">
 			<h3>
 				Add Collaborator
 			</h3>
@@ -195,15 +195,16 @@
 				Begin entering the name of the person you'd like to add, then simply select their name from the list to add them to your report as a collaborator.
 			</p>
 			<FuzzySelect
-			v-model="newCollaborator.PERSONNEL_ID"
-			v-on:addCollaborator="addCollaborator"
-			:options="personnelForFuzzySelect"
+				v-model="newCollaborator.PERSONNEL_ID"
+				v-on:addCollaborator="addCollaborator"
+				:options="personnelForFuzzySelect"
 			/>
 		</div>
 	</div>
 </template>
 
 <script>
+	/* global activeUser */
 	/* global activeUserID */
 	/* global caesCache */
 	import FuzzySelect from '@/views/elements/FuzzySelect';
@@ -270,6 +271,7 @@
 				return duplication;
 			},
 			editMode () {
+				if (activeUser.IS_ADMINISTRATOR) return 'admin';
 				if (activeUserID === this.ownerID) return 'owner';
 				if (this.collaborators.map(c => c.PERSONNEL_ID).indexOf(activeUserID) !== -1) return 'collaborator';
 				return 'guest';
@@ -679,7 +681,7 @@
 						if (data) {
 							data.forEach((record) => {
 								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-									if (this.editMode === 'owner') delete record.SUB_REPORT_ROLE_LABEL;
+									if (this.editMode === 'owner' || this.editMode === 'admin') delete record.SUB_REPORT_ROLE_LABEL;
 									this.ownerRoles.push(record);
 								} else if (this.needExistingData) {
 									this.collaboratorRecords.roles.push(record);
@@ -754,7 +756,7 @@
 			fetchPersonnel();
 			fetchStatePlannedPrograms();
 
-			if (this.editMode === 'owner') {
+			if (this.editMode === 'owner' || this.editMode === 'admin') {
 				fetchOwnerPlannedPrograms();
 				fetchRoleTypes();
 				fetchContactTypes();

@@ -420,6 +420,18 @@
 		}
 	}
 	div.heading-container {
+		@media screen and (max-width: 1080px) {
+			display: block;
+			h1 { margin-bottom: .5rem; }
+			button[type="button"] {
+				padding: .5rem;
+				margin: 0;
+				&.favorite div span.icon-wrapper {
+					font-size: 1em;
+					line-height: inherit
+				}
+			}
+		}
 		display: flex;
 		align-items: stretch;
 		h1 { align-self: center; }
