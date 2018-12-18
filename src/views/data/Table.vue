@@ -23,7 +23,7 @@
 				</tr>
 			</thead>
 			<transition-group name="list-complete" tag="tbody">
-				<tr v-for="(record, index) in records" v-bind:key="index" class="list-complete-item">
+				<tr v-for="(record, index) in records" v-bind:key="JSON.stringify(record)" class="list-complete-item">
 					<td v-for="column in schema.columns" v-if="columnShouldBeDisplayed(column)">
 						<label v-if="allowEdit && columnShouldBeEditable(column)">
 							<textarea v-if="column.inputType === 'textarea' || sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :disabled="column.immutable"></textarea>
