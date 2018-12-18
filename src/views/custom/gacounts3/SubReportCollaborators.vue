@@ -344,9 +344,9 @@
 				}
 			},
 			personnelForFuzzySelect () {
-				return this.personnel.map((personnel) => {
+				return this.personnel.map(personnel => {
 					return {
-						key: personnel.ID,
+						key: personnel.PERSONNEL_ID,
 						label: [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ')
 					};
 				});
