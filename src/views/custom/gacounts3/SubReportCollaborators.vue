@@ -164,7 +164,7 @@
 		<transition-group appear name="fade">
 			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
 				<h3>
-					{{ collaborator.LAST_NAME ? [collaborator.FIRST_NAME, collaborator.LAST_NAME].join(' ') : getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
+					{{ collaborator.DISPLAY_NAME || getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
 					<button v-if="!needExistingData || (needExistingData && mode === 'edit' && (editMode === 'owner' || editMode === 'admin') && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
 						Remove
 					</button>
@@ -218,6 +218,7 @@
 		getContactTypes,
 		getCriteriaStructure,
 		getPersonnel,
+		getPersonnelWithCriteria,
 		getPlannedPrograms,
 		getReportPersonnel,
 		getStatePlannedPrograms,
@@ -343,9 +344,9 @@
 				}
 			},
 			personnelForFuzzySelect () {
-				return this.personnel.map((personnel) => {
+				return this.personnel.map(personnel => {
 					return {
-						key: personnel.ID,
+						key: personnel.PERSONNEL_ID,
 						label: [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ')
 					};
 				});
@@ -407,6 +408,17 @@
 			},
 			removeCollaborator (collaborator) {
 				this.collaborators.splice(this.collaborators.indexOf(collaborator), 1);
+			},
+			fetchMissingPersonnel () {
+				const critStruct = cfToJs(caesCache.criteriaStructures.ccd.personnel);
+				critStruct.criteria_PERSONNEL_ID_eq = this.collaborators.map(c => c.PERSONNEL_ID);
+				if (this.personnel.map(p => p.PERSONNEL_ID).indexOf(this.ownerID) === -1) critStruct.criteria_PERSONNEL_ID_eq.push(this.ownerID);
+				if (critStruct.criteria_PERSONNEL_ID_eq.length > 0) {
+					getPersonnelWithCriteria(critStruct, (err, records) => {
+						if (err) console.error(err);
+						this.retiredPersonnel = records;
+					});
+				}
 			},
 			getCollaboratorPlannedProgramFromID (id) {
 				const collabProgramsMap = this.collaboratorRecords.plannedPrograms.map(p => p.ID);
@@ -472,9 +484,14 @@
 			},
 			getPersonnelNameFromID (id) {
 				let index = this.personnel.map(p => p.ID).indexOf(id);
-				if (index === -1) return 'Unknown';
-				const personnel = this.personnel[index];
-				return [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ');
+				if (index === -1) {
+					index = this.retiredPersonnel.map(p => p.PERSONNEL_ID).indexOf(id);
+					if (index === -1) return 'Unknown';
+					return this.retiredPersonnel[index].DISPLAY_NAME;
+				} else {
+					const personnel = this.personnel[index];
+					return personnel.DISPLAY_NAME;
+				}
 			},
 			getStatePlannedProgramFromID (id) {
 				let statePlannedProgram = {};
@@ -653,6 +670,7 @@
 					if (err) logError(err);
 					if (data) {
 						this.personnel = data;
+						this.fetchMissingPersonnel();
 					}
 				});
 			};
@@ -667,10 +685,6 @@
 					};
 				});
 			};
-
-			// const fetchRetiredPersonnel = () => {
-			//
-			// };
 
 			const fetchRoles = () => {
 				const critStruct = caesCache.criteriaStructures.gc3.associationSubReportRole;
@@ -785,6 +799,9 @@
 			}
 		},
 		watch: {
+			collaborators () {
+				this.fetchMissingPersonnel();
+			},
 			reportContacts () {
 				this.populateOwnerContactsRecords();
 			}
