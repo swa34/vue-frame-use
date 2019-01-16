@@ -36,13 +36,13 @@
 					v-for="record in recordsSortedBySortOrder"
 					:class="`${mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''} ${isHeaderField(record.FIELD_ID) ? 'supplemental-subheading' : ''}`"
 				>
-					<td>
-						<strong v-if="isHeaderField(record.FIELD_ID)">
+					<td v-if="isHeaderField(record.FIELD_ID)" colspan="100%">
+						<strong>
 							{{ getFieldLabel(record.FIELD_ID) }}
 						</strong>
-						<span v-else>
-							{{ getFieldLabel(record.FIELD_ID) }}
-						</span>
+					</td>
+					<td v-else>
+						{{ getFieldLabel(record.FIELD_ID) }}
 					</td>
 					<td v-if="mode === 'edit' && !isHeaderField(record.FIELD_ID)">
 						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
@@ -61,7 +61,7 @@
 							{{ record.FIELD_VALUE }}
 						</span>
 					</td>
-					<td v-else></td>
+					<td v-else-if="!isHeaderField(record.FIELD_ID)"></td>
 				</tr>
 			</tbody>
 		</table>
