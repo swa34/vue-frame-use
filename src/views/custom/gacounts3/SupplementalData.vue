@@ -165,11 +165,12 @@
 				}
 			},
 			recordsSortedBySortOrder () {
-				return this.records.sort((r1, r2) => {
-					const sortOrder1 = this.getFieldSortOrder(r1.FIELD_ID);
-					const sortOrder2 = this.getFieldSortOrder(r2.FIELD_ID);
-					return sortOrder1 > sortOrder2;
-				});
+				return this.records
+					.map(r => {
+						r.sortOrder = Number(this.getFieldSortOrder(r.FIELD_ID));
+						return r;
+					})
+					.sort((r1, r2) => r1.sortOrder - r2.sortOrder);
 			},
 			recordFieldIDs () {
 				return this.records.map(r => r.FIELD_ID);
