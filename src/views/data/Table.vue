@@ -277,7 +277,11 @@
 										}
 										values.push(value);
 									});
-									column.constraint.values = values.sort((a, b) => { return a.label > b.label; });
+									column.constraint.values = values.sort((a, b) => {
+										if (a.label > b.label) return 1;
+										if (a.label === b.label) return 0;
+										return -1;
+									});
 								}
 							});
 						}

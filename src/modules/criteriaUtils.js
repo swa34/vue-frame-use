@@ -22,15 +22,25 @@ const sortRecords = (records, key) => {
 			let testRecord = records[0];
 			if (testRecord.hasOwnProperty('LABEL')) {
 				// Sort by LABEL key
-				records.sort((a, b) => { return a.LABEL > b.LABEL; });
+				records.sort((a, b) => {
+					if (a.LABEL > b.LABEL) return 1;
+					if (a.LABEL === b.LABEL) return 0;
+					return -1;
+				});
 			} else if (testRecord.hasOwnProperty('NAME')) {
 				// Sort by NAME key
-				records.sort((a, b) => { return a.NAME > b.NAME; });
+				records.sort((a, b) => {
+					if (a.NAME > b.NAME) return 1;
+					if (a.NAME === b.NAME) return 0;
+					return -1;
+				});
 			}
 		} else {
 			// Else, sort by the key
 			records.sort((a, b) => {
-				return a[key] > b[key];
+				if (a[key] > b[key]) return 1;
+				if (a[key] === b[key]) return 0;
+				return -1;
 			});
 		}
 	}
