@@ -46,6 +46,9 @@
 					</td>
 					<td v-if="mode === 'edit' && !isHeaderField(record.FIELD_ID)">
 						<select v-if="getFieldInputType(record) === 'select'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)">
+							<option :value="null">
+								(None)
+							</option>
 							<option v-for="option in getFieldOptions(record)" :value="option.ID">
 								{{ option.LABEL }}
 							</option>
