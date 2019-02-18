@@ -24,16 +24,29 @@ module.exports = {
 	},
 	module: {
 		rules: [
+			// Enabling this chunk will prevent builds from compiling if the linting
+			// rules are not adhered to.  It's disabled for now because the codebase
+			// is a mess and needs to be cleaned up but I don't have time right now.
+			// Just wanted to leave it here, commented, so I don't forget to
+			// eventually implement it.
+			// {
+			// 	enforce: 'pre',
+			// 	test: /\.(js|vue)$/,
+			// 	loader: 'eslint-loader',
+			// 	exclude: /node_modules/
+			// },
 			{
 				test: /\.js$/,
 				exclude: /node_modules\/(?!(superagent)\/)/,
-				use: {
-					loader: 'babel-loader',
-					options: {
-						presets: ['@babel/preset-env'],
-						plugins: ['@babel/plugin-proposal-object-rest-spread']
+				use: [
+					{
+						loader: 'babel-loader',
+						options: {
+							presets: ['@babel/preset-env'],
+							plugins: ['@babel/plugin-proposal-object-rest-spread']
+						}
 					}
-				}
+				]
 			},
 			{
 				test: /\.vue$/,
