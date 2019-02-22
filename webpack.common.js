@@ -6,7 +6,8 @@ const resolve = dir => path.join(__dirname, dir);
 
 module.exports = {
 	entry: {
-		'gacounts.singlepage': path.join(__dirname, 'src/index.js')
+		'gacounts.singlepage': path.join(__dirname, 'src/gacounts.singlepage.js'),
+		'researchfarm.publicform': path.join(__dirname, 'src/researchfarm.publicform.js'),
 	},
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
