@@ -660,6 +660,17 @@
 </script>
 
 <style lang="scss">
+	div.flex-section {
+		display: flex;
+		flex-wrap: wrap;
+		div.area {
+			flex-basis: 100%;
+			&.inline {
+				flex-basis: auto;
+				padding-right: 1rem;
+			}
+		}
+	}
 	div.submit {
 		hr {
 			margin-top: 2rem;

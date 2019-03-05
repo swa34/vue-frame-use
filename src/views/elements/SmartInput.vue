@@ -27,6 +27,12 @@
 				v-bind:value="value"
 				v-on:input="$emit('input', $event.target.value)"
 			/>
+			<FuzzySelect
+				v-else-if="fieldType === 'fuzzyselect'"
+				:options="field.constraint.values"
+				:value="value"
+				@input="$emit('input', $event.target.value)"
+			/>
 			<select
 				v-else-if="fieldType === 'select'"
 				v-bind:value="value"
@@ -36,8 +42,8 @@
 				:disabled="field.immutable"
 				:style="field.style"
 			>
-				<option disabled selected value>
-					(Select One)
+				<option :disabled="!field.allowNullOption" selected value>
+					{{ field.allowNullOption ? '(None)' : '(Select One)' }}
 				</option>
 				<option
 					v-for="option in field.constraint.values"
@@ -71,6 +77,7 @@
 
 <script>
 	import Editor from '@tinymce/tinymce-vue';
+	import FuzzySelect from '@/views/elements/FuzzySelect';
 	import {
 		getPrettyColumnName,
 		sqlToHtml
@@ -81,6 +88,7 @@
 		name: 'SmartInput',
 		components: {
 			Editor,
+			FuzzySelect,
 			HelpCircleIcon
 		},
 		computed: {
