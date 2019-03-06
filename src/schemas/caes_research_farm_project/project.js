@@ -1,4 +1,8 @@
 /* global caesCache */
+import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
+import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
+import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
+import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
 
 const nullTest = val => val === null || val === '';
 
@@ -682,7 +686,40 @@ const schema = {
 			}
 		}
 	],
-	associations: [],
+	associations: [
+		{
+			title: 'Supplemental Plant Information',
+			schema: supplementalPlantInfoSchema,
+			customComponent: SupplementalPlantInfo,
+			localKey: 'ID',
+			// foreignKey: 'PROJECT_ID',
+			associatedColumn: 'PROJECT_ID',
+			// isAssignable: true,
+			grouping: {
+				section: 'Scientist and Station Responsibilities',
+				order: 2
+			},
+			depends: {
+				column: 'INVOLVES_PLANTS',
+				test (val) { return val === true; }
+			}
+		},
+		{
+			title: 'Supplemental Animal Information',
+			schema: supplementalAnimalInfoSchema,
+			customComponent: SupplementalAnimalInfo,
+			localKey: 'ID',
+			associatedColumn: 'PROJECT_ID',
+			grouping: {
+				section: 'Scientist and Station Responsibilities',
+				order: 3
+			},
+			depends: {
+				column: 'INVOLVES_ANIMALS',
+				test (val) { return val === true; }
+			}
+		}
+	],
 	subschemas: [],
 	sections: [
 		{

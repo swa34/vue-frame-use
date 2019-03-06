@@ -39,4 +39,3 @@
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	}
 </script>
-

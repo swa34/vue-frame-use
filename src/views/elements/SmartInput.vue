@@ -63,6 +63,15 @@
 				min="0"
 			/>
 			<input
+				v-else-if="fieldType === 'checkbox'"
+				type="checkbox"
+				:value="value"
+				:required="field.required"
+				:disabled="field.immutable"
+				:style="field.style"
+				@input="$emit('input', $event.target.checked)"
+			/>
+			<input
 				v-else
 				:type="fieldType"
 				v-bind:value="value"
