@@ -9,12 +9,15 @@ const importantDateSchema = {
 		{
 			columnName: 'IMPORTANT_DATE',
 			prettyName: 'Date',
-			type: 'datetime'
+			type: 'datetime',
+			required: true
 		},
 		{
 			columnName: 'DESCRIPTION',
 			prettyName: 'Procedure or activity to be performed',
-			type: 'nvarchar'
+			type: 'nvarchar',
+			inputType: 'textarea',
+			required: true
 		}
 	]
 };

@@ -1,7 +1,7 @@
 <template lang="html">
   <div>
 		<label>
-			<legend>
+			<legend v-if="displayLabel">
 				<h3>
 					{{ fieldName }}
 					<a v-if="field.helpMessageName" v-on:click="$emit('show-help')" class="help-link">
@@ -114,6 +114,10 @@
 			}
 		},
 		props: {
+			displayLabel: {
+				type: Boolean,
+				default: true
+			},
 			field: {
 				type: Object,
 				required: true

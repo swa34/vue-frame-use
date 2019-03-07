@@ -92,7 +92,7 @@
 				</thead>
 				<tbody>
 					<tr v-for="columnGroup in tableGroups" :key="columnGroup.name">
-						<td>{{ columnGroup.textColumn.prettyName }}</td>
+						<td>{{ columnGroup.textColumn.prettyName || getPrettyColumnName(columnGroup.textColumn.columnName) }}</td>
 						<td>
 							<textarea v-model="record[columnGroup.textColumn.columnName]"></textarea>
 						</td>
@@ -111,17 +111,79 @@
 				</tbody>
 			</table>
 		</div>
+		<div>
+			<h3>Important Dates</h3>
+			<table>
+				<thead>
+					<tr>
+						<th v-for="column in importantDateSchema.columns" v-if="!column.automated">
+							{{ column.prettyName || getPrettyColumnName(column.columnName) }}
+						</th>
+						<th>&nbsp;</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="importantDate in record.importantDates">
+						<td v-for="column in importantDateSchema.columns" v-if="!column.automated">
+							<SmartInput
+								v-model="importantDate[column.columnName]"
+								:displayLabel="false"
+								:field="column"
+							/>
+						</td>
+						<td>
+							<button class="button" @click="removeImportantDate(importantDate)" type="button">
+								Remove
+							</button>
+						</td>
+					</tr>
+					<tr>
+						<td v-for="column in importantDateSchema.columns" v-if="!column.automated">
+							<SmartInput
+								v-model="newImportantDate[column.columnName]"
+								:displayLabel="false"
+								:field="column"
+							/>
+						</td>
+						<td>
+							<button
+								class="button"
+								@click="addNewImportantDate"
+								type="button"
+								:disabled="!newImportantDateIsValid"
+							>
+								Add
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</section>
 </template>
 
 <script>
 	/* global caesCache */
+	import importantDateSchema from '@/schemas/caes_research_farm_project/important_date';
 	import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
-	import { getObjectIndexedByKeyFromArray } from '@/modules/utilities';
+	import SmartInput from '@/views/elements/SmartInput';
+
+	import {
+		getObjectIndexedByKeyFromArray,
+		getPrettyColumnName
+	} from '@/modules/utilities';
 
 	export default {
 		name: 'SupplementalAnimalInfo',
+		components: { SmartInput },
 		computed: {
+			newImportantDateIsValid () {
+				return importantDateSchema.columns.reduce((isValid, column) => {
+					let val = this.newImportantDate[column.columnName];
+					if (!column.automated && column.required && !val) isValid = false;
+					return isValid;
+				}, true);
+			},
 			record: {
 				get () {
 					let records = this.$store.state.supplementalAnimalInformation.records;
@@ -154,13 +216,35 @@
 		data () {
 			return {
 				columns: getObjectIndexedByKeyFromArray(supplementalAnimalInfoSchema.columns, 'columnName'),
-				localRecord: supplementalAnimalInfoSchema.columns.reduce((out, column) => {
-					out[column.columnName] = null;
-					return out;
+				importantDateSchema,
+				localRecord: {
+					...supplementalAnimalInfoSchema.columns.reduce((out, column) => {
+						out[column.columnName] = null;
+						return out;
+					}, {}),
+					importantDates: []
+				},
+				newImportantDate: importantDateSchema.columns.reduce((output, column) => {
+					output[column.columnName] = null;
+					return output;
 				}, {}),
 				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
 				schema: supplementalAnimalInfoSchema
 			};
+		},
+		methods: {
+			addNewImportantDate () {
+				this.record.importantDates.push(this.newImportantDate);
+				this.newImportantDate = importantDateSchema.columns.reduce((output, column) => {
+					output[column.columnName] = null;
+					return output;
+				}, {});
+			},
+			getPrettyColumnName,
+			removeImportantDate (importantDate) {
+				const index = this.record.importantDates.map(d => JSON.stringify(d)).indexOf(JSON.stringify(importantDate));
+				this.record.importantDates.splice(index, 1);
+			}
 		},
 		mounted () {
 			let records = this.$store.state.supplementalAnimalInformation.records;

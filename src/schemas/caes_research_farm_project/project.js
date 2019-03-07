@@ -542,6 +542,16 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test (val) {
+					if (!val) return false;
+					const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
+					if (farmIndex === -1) return false;
+					const farm = caesCache.data.crfp.researchFarm[farmIndex];
+					return farm.SUPERINTENDENT_PERSONNEL_ID !== null;
+				}
 			}
 		},
 		{
@@ -638,6 +648,16 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test (val) {
+					if (!val) return false;
+					const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
+					if (farmIndex === -1) return false;
+					const farm = caesCache.data.crfp.researchFarm[farmIndex];
+					return farm.OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID !== null;
+				}
 			}
 		},
 		{
@@ -740,7 +760,10 @@ const schema = {
 		},
 		{
 			title: 'Routing and Approval',
-			order: 5
+			order: 5,
+			depends: {
+				columns: ['PARTICIPATING_RESEARCH_FARM_ID']
+			}
 		}
 	]
 };
