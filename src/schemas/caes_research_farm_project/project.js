@@ -5,6 +5,27 @@ import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/s
 import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
 
 const nullTest = val => val === null || val === '';
+const notNullTest = val => !nullTest(val);
+
+const getResearchFarmDependencyTest = key => {
+	return (val) => {
+		if (!val) return false;
+		const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
+		if (farmIndex === -1) return false;
+		const farm = caesCache.data.crfp.researchFarm[farmIndex];
+		return farm[key] !== null;
+	};
+};
+
+const getResearchFarmDependentValueFn = key => {
+	return (store) => {
+		const farmId = store.state.project.PARTICIPATING_RESEARCH_FARM_ID;
+		if (nullTest(farmId)) return null;
+		const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(farmId);
+		if (farmIndex === -1) return null;
+		return caesCache.data.crfp.researchFarm[farmIndex][key];
+	};
+};
 
 const schema = {
 	title: 'Project',
@@ -534,6 +555,7 @@ const schema = {
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
 			prettyName: 'Station Superintendent',
 			type: 'int',
+			getDependentValue: getResearchFarmDependentValueFn('SUPERINTENDENT_PERSONNEL_ID'),
 			constraint: {
 				values: caesCache.data.crfp.superintendents,
 				foreignKey: 'PERSONNEL_ID',
@@ -545,13 +567,7 @@ const schema = {
 			},
 			depends: {
 				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test (val) {
-					if (!val) return false;
-					const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
-					if (farmIndex === -1) return false;
-					const farm = caesCache.data.crfp.researchFarm[farmIndex];
-					return farm.SUPERINTENDENT_PERSONNEL_ID !== null;
-				}
+				test: getResearchFarmDependencyTest('SUPERINTENDENT_PERSONNEL_ID')
 			}
 		},
 		{
@@ -561,6 +577,10 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test: getResearchFarmDependencyTest('SUPERINTENDENT_PERSONNEL_ID')
 			}
 		},
 		{
@@ -584,6 +604,10 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PI_PERSONNEL_ID',
+				test: notNullTest
 			}
 		},
 		{
@@ -593,6 +617,10 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PI_PERSONNEL_ID',
+				test: notNullTest
 			}
 		},
 		{
@@ -616,6 +644,11 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			getDependentValue: getResearchFarmDependentValueFn('FINAL_SITE_APPROVER_PERSONNEL_ID'),
+			depends: {
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test: getResearchFarmDependencyTest('FINAL_SITE_APPROVER_PERSONNEL_ID')
 			}
 		},
 		{
@@ -625,6 +658,10 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test: getResearchFarmDependencyTest('FINAL_SITE_APPROVER_PERSONNEL_ID')
 			}
 		},
 		{
@@ -649,15 +686,10 @@ const schema = {
 				section: 'Routing and Approval',
 				order: 1
 			},
+			getDependentValue: getResearchFarmDependentValueFn('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID'),
 			depends: {
 				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test (val) {
-					if (!val) return false;
-					const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
-					if (farmIndex === -1) return false;
-					const farm = caesCache.data.crfp.researchFarm[farmIndex];
-					return farm.OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID !== null;
-				}
+				test: getResearchFarmDependencyTest('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID')
 			}
 		},
 		{
@@ -667,6 +699,10 @@ const schema = {
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
+			},
+			depends: {
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test: getResearchFarmDependencyTest('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID')
 			}
 		},
 		{

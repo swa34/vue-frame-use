@@ -35,7 +35,13 @@
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
 									<SmartInput
-										v-if="mode === 'edit'"
+										v-if="mode === 'edit' && area.data.type === 'int'"
+										v-model.number="record[area.data.columnName]"
+										:field="area.data"
+										v-on:show-help="showHelp(area.data)"
+									/>
+									<SmartInput
+										v-else-if="mode === 'edit'"
 										v-model="record[area.data.columnName]"
 										:field="area.data"
 										v-on:show-help="showHelp(area.data)"
@@ -510,6 +516,11 @@
 				const label = option[constraint.foreignLabel];
 				return label;
 			},
+			getPrettyColumnNameFromColumnName (columnName) {
+				let columnIndex = this.columns.map(c => c.columnName).indexOf(columnName);
+				if (columnIndex === -1) return columnName;
+				return this.columns[columnIndex].prettyName || getPrettyColumnName(this.columns[columnIndex].columnName);
+			},
 			getSectionDependsMessage (section) {
 				let message = '';
 				let totalDependencies = 0;
@@ -517,12 +528,14 @@
 				if (section.depends.columns) totalDependencies += section.depends.columns.length;
 				if (section.depends.associations) totalDependencies += section.depends.associations.length;
 				if (section.depends.columns) {
-					section.depends.columns.forEach((column) => {
+					section.depends.columns.forEach(column => {
 						++listedDependencies;
-						if (listedDependencies < totalDependencies) {
-							message += 'a <strong>' + column + '</strong>, ';
+						if (totalDependencies === 1) {
+							message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
+						} else if (listedDependencies < totalDependencies) {
+							message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
 						} else {
-							message += 'and a <strong>' + column + '</strong>';
+							message += `and a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
 						}
 					});
 				}

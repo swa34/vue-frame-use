@@ -14,18 +14,18 @@
 			</legend>
 			<textarea
 				v-if="fieldType === 'textarea'"
-				v-bind:value="value"
-				v-on:input="$emit('input', $event.target.value)"
+				:value="value"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
+				@input="$emit('input', $event.target.value)"
 			>
 				{{ value }}
 			</textarea>
 			<Editor
 				v-else-if="fieldType === 'richtext'"
-				v-bind:value="value"
-				v-on:input="$emit('input', $event.target.value)"
+				:value="value"
+				@input="$emit('input', $event.target.value)"
 			/>
 			<FuzzySelect
 				v-else-if="fieldType === 'fuzzyselect'"
@@ -36,11 +36,11 @@
 			<select
 				v-else-if="fieldType === 'select'"
 				v-bind:value="value"
-				v-on:input="$emit('input', $event.target.value)"
-				v-on:change="$emit('input', $event.target.value)"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
+				@change="$emit('input', $event.target.value)"
+				@input="$emit('input', $event.target.value)"
 			>
 				<option :disabled="!field.allowNullOption" selected value>
 					{{ field.allowNullOption ? '(None)' : '(Select One)' }}
@@ -55,12 +55,12 @@
 			<input
 				v-else-if="fieldType === 'number'"
 				type="number"
-				v-bind:value="value"
-				v-on:input="$emit('input', $event.target.value)"
+				:value="value"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
 				min="0"
+				@input="$emit('input', $event.target.value)"
 			/>
 			<input
 				v-else-if="fieldType === 'checkbox'"
@@ -74,11 +74,11 @@
 			<input
 				v-else
 				:type="fieldType"
-				v-bind:value="value"
-				v-on:input="$emit('input', $event.target.value)"
+				:value="value"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
+				@input="$emit('input', $event.target.value)"
 			/>
 		</label>
 	</div>
@@ -101,6 +101,10 @@
 			HelpCircleIcon
 		},
 		computed: {
+			dependentValue () {
+				if (!this.field.getDependentValue) return null;
+				return this.field.getDependentValue(this.$store);
+			},
 			fieldName () {
 				return this.field.prettyName || getPrettyColumnName(this.field.columnName);
 			},
@@ -108,10 +112,8 @@
 				return this.field.inputType || sqlToHtml(this.field);
 			}
 		},
-		methods: {
-			updateValue (val) {
-
-			}
+		mounted () {
+			if (this.field.getDependentValue) this.$emit('input', this.dependentValue);
 		},
 		props: {
 			displayLabel: {
@@ -129,6 +131,9 @@
 					Boolean
 				]
 			}
+		},
+		watch: {
+			dependentValue (newVal) { this.$emit('input', newVal); }
 		}
 	};
 </script>
