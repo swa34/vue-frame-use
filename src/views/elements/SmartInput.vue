@@ -1,10 +1,10 @@
 <template lang="html">
-  <div>
+	<div>
 		<label>
 			<legend v-if="displayLabel">
 				<h3>
 					{{ fieldName }}
-					<a v-if="field.helpMessageName" v-on:click="$emit('show-help')" class="help-link">
+					<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
 						<HelpCircleIcon />
 					</a>
 				</h3>
@@ -20,7 +20,6 @@
 				:style="field.style"
 				@input="$emit('input', $event.target.value)"
 			>
-				{{ value }}
 			</textarea>
 			<Editor
 				v-else-if="fieldType === 'richtext'"
@@ -35,7 +34,7 @@
 			/>
 			<select
 				v-else-if="fieldType === 'select'"
-				v-bind:value="value"
+				:value="value"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
@@ -47,6 +46,7 @@
 				</option>
 				<option
 					v-for="option in field.constraint.values"
+					:key="option[field.constraint.foreignKey]"
 					:value="option[field.constraint.foreignKey]"
 				>
 					{{ option[field.constraint.foreignLabel] }}
@@ -87,11 +87,11 @@
 <script>
 	import Editor from '@tinymce/tinymce-vue';
 	import FuzzySelect from '@/views/elements/FuzzySelect';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 	import {
 		getPrettyColumnName,
 		sqlToHtml
 	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 
 	export default {
 		name: 'SmartInput',
@@ -99,6 +99,24 @@
 			Editor,
 			FuzzySelect,
 			HelpCircleIcon
+		},
+		props: {
+			displayLabel: {
+				type: Boolean,
+				default: true
+			},
+			field: {
+				type: Object,
+				required: true
+			},
+			value: {
+				default: null,
+				type: [
+					Number,
+					String,
+					Boolean
+				]
+			}
 		},
 		computed: {
 			dependentValue () {
@@ -112,28 +130,11 @@
 				return this.field.inputType || sqlToHtml(this.field);
 			}
 		},
-		mounted () {
-			if (this.field.getDependentValue) this.$emit('input', this.dependentValue);
-		},
-		props: {
-			displayLabel: {
-				type: Boolean,
-				default: true
-			},
-			field: {
-				type: Object,
-				required: true
-			},
-			value: {
-				type: [
-					Number,
-					String,
-					Boolean
-				]
-			}
-		},
 		watch: {
 			dependentValue (newVal) { this.$emit('input', newVal); }
+		},
+		mounted () {
+			if (this.field.getDependentValue) this.$emit('input', this.dependentValue);
 		}
 	};
 </script>

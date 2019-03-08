@@ -17,31 +17,31 @@
 			<p>
 				<label>
 					<h4>AUP Number</h4>
-					<input type="text" v-model="record.AUP_NUMBER" required />
+					<input v-model="record.AUP_NUMBER" type="text" required />
 				</label>
 			</p>
 			<p>
 				<label>
 					<h4>{{ columns.NUMBER.prettyName }}</h4>
-					<input type="text" v-model="record.NUMBER" />
+					<input v-model="record.NUMBER" type="text" />
 				</label>
 			</p>
 			<p>
 				<label>
 					<h4>{{ columns.DESCRIPTION.prettyName }}</h4>
-					<input type="text" v-model="record.DESCRIPTION" />
+					<input v-model="record.DESCRIPTION" type="text" />
 				</label>
 			</p>
 			<p>
 				<label>
 					<h4>{{ columns.SOURCE.prettyName }}</h4>
-					<input type="text" v-model="record.SOURCE" />
+					<input v-model="record.SOURCE" type="text" />
 				</label>
 			</p>
 			<p>
 				<label>
 					<h4>{{ columns.FINAL_DISPOSITION.prettyName }}</h4>
-					<input type="text" v-model="record.FINAL_DISPOSITION" />
+					<input v-model="record.FINAL_DISPOSITION" type="text" />
 				</label>
 			</p>
 		</div>
@@ -58,13 +58,13 @@
 			<p>
 				<label>
 					<h4>{{ columns.TOTAL_FEED_AMOUNT.prettyName }}</h4>
-					<input type="text" v-model="record.TOTAL_FEED_AMOUNT" />
+					<input v-model="record.TOTAL_FEED_AMOUNT" type="text" />
 				</label>
 			</p>
 			<p>
 				<label>
 					<h4>{{ columns.FEED_STORAGE_LOCATION.prettyName }}</h4>
-					<input type="text" v-model="record.FEED_STORAGE_LOCATION" />
+					<input v-model="record.FEED_STORAGE_LOCATION" type="text" />
 				</label>
 			</p>
 			<p>
@@ -116,15 +116,18 @@
 			<table>
 				<thead>
 					<tr>
-						<th v-for="column in importantDateSchema.columns" v-if="!column.automated">
+						<th
+							v-for="column in columnsToBeDisplayed"
+							:key="column.columnName"
+						>
 							{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 						</th>
 						<th>&nbsp;</th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="importantDate in record.importantDates">
-						<td v-for="column in importantDateSchema.columns" v-if="!column.automated">
+					<tr v-for="importantDate in record.importantDates" :key="JSON.stringify(importantDate)">
+						<td v-for="column in columnsToBeDisplayed" :key="column.columnName">
 							<SmartInput
 								v-model="importantDate[column.columnName]"
 								:displayLabel="false"
@@ -132,13 +135,13 @@
 							/>
 						</td>
 						<td>
-							<button class="button" @click="removeImportantDate(importantDate)" type="button">
+							<button class="button" type="button" @click="removeImportantDate(importantDate)">
 								Remove
 							</button>
 						</td>
 					</tr>
 					<tr>
-						<td v-for="column in importantDateSchema.columns" v-if="!column.automated">
+						<td v-for="column in columnsToBeDisplayed" :key="column.columnName">
 							<SmartInput
 								v-model="newImportantDate[column.columnName]"
 								:displayLabel="false"
@@ -148,9 +151,9 @@
 						<td>
 							<button
 								class="button"
-								@click="addNewImportantDate"
 								type="button"
 								:disabled="!newImportantDateIsValid"
+								@click="addNewImportantDate"
 							>
 								Add
 							</button>
@@ -176,7 +179,33 @@
 	export default {
 		name: 'SupplementalAnimalInfo',
 		components: { SmartInput },
+		props: {
+			mode: {
+				type: String,
+				required: true
+			}
+		},
+		data () {
+			return {
+				columns: getObjectIndexedByKeyFromArray(supplementalAnimalInfoSchema.columns, 'columnName'),
+				importantDateSchema,
+				localRecord: {
+					...supplementalAnimalInfoSchema.columns.reduce((out, column) => {
+						out[column.columnName] = null;
+						return out;
+					}, {}),
+					importantDates: []
+				},
+				newImportantDate: importantDateSchema.columns.reduce((output, column) => {
+					output[column.columnName] = null;
+					return output;
+				}, {}),
+				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
+				schema: supplementalAnimalInfoSchema
+			};
+		},
 		computed: {
+			columnsToBeDisplayed () { return importantDateSchema.columns.filter(c => !c.automated); },
 			newImportantDateIsValid () {
 				return importantDateSchema.columns.reduce((isValid, column) => {
 					let val = this.newImportantDate[column.columnName];
@@ -213,24 +242,13 @@
 				return tableGroups;
 			}
 		},
-		data () {
-			return {
-				columns: getObjectIndexedByKeyFromArray(supplementalAnimalInfoSchema.columns, 'columnName'),
-				importantDateSchema,
-				localRecord: {
-					...supplementalAnimalInfoSchema.columns.reduce((out, column) => {
-						out[column.columnName] = null;
-						return out;
-					}, {}),
-					importantDates: []
-				},
-				newImportantDate: importantDateSchema.columns.reduce((output, column) => {
-					output[column.columnName] = null;
-					return output;
-				}, {}),
-				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
-				schema: supplementalAnimalInfoSchema
-			};
+		mounted () {
+			let records = this.$store.state.supplementalAnimalInformation.records;
+			if (records.length < 1) {
+				records.push(this.localRecord);
+			} else {
+				this.localRecord = records[0];
+			}
 		},
 		methods: {
 			addNewImportantDate () {
@@ -244,20 +262,6 @@
 			removeImportantDate (importantDate) {
 				const index = this.record.importantDates.map(d => JSON.stringify(d)).indexOf(JSON.stringify(importantDate));
 				this.record.importantDates.splice(index, 1);
-			}
-		},
-		mounted () {
-			let records = this.$store.state.supplementalAnimalInformation.records;
-			if (records.length < 1) {
-				records.push(this.localRecord);
-			} else {
-				this.localRecord = records[0];
-			}
-		},
-		props: {
-			mode: {
-				type: String,
-				required: true
 			}
 		}
 	};

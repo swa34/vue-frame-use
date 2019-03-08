@@ -2,20 +2,18 @@
 	<div class="fuzzy-select">
 		<input v-model="inputText" type="text" @input="debounceInput" />
 		<div class="options">
-			<span v-for="(option, index) in filteredOptions" :id="option.label" v-bind:key="option.key" v-on:click="setValue(option)" @mouseover="setSelectionIndex(index)" :class="index === inputHandling.selectionIndex ? 'selected' : ''">
+			<span
+				v-for="(option, index) in filteredOptions"
+				:id="option.label"
+				:key="option.key"
+				:class="index === inputHandling.selectionIndex ? 'selected' : ''"
+				@click="setValue(option)"
+				@mouseover="setSelectionIndex(index)"
+			>
 				{{ option.label }}
 			</span>
 		</div>
 	</div>
-	<!-- <fieldset class="fuzzy-select">
-		<input v-model="inputText" type="text" @input="debounceInput" />
-		<select v-model="computedValue" :disabled="filteredOptions.length < 1">
-			<input type="text" />
-			<option v-for="option in filteredOptions" v-bind:key="option.key" :value="option.key">
-				{{ option.label }}
-			</option>
-		</select>
-	</fieldset> -->
 </template>
 
 <script>
@@ -31,8 +29,38 @@
 
 	export default {
 		name: 'FuzzySelect',
-		beforeDestroy () {
-			delete this.fuse;
+		props: {
+			options: {
+				type: Array,
+				required: true
+			},
+			value: {
+				default: null,
+				type: [
+					String,
+					Number,
+					Boolean
+				]
+			}
+		},
+		data () {
+			let selectedOptionLabel = '';
+			this.options.forEach((option) => {
+				if (option.key === this.value) selectedOptionLabel = option.label;
+			});
+			return {
+				fuseOptions: {
+					includeMatches: true,
+					includeScore: true,
+					shouldSort: true,
+					threshold: 0.45
+				},
+				filteredOptions: this.options,
+				inputHandling: {
+					selectionIndex: -1
+				},
+				inputText: selectedOptionLabel
+			};
 		},
 		computed: {
 			fuse () {
@@ -54,23 +82,28 @@
 				return this.$el.querySelectorAll('div.options span');
 			}
 		},
-		data () {
-			let selectedOptionLabel = '';
-			this.options.forEach((option) => {
-				if (option.key === this.value) selectedOptionLabel = option.label;
-			});
-			return {
-				fuseOptions: {
-					includeMatches: true,
-					includeScore: true,
-					shouldSort: true,
-					threshold: 0.45
-				},
-				filteredOptions: this.options,
-				inputHandling: {
-					selectionIndex: -1
-				},
-				inputText: selectedOptionLabel
+		watch: {
+			value () {
+				if (this.value === null) this.inputText = '';
+			}
+		},
+		beforeDestroy () {
+			delete this.fuse;
+		},
+		mounted () {
+			this.inputEl.onkeydown = (e) => {
+				const keyCode = e.keyCode;
+				switch (keyCode) {
+					case keyCodes.up:
+						if (this.inputHandling.selectionIndex > -1) --this.inputHandling.selectionIndex;
+						break;
+					case keyCodes.down:
+						if (this.inputHandling.selectionIndex < this.filteredOptions.length) ++this.inputHandling.selectionIndex;
+						break;
+					case keyCodes.enter:
+						if (this.inputHandling.selectionIndex >= 0) this.setValue(this.filteredOptions[this.inputHandling.selectionIndex]);
+						break;
+				}
 			};
 		},
 		methods: {
@@ -96,40 +129,6 @@
 			unfocusInput () {
 				this.inputEl.blur();
 				this.$el.focus();
-			}
-		},
-		mounted () {
-			this.inputEl.onkeydown = (e) => {
-				const keyCode = e.keyCode;
-				switch (keyCode) {
-					case keyCodes.up:
-						if (this.inputHandling.selectionIndex > -1) --this.inputHandling.selectionIndex;
-						break;
-					case keyCodes.down:
-						if (this.inputHandling.selectionIndex < this.filteredOptions.length) ++this.inputHandling.selectionIndex;
-						break;
-					case keyCodes.enter:
-						if (this.inputHandling.selectionIndex >= 0) this.setValue(this.filteredOptions[this.inputHandling.selectionIndex]);
-						break;
-				}
-			};
-		},
-		props: {
-			options: {
-				type: Array,
-				required: true
-			},
-			value: {
-				type: [
-					String,
-					Number,
-					Boolean
-				]
-			}
-		},
-		watch: {
-			value () {
-				if (this.value === null) this.inputText = '';
 			}
 		}
 	};
@@ -175,11 +174,4 @@
 			}
 		}
 	}
-	// fieldset.fuzzy-select {
-	// 	border: none;
-	// 	// display: flex;
-	// 	input, select {
-	// 		width: 100%;
-	// 	}
-	// }
 </style>

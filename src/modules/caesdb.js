@@ -12,19 +12,6 @@ const apiPrefix = '/rest/gacounts/';
 
 const generateURL = str => apiPrefix + str + '.json';
 
-// const serializeByColumns = (obj) => {
-// 	if (!obj.COLUMNS || !obj.DATA) return obj;
-// 	let newArr = [];
-// 	obj.DATA.forEach((item) => {
-// 		let newObj = {};
-// 		item.forEach((field, i) => {
-// 			newObj[obj.COLUMNS[i]] = field;
-// 		});
-// 		newArr.push(newObj);
-// 	});
-// 	return newArr;
-// };
-
 const makeGetRequest = (url, callback) => {
 	if (!window.pendingRequests) {
 		window.pendingRequests = 1;
@@ -65,27 +52,6 @@ const makePostRequest = (url, dataToSend, callback, isCriteriaStructure = true) 
 			}
 		});
 };
-
-// const makeSerializedPostRequest = (url, dataToSend, callback) => {
-// 	if (!window.pendingRequests) {
-// 		window.pendingRequests = 1;
-// 	} else {
-// 		++window.pendingRequests;
-// 	}
-// 	request.post(url)
-// 		.send(dataToSend)
-// 		.end((err, response) => {
-// 			--window.pendingRequests;
-// 			const data = serializeByColumns(response.body);
-// 			if (err) {
-// 				callback(err);
-// 			} else if (data.Message) {
-// 				callback(new Error(data.Message), null);
-// 			} else {
-// 				callback(null, data);
-// 			}
-// 		});
-// };
 
 const deleteReport = (reportID, callback) => {
 	const url = generateURL('deleteReport');

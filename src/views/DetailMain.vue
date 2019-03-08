@@ -1,10 +1,10 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
-  <div :class="`${mode}-mode`">
+	<div :class="`${mode}-mode`">
 		<ContextualHelpMessage
-			:messageName="helpMessage.name"
-			v-on:close-modal="hideHelp"
 			v-if="helpMessage.show"
+			:messageName="helpMessage.name"
+			@:close-modal="hideHelp"
 		/>
 		<div v-if="requestsInProgress" class="application-loading-overlay">
 			<div class="container">
@@ -12,8 +12,8 @@
 				<p>Loading...</p>
 			</div>
 		</div>
-		<section v-for="section in schema.sections">
-			<h2 v-on:click="toggleSection(section)" class="head section-heading">
+		<section v-for="section in schema.sections" :key="JSON.stringify(section)">
+			<h2 class="head section-heading" @click="toggleSection(section)">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
 				<ChevronRightIcon v-else class="hide-on-print" />
 				{{ section.title }}
@@ -25,26 +25,30 @@
 				<div v-if="sectionDependenciesMet(section)">
 					<div v-if="section.customComponent">
 						<component
-							v-bind:is="section.customComponent"
-							v-on:show-help="showHelp"
+							:is="section.customComponent"
 							:mode="mode"
+							@show-help="showHelp"
 						/>
 					</div>
 					<div v-else :class="!section.disableFlex ? 'flex-section' : ''">
-						<div v-for="area in section.areas" :class="`area ${area.data.customClasses ? area.data.customClasses.join(' ') : ''}`">
+						<div
+							v-for="area in section.areas"
+							:key="JSON.stringify(area)"
+							:class="`area ${area.data.customClasses ? area.data.customClasses.join(' ') : ''}`"
+						>
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
 									<SmartInput
 										v-if="mode === 'edit' && area.data.type === 'int'"
 										v-model.number="record[area.data.columnName]"
 										:field="area.data"
-										v-on:show-help="showHelp(area.data)"
+										@show-help="showHelp(area.data)"
 									/>
 									<SmartInput
 										v-else-if="mode === 'edit'"
 										v-model="record[area.data.columnName]"
 										:field="area.data"
-										v-on:show-help="showHelp(area.data)"
+										@show-help="showHelp(area.data)"
 									/>
 									<div v-else>
 										<h3 class="inline">
@@ -73,19 +77,18 @@
 									<!-- If it uses a custom component, render that component -->
 									<div v-else-if="area.data.customComponent">
 										<component
+											:is="area.data.customComponent"
 											v-if="dependencyMet(area.data)"
-											v-bind:is="area.data.customComponent"
-											v-on:show-help="showHelp"
-											v-on:expand-section="expandSection"
-											v-on:collapse-section="collapseSection"
 											:mode="getMode(area.data)"
+											@show-help="showHelp"
+											@expand-section="expandSection"
+											@collapse-section="collapseSection"
 										/>
 									</div>
 									<!-- If it's a multiselect association, use a data multi select component -->
 									<div v-else-if="area.data.multiSelect">
 										<DataMultiSelect
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:associatedColumn="area.data.associatedColumn"
 											:filter="area.data.filter"
 											:groupBy="area.data.groupBy"
@@ -98,13 +101,13 @@
 											:affects="area.data.affects"
 											:helpMessageName="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 									<!-- If multiple values are forbidden, use a data radio component -->
 									<div v-else-if="area.data.forbidMultiple">
 										<DataRadio
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
 											:associatedColumn="area.data.associatedColumn"
@@ -114,12 +117,12 @@
 											:affects="area.data.affects"
 											:helpMessageName="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 									<div v-else-if="area.data.displayAllOptions">
 										<DataMultiTable
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
 											:associatedColumn="area.data.associatedColumn"
@@ -131,13 +134,13 @@
 											:description="area.data.description"
 											:helpMessageName="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 									<!-- Else, just use a data table component -->
 									<div v-else-if="!identifier.value ? area.data.isAssignable : true">
 										<DataTable
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
 											:associatedColumn="area.data.foreignKey"
@@ -148,14 +151,15 @@
 											:helpMessageName="area.data.helpMessageName"
 											:mode="getMode(area.data)"
 											:recordLimit="area.data.limit"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 								</div>
 								<div v-else-if="area.type === 'subschema'">
 									<component
-										v-bind:is="area.data.customComponent"
-										v-on:show-help="showHelp"
+										:is="area.data.customComponent"
 										:mode="getMode(area.data)"
+										@show-help="showHelp"
 									/>
 								</div>
 							</transition>
@@ -195,12 +199,12 @@
 					If you would like to, you may also <a id="delete-link" v-on:click="deleteRecord" >delete your {{ schema.title }}</a>.
 				</span> -->
 				<br />
-				<button v-on:click="cleanUpData" type="button" class="button">
+				<button type="button" class="button" @click="cleanUpData">
 					Save My {{ schema.title }}
 				</button>
 			</p>
 		</div>
-  </div>
+	</div>
 </template>
 
 <!-- The script portion of the component -->
@@ -253,6 +257,55 @@
 			SmartInput,
 			Spinner
 		},
+		// The component's properties, which are set by the parent component.
+		props: {
+			// The schema to be used
+			'schema': {
+				type: Object,
+				required: true
+			},
+			// An optional identifier/selector
+			'identifier': {
+				default: false,
+				type: [
+					Object,
+					Boolean
+				]
+			},
+			// Display mode
+			'mode': {
+				type: String,
+				required: true,
+				default: 'view',
+				validator (value) {
+					return ['edit', 'view'].indexOf(value) !== -1;
+				}
+			},
+			// Should associations be rendered too?
+			'includeAssociations': {
+				type: Boolean,
+				default: true
+			},
+			// How about subschemas?
+			'includeSubSchemas': {
+				type: Boolean,
+				default: true
+			},
+			'userIsOwner': {
+				type: Boolean,
+				default: false
+			}
+		},
+		data () {
+			return {
+				helpMessage: {
+					show: false,
+					name: ''
+				},
+				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
+				sectionsToDisplay: this.schema.sections.map(s => s.title)
+			};
+		},
 		computed: {
 			columns: {
 				get () {
@@ -285,23 +338,51 @@
 				}
 			}
 		},
-		data () {
-			// let sectionsToDisplay = [];
-			// if (this.identifier.value) {
-			// 	this.schema.sections.forEach((section) => {
-			// 		sectionsToDisplay.push(section.title);
-			// 	});
-			// } else if (this.schema.sections.length > 0) {
-			// 	sectionsToDisplay.push(this.schema.sections[0].title);
-			// }
-			return {
-				helpMessage: {
-					show: false,
-					name: ''
+		watch: {
+			duplication: {
+				handler () {
+					this.getMainData();
 				},
-				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
-				sectionsToDisplay: this.schema.sections.map(s => s.title)
+				deep: true
+			}
+		},
+		mounted () {
+			// Set up the watcher for pending requests
+			setInterval(() => {
+				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0)) {
+					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0;
+				}
+			}, 300);
+
+			const getConstraintData = () => {
+				this.columns.forEach((column) => {
+					// We only care about columns that have a constraint and a getValues
+					// function, since those are the ones we have to fetch values for
+					if (column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							// structure first, then send our request
+							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) logError(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) logError(err);
+									if (data) column.constraint.values = data;
+								});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) logError(err);
+								if (data) column.constraint.values = data;
+							});
+						}
+					}
+				});
 			};
+
+			if (this.identifier) this.getMainData();
+			getConstraintData();
 		},
 		// The methods available to this component during render
 		methods: {
@@ -377,19 +458,7 @@
 			},
 			// Run validation on the data
 			validateData (store) {
-				// console.log(store);
 				let isValid = true;
-				// this.schema.sections.forEach((section) => {
-				// 	section.areas.forEach((area) => {
-				// 		if (area.data.validate) {
-				// 			const validation = area.data.validate(store);
-				// 			if (validation.isValid !== true) {
-				// 				notify.error(validation.message);
-				// 				isValid = false;
-				// 			};
-				// 		}
-				// 	});
-				// });
 				if (isValid) this.submitData(store);
 			},
 			// Doesn't send anything yet, just pretends like it does
@@ -583,90 +652,6 @@
 				} else {
 					this.sectionsToDisplay.splice(index, 1);
 				}
-			}
-		},
-		mounted () {
-			// Set up the watcher for pending requests
-			setInterval(() => {
-				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0)) {
-					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0;
-				}
-			}, 300);
-
-			const getConstraintData = () => {
-				this.columns.forEach((column) => {
-					// We only care about columns that have a constraint and a getValues
-					// function, since those are the ones we have to fetch values for
-					if (column.constraint && column.constraint.getValues) {
-						if (column.constraint.tablePrefix) {
-							// If the constraint has a tablePrefix, we need to get a criteria
-							// structure first, then send our request
-							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) logError(err);
-								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
-								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) logError(err);
-									if (data) column.constraint.values = data;
-								});
-							});
-						} else {
-							// If no table prefix, just fetch the data
-							column.constraint.getValues((err, data) => {
-								if (err) logError(err);
-								if (data) column.constraint.values = data;
-							});
-						}
-					}
-				});
-			};
-
-			if (this.identifier) this.getMainData();
-			getConstraintData();
-		},
-		// The component's properties, which are set by the parent component.
-		props: {
-			// The schema to be used
-			'schema': {
-				type: Object,
-				required: true
-			},
-			// An optional identifier/selector
-			'identifier': {
-				type: [
-					Object,
-					Boolean
-				]
-			},
-			// Display mode
-			'mode': {
-				type: String,
-				required: true,
-				default: 'view',
-				validator (value) {
-					return ['edit', 'view'].indexOf(value) !== -1;
-				}
-			},
-			// Should associations be rendered too?
-			'includeAssociations': {
-				type: Boolean,
-				default: true
-			},
-			// How about subschemas?
-			'includeSubSchemas': {
-				type: Boolean,
-				default: true
-			},
-			'userIsOwner': {
-				type: Boolean,
-				default: false
-			}
-		},
-		watch: {
-			duplication: {
-				handler () {
-					this.getMainData();
-				},
-				deep: true
 			}
 		}
 	};

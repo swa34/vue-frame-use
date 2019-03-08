@@ -4,10 +4,10 @@
 const recursiveAssign = (a, b) => {
 	return Object(b) !== b ? b
 		: Object.keys(b).reduce((a, key) =>
-				Object.assign(a, {
-					[key]: recursiveAssign(a[key], b[key])
-				})
-			, Object(a) === a ? a : {});
+			Object.assign(a, {
+				[key]: recursiveAssign(a[key], b[key])
+			})
+		, Object(a) === a ? a : {});
 };
 
 export default recursiveAssign;

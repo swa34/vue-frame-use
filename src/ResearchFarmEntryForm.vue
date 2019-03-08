@@ -11,31 +11,22 @@
 		getComputed,
 		getStore
 	} from '@/modules/store';
-	import {
-		stringFormats,
-		url
-	} from '@/modules/utilities';
+	import { url } from '@/modules/utilities';
 	import { getSortedSchema } from '@/modules/schemaTools';
-	import {
-		getCriteriaStructure,
-		getDuplicatedReport,
-		logError,
-		postReportTemplateStatus
-	} from '@/modules/caesdb';
 
 	export default {
 		name: 'ResearchFarmEntryForm',
 		components: {
 			DetailMain
 		},
+		data () {
+			return {
+				schema: getSortedSchema(schema)
+			};
+		},
 		computed: {
 			...getComputed(schema)
 		},
-		data(){
-			return {
-				schema: getSortedSchema(schema)
-			}
-		},
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
-	}
+	};
 </script>

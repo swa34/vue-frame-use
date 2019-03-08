@@ -9,7 +9,7 @@
 			</h3>
 			<p>
 				<label class="checkbox">
-					<input type="checkbox" v-model="record.IS_SAFE" />
+					<input v-model="record.IS_SAFE" type="checkbox" />
 					<span>
 						{{ columns.IS_SAFE.prettyName }}
 					</span>
@@ -17,7 +17,7 @@
 			</p>
 			<p>
 				<label class="checkbox">
-					<input type="checkbox" v-model="record.MUST_BE_DESTROYED" />
+					<input v-model="record.MUST_BE_DESTROYED" type="checkbox" />
 					<span>
 						{{ columns.MUST_BE_DESTROYED.prettyName }}
 					</span>
@@ -26,7 +26,7 @@
 			<p>
 				<label>
 					<h4>{{ columns.FIELD_NAME.prettyName }}</h4>
-					<input type="text" v-model="record.FIELD_NAME" />
+					<input v-model="record.FIELD_NAME" type="text" />
 				</label>
 			</p>
 		</div>
@@ -79,6 +79,23 @@
 
 	export default {
 		name: 'SupplementalPlantInfo',
+		props: {
+			mode: {
+				type: String,
+				required: true
+			}
+		},
+		data () {
+			return {
+				columns: getObjectIndexedByKeyFromArray(supplementalPlantInfoSchema.columns, 'columnName'),
+				localRecord: supplementalPlantInfoSchema.columns.reduce((out, column) => {
+					out[column.columnName] = null;
+					return out;
+				}, {}),
+				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
+				schema: supplementalPlantInfoSchema
+			};
+		},
 		computed: {
 			record: {
 				get () {
@@ -93,32 +110,20 @@
 				}
 			},
 			tableGroups () {
-				let tableGroups = [];
-				supplementalPlantInfoSchema.columns
+				return supplementalPlantInfoSchema.columns
 					.filter(column => column.tableGroup)
-					.forEach(column => {
-						let indexOfGroup = tableGroups.map(g => g.name).indexOf(column.tableGroup.name);
+					.reduce((tableGroups, column) => {
+						const indexOfGroup = tableGroups.map(g => g.name).indexOf(column.tableGroup.name);
 						if (indexOfGroup === -1) {
-							let groupObj = { name: column.tableGroup.name };
+							const groupObj = { name: column.tableGroup.name };
 							groupObj[`${column.tableGroup.class}Column`] = column;
 							tableGroups.push(groupObj);
 						} else {
 							tableGroups[indexOfGroup][`${column.tableGroup.class}Column`] = column;
 						}
-					});
-				return tableGroups;
+						return tableGroups;
+					}, []);
 			}
-		},
-		data () {
-			return {
-				columns: getObjectIndexedByKeyFromArray(supplementalPlantInfoSchema.columns, 'columnName'),
-				localRecord: supplementalPlantInfoSchema.columns.reduce((out, column) => {
-					out[column.columnName] = null;
-					return out;
-				}, {}),
-				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
-				schema: supplementalPlantInfoSchema
-			};
 		},
 		mounted () {
 			let records = this.$store.state.supplementalPlantInformation.records;
@@ -126,12 +131,6 @@
 				records.push(this.localRecord);
 			} else {
 				this.localRecord = records[0];
-			}
-		},
-		props: {
-			mode: {
-				type: String,
-				required: true
 			}
 		}
 	};

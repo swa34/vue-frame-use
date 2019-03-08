@@ -1,0 +1,40 @@
+{
+	"parserOptions": {
+		"ecmaVersion": 2018
+	},
+	"extends": [
+		"plugin:vue/recommended",
+		"happiness"
+	],
+	"rules": {
+		"vue/html-indent": [
+			"error",
+			"tab"
+		],
+		"vue/html-self-closing": ["error", {
+			"html": {
+				"normal": "never",
+				"void": "always"
+			}
+		}],
+		"vue/max-attributes-per-line": ["error", {
+			"singleline": 3,
+			"multiline": 3
+		}],
+		"vue/script-indent": [
+			"error",
+			"tab",
+			{
+				"baseIndent": 1
+			}
+		]
+	},
+	"overrides": [
+		{
+			"files": ["*.vue"],
+			"rules": {
+				"indent": "off"
+			}
+		}
+	]
+}
