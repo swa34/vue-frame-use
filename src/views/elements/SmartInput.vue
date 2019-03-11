@@ -72,6 +72,16 @@
 				@input="$emit('input', $event.target.checked)"
 			/>
 			<input
+				v-else-if="fieldType === 'file'"
+				type="file"
+				:value="value"
+				:accepted="field.acceptedTypes ? field.acceptedTypes.join(', ') : false"
+				:required="field.required"
+				:disabled="field.immutable"
+				:style="field.style"
+				@input="$emit('input', $event.target.value)"
+			/>
+			<input
 				v-else
 				:type="fieldType"
 				:value="value"
@@ -118,11 +128,13 @@
 				]
 			}
 		},
-		computed: {
-			dependentValue () {
+		asyncComputed: {
+			async dependentValue () {
 				if (!this.field.getDependentValue) return null;
-				return this.field.getDependentValue(this.$store);
+				return await this.field.getDependentValue(this.$store);
 			},
+		},
+		computed: {
 			fieldName () {
 				return this.field.prettyName || getPrettyColumnName(this.field.columnName);
 			},

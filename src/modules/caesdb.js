@@ -53,6 +53,80 @@ const makePostRequest = (url, dataToSend, callback, isCriteriaStructure = true) 
 		});
 };
 
+const logError = (err, dump = {}, trace = null) => {
+	// If in development mode, log the error to the console
+	if (process.env.NODE_ENV === 'development') console.error(err);
+
+	// Grab the current url
+	const currentUrl = new URL(window.location);
+	// Create an object that mirrors our error log table
+	const errObj = {
+		ID: null,
+		APPLICATION_ID: 1,
+		FIXED_DEVELOPMENT: false,
+		FIXED_PRODUCTION: false,
+		DATE_CREATED: null,
+		DATE_LAST_UPDATED: null,
+		BROWSER: navigator.userAgent,
+		ERROR_DATETIME: (new Date()).toUTCString(),
+		DETAIL: null,
+		ERROR_DIAGNOSTICS: null,
+		ERROR_CODE: null,
+		EXTENDED_INFO: null,
+		HTTP_REFERER: currentUrl.href,
+		MAIL_TO: null,
+		MESSAGE: null,
+		NATIVE_ERROR_CODE: null,
+		QUERY_STRING: currentUrl.search,
+		REMOTE_ADDRESS: null,
+		ERROR_SQLSTATE: null,
+		TAG_CONTEXT: null,
+		TEMPLATE: currentUrl.pathname,
+		TYPE: 'javascript/vue',
+		SQL_STATEMENT: null,
+		SESSION_DUMP: null,
+		URL_DUMP: null,
+		FORM_DUMP: null,
+		CGI_DUMP: null,
+		APPLICATION_DUMP: null,
+		REQUEST_DUMP: null
+	};
+	// (typeof err === 'string' ? err : JSON.stringify(err, null, 2)) + (trace ? '\n' + JSON.stringify(trace, null, 2) : '')
+	if (err.status) {
+		let response = null;
+		try {
+			response = JSON.parse(err.response.text);
+		} catch (e) {
+			// Do nothing
+		}
+		errObj.DETAIL = `<pre>${JSON.stringify({
+			url: err.response.req.url,
+			data: err.response.req._data,
+			status: err.status,
+			method: err.response.req.method,
+			response
+		}, null, 4)}</pre>`;
+	} else {
+		if (typeof err === 'object') {
+			errObj.DETAIL = `<pre>${JSON.stringify(err, null, 4)}</pre>`;
+		} else {
+			errObj.DETAIL = err;
+		}
+		if (dump && dump !== '') errObj.APPLICATION_DUMP = JSON.stringify(dump, null, 4);
+	}
+	// The url for the error logging endpoint
+	let url = '/rest/oittools/logError.json';
+	// Optionally provide a url param specifying the application name
+	if (applicationName) url += `?applicationName=${applicationName}`;
+	// Dummy callback that don't do nothin
+	const callback = () => {};
+	// Send it off!
+	makePostRequest(url, prepareForCf(errObj), callback, false);
+
+	// Notify the user
+	notify.error(`An error has occurred.  If this persists, please email <a href="mailto:caesweb@uga.edu">caesweb@uga.edu</a> and include the following error message:<br /><br />${err}`);
+};
+
 const deleteReport = (reportID, callback) => {
 	const url = generateURL('deleteReport');
 	makePostRequest(url, { reportID }, callback, false);
@@ -347,80 +421,6 @@ const getTopics = (callback) => {
 	makeGetRequest(url, callback);
 };
 
-const logError = (err, dump = {}, trace = null) => {
-	// If in development mode, log the error to the console
-	if (process.env.NODE_ENV === 'development') console.error(err);
-
-	// Grab the current url
-	const currentUrl = new URL(window.location);
-	// Create an object that mirrors our error log table
-	const errObj = {
-		ID: null,
-		APPLICATION_ID: 1,
-		FIXED_DEVELOPMENT: false,
-		FIXED_PRODUCTION: false,
-		DATE_CREATED: null,
-		DATE_LAST_UPDATED: null,
-		BROWSER: navigator.userAgent,
-		ERROR_DATETIME: (new Date()).toUTCString(),
-		DETAIL: null,
-		ERROR_DIAGNOSTICS: null,
-		ERROR_CODE: null,
-		EXTENDED_INFO: null,
-		HTTP_REFERER: currentUrl.href,
-		MAIL_TO: null,
-		MESSAGE: null,
-		NATIVE_ERROR_CODE: null,
-		QUERY_STRING: currentUrl.search,
-		REMOTE_ADDRESS: null,
-		ERROR_SQLSTATE: null,
-		TAG_CONTEXT: null,
-		TEMPLATE: currentUrl.pathname,
-		TYPE: 'javascript/vue',
-		SQL_STATEMENT: null,
-		SESSION_DUMP: null,
-		URL_DUMP: null,
-		FORM_DUMP: null,
-		CGI_DUMP: null,
-		APPLICATION_DUMP: null,
-		REQUEST_DUMP: null
-	};
-	// (typeof err === 'string' ? err : JSON.stringify(err, null, 2)) + (trace ? '\n' + JSON.stringify(trace, null, 2) : '')
-	if (err.status) {
-		let response = null;
-		try {
-			response = JSON.parse(err.response.text);
-		} catch (e) {
-			// Do nothing
-		}
-		errObj.DETAIL = `<pre>${JSON.stringify({
-			url: err.response.req.url,
-			data: err.response.req._data,
-			status: err.status,
-			method: err.response.req.method,
-			response
-		}, null, 4)}</pre>`;
-	} else {
-		if (typeof err === 'object') {
-			errObj.DETAIL = `<pre>${JSON.stringify(err, null, 4)}</pre>`;
-		} else {
-			errObj.DETAIL = err;
-		}
-		if (dump && dump !== '') errObj.APPLICATION_DUMP = JSON.stringify(dump, null, 4);
-	}
-	// The url for the error logging endpoint
-	let url = '/rest/oittools/logError.json';
-	// Optionally provide a url param specifying the application name
-	if (applicationName) url += `?applicationName=${applicationName}`;
-	// Dummy callback that don't do nothin
-	const callback = () => {};
-	// Send it off!
-	makePostRequest(url, prepareForCf(errObj), callback, false);
-
-	// Notify the user
-	notify.error(`An error has occurred.  If this persists, please email <a href="mailto:caesweb@uga.edu">caesweb@uga.edu</a> and include the following error message:<br /><br />${err}`);
-};
-
 const postReportData = (report, callback) => {
 	const url = generateURL('processSinglePageReport');
 	makePostRequest(url, report, callback, false);
@@ -431,7 +431,28 @@ const postReportTemplateStatus = (duplicatedReportRecord, callback) => {
 	makePostRequest(url, duplicatedReportRecord, callback, false);
 };
 
+// CAES RESEARCH FARM
+const getDepartmentHeadCollegeId = personnelId => {
+	const apiPrefix = '/rest/caesresearchfarmproject/';
+	if (!personnelId) {
+		logError(new Error('Cannot get department head: No personnel ID specified.'));
+		return;
+	}
+	const url = `${apiPrefix}departmentHeadFromPersonnelId?personnelId=${personnelId}`;
+	if (!window.pendingRequests) {
+		window.pendingRequests = 1;
+	} else {
+		++window.pendingRequests;
+	}
+	const response = request.get(url);
+	--window.pendingRequests;
+	return response;
+};
+
 export {
+	makeGetRequest,
+	makePostRequest,
+	logError,
 	deleteReport,
 	get4HActivity,
 	get4HActivityList,
@@ -488,7 +509,8 @@ export {
 	getSubReportPurposeAchievements,
 	getTargetAudiences,
 	getTopics,
-	logError,
 	postReportData,
-	postReportTemplateStatus
+	postReportTemplateStatus,
+	// CAES RESEARCH FARM PROJECT
+	getDepartmentHeadCollegeId
 };

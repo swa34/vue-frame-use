@@ -3,6 +3,7 @@ import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/Su
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
 import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
 import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
+import { getDepartmentHeadCollegeId } from '@/modules/caesdb';
 
 const nullTest = val => val === null || val === '';
 const notNullTest = val => !nullTest(val);
@@ -482,6 +483,7 @@ const schema = {
 			columnName: 'TREATMENT_LIST_ATTACHMENT_PATH',
 			prettyName: 'Treatment List',
 			type: 'nvarchar',
+			inputType: 'file',
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -491,6 +493,7 @@ const schema = {
 			columnName: 'PLOT_MAP_ATTACHMENT_PATH',
 			prettyName: 'Plot Map',
 			type: 'nvarchar',
+			inputType: 'file',
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -500,6 +503,7 @@ const schema = {
 			columnName: 'CALENDAR_ATTACHMENT_PATH',
 			prettyName: 'Calendar',
 			type: 'nvarchar',
+			inputType: 'file',
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -600,6 +604,23 @@ const schema = {
 				values: caesCache.data.crfp.departmentHeads,
 				foreignKey: 'PERSONNEL_ID',
 				foreignLabel: 'DISPLAY_NAME'
+			},
+			getDependentValue: async (store) => {
+				console.log('zebra');
+				const piPersonnelId = store.state.project.PI_PERSONNEL_ID;
+				if (nullTest(piPersonnelId)) return null;
+				console.log('got personnel id');
+				try {
+					console.log(caesCache.data.crfp.departmentHeads);
+					const dHeadIndex = caesCache.data.crfp.departmentHeads.map(h => h.COLLEGE_ID).indexOf(await getDepartmentHeadCollegeId(piPersonnelId));
+					if (dHeadIndex === -1) return;
+					console.log('found dept head');
+					console.log(caesCache.data.crfp.departmentHeads[dHeadIndex].PERSONNEL_ID);
+					return caesCache.data.crfp.departmentHeads[dHeadIndex].PERSONNEL_ID;
+					// if (deptHeadCollegeId === null) return;
+				} catch (err) {
+					console.error(err);
+				}
 			},
 			grouping: {
 				section: 'Routing and Approval',

@@ -1,3 +1,5 @@
+// Allow asynchronous computed properties
+import AsyncComputed from 'vue-async-computed';
 // Polyfill for URL api and IE11
 import 'url-polyfill';
 // Polyfill for Element.matches and IE11
@@ -6,6 +8,8 @@ import 'element-matches';
 import ResearchFarmEntryForm from '@/ResearchFarmEntryForm';
 import Vue from 'vue';
 import { logError } from '@/modules/caesdb';
+
+Vue.use(AsyncComputed);
 
 Vue.filter('capitalize', (str) => {
 	if (!str) return '';
