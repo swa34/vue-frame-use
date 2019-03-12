@@ -111,10 +111,12 @@
 	import { getSortedSchema } from '@/modules/schemaTools';
 	import {
 		getCriteriaStructure,
-		getDuplicatedReport,
 		logError,
-		postReportTemplateStatus
 	} from '@/modules/caesdb';
+	import {
+		getDuplicatedReport,
+		postReportTemplateStatus
+	} from '@/modules/caesdb/gacounts3';
 
 	// Configure notifications
 	notify.configure({
@@ -331,7 +333,7 @@
 				// Once we have a report ID, we need to check if the user has a
 				// duplicated report record for this report
 				if (!isNaN(this.ID)) {
-					getCriteriaStructure('GC3_DUPLICATED_REPORT', (err, data) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_DUPLICATED_REPORT', (err, data) => {
 						if (err) logError(err);
 						if (data) {
 							let critStruct = data;

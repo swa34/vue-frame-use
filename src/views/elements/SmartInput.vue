@@ -110,6 +110,7 @@
 			FuzzySelect,
 			HelpCircleIcon
 		},
+		data () { return { dependentValue: null }; },
 		props: {
 			displayLabel: {
 				type: Boolean,
@@ -128,25 +129,23 @@
 				]
 			}
 		},
-		asyncComputed: {
-			async dependentValue () {
-				if (!this.field.getDependentValue) return null;
-				return await this.field.getDependentValue(this.$store);
-			},
-		},
 		computed: {
-			fieldName () {
-				return this.field.prettyName || getPrettyColumnName(this.field.columnName);
+			dependentColumnValue () {
+				if (!this.field.depends || !this.field.depends.column) return null;
+				return this.$store.state[this.$store.state.schema.title.toLowerCase()][this.field.depends.column];
 			},
-			fieldType () {
-				return this.field.inputType || sqlToHtml(this.field);
+			fieldName () { return this.field.prettyName || getPrettyColumnName(this.field.columnName); },
+			fieldType () { return this.field.inputType || sqlToHtml(this.field); }
+		},
+		methods: {
+			async updateDependentValue () {
+				if (this.field.getDependentValue) this.dependentValue = await this.field.getDependentValue(this.$store);
 			}
 		},
 		watch: {
+			dependentColumnValue () { this.updateDependentValue(); },
 			dependentValue (newVal) { this.$emit('input', newVal); }
 		},
-		mounted () {
-			if (this.field.getDependentValue) this.$emit('input', this.dependentValue);
-		}
+		mounted () { this.updateDependentValue(); }
 	};
 </script>

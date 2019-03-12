@@ -3,7 +3,8 @@ import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/Su
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
 import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
 import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
-import { getDepartmentHeadCollegeId } from '@/modules/caesdb';
+import { getDepartmentHeadCollegeId } from '@/modules/caesdb/caes_research_farm_project';
+import { logError } from '@/modules/caesdb';
 
 const nullTest = val => val === null || val === '';
 const notNullTest = val => !nullTest(val);
@@ -606,20 +607,15 @@ const schema = {
 				foreignLabel: 'DISPLAY_NAME'
 			},
 			getDependentValue: async (store) => {
-				console.log('zebra');
 				const piPersonnelId = store.state.project.PI_PERSONNEL_ID;
 				if (nullTest(piPersonnelId)) return null;
-				console.log('got personnel id');
 				try {
-					console.log(caesCache.data.crfp.departmentHeads);
-					const dHeadIndex = caesCache.data.crfp.departmentHeads.map(h => h.COLLEGE_ID).indexOf(await getDepartmentHeadCollegeId(piPersonnelId));
+					const dHeadId = await getDepartmentHeadCollegeId(piPersonnelId);
+					const dHeadIndex = caesCache.data.crfp.departmentHeads.map(h => h.COLLEGE_ID).indexOf(dHeadId);
 					if (dHeadIndex === -1) return;
-					console.log('found dept head');
-					console.log(caesCache.data.crfp.departmentHeads[dHeadIndex].PERSONNEL_ID);
 					return caesCache.data.crfp.departmentHeads[dHeadIndex].PERSONNEL_ID;
-					// if (deptHeadCollegeId === null) return;
 				} catch (err) {
-					console.error(err);
+					logError(err);
 				}
 			},
 			grouping: {

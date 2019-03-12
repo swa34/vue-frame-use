@@ -1,13 +1,11 @@
 /* global caesCache */
 
 import { enableConstraintValues } from '@/modules/schemaTools';
-import {
-	// getContactTypes,
-	getSubReportContact
-} from '@/modules/caesdb';
+import { getSubReportContact } from '@/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Sub-Report Contacts',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_SUB_REPORT_CONTACT',
 	criteria: {
 		string: 'criteria_SUB_REPORT_ID_eq'
@@ -27,7 +25,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getContactTypes,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.gc3.contactType

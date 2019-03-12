@@ -3,8 +3,9 @@
 	<div :class="`${mode}-mode`">
 		<ContextualHelpMessage
 			v-if="helpMessage.show"
+			:messageFetcher="this.schema.messageFetcher"
 			:messageName="helpMessage.name"
-			@:close-modal="hideHelp"
+			@close-modal="hideHelp"
 		/>
 		<div v-if="requestsInProgress" class="application-loading-overlay">
 			<div class="container">
@@ -12,7 +13,7 @@
 				<p>Loading...</p>
 			</div>
 		</div>
-		<section v-for="section in schema.sections" :key="JSON.stringify(section)">
+		<section v-for="section in schema.sections" :key="section.title">
 			<h2 class="head section-heading" @click="toggleSection(section)">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
 				<ChevronRightIcon v-else class="hide-on-print" />
@@ -33,7 +34,7 @@
 					<div v-else :class="!section.disableFlex ? 'flex-section' : ''">
 						<div
 							v-for="area in section.areas"
-							:key="JSON.stringify(area)"
+							:key="area.data.title || area.data.columnName"
 							:class="`area ${area.data.customClasses ? area.data.customClasses.join(' ') : ''}`"
 						>
 							<transition appear name="fade">
@@ -362,7 +363,7 @@
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							// structure first, then send our request
-							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
 								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {
@@ -544,7 +545,7 @@
 				};
 			},
 			getMainData () {
-				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						let critStruct = data;

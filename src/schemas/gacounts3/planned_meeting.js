@@ -1,6 +1,4 @@
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'PLANNED_MEETING',
 	columns: [
 		{
 			columnName: 'ID',

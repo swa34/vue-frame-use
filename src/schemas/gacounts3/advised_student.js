@@ -1,6 +1,4 @@
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'ADVISED_STUDENT',
 	columns: [
 		{
 			columnName: 'ID',

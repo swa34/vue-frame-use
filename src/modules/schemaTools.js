@@ -158,7 +158,9 @@ const getSortedSchema = schema => {
 		fetchExisting: schema.fetchExisting,
 		cleanUpData: schema.cleanUpData,
 		processSubmission: schema.processSubmission,
-		sections: sortedSections
+		sections: sortedSections,
+		messageFetcher: schema.messageFetcher,
+		databaseName: schema.databaseName
 	};
 	return sortedSchema;
 };

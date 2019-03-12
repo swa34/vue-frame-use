@@ -148,7 +148,7 @@
 
 			// Our main data grabbing function, grabs data for the main schema
 			const getMainData = () => {
-				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
@@ -181,7 +181,7 @@
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
 							// structure first, then send our request
-							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
 								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {

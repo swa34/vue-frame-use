@@ -211,12 +211,15 @@
 	import SubReportPlainText from '@/views/custom/gacounts3/SubReportPlainText';
 	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
 	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
+	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
 		getAssociationSubReportField,
 		getAssociationSubReportRole,
 		getContactTypes,
-		getCriteriaStructure,
 		getPersonnel,
 		getPersonnelWithCriteria,
 		getPlannedPrograms,
@@ -224,9 +227,8 @@
 		getStatePlannedPrograms,
 		getSubReport,
 		getSubReportContact,
-		getSubReportPurposeAchievements,
-		logError
-	} from '@/modules/caesdb';
+		getSubReportPurposeAchievements
+	} from '@/modules/caesdb/gacounts3';
 	import {
 		cfToJs,
 		filter
@@ -632,7 +634,7 @@
 			};
 
 			const fetchOutcomes = () => {
-				getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+				getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						const critStruct = data;

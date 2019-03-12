@@ -1,6 +1,4 @@
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'SUB_REPORT_COMMENT',
 	columns: [
 		{
 			columnName: 'ID',

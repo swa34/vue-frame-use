@@ -83,13 +83,15 @@
 <script>
 	/* global caesCache */
 	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
+	import {
 		getAssociationReportField,
 		getAssociationReportTypeField,
 		getAssociationSubReportField,
-		getCriteriaStructure,
-		getFieldOptions,
-		logError
-	} from '@/modules/caesdb';
+		getFieldOptions
+	} from '@/modules/caesdb/gacounts3';
 	import { filter } from '@/modules/criteriaUtils';
 	import {
 		modeValidator,
@@ -343,11 +345,11 @@
 		},
 		mounted () {
 			// Fetch some things we need
-			getCriteriaStructure('GC3_FIELD_OPTION', (err, data) => {
+			getCriteriaStructure('GACOUNTS3', 'GC3_FIELD_OPTION', (err, data) => {
 				if (err) logError(err);
 				if (data) this.criteriaStructureTemplates.fieldOption = data;
 			});
-			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
 				if (err) logError(err);
 				if (data) this.criteriaStructureTemplates.reportField = data;
 				this.populateReportFields();
@@ -356,7 +358,7 @@
 			const fetchExistingRecords = () => {
 				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
 				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
-				getCriteriaStructure(tablePrefix, (err, data) => {
+				getCriteriaStructure('GACOUNTS3', tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						let critStruct = data;

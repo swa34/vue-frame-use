@@ -150,7 +150,7 @@
 				return record;
 			},
 			getRecords () {
-				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
@@ -204,7 +204,7 @@
 					} else if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
 						if (column.constraint.tablePrefix) {
 							// If the constraint has a tablePrefix, we need to get a criteria
-							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
+							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
 								if (err) logError(err);
 								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
 								column.constraint.getValues(criteriaStructure, (err, data) => {

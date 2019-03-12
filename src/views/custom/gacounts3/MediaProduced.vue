@@ -59,11 +59,13 @@
 <script>
 	import {
 		getCriteriaStructure,
-		getMediaProduction,
-		getMediaReviewType,
-		getMediaType,
 		logError
 	} from '@/modules/caesdb';
+	import {
+		getMediaProduction,
+		getMediaReviewType,
+		getMediaType
+	} from '@/modules/caesdb/gacounts3';
 	import { modeValidator } from '@/modules/utilities';
 
 	export default {
@@ -124,7 +126,7 @@
 		},
 		mounted () {
 			const fetchExisting = () => {
-				getCriteriaStructure('GC3_MEDIA_PRODUCTION', (err, data) => {
+				getCriteriaStructure('GACOUNTS3', 'GC3_MEDIA_PRODUCTION', (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						const critStruct = data;

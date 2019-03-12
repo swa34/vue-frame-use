@@ -1,6 +1,4 @@
 const schema = {
-	database: 'GACOUNTS3',
-	table: 'ACTIVITY_LOCATION_TYPE',
 	columns: [
 		{
 			columnName: 'ID',

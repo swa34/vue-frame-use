@@ -245,7 +245,7 @@
 				return record;
 			},
 			getExistingRecords () {
-				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
@@ -361,7 +361,7 @@
 			};
 
 			const fetchCriteriaStructure = () => {
-				getCriteriaStructure(component.filter.tablePrefix, (err, data) => {
+				getCriteriaStructure(component.filter.databaseName, component.filter.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						component.criteriaStructure = data;

@@ -17,14 +17,15 @@
 <script>
 	import Spinner from 'vue-simple-spinner';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
-	import {
-		getContextualHelpMessageHTML,
-		logError
-	} from '@/modules/caesdb';
+	import { logError } from '@/modules/caesdb';
 
 	export default {
 		name: 'ContextualHelpMessage',
 		props: {
+			messageFetcher: {
+				type: Function,
+				required: true
+			},
 			messageName: {
 				type: String,
 				required: true
@@ -36,25 +37,31 @@
 		},
 		data () {
 			return {
+				cssSelectorsForClosingModal: [
+					'div.modal-container',
+					'span.close div',
+					'svg.feather',
+					'line'
+				],
 				helpMessageHTML: ''
 			};
 		},
 		methods: {
 			closeModal (event) {
-				if (event.target.matches('div.modal-container') || event.target.matches('span.close div') || event.target.matches('svg.feather') || event.target.matches('line')) this.$emit('close-modal');
+				const modalShouldBeClosed = this.cssSelectorsForClosingModal.reduce((modalShouldBeClosed, selector) => {
+					if (event.target.matches(selector)) modalShouldBeClosed = true;
+					return modalShouldBeClosed;
+				}, false);
+				if (modalShouldBeClosed) this.$emit('close-modal');
 			}
 		},
-		mounted () {
-			if (!this.messageName) {
+		async mounted () {
+			try {
+				const data = await this.messageFetcher(this.messageName);
+				if (data.length < 1) this.$emit('close-model');
+				this.helpMessageHTML = data.trim();
+			} catch {
 				this.$emit('close-modal');
-			} else {
-				getContextualHelpMessageHTML(this.messageName, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						if (data.length < 1) this.$emit('close-modal');
-						this.helpMessageHTML = data.trim();
-					}
-				});
 			}
 		}
 	};

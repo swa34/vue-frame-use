@@ -1,12 +1,10 @@
 /* global caesCache */
 
-import {
-	getAssociationReportType
-	// getReportTypes
-} from '@/modules/caesdb';
+import { getAssociationReportType } from '@/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Type Associations',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_ASSOCIATION_REPORT_TYPE',
 	criteria: {
 		string: 'criteria_ID_eq'
@@ -18,8 +16,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				database: 'GACOUNTS3',
-				table: 'REPORT',
 				foreignKey: 'ID',
 				foreignLabel: 'TITLE',
 				values: []
@@ -30,7 +26,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getReportTypes,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.gc3.reportType

@@ -115,19 +115,21 @@
 	/* global activeUserID */
 	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
 	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
+	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
 		getAssociationSubReportField,
 		getAssociationSubReportRole,
 		getContactTypes,
-		getCriteriaStructure,
 		getPlannedPrograms,
 		getStatePlannedPrograms,
 		getSubReport,
 		getSubReportContact,
-		getSubReportPurposeAchievements,
-		logError
-	} from '@/modules/caesdb';
+		getSubReportPurposeAchievements
+	} from '@/modules/caesdb/gacounts3';
 	import { filter } from '@/modules/criteriaUtils';
 	import { url } from '@/modules/utilities';
 
@@ -284,13 +286,13 @@
 			this.importReportData();
 			this.populateContactsRecords();
 			this.populateOutcomeRecord();
-			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
 				if (err) logError(err);
 				if (data) {
 					this.criteriaStructureTemplates.associationReportTypeContactType = data;
 				}
 			});
-			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
 				if (err) logError(err);
 				if (data) {
 					this.criteriaStructureTemplates.associationReportTypeRole = data;
@@ -308,7 +310,7 @@
 					this.unfilteredRoleTypes = data;
 				}
 			});
-			getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
+			getCriteriaStructure('GACOUNTS3', 'FPW_PLANNED_PROGRAM', (err, data) => {
 				if (err) logError(err);
 				if (data) {
 					let critStruct = data;
@@ -331,7 +333,7 @@
 			const fetchExistingData = () => {
 				const fetchSubReportCriteriaStructure = (callback) => {
 					console.log('fetching subreport crit struct');
-					getCriteriaStructure('GC3_SUB_REPORT', (err, data) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT', (err, data) => {
 						if (err) logError(err);
 						if (data) {
 							this.criteriaStructureTemplates.subReport = data;
@@ -373,7 +375,7 @@
 
 				const fetchRoles = () => {
 					console.log('fetch subreport roles');
-					getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
 						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
@@ -393,7 +395,7 @@
 
 				const fetchContacts = () => {
 					console.log('fetching contacts');
-					getCriteriaStructure('GC3_SUB_REPORT_CONTACT', (err, data) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_CONTACT', (err, data) => {
 						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
@@ -414,7 +416,7 @@
 
 				const fetchSupplementalData = () => {
 					console.log('fetching supplemental data');
-					getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
 						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
@@ -435,7 +437,7 @@
 
 				const fetchOutcomes = () => {
 					console.log('fetching outcomes');
-					getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
 						if (err) logError(err);
 						if (data) {
 							const critStruct = data;
