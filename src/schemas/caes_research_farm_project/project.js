@@ -88,7 +88,7 @@ const schema = {
 		},
 		{
 			columnName: 'PI_PERSONNEL_ID',
-			prettyName: 'Principle Investigator',
+			prettyName: 'CAES Principle Investigator',
 			type: 'int',
 			constraint: {
 				values: caesCache.data.crfp.principleInvestigators,
@@ -103,7 +103,7 @@ const schema = {
 		},
 		{
 			columnName: 'PI_FIRST_NAME',
-			prettyName: 'Principle Investigator First Name',
+			prettyName: 'First Name',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -117,7 +117,7 @@ const schema = {
 		},
 		{
 			columnName: 'PI_MIDDLE_NAME',
-			prettyName: 'Principle Investigator Middle Name',
+			prettyName: 'Middle Name',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -131,7 +131,7 @@ const schema = {
 		},
 		{
 			columnName: 'PI_LAST_NAME',
-			prettyName: 'Principle Investigator Last Name',
+			prettyName: 'Last Name',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -141,11 +141,12 @@ const schema = {
 				section: 'General Information',
 				order: 1
 			},
-			customClasses: [ 'inline' ]
+			customClasses: [ 'inline' ],
+			breakAfter: true
 		},
 		{
 			columnName: 'PI_EMAIL',
-			prettyName: 'Principle Investigator Email',
+			prettyName: 'Email Address',
 			type: 'nvarchar',
 			inputType: 'email',
 			depends: {
@@ -155,11 +156,12 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_PHONE',
-			prettyName: 'Principle Investigator Phone Number',
+			prettyName: 'Phone Number',
 			type: 'nvarchar',
 			inputType: 'tel',
 			depends: {
@@ -169,11 +171,13 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline'],
+			breakAfter: true
 		},
 		{
 			columnName: 'PI_ADDRESS_1',
-			prettyName: 'Principle Investigator Address',
+			prettyName: 'Address',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -182,11 +186,12 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_ADDRESS_2',
-			prettyName: 'Principle Investigator Address (Cont.)',
+			prettyName: 'Address (Cont.)',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -195,11 +200,12 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_CITY',
-			prettyName: 'Principle Investigator City',
+			prettyName: 'City',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -208,11 +214,12 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_STATE',
-			prettyName: 'Principle Investigator State',
+			prettyName: 'State',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -221,11 +228,12 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_ZIPCODE',
-			prettyName: 'Principle Investigator ZIP Code',
+			prettyName: 'ZIP Code',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -234,11 +242,12 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_DEPARTMENT',
-			prettyName: 'Principle Investigator Department Name',
+			prettyName: 'Department Name',
 			type: 'nvarchar',
 			depends: {
 				column: 'PI_PERSONNEL_ID',
@@ -251,7 +260,7 @@ const schema = {
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_PERSONNEL_ID',
-			prettyName: 'Secondary Contact',
+			prettyName: 'CAES Secondary Contact',
 			type: 'int',
 			constraint: {
 				values: caesCache.data.crfp.secondaryContacts,
@@ -266,135 +275,107 @@ const schema = {
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_FIRST_NAME',
-			prettyName: 'Secondary Contact First Name',
+			prettyName: 'First Name',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_MIDDLE_NAME',
-			prettyName: 'Secondary Contact Middle Name',
+			prettyName: 'Middle Name',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_LAST_NAME',
-			prettyName: 'Secondary Contact Last Name',
+			prettyName: 'Last Name',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline'],
+			breakAfter: true
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_EMAIL',
-			prettyName: 'Secondary Contact Email',
+			prettyName: 'Email Address',
 			type: 'nvarchar',
 			inputType: 'email',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_PHONE',
-			prettyName: 'Secondary Contact Phone Number',
+			prettyName: 'Phone Number',
 			type: 'nvarchar',
 			inputType: 'tel',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline'],
+			breakAfter: true
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_ADDRESS_1',
-			prettyName: 'Secondary Contact Address',
+			prettyName: 'Address',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_ADDRESS_2',
-			prettyName: 'Secondary Contact Address (Cont.)',
+			prettyName: 'Address (Cont.)',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_CITY',
-			prettyName: 'Secondary Contact City',
+			prettyName: 'City',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_STATE',
-			prettyName: 'Secondary Contact State',
+			prettyName: 'State',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_ZIPCODE',
-			prettyName: 'Secondary Contact ZIP Code',
+			prettyName: 'ZIP Code',
 			type: 'nvarchar',
-			depends: {
-				column: 'SECONDARY_CONTACT_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'COMMODITY_ID',
@@ -426,30 +407,33 @@ const schema = {
 		},
 		{
 			columnName: 'IS_RESEARCH',
-			prettyName: 'Pertains to Research',
+			prettyName: 'Research',
 			type: 'bit',
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'IS_EXTENSION',
-			prettyName: 'Pertains to Extension',
+			prettyName: 'Extension',
 			type: 'bit',
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'IS_TEACHING',
-			prettyName: 'Pertains to Teaching',
+			prettyName: 'Teaching',
 			type: 'bit',
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'RATIONALE',
@@ -512,21 +496,23 @@ const schema = {
 		},
 		{
 			columnName: 'INVOLVES_PLANTS',
-			prettyName: 'Project involves plants',
+			prettyName: 'Plants',
 			type: 'bit',
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'INVOLVES_ANIMALS',
-			prettyName: 'Project involves animals',
+			prettyName: 'Animals',
 			type: 'bit',
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SAFETY_REQUIREMENTS',
@@ -550,6 +536,7 @@ const schema = {
 		{
 			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
 			prettyName: 'Financial Support Available for Project',
+			description: 'Please enter the US dollar amount of funding available for this project.',
 			type: 'int',
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
@@ -797,7 +784,63 @@ const schema = {
 	sections: [
 		{
 			title: 'General Information',
-			order: 1
+			order: 1,
+			fieldsets: [
+				{
+					title: 'Dates',
+					columns: [
+						'START_DATE',
+						'END_DATE'
+					]
+				},
+				{
+					title: 'Non-CAES Principle Investigator',
+					columns: [
+						'PI_FIRST_NAME',
+						'PI_MIDDLE_NAME',
+						'PI_LAST_NAME',
+						'PI_EMAIL',
+						'PI_PHONE',
+						'PI_ADDRESS_1',
+						'PI_ADDRESS_2',
+						'PI_CITY',
+						'PI_STATE',
+						'PI_ZIPCODE',
+						'PI_DEPARTMENT'
+					],
+					depends: {
+						column: 'PI_PERSONNEL_ID',
+						test: nullTest
+					}
+				},
+				{
+					title: 'Non-CAES Secondary Contact',
+					columns: [
+						'SECONDARY_CONTACT_FIRST_NAME',
+						'SECONDARY_CONTACT_MIDDLE_NAME',
+						'SECONDARY_CONTACT_LAST_NAME',
+						'SECONDARY_CONTACT_EMAIL',
+						'SECONDARY_CONTACT_PHONE',
+						'SECONDARY_CONTACT_ADDRESS_1',
+						'SECONDARY_CONTACT_ADDRESS_2',
+						'SECONDARY_CONTACT_CITY',
+						'SECONDARY_CONTACT_STATE',
+						'SECONDARY_CONTACT_ZIPCODE'
+					],
+					depends: {
+						column: 'SECONDARY_CONTACT_PERSONNEL_ID',
+						test: nullTest
+					}
+				},
+				{
+					title: 'Areas to Which the Project Pertains',
+					columns: [
+						'IS_RESEARCH',
+						'IS_EXTENSION',
+						'IS_TEACHING'
+					]
+				}
+			]
 		},
 		{
 			title: 'Summary of Project',
@@ -805,7 +848,16 @@ const schema = {
 		},
 		{
 			title: 'Scientist and Station Responsibilities',
-			order: 3
+			order: 3,
+			fieldsets: [
+				{
+					title: 'Project Involves Plants/Animals',
+					columns: [
+						'INVOLVES_PLANTS',
+						'INVOLVES_ANIMALS'
+					]
+				}
+			]
 		},
 		{
 			title: 'Additional Responsibilities and Funding',

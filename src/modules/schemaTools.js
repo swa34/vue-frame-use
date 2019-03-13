@@ -80,11 +80,57 @@ const getUnsortedSections = schema => {
 						data: column
 					});
 				} else {
-					sections[sectionTitleMap.indexOf(column.grouping.section)].areas.push({
-						type: 'column',
-						order: column.grouping.order || -1,
-						data: column
-					});
+					let section = sections[sectionTitleMap.indexOf(column.grouping.section)];
+					if (section.fieldsets) {
+						// Check if column belongs to a fieldset in its section
+						let sectionBelongsToFieldset = false;
+						section.fieldsets.forEach(fieldset => {
+							if (fieldset.columns && fieldset.columns.indexOf(column.columnName) !== -1) {
+								sectionBelongsToFieldset = true;
+								const indexOfExistingArea = section.areas.map(a => a.data.title).indexOf(fieldset.title);
+								if (indexOfExistingArea === -1) {
+									// If the fieldset has not already been added as an area, we
+									// need to make a new one
+									const area = {
+										type: 'fieldset',
+										data: {
+											...fieldset,
+											fields: [column]
+										}
+									};
+									if (column.breakAfter) {
+										area.data.fields.push({
+											columnName: Math.random().toString(),
+											isFlexBreak: true
+										});
+									}
+									section.areas.push(area);
+								} else {
+									// It's already added, so we just need to add the column
+									section.areas[indexOfExistingArea].data.fields.push(column);
+									if (column.breakAfter) {
+										section.areas[indexOfExistingArea].data.fields.push({
+											columnName: Math.random().toString(),
+											isFlexBreak: true
+										});
+									}
+								}
+							}
+						});
+						if (!sectionBelongsToFieldset) {
+							sections[sectionTitleMap.indexOf(column.grouping.section)].areas.push({
+								type: 'column',
+								order: column.grouping.order || -1,
+								data: column
+							});
+						}
+					} else {
+						sections[sectionTitleMap.indexOf(column.grouping.section)].areas.push({
+							type: 'column',
+							order: column.grouping.order || -1,
+							data: column
+						});
+					}
 				}
 			});
 		}

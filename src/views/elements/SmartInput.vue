@@ -1,13 +1,19 @@
 <template lang="html">
 	<div>
-		<label>
+		<label :class="fieldType === 'checkbox' && isInsideFieldset ? 'flex' : ''">
 			<legend v-if="displayLabel">
-				<h3>
+				<h3 v-if="!isInsideFieldset">
 					{{ fieldName }}
 					<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
 						<HelpCircleIcon />
 					</a>
 				</h3>
+				<h4 v-else>
+					{{ fieldName }}
+					<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
+						<HelpCircleIcon />
+					</a>
+				</h4>
 				<p v-if="field.description">
 					{{ field.description }}
 				</p>
@@ -59,13 +65,16 @@
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
-				min="0"
+				:min="field.min || 0"
+				:max="field.max"
+				:step="field.step"
 				@input="$emit('input', $event.target.value)"
 			/>
 			<input
 				v-else-if="fieldType === 'checkbox'"
 				type="checkbox"
 				:value="value"
+				:checked="value"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
@@ -110,7 +119,6 @@
 			FuzzySelect,
 			HelpCircleIcon
 		},
-		data () { return { dependentValue: null }; },
 		props: {
 			displayLabel: {
 				type: Boolean,
@@ -119,6 +127,10 @@
 			field: {
 				type: Object,
 				required: true
+			},
+			isInsideFieldset: {
+				type: Boolean,
+				default: false
 			},
 			value: {
 				default: null,
@@ -129,6 +141,7 @@
 				]
 			}
 		},
+		data () { return { dependentValue: null }; },
 		computed: {
 			dependentColumnValue () {
 				if (!this.field.depends || !this.field.depends.column) return null;
@@ -137,15 +150,27 @@
 			fieldName () { return this.field.prettyName || getPrettyColumnName(this.field.columnName); },
 			fieldType () { return this.field.inputType || sqlToHtml(this.field); }
 		},
-		methods: {
-			async updateDependentValue () {
-				if (this.field.getDependentValue) this.dependentValue = await this.field.getDependentValue(this.$store);
-			}
-		},
 		watch: {
 			dependentColumnValue () { this.updateDependentValue(); },
 			dependentValue (newVal) { this.$emit('input', newVal); }
 		},
-		mounted () { this.updateDependentValue(); }
+		mounted () { this.updateDependentValue(); },
+		methods: {
+			async updateDependentValue () {
+				if (this.field.getDependentValue) this.dependentValue = await this.field.getDependentValue(this.$store);
+			}
+		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	label {
+		&.flex {
+			display: flex;
+			flex-direction: column;
+		}
+		legend h4 { margin: 0; }
+	}
+	label legend h4 { margin: 0; }
+	input[type="number"] { width: auto; }
+</style>

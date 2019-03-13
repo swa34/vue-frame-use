@@ -163,6 +163,34 @@
 										@show-help="showHelp"
 									/>
 								</div>
+								<fieldset v-else-if="area.type === 'fieldset' && dependencyMet(area.data)">
+									<legend>
+										<h3>
+											{{ area.data.title }}
+										</h3>
+									</legend>
+									<div
+										v-for="field in area.data.fields"
+										:key="field.columnName"
+										:class="field.customClasses ? field.customClasses.join(' ') : ''"
+									>
+										<div v-if="field.isFlexBreak" class="flex-break"></div>
+										<SmartInput
+											v-else-if="mode === 'edit' && field.type === 'int'"
+											v-model.number="record[field.columnName]"
+											:field="field"
+											:isInsideFieldset="true"
+											@show-help="showHelp(field)"
+										/>
+										<SmartInput
+											v-else-if="mode === 'edit'"
+											v-model="record[field.columnName]"
+											:field="field"
+											:isInsideFieldset="true"
+											@show-help="showHelp(field)"
+										/>
+									</div>
+								</fieldset>
 							</transition>
 						</div>
 					</div>
@@ -659,15 +687,16 @@
 </script>
 
 <style lang="scss">
-	div.flex-section {
+	fieldset {
 		display: flex;
 		flex-wrap: wrap;
-		div.area {
+		div {
 			flex-basis: 100%;
 			&.inline {
 				flex-basis: auto;
-				padding-right: 1rem;
+				margin-right: .5rem;
 			}
+			label legend h3 { font-size: .75rem; }
 		}
 	}
 	div.submit {
