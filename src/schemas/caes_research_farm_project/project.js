@@ -43,6 +43,16 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'ORIGINATOR_ID',
+			type: 'int',
+			immutable: true,
+			automated: true,
+			grouping: {
+				section: 'General Information',
+				order: 1
+			}
+		},
+		{
 			columnName: 'TITLE',
 			type: 'nvarchar',
 			required: true,
@@ -721,15 +731,6 @@ const schema = {
 		{
 			columnName: 'STATUS_ID',
 			type: 'int',
-			automated: true,
-			grouping: {
-				section: 'Routing and Approval',
-				order: 1
-			}
-		},
-		{
-			columnName: 'IS_SUBMITTED',
-			type: 'bit',
 			automated: true,
 			grouping: {
 				section: 'Routing and Approval',

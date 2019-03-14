@@ -1,6 +1,9 @@
 <template lang="html">
 	<div>
-		<DetailMain :schema="schema" mode="edit" />
+		<DetailMain
+			:schema="schema"
+			mode="edit"
+		/>
 	</div>
 </template>
 
@@ -25,7 +28,18 @@
 			};
 		},
 		computed: {
-			...getComputed(schema)
+			...getComputed(schema),
+			identifier () {
+				const key = 'ID';
+				const duplicate = url.getParam('duplicateID') !== null;
+				const value = duplicate ? url.getParam('duplicateID') : url.getParam('PK_ID') || url.getParam('pk_id');
+
+				return {
+					key,
+					duplicate,
+					value
+				};
+			}
 		},
 		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
