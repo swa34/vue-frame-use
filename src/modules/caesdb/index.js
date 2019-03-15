@@ -121,6 +121,18 @@ export const makeGetRequest = (url, callback) => {
 		});
 };
 
+export const makeAsyncPostRequest = async (url, dataToSend, isCriteriaStructure = true) => {
+	window.pendingRequests ? ++window.pendingRequest : window.pendingRequests = 1;
+	try {
+		const response = await request.post(url).send(isCriteriaStructure ? jsToCf(dataToSend) : dataToSend);
+		--window.pendingRequests;
+		return response.body;
+	} catch (err) {
+		--window.pendingRequests;
+		logError(err);
+	}
+};
+
 export const makePostRequest = (url, dataToSend, callback, isCriteriaStructure = true) => {
 	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
 	request.post(url)

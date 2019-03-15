@@ -341,7 +341,11 @@
 					let columns = [];
 					this.schema.sections.forEach((section) => {
 						section.areas.forEach((area) => {
-							if (area.type === 'column') columns.push(area.data);
+							if (area.type === 'column') {
+								columns.push(area.data);
+							} else if (area.type === 'fieldset') {
+								area.data.fields.forEach(column => { columns.push(column); });
+							}
 						});
 					});
 					return columns;
@@ -537,7 +541,17 @@
 					if (column.automated) return false;
 					return true;
 				} else {
-					return column.depends.test(this.record[column.depends.column]);
+					if (column.depends.column) {
+						if (typeof column.depends.column === 'string') {
+							return column.depends.test(this.record[column.depends.column]);
+						} else if (Array.isArray(column.depends.column)) {
+							return column.depends.test(column.depends.column.map(column => {
+								return this.record[column];
+							}));
+						}
+					} else {
+						return column.depends.test();
+					}
 				}
 			},
 			// A function to determine if an association's dependency has been met

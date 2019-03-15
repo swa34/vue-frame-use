@@ -3,7 +3,11 @@ import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/Su
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
 import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
 import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
-import { getDepartmentHeadCollegeId } from '@/modules/caesdb/caes_research_farm_project';
+import usStates from '@/modules/data/united-states';
+import {
+	getDepartmentHeadCollegeId,
+	getProject
+} from '@/modules/caesdb/caes_research_farm_project';
 import { logError } from '@/modules/caesdb';
 
 const nullTest = val => val === null || val === '';
@@ -31,6 +35,12 @@ const getResearchFarmDependentValueFn = key => {
 
 const schema = {
 	title: 'Project',
+	databaseName: 'CAES_RESEARCH_FARM_PROJECT',
+	tablePrefix: 'CRFP_PROJECT',
+	criteria: {
+		string: 'criteria_ID_eq'
+	},
+	fetchExisting: getProject,
 	columns: [
 		{
 			columnName: 'ID',
@@ -211,7 +221,8 @@ const schema = {
 				section: 'General Information',
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ['inline'],
+			breakAfter: true
 		},
 		{
 			columnName: 'PI_CITY',
@@ -239,7 +250,13 @@ const schema = {
 				section: 'General Information',
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ['inline'],
+			constraint: {
+				values: usStates,
+				foreignKey: 'abbreviation',
+				foreignLabel: 'name'
+			},
+			defaultValue: "GA"
 		},
 		{
 			columnName: 'PI_ZIPCODE',
@@ -355,7 +372,8 @@ const schema = {
 				section: 'General Information',
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ['inline'],
+			breakAfter: true
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_CITY',
@@ -375,7 +393,13 @@ const schema = {
 				section: 'General Information',
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ['inline'],
+			constraint: {
+				values: usStates,
+				foreignKey: 'abbreviation',
+				foreignLabel: 'name'
+			},
+			defaultValue: "GA"
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_ZIPCODE',
@@ -674,8 +698,17 @@ const schema = {
 				order: 1
 			},
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('FINAL_SITE_APPROVER_PERSONNEL_ID')
+				column: ['STATUS_ID', 'FINAL_SITE_APPROVER_PERSONNEL_ID'],
+				test (vals) {
+					if (vals.length < 2) return false;
+					const statusId = vals[0];
+					const approverId = vals[1];
+					if (activeUserId !== approverId) return false;
+					const statusIndex = caesCache.data.crfp.status.map(s => s.ID).indexOf(statusId);
+					if (statusIndex === -1) return false;
+					if (caesCache.data.crfp.status[statusIndex].NAME !== 'Pending Final Site Approver Approval') return false;
+					return true;
+				}
 			}
 		},
 		{

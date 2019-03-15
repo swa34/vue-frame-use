@@ -1,9 +1,14 @@
 import request from 'superagent';
-import { logError } from '@/modules/caesdb';
+import {
+	generateUrl,
+	logError,
+	makeAsyncPostRequest
+} from '@/modules/caesdb';
+
+const apiPrefix = '/rest/caesresearchfarmproject/';
 
 export const getDepartmentHeadCollegeId = async personnelId => {
 	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
-	const apiPrefix = '/rest/caesresearchfarmproject/';
 	if (!personnelId) {
 		logError(new Error('Cannot get department head: No personnel ID specified.'));
 		return;
@@ -18,5 +23,15 @@ export const getDepartmentHeadCollegeId = async personnelId => {
 	} catch (err) {
 		--window.pendingRequests;
 		logError(err);
+	}
+};
+
+export const getProject = async (criteriaStructure, callback) => {
+	try {
+		const url = generateUrl('project', apiPrefix);
+		const data = await makeAsyncPostRequest(url, criteriaStructure);
+		callback(null, data);
+	} catch (err) {
+		callback(err);
 	}
 };

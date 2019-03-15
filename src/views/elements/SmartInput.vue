@@ -154,8 +154,14 @@
 			dependentColumnValue () { this.updateDependentValue(); },
 			dependentValue (newVal) { this.$emit('input', newVal); }
 		},
-		mounted () { this.updateDependentValue(); },
+		mounted () {
+			if (this.field.defaultValue) this.setDefaultValue();
+			this.updateDependentValue();
+		},
 		methods: {
+			setDefaultValue () {
+				this.$emit('input', this.field.defaultValue);
+			},
 			async updateDependentValue () {
 				if (this.field.getDependentValue) this.dependentValue = await this.field.getDependentValue(this.$store);
 			}
