@@ -1,4 +1,5 @@
 /* global caesCache */
+import RoutingAndApproval from '@/views/custom/caes_research_farm_project/RoutingAndApproval';
 import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
 import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
@@ -12,6 +13,12 @@ import { logError } from '@/modules/caesdb';
 
 const nullTest = val => val === null || val === '';
 const notNullTest = val => !nullTest(val);
+
+const genericCommentFieldDescription = `
+	Please indicate whether this project should be approved or not.  Any
+	feedback you have entered in the comments field will be sent to the
+	PI / project originator.
+`.trim();
 
 const getResearchFarmDependencyTest = key => {
 	return (val) => {
@@ -600,6 +607,7 @@ const schema = {
 			columnName: 'SUPERINTENDENT_COMMENTS',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			description: genericCommentFieldDescription,
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
@@ -607,6 +615,12 @@ const schema = {
 			depends: {
 				column: 'PARTICIPATING_RESEARCH_FARM_ID',
 				test: getResearchFarmDependencyTest('SUPERINTENDENT_PERSONNEL_ID')
+			},
+			extra: {
+				dateColumn: 'SUPERINTENDENT_APPROVAL_DATE',
+				needsApprovalButtons: true,
+				personnelColumn: 'SUPERINTENDENT_PERSONNEL_ID',
+				status: 'Pending Superintendent Approval'
 			}
 		},
 		{
@@ -652,6 +666,7 @@ const schema = {
 			columnName: 'DEPARTMENT_HEAD_COMMENTS',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			description: genericCommentFieldDescription,
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
@@ -659,6 +674,12 @@ const schema = {
 			depends: {
 				column: 'PI_PERSONNEL_ID',
 				test: notNullTest
+			},
+			extra: {
+				dateColumn: 'DEPARTMENT_HEAD_APPROVAL_DATE',
+				needsApprovalButtons: true,
+				personnelColumn: 'DEPARTMENT_HEAD_PERSONNEL_ID',
+				status: 'Pending Department Head Approval'
 			}
 		},
 		{
@@ -693,22 +714,20 @@ const schema = {
 			columnName: 'FINAL_SITE_APPROVER_COMMENTS',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			description: genericCommentFieldDescription,
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
 			},
 			depends: {
-				column: ['STATUS_ID', 'FINAL_SITE_APPROVER_PERSONNEL_ID'],
-				test (vals) {
-					if (vals.length < 2) return false;
-					const statusId = vals[0];
-					const approverId = vals[1];
-					if (activeUserId !== approverId) return false;
-					const statusIndex = caesCache.data.crfp.status.map(s => s.ID).indexOf(statusId);
-					if (statusIndex === -1) return false;
-					if (caesCache.data.crfp.status[statusIndex].NAME !== 'Pending Final Site Approver Approval') return false;
-					return true;
-				}
+				column: 'PARTICIPATING_RESEARCH_FARM_ID',
+				test: getResearchFarmDependencyTest('FINAL_SITE_APPROVER_PERSONNEL_ID')
+			},
+			extra: {
+				dateColumn: 'FINAL_SITE_APPROVER_APPROVAL_DATE',
+				needsApprovalButtons: true,
+				personnelColumn: 'FINAL_SITE_APPROVER_PERSONNEL_ID',
+				status: 'Pending Final Site Approver Approval'
 			}
 		},
 		{
@@ -743,6 +762,7 @@ const schema = {
 			columnName: 'OFFICE_OF_RESEARCH_COMMENTS',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			description: genericCommentFieldDescription,
 			grouping: {
 				section: 'Routing and Approval',
 				order: 1
@@ -750,6 +770,12 @@ const schema = {
 			depends: {
 				column: 'PARTICIPATING_RESEARCH_FARM_ID',
 				test: getResearchFarmDependencyTest('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID')
+			},
+			extra: {
+				dateColumn: 'OFFICE_OF_RESEARCH_APPROVAL_DATE',
+				needsApprovalButtons: true,
+				personnelColumn: 'OFFICE_OF_RESEARCH_PERSONNEL_ID',
+				status: 'Pending Office of Associate Dean of Research Approval'
 			}
 		},
 		{
@@ -902,7 +928,8 @@ const schema = {
 			order: 5,
 			depends: {
 				columns: ['PARTICIPATING_RESEARCH_FARM_ID']
-			}
+			},
+			customComponent: RoutingAndApproval
 		}
 	]
 };
