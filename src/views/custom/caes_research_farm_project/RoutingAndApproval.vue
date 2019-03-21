@@ -6,6 +6,7 @@
 					<SmartInput
 						v-model="record[column.columnName]"
 						:field="column"
+						:fetched="record._fetched"
 					/>
 					<div v-if="column.extra && column.extra.needsApprovalButtons" class="button-container">
 						<button type="button" class="approve" @click="approveProject">
@@ -121,8 +122,8 @@
 		display: flex;
 		button {
 			margin-right: .5rem;
-			&.approve { background-color: green; }
-			&.needs-review { background-color: red; }
+			&.approve { background-color: #406242; }
+			&.needs-review { background-color: #6c3129; }
 		}
 	}
 </style>

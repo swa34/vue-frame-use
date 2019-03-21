@@ -132,6 +132,7 @@
 								v-model="importantDate[column.columnName]"
 								:displayLabel="false"
 								:field="column"
+								:fetched="fetched"
 							/>
 						</td>
 						<td>
@@ -146,6 +147,7 @@
 								v-model="newImportantDate[column.columnName]"
 								:displayLabel="false"
 								:field="column"
+								:fetched="fetched"
 							/>
 						</td>
 						<td>
@@ -206,6 +208,7 @@
 		},
 		computed: {
 			columnsToBeDisplayed () { return importantDateSchema.columns.filter(c => !c.automated); },
+			fetched () { return this.$store.state.supplementalAnimalInformation.fetched; },
 			newImportantDateIsValid () {
 				return importantDateSchema.columns.reduce((isValid, column) => {
 					let val = this.newImportantDate[column.columnName];

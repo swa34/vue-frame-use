@@ -43,12 +43,14 @@
 										v-if="mode === 'edit' && area.data.type === 'int'"
 										v-model.number="record[area.data.columnName]"
 										:field="area.data"
+										:fetched="record._fetched"
 										@show-help="showHelp(area.data)"
 									/>
 									<SmartInput
 										v-else-if="mode === 'edit'"
 										v-model="record[area.data.columnName]"
 										:field="area.data"
+										:fetched="record._fetched"
 										@show-help="showHelp(area.data)"
 									/>
 									<div v-else>
@@ -180,6 +182,7 @@
 											v-model.number="record[field.columnName]"
 											:field="field"
 											:isInsideFieldset="true"
+											:fetched="record._fetched"
 											@show-help="showHelp(field)"
 										/>
 										<SmartInput
@@ -187,6 +190,7 @@
 											v-model="record[field.columnName]"
 											:field="field"
 											:isInsideFieldset="true"
+											:fetched="record._fetched"
 											@show-help="showHelp(field)"
 										/>
 									</div>
@@ -215,7 +219,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<div v-if="mode === 'edit'" class="submit">
+		<div v-if="mode === 'edit' && useDefaultSubmit" class="submit">
 			<hr />
 			<p>
 				<strong>
@@ -323,6 +327,11 @@
 			'userIsOwner': {
 				type: Boolean,
 				default: false
+			},
+			// Show default submit button/verbage?
+			useDefaultSubmit: {
+				type: Boolean,
+				default: true
 			}
 		},
 		data () {
@@ -606,6 +615,7 @@
 									}
 								}
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.record);
+								this.record._fetched = true;
 							}
 						});
 					}

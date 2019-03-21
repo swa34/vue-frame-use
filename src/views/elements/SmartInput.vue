@@ -124,6 +124,11 @@
 				type: Boolean,
 				default: true
 			},
+			fetched: {
+				type: Boolean,
+				required: true,
+				default: false
+			},
 			field: {
 				type: Object,
 				required: true
@@ -163,7 +168,7 @@
 				this.$emit('input', this.field.defaultValue);
 			},
 			async updateDependentValue () {
-				if (this.field.getDependentValue) this.dependentValue = await this.field.getDependentValue(this.$store);
+				if (!this.fetched && this.field.getDependentValue) this.dependentValue = await this.field.getDependentValue(this.$store);
 			}
 		}
 	};

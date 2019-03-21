@@ -71,7 +71,9 @@ const getStoreConfig = (schema, isNew = false) => {
 			},
 			[schemaCamelTitle]: {
 				namespaced: true,
-				state: {}
+				state: {
+					_fetched: false
+				}
 			}
 		}
 	};

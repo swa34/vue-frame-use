@@ -7,6 +7,8 @@ import {
 
 const apiPrefix = '/rest/caesresearchfarmproject/';
 
+const failureMessage = { success: false };
+
 export const getDepartmentHeadCollegeId = async personnelId => {
 	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
 	if (!personnelId) {
@@ -33,5 +35,27 @@ export const getProject = async (criteriaStructure, callback) => {
 		callback(null, data);
 	} catch (err) {
 		callback(err);
+	}
+};
+
+export const saveProject = async project => {
+	try {
+		const url = generateUrl('saveProject', apiPrefix);
+		const data = await makeAsyncPostRequest(url, project, false);
+		return data;
+	} catch (err) {
+		logError(err);
+		return failureMessage;
+	}
+};
+
+export const addComment = async (projectId, statusId, comment = '') => {
+	try {
+		const url = generateUrl('addComment', apiPrefix);
+		const data = await makeAsyncPostRequest(url, { projectId, statusId, comment }, false);
+		return data;
+	} catch (err) {
+		logError(err);
+		return failureMessage;
 	}
 };
