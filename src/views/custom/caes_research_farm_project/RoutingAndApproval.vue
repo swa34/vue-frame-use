@@ -9,11 +9,14 @@
 						:fetched="record._fetched"
 					/>
 					<div v-if="column.extra && column.extra.needsApprovalButtons" class="button-container">
-						<button type="button" class="approve" @click="approveProject">
+						<button type="button" class="approve" @click="submitComments(column.columnName, record[column.columnName], 'approve')">
 							Approve this Project
 						</button>
-						<button type="button" class="needs-review" @click="submitProjectForReview">
+						<button type="button" class="needs-review" @click="submitComments(column.columnName, record[column.columnName], 'returnForReview')">
 							Project Needs Revision
+						</button>
+						<button type="button" class="reject" @click="submitComments(column.columnName, record[column.columnName], 'reject')">
+							Reject this Project
 						</button>
 					</div>
 				</div>
@@ -31,9 +34,16 @@
 </template>
 
 <script>
+	import alert from '@/modules/applications/caes_research_farm_project/alert';
 	import projectSchema from '@/schemas/caes_research_farm_project/project';
 	import SmartInput from '@/views/elements/SmartInput';
 	import { getPrettyColumnName } from '@/modules/utilities';
+	import {
+		getProjectsNextStatusId,
+		getProjectsRevisionStatusId,
+		statusesIndexedByName
+	} from '@/modules/applications/caes_research_farm_project/status-handling';
+	import { addComment } from '@/modules/caesdb/caes_research_farm_project';
 
 	export default {
 		/* global activeUserId */
@@ -67,9 +77,6 @@
 		},
 		methods: {
 			getPrettyColumnName,
-			approveProject () {
-				console.log('approving project');
-			},
 			columnShouldBeDisplayed (column) {
 				if (!column.depends) return true;
 				if (Array.isArray(column.depends.column)) {
@@ -89,8 +96,24 @@
 				const constraintValue = column.constraint.values[constraintValueIndex];
 				return constraintValue[column.constraint.foreignLabel];
 			},
-			submitProjectForReview () {
-				console.log('yo this is whack');
+			async submitComments (columnName, comment, action) {
+				if (['approve', 'returnForReview', 'reject'].indexOf(action) === -1) {
+					logError('Invalid action for comment submission alert.');
+					return;
+				}
+				if (action === 'approve') {
+					status = getProjectsNextStatusId(this.$store.state.project);
+				} else if (action === 'returnForReview') {
+					status = getProjectsRevisionStatusId(this.$store.state.project);
+				} else if (action === 'reject') {
+					status = statusesIndexedByName['Rejected'];
+				}
+				const response = await addComment(this.$store.state.project.ID, status, columnName, comment);
+				if (response.SUCCESS) {
+					alert.successfulCommentSubmission(this.schema.title.toLowerCase(), response.PROJECT_ID, action);
+				} else {
+					alert.failedCommentSubmission(this.schema.title.toLowerCase(), response.MESSAGES);
+				}
 			},
 			typeToShow (column) {
 				// If it's an ID input, always show the input
@@ -123,7 +146,8 @@
 		button {
 			margin-right: .5rem;
 			&.approve { background-color: #406242; }
-			&.needs-review { background-color: #6c3129; }
+			&.needs-review { background: #f7b538; color: #000; }
+			&.reject { background-color: #6c3129; }
 		}
 	}
 </style>

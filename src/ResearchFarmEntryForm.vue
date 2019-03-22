@@ -52,6 +52,7 @@
 <script>
 	/* global activeUserId */
 	/* global swal */
+	import alert from '@/modules/applications/caes_research_farm_project/alert';
 	import schema from '@/schemas/caes_research_farm_project/project';
 	import DetailMain from '@/views/DetailMain';
 	import DuplicationModal from '@/views/DuplicationModal';
@@ -70,6 +71,11 @@
 		addComment,
 		saveProject
 	} from '@/modules/caesdb/caes_research_farm_project';
+	import {
+		getProjectsNextStatusId,
+		getProjectsRevisionStatusId,
+		statusesIndexedByName
+	} from '@/modules/applications/caes_research_farm_project/status-handling';
 
 	export default {
 		name: 'ResearchFarmEntryForm',
@@ -81,7 +87,8 @@
 			return {
 				duplicationSchema: projectDuplicationSchema,
 				mode: 'view',
-				schema: getSortedSchema(schema)
+				schema: getSortedSchema(schema),
+				statusesIndexedByName
 			};
 		},
 		computed: {
@@ -124,52 +131,7 @@
 			},
 			isDuplicatedProject () { return this.duplicateId !== null && this.duplicateId !== false; },
 			isNewProject () { return url.getParam('new') !== null || url.getParam('NEW') !== null; },
-			projectsNextStatusId () {
-				const currentStatus = this.$store.state.project.STATUS_ID;
-				const statusesIndexedById = caesCache.data.crfp.status.reduce((newIndex, status) => {
-					newIndex[status.ID] = status.NAME;
-					return newIndex;
-				}, {});
-				const stage = {
-					null: 0,
-					undefined: 0,
-					'Saved Without Submission': 0,
-					'Pending PI Review of Department Head Comments': 0,
-				  'Pending PI Review of Superintendent Comments': 0,
-				  'Pending PI Review of Final Site Approver Comments': 0,
-				  'Pending PI Review of Office of Associate Dean of Research Comments': 0,
-					'Pending Superintendent Approval': 1,
-					'Pending Department Head Approval': 2,
-					'Pending Final Site Approver Approval': 3,
-					'Pending Office of Associate Dean of Research Approval': 4,
-					'Approved': 5,
-					'Rejected': 5
-				}[statusesIndexedById[currentStatus]];
-				const statusMap = caesCache.data.crfp.status.reduce((map, status) => {
-					if (stage < 1 && this.SUPERINTENDENT_PERSONNEL_ID !== null) {
-						map[status.ID] = this.statusesIndexedByName['Pending Superintendent Approval'];
-					} else if (stage < 2 && this.DEPARTMENT_HEAD_PERSONNEL_ID !== null) {
-						map[status.ID] = this.statusesIndexedByName['Pending Department Head Approval'];
-					} else if (stage < 3 && this.FINAL_SITE_APPROVER_PERSONNEL_ID !== null) {
-						map[status.ID] = this.statusesIndexedByName['Pending Final Site Approver Approval'];
-					} else if (stage < 4 && this.OFFICE_OF_RESEARCH_PERSONNEL_ID !== null) {
-						map[status.ID] = this.statusesIndexedByName['Pending Office of Associate Dean of Research Approval'];
-					} else if (stage < 5) {
-						map[status.ID] = this.statusesIndexedByName['Approved'];
-					} else {
-						map[status.ID] = -1;
-					}
-					return map;
-				}, {});
-
-				return statusMap[currentStatus];
-			},
-			statusesIndexedByName () {
-				return caesCache.data.crfp.status.reduce((newIndex, status) => {
-					newIndex[status.NAME] = status.ID;
-					return newIndex;
-				}, {});
-			},
+			projectsNextStatusId () { return getProjectsNextStatusId(this.$store.state.project); },
 			userHasEditRights () {
 				if (this.userIsOriginator) return true;
 				if (Boolean(activeUser.IS_ADMINISTRATOR)) return true;
@@ -213,31 +175,9 @@
 				projectBlob.project.STATUS_ID = this.statusesIndexedByName['Rejected'];
 				const response = await saveProject(projectBlob);
 				if (response.SUCCESS) {
-					swal({
-						type: 'success',
-						title: 'Awesome!',
-						text: `You have successfully rejected this ${this.schema.title.toLowerCase()}.`,
-						confirmButtonText: 'OK'
-					}).then((result) => {
-						if (result.value) {
-							// They clicked OK
-							window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${response.PROJECT_ID}`;
-						}
-					});
+					alert.successfulReject(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
-					swal({
-						type: 'error',
-						title: 'Oops!',
-						html: `
-							<p>
-								We were unable to mark this ${this.schema.title.toLowerCase()}
-								as rejected due to the following issues:
-							</p>
-							<div style="text-align: left;">
-								${response.MESSAGES}
-							</div>
-						`.trim()
-					});
+					alert.failedReject(this.schema.title.toLowerCase, response.MESSAGES);
 				}
 			},
 			async saveProjectWithoutSubmitting () {
@@ -253,34 +193,12 @@
 				const response = await saveProject(projectBlob);
 				if (response.SUCCESS) {
 					if (this.isNewProject) {
-						swal({
-							type: 'success',
-							title: 'Awesome!',
-							text: 'Your ' + this.schema.title.toLowerCase() + ' has been saved successfully.',
-							confirmButtonText: 'OK'
-						}).then((result) => {
-							if (result.value) {
-								// They clicked OK
-								window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${response.PROJECT_ID}`;
-							}
-						});
+						alert.successfulSave(this.schema.title.toLowerCase(), response.PROJECT_ID);
 					} else {
-						swal('Awesome!', 'Your changes have been saved successfully.', 'success');
+						alert.successfulChanges();
 					}
 				} else {
-					swal({
-						type: 'error',
-						title: 'Oops!',
-						html: `
-							<p>
-								Your ${(this.isNewProject ? `${this.schema.title.toLowerCase()} was` : 'changes were')}
-								unable to be saved due to the following issues:
-							</p>
-							<div style="text-align: left;">
-								${response.MESSAGES}
-							</div>
-						`.trim()
-					});
+					alert.failedSave(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
 				}
 			},
 			setDocumentTitle () {
@@ -299,85 +217,21 @@
 				projectBlob.project.STATUS_ID = this.projectsNextStatusId;
 				const response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
-				const messages = {
-					success: {
-						title: 'Awesome!',
-						successfulSubmit: {
-							approver: `Your ${this.schema.title.toLowerCase()} has been submitted successfully and moved to the next stage of approval.`,
-							originator: `Your ${this.schema.title.toLowerCase()} has been submitted successfully.`
-						}
-					}
-				};
+
 				if (response.SUCCESS) {
-					swal({
-						type: 'success',
-						title: messages.success.title,
-						text: messages.success.successfulSubmit[submitter],
-						confirmButtonText: 'OK'
-					}).then((result) => {
-						if (result.value) {
-							// They clicked OK
-							window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${response.PROJECT_ID}`;
-						}
-					});
+					alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
 				} else {
-					swal({
-						type: 'error',
-						title: 'Oops!',
-						html: `
-							<p>
-								Your ${(this.isNewProject ? `${this.schema.title.toLowerCase()} was` : 'changes were')}
-								unable to be saved due to the following issues:
-							</p>
-							<div style="text-align: left;">
-								${response.MESSAGES}
-							</div>
-						`.trim()
-					});
+					alert.failedSubmit(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
 				}
 			},
 			async submitProjectForReview () {
 				const projectBlob = this.getPreparedStoreForSubmit();
-				projectBlob.project.STATUS_ID = caesCache.data.crfp.status.map(status => {
-					if (status.NAME === 'Pending Superintendent Approval') {
-						return this.statusesIndexedByName['Pending PI Review of Superintendent Comments'];
-					} else if (status.NAME === 'Pending Department Head Approval') {
-						return this.statusesIndexedByName['Pending PI Review of Department Head Comments'];
-					} else if (status.NAME === 'Pending Final Site Approver Approval') {
-						return this.statusesIndexedByName['Pending PI Review of Final Site Approver Comments'];
-					} else if (status.NAME === 'Pending Office of Associate Dean of Research Approval') {
-						return this.statusesIndexedByName['Pending PI Review of Office of Associate Dean of Research Comments'];
-					} else {
-						return status;
-					}
-				})[caesCache.data.crfp.status.map(s => s.ID).indexOf(projectBlob.project.STATUS_ID)];
+				projectBlob.project.STATUS_ID = getProjectsRevisionStatusId(projectBlob.project);
 				const response = await saveProject(projectBlob);
 				if (response.SUCCESS) {
-					swal({
-						type: 'success',
-						title: 'Awesome!',
-						text: `This ${this.schema.title.toLowerCase()} has been successfully returned to the PI for review.`,
-						confirmButtonText: 'OK'
-					}).then((result) => {
-						if (result.value) {
-							// They clicked OK
-							window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${response.PROJECT_ID}`;
-						}
-					});
+					alert.successfulReturnForReview(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
-					swal({
-						type: 'error',
-						title: 'Oops!',
-						html: `
-							<p>
-								This project was unable to be returned to the PI for review due
-								to the following issues:
-							</p>
-							<div style="text-align: left;">
-								${response.MESSAGES}
-							</div>
-						`.trim()
-					});
+					alert.failedReturnForReview(this.schema.title.toLowerCase(), response.MESSAGES);
 				}
 			},
 			toggleMode () { this.mode === 'edit' ? this.mode = 'view' : this.mode = 'edit'; }
@@ -393,7 +247,9 @@
 			justify-content: center;
 			button {
 				margin-right: .5rem;
-				&.submit-for-approval { background: #406242; }
+				&.submit-for-approval, &.approve { background: #406242; }
+				&.needs-review { background: #f7b538; color: #000; }
+				&.reject { background: #6c3129; }
 			}
 		}
 	}

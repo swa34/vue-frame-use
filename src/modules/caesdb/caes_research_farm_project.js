@@ -49,10 +49,10 @@ export const saveProject = async project => {
 	}
 };
 
-export const addComment = async (projectId, statusId, comment = '') => {
+export const addComment = async (projectId, statusId, columnName, comment = '') => {
 	try {
 		const url = generateUrl('addComment', apiPrefix);
-		const data = await makeAsyncPostRequest(url, { projectId, statusId, comment }, false);
+		const data = await makeAsyncPostRequest(url, { projectId, statusId, columnName, comment }, false);
 		return data;
 	} catch (err) {
 		logError(err);
