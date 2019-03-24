@@ -9,7 +9,11 @@
 			</h3>
 			<p>
 				<label class="checkbox">
-					<input v-model="record.IS_SAFE" type="checkbox" />
+					<input
+						v-model="record.IS_SAFE"
+						type="checkbox"
+						:disabled="mode === 'view'"
+					/>
 					<span>
 						{{ columns.IS_SAFE.prettyName }}
 					</span>
@@ -17,18 +21,34 @@
 			</p>
 			<p>
 				<label class="checkbox">
-					<input v-model="record.MUST_BE_DESTROYED" type="checkbox" />
+					<input
+						v-model="record.MUST_BE_DESTROYED"
+						type="checkbox"
+						:disabled="mode === 'view'"
+					/>
 					<span>
 						{{ columns.MUST_BE_DESTROYED.prettyName }}
 					</span>
 				</label>
 			</p>
-			<p>
-				<label>
-					<h4>{{ columns.FIELD_NAME.prettyName }}</h4>
-					<input v-model="record.FIELD_NAME" type="text" />
-				</label>
-			</p>
+			<div v-if="mode === 'edit'">
+				<p>
+					<label>
+						<h4>{{ columns.FIELD_NAME.prettyName }}</h4>
+						<input v-model="record.FIELD_NAME" type="text" />
+					</label>
+				</p>
+			</div>
+			<div v-else>
+				<p>
+					<h4>
+						{{ columns.FIELD_NAME.prettyName }}
+					</h4>
+					<span>
+						{{ record.FIELD_NAME }}
+					</span>
+				</p>
+			</div>
 		</div>
 		<div>
 			<h3>
@@ -52,10 +72,13 @@
 					<tr v-for="columnGroup in tableGroups" :key="columnGroup.name">
 						<td>{{ columnGroup.textColumn.prettyName }}</td>
 						<td>
-							<textarea v-model="record[columnGroup.textColumn.columnName]"></textarea>
+							<textarea v-if="mode === 'edit'" v-model="record[columnGroup.textColumn.columnName]"></textarea>
+							<p v-else>
+								{{ record[columnGroup.textColumn.columnName] }}
+							</p>
 						</td>
 						<td>
-							<select v-model="record[columnGroup.partyColumn.columnName]">
+							<select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
 								<option
 									v-for="option in responsiblePartyOptions"
 									:key="option.ID"
@@ -64,6 +87,9 @@
 									{{ option.NAME }}
 								</option>
 							</select>
+							<span v-else>
+								{{ getResponsiblePartyNameFromId(record[columnGroup.partyColumn.columnName]) }}
+							</span>
 						</td>
 					</tr>
 				</tbody>
@@ -131,6 +157,15 @@
 				records.push(this.localRecord);
 			} else {
 				this.localRecord = records[0];
+			}
+		},
+		methods: {
+			getResponsiblePartyNameFromId (id) {
+				if (!id) return null;
+				const index = this.responsiblePartyOptions.map(o => o.ID).indexOf(id);
+				console.log(index);
+				if (index === -1) return 'Unknown';
+				return this.responsiblePartyOptions[index].NAME || 'Unknown';
 			}
 		}
 	};

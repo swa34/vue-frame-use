@@ -3,7 +3,7 @@
 		<h3 class="head">
 			Animal Science Projects
 		</h3>
-		<p>
+		<p v-if="mode === 'edit'">
 			NOTE: An Animal Use Protocol (AUP) must be completed for each project
 			involving animals, even if no treatments are applied to the animals and no
 			data are collected from the animals. This would include, for example,
@@ -14,65 +14,91 @@
 			<h3>
 				General Animal Project Info
 			</h3>
-			<p>
-				<label>
-					<h4>AUP Number</h4>
-					<input v-model="record.AUP_NUMBER" type="text" required />
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.NUMBER.prettyName }}</h4>
-					<input v-model="record.NUMBER" type="text" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.DESCRIPTION.prettyName }}</h4>
-					<input v-model="record.DESCRIPTION" type="text" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.SOURCE.prettyName }}</h4>
-					<input v-model="record.SOURCE" type="text" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.FINAL_DISPOSITION.prettyName }}</h4>
-					<input v-model="record.FINAL_DISPOSITION" type="text" />
-				</label>
-			</p>
+			<div v-if="mode === 'edit'">
+				<p>
+					<label>
+						<h4>AUP Number</h4>
+						<input v-model="record.AUP_NUMBER" type="text" required />
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.NUMBER.prettyName }}</h4>
+						<input v-model="record.NUMBER" type="text" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.DESCRIPTION.prettyName }}</h4>
+						<input v-model="record.DESCRIPTION" type="text" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.SOURCE.prettyName }}</h4>
+						<input v-model="record.SOURCE" type="text" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.FINAL_DISPOSITION.prettyName }}</h4>
+						<input v-model="record.FINAL_DISPOSITION" type="text" />
+					</label>
+				</p>
+			</div>
+			<div v-else>
+				<h4>AUP Number</h4>
+				<p>{{ record.AUP_NUMBER }}</p>
+				<h4>{{ columns.NUMBER.prettyName }}</h4>
+				<p>{{ record.NUMBER }}</p>
+				<h4>{{ columns.DESCRIPTION.prettyName }}</h4>
+				<p>{{ record.DESCRIPTION }}</p>
+				<h4>{{ columns.SOURCE.prettyName }}</h4>
+				<p>{{ record.SOURCE }}</p>
+				<h4>{{ columns.FINAL_DISPOSITION.prettyName }}</h4>
+				<p>{{ record.FINAL_DISPOSITION }}</p>
+			</div>
 		</div>
 		<div>
 			<h3>
 				Animal Feeding Information
 			</h3>
-			<p>
-				<label>
-					<h4>{{ columns.FEEDING_REGIME.prettyName }}</h4>
-					<textarea v-model="record.FEEDING_REGIME"></textarea>
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.TOTAL_FEED_AMOUNT.prettyName }}</h4>
-					<input v-model="record.TOTAL_FEED_AMOUNT" type="text" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.FEED_STORAGE_LOCATION.prettyName }}</h4>
-					<input v-model="record.FEED_STORAGE_LOCATION" type="text" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
-					<textarea v-model="record.SPECIAL_NEEDS"></textarea>
-				</label>
-			</p>
+			<div v-if="mode === 'edit'">
+				<p>
+					<label>
+						<h4>{{ columns.FEEDING_REGIME.prettyName }}</h4>
+						<textarea v-model="record.FEEDING_REGIME"></textarea>
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.TOTAL_FEED_AMOUNT.prettyName }}</h4>
+						<input v-model="record.TOTAL_FEED_AMOUNT" type="text" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.FEED_STORAGE_LOCATION.prettyName }}</h4>
+						<input v-model="record.FEED_STORAGE_LOCATION" type="text" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+						<textarea v-model="record.SPECIAL_NEEDS"></textarea>
+					</label>
+				</p>
+			</div>
+			<div v-else>
+				<h4>{{ columns.FEEDING_REGIME.prettyName }}</h4>
+				<p>{{ record.FEEDING_REGIME }}</p>
+				<h4>{{ columns.TOTAL_FEED_AMOUNT.prettyName }}</h4>
+				<p>{{ record.TOTAL_FEED_AMOUNT }}</p>
+				<h4>{{ columns.FEED_STORAGE_LOCATION.prettyName }}</h4>
+				<p>{{ record.FEED_STORAGE_LOCATION }}</p>
+				<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+				<p>{{ record.SPECIAL_NEEDS }}</p>
+			</div>
 		</div>
 		<div>
 			<h3>
@@ -94,10 +120,13 @@
 					<tr v-for="columnGroup in tableGroups" :key="columnGroup.name">
 						<td>{{ columnGroup.textColumn.prettyName || getPrettyColumnName(columnGroup.textColumn.columnName) }}</td>
 						<td>
-							<textarea v-model="record[columnGroup.textColumn.columnName]"></textarea>
+							<textarea v-if="mode === 'edit'" v-model="record[columnGroup.textColumn.columnName]"></textarea>
+							<p v-else>
+								{{ record[columnGroup.textColumn.columnName] }}
+							</p>
 						</td>
 						<td>
-							<select v-model="record[columnGroup.partyColumn.columnName]">
+							<select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
 								<option
 									v-for="option in responsiblePartyOptions"
 									:key="option.ID"
@@ -106,6 +135,9 @@
 									{{ option.NAME }}
 								</option>
 							</select>
+							<span v-else>
+								{{ getResponiblePartyNameFromId(record[columnGroup.partyColumn.columnName]) }}
+							</span>
 						</td>
 					</tr>
 				</tbody>
@@ -122,26 +154,32 @@
 						>
 							{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 						</th>
-						<th>&nbsp;</th>
+						<th v-if="mode === 'edit'">
+							&nbsp;
+						</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr v-for="importantDate in record.importantDates" :key="JSON.stringify(importantDate)">
 						<td v-for="column in columnsToBeDisplayed" :key="column.columnName">
 							<SmartInput
+								v-if="mode === 'edit'"
 								v-model="importantDate[column.columnName]"
 								:displayLabel="false"
 								:field="column"
 								:fetched="fetched"
 							/>
+							<p v-else>
+								{{ importantDate[column.columnName] }}
+							</p>
 						</td>
-						<td>
+						<td v-if="mode === 'edit'">
 							<button class="button" type="button" @click="removeImportantDate(importantDate)">
 								Remove
 							</button>
 						</td>
 					</tr>
-					<tr>
+					<tr v-if="mode === 'edit'">
 						<td v-for="column in columnsToBeDisplayed" :key="column.columnName">
 							<SmartInput
 								v-model="newImportantDate[column.columnName]"
@@ -262,6 +300,12 @@
 				}, {});
 			},
 			getPrettyColumnName,
+			getResponiblePartyNameFromId (id) {
+				if (!id) return null;
+				const index = this.responsiblePartyOptions.map(o => o.ID).indexOf(id);
+				if (index === -1) return 'Unknown';
+				return this.responsiblePartyOptions[index].NAME || 'Unknown';
+			},
 			removeImportantDate (importantDate) {
 				const index = this.record.importantDates.map(d => JSON.stringify(d)).indexOf(JSON.stringify(importantDate));
 				this.record.importantDates.splice(index, 1);

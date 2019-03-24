@@ -193,6 +193,17 @@
 											:fetched="record._fetched"
 											@show-help="showHelp(field)"
 										/>
+										<div v-else>
+											<h3 class="inline">
+												{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
+											</h3>
+											<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
+												{{ getOptionLabel(field.constraint, record[field.columnName]) }}
+											</span>
+											<span v-else>
+												{{ record[field.columnName] }}
+											</span>
+										</div>
 									</div>
 								</fieldset>
 							</transition>
