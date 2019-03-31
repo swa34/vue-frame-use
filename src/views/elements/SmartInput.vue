@@ -83,12 +83,12 @@
 			<input
 				v-else-if="fieldType === 'file'"
 				type="file"
-				:value="value"
+				:files="value"
 				:accepted="field.acceptedTypes ? field.acceptedTypes.join(', ') : false"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
-				@input="$emit('input', $event.target.value)"
+				@change="$emit('input', $event.target.files)"
 			/>
 			<input
 				v-else
@@ -140,6 +140,7 @@
 			value: {
 				default: null,
 				type: [
+					FileList,
 					Number,
 					String,
 					Boolean

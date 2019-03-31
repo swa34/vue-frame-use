@@ -39,9 +39,14 @@ export const getProject = async (criteriaStructure, callback) => {
 };
 
 export const saveProject = async project => {
+	// console.log(project);
+	console.log(typeof project.project.TREATMENT_LIST_ATTACHMENT_PATH);
 	try {
 		const url = generateUrl('saveProject', apiPrefix);
-		const data = await makeAsyncPostRequest(url, project, false);
+		// const data = await makeAsyncPostRequest(url, project, false);
+		const data = await request
+			.post(url)
+			.attach('TREATMENT_LIST_ATTACHMENT_PATH', project.project.TREATMENT_LIST_ATTACHMENT_PATH[0]);
 		return data;
 	} catch (err) {
 		logError(err);

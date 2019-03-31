@@ -217,12 +217,12 @@
 				projectBlob.project.STATUS_ID = this.projectsNextStatusId;
 				const response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
-
-				if (response.SUCCESS) {
-					alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
-				} else {
-					alert.failedSubmit(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
-				}
+				console.log(response);
+				// if (response.SUCCESS) {
+				// 	alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
+				// } else {
+				// 	alert.failedSubmit(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
+				// }
 			},
 			async submitProjectForReview () {
 				const projectBlob = this.getPreparedStoreForSubmit();
