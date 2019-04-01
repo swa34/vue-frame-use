@@ -168,6 +168,10 @@
 						for (let key in record) if (record[key] === null) record[key] = '';
 					});
 				});
+				// Need to re-add files since they get broken during the deep object assign
+				schema.columns.filter(c => c.inputType === 'file').forEach(column => {
+					schemaLessStore.project[column.columnName] = this.$store.state.project[column.columnName];
+				});
 				return schemaLessStore;
 			},
 			async rejectProject () {

@@ -38,15 +38,16 @@ export const getProject = async (criteriaStructure, callback) => {
 	}
 };
 
-export const saveProject = async project => {
-	// console.log(project);
-	console.log(typeof project.project.TREATMENT_LIST_ATTACHMENT_PATH);
+export const saveProject = async projectBlob => {
 	try {
 		const url = generateUrl('saveProject', apiPrefix);
 		// const data = await makeAsyncPostRequest(url, project, false);
 		const data = await request
 			.post(url)
-			.attach('TREATMENT_LIST_ATTACHMENT_PATH', project.project.TREATMENT_LIST_ATTACHMENT_PATH[0]);
+			.attach('TREATMENT_LIST_ATTACHMENT_PATH', projectBlob.project.TREATMENT_LIST_ATTACHMENT_PATH)
+			.attach('PLOT_MAP_ATTACHMENT_PATH', projectBlob.project.PLOT_MAP_ATTACHMENT_PATH)
+			.attach('CALENDAR_ATTACHMENT_PATH', projectBlob.project.CALENDAR_ATTACHMENT_PATH)
+			.field('projectBlob', JSON.stringify(projectBlob));
 		return data;
 	} catch (err) {
 		logError(err);
