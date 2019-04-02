@@ -539,6 +539,7 @@ const schema = {
 			columnName: 'INVOLVES_PLANTS',
 			prettyName: 'Plants',
 			type: 'bit',
+			default: false,
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -549,6 +550,7 @@ const schema = {
 			columnName: 'INVOLVES_ANIMALS',
 			prettyName: 'Animals',
 			type: 'bit',
+			default: false,
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1

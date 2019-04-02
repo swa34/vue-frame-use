@@ -81,7 +81,8 @@ const getStoreConfig = (schema, isNew = false) => {
 	// For each column, push it into the config module, using either the specified
 	// default value or null
 	schema.columns.forEach((column) => {
-		config.modules[schemaCamelTitle].state[column.columnName] = column.default || null;
+		const hasDefault = column.default !== null && column.default !== undefined;
+		config.modules[schemaCamelTitle].state[column.columnName] = hasDefault ? column.default : null;
 	});
 
 	// If the schema has associations, we need to set up the extra modules for the

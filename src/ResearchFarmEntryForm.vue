@@ -46,6 +46,8 @@
 				</button>
 			</div>
 		</div>
+		<pre>{{ JSON.stringify($store.state.supplementalAnimalInformation, null, 2) }}</pre>
+		<pre>{{ JSON.stringify($store.state.supplementalPlantInformation, null, 2) }}</pre>
 	</div>
 </template>
 
@@ -219,14 +221,16 @@
 			async submitProject () {
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = this.projectsNextStatusId;
-				const response = await saveProject(projectBlob);
+				console.log(projectBlob.project);
+				let response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
 				console.log(response);
-				// if (response.SUCCESS) {
-				// 	alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
-				// } else {
-				// 	alert.failedSubmit(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
-				// }
+				response = await response.body;
+				if (response.SUCCESS) {
+					alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
+				} else {
+					alert.failedSubmit(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
+				}
 			},
 			async submitProjectForReview () {
 				const projectBlob = this.getPreparedStoreForSubmit();
