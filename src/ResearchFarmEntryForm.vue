@@ -2,23 +2,33 @@
 	<div>
 		<h1>Research Farm Project</h1>
 		<div class="button-container">
-			<button v-if="!isNewProject && userHasEditRights" type="button" class="edit-view-toggle" @click="toggleMode">
+			<button
+				v-if="!isNewProject && userHasEditRights"
+				type="button"
+				class="edit-view-toggle"
+				@click="toggleMode"
+			>
 				{{ mode === 'edit' ? 'View' : 'Edit' }}
 			</button>
-			<button v-if="!isNewProject" type="button" class="duplication" @click="duplicateProject">
+			<button
+				v-if="!isNewProject"
+				type="button"
+				class="duplication"
+				@click="duplicateProject"
+			>
 				Duplicate
 			</button>
 		</div>
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
-			:duplicationSchema="duplicationSchema"
+			:duplication-schema="duplicationSchema"
 		/>
 		<DetailMain
 			:schema="schema"
 			:mode="mode"
 			:identifier="identifier"
-			:userIsOwner="userIsOriginator"
-			:useDefaultSubmit="false"
+			:user-is-owner="userIsOriginator"
+			:use-default-submit="false"
 		/>
 		<hr v-if="mode === 'edit'" />
 		<div v-if="mode === 'edit'" class="submit">
@@ -32,28 +42,47 @@
 				<button type="button" class="button" @click="saveProjectWithoutSubmitting">
 					Save Without Submitting
 				</button>
-				<button v-if="userIsOriginator || userIsAdmin" type="button" class="button submit-for-approval" @click="submitProject">
+				<button
+					v-if="userIsOriginator || userIsAdmin"
+					type="button"
+					class="button submit-for-approval"
+					@click="submitProject"
+				>
 					Submit for Approval
 				</button>
-				<button v-if="userIsApprover || userIsAdmin" type="button" class="button approve" @click="submitProject">
+				<button
+					v-if="userIsApprover || userIsAdmin"
+					type="button"
+					class="button approve"
+					@click="submitProject"
+				>
 					Approve this Project
 				</button>
-				<button v-if="userIsApprover || userIsAdmin" type="button" class="button needs-review" @click="submitProjectForReview">
+				<button
+					v-if="userIsApprover || userIsAdmin"
+					type="button"
+					class="button needs-review"
+					@click="submitProjectForReview"
+				>
 					Project Needs Revision
 				</button>
-				<button v-if="userIsApprover || userIsAdmin" type="button" class="button reject" @click="rejectProject">
+				<button
+					v-if="userIsApprover || userIsAdmin"
+					type="button"
+					class="button reject"
+					@click="rejectProject"
+				>
 					Reject this Project
 				</button>
 			</div>
 		</div>
-		<pre>{{ JSON.stringify($store.state.supplementalAnimalInformation, null, 2) }}</pre>
-		<pre>{{ JSON.stringify($store.state.supplementalPlantInformation, null, 2) }}</pre>
 	</div>
 </template>
 
 <script>
+	/* global activeUser */
 	/* global activeUserId */
-	/* global swal */
+	/* global caesCache */
 	import alert from '@/modules/applications/caes_research_farm_project/alert';
 	import schema from '@/schemas/caes_research_farm_project/project';
 	import DetailMain from '@/views/DetailMain';
@@ -69,10 +98,8 @@
 		url
 	} from '@/modules/utilities';
 	import { getSortedSchema } from '@/modules/schemaTools';
-	import {
-		addComment,
-		saveProject
-	} from '@/modules/caesdb/caes_research_farm_project';
+	import { logError } from '@/modules/caesdb';
+	import { saveProject } from '@/modules/caesdb/caes_research_farm_project';
 	import {
 		getProjectsNextStatusId,
 		getProjectsRevisionStatusId,
@@ -136,7 +163,7 @@
 			projectsNextStatusId () { return getProjectsNextStatusId(this.$store.state.project); },
 			userHasEditRights () {
 				if (this.userIsOriginator) return true;
-				if (Boolean(activeUser.IS_ADMINISTRATOR)) return true;
+				if (Boolean(activeUser.IS_ADMINISTRATOR) === true) return true;
 				return this.approvers.indexOf(activeUserId) !== -1;
 			},
 			userIsAdmin () {

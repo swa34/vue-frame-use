@@ -21,7 +21,7 @@ const genericCommentFieldDescription = `
 `.trim();
 
 const getResearchFarmDependencyTest = key => {
-	return (val) => {
+	return val => {
 		if (!val) return false;
 		const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
 		if (farmIndex === -1) return false;
@@ -31,7 +31,7 @@ const getResearchFarmDependencyTest = key => {
 };
 
 const getResearchFarmDependentValueFn = key => {
-	return (store) => {
+	return store => {
 		const farmId = store.state.project.PARTICIPATING_RESEARCH_FARM_ID;
 		if (nullTest(farmId)) return null;
 		const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(farmId);
@@ -263,7 +263,7 @@ const schema = {
 				foreignKey: 'abbreviation',
 				foreignLabel: 'name'
 			},
-			defaultValue: "GA"
+			defaultValue: 'GA'
 		},
 		{
 			columnName: 'PI_ZIPCODE',
@@ -406,7 +406,7 @@ const schema = {
 				foreignKey: 'abbreviation',
 				foreignLabel: 'name'
 			},
-			defaultValue: "GA"
+			defaultValue: 'GA'
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_ZIPCODE',
@@ -847,6 +847,9 @@ const schema = {
 		{
 			title: 'General Information',
 			order: 1,
+			disableFlex: {
+				modes: ['view']
+			},
 			fieldsets: [
 				{
 					title: 'Dates',

@@ -3,8 +3,8 @@
 	<div :class="`${mode}-mode`">
 		<ContextualHelpMessage
 			v-if="helpMessage.show"
-			:messageFetcher="this.schema.messageFetcher"
-			:messageName="helpMessage.name"
+			:message-fetcher="schema.messageFetcher"
+			:message-name="helpMessage.name"
 			@close-modal="hideHelp"
 		/>
 		<div v-if="requestsInProgress" class="application-loading-overlay">
@@ -31,7 +31,7 @@
 							@show-help="showHelp"
 						/>
 					</div>
-					<div v-else :class="!section.disableFlex ? 'flex-section' : ''">
+					<div v-else :class="getSectionClasses(section)">
 						<div
 							v-for="area in section.areas"
 							:key="area.data.title || area.data.columnName"
@@ -92,17 +92,17 @@
 									<div v-else-if="area.data.multiSelect">
 										<DataMultiSelect
 											v-if="dependencyMet(area.data)"
-											:associatedColumn="area.data.associatedColumn"
+											:associated-column="area.data.associatedColumn"
 											:filter="area.data.filter"
-											:groupBy="area.data.groupBy"
-											:groupLabel="area.data.groupLabel"
-											:groupsToShow="area.data.groupsToShow"
+											:group-by="area.data.groupBy"
+											:group-label="area.data.groupLabel"
+											:groups-to-show="area.data.groupsToShow"
 											:identifier="generateIdentifier(area.data)"
 											:schema="area.data.schema"
 											:title="area.data.title"
 											:description="area.data.description"
 											:affects="area.data.affects"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
 											@show-help="showHelp(area.data)"
 										/>
@@ -113,12 +113,12 @@
 											v-if="dependencyMet(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:associatedColumn="area.data.associatedColumn"
+											:associated-column="area.data.associatedColumn"
 											:identifier="generateIdentifier(area.data)"
 											:filter="area.data.filter"
 											:description="area.data.description"
 											:affects="area.data.affects"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
 											@show-help="showHelp(area.data)"
 										/>
@@ -128,14 +128,14 @@
 											v-if="dependencyMet(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:associatedColumn="area.data.associatedColumn"
+											:associated-column="area.data.associatedColumn"
 											:identifier="generateIdentifier(area.data)"
-											:optionColumnName="area.data.optionColumnName"
+											:option-column-name="area.data.optionColumnName"
 											:filter="area.data.filter"
-											:showTotals="area.data.showTotals"
+											:show-totals="area.data.showTotals"
 											:depends="area.data.depends"
 											:description="area.data.description"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
 											@show-help="showHelp(area.data)"
 										/>
@@ -146,14 +146,14 @@
 											v-if="dependencyMet(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:associatedColumn="area.data.foreignKey"
+											:associated-column="area.data.foreignKey"
 											:identifier="generateIdentifier(area.data)"
-											:allowInsert="true"
-											:allowEdit="true"
+											:allow-insert="true"
+											:allow-edit="true"
 											:description="area.data.description"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
-											:recordLimit="area.data.limit"
+											:record-limit="area.data.limit"
 											@show-help="showHelp(area.data)"
 										/>
 									</div>
@@ -165,7 +165,7 @@
 										@show-help="showHelp"
 									/>
 								</div>
-								<fieldset v-else-if="area.type === 'fieldset' && dependencyMet(area.data)">
+								<fieldset v-else-if="area.type === 'fieldset' && dependencyMet(area.data)" :class="mode === 'view' ? 'view-mode' : ''">
 									<legend>
 										<h3>
 											{{ area.data.title }}
@@ -181,7 +181,7 @@
 											v-else-if="mode === 'edit' && field.type === 'int'"
 											v-model.number="record[field.columnName]"
 											:field="field"
-											:isInsideFieldset="true"
+											:is-inside-fieldset="true"
 											:fetched="record._fetched"
 											@show-help="showHelp(field)"
 										/>
@@ -189,14 +189,14 @@
 											v-else-if="mode === 'edit'"
 											v-model="record[field.columnName]"
 											:field="field"
-											:isInsideFieldset="true"
+											:is-inside-fieldset="true"
 											:fetched="record._fetched"
 											@show-help="showHelp(field)"
 										/>
-										<div v-else>
-											<h3 class="inline">
+										<div v-else class="view-mode-wrapper">
+											<h4 class="inline">
 												{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
-											</h3>
+											</h4>
 											<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
 												{{ getOptionLabel(field.constraint, record[field.columnName]) }}
 											</span>
@@ -440,6 +440,19 @@
 		// The methods available to this component during render
 		methods: {
 			getPrettyColumnName,
+			getSectionClasses (section) {
+				if (typeof section.disableFlex === 'undefined') return 'flex-section';
+				if (section.disableFlex === true) return '';
+				if (section.disableFlex === false) return 'flex-section';
+				if (typeof section.disableFlex === 'object' && typeof section.disableFlex.modes !== 'undefined' && Array.isArray(section.disableFlex.modes)) {
+					const disableForViewMode = section.disableFlex.modes.indexOf('view') !== -1;
+					const disableForEditMode = section.disableFlex.modes.indexOf('edit') !== -1;
+					if (disableForViewMode && this.mode === 'view') return '';
+					if (disableForEditMode && this.mode === 'edit') return '';
+					return 'flex-section';
+				}
+				return '';
+			},
 			showHelp (area) {
 				if (area.helpMessageName) {
 					this.helpMessage.name = area.helpMessageName;
@@ -725,6 +738,18 @@
 	fieldset {
 		display: flex;
 		flex-wrap: wrap;
+		&.view-mode {
+			display: block;
+			margin: 1rem 0;
+			legend h3 { margin: 0; }
+			div.view-mode-wrapper {
+				display: flex;
+				h4 {
+					margin: 0 .5rem 0 0;
+					line-height: 1.6em;
+				}
+			}
+		}
 		div {
 			flex-basis: 100%;
 			&.inline {
@@ -741,14 +766,9 @@
 		p {
 			text-align: center;
 			button {
-				// background: cornflowerblue;
 				max-width: 100%;
 				width: 32rem;
 				font-size: 1.25rem;
-				// text-transform: uppercase;
-				// &:hover {
-				// 	background: darken(cornflowerblue, 20%);
-				// }
 			}
 			a#delete-link { cursor: pointer; }
 		}
