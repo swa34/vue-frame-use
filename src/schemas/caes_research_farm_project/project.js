@@ -51,9 +51,11 @@ const schema = {
 	columns: [
 		{
 			columnName: 'ID',
+			prettyName: 'Project ID',
 			type: 'int',
 			immutable: true,
 			automated: true,
+			showOnView: true,
 			grouping: {
 				section: 'General Information',
 				order: 1

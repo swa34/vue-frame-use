@@ -1,5 +1,5 @@
 <template lang="html">
-  <div id="main">
+	<div id="main">
 		<div class="heading-container">
 			<h1>Activity Report</h1>
 			<div class="spacer"></div>

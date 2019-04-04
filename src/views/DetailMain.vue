@@ -53,7 +53,7 @@
 										:fetched="record._fetched"
 										@show-help="showHelp(area.data)"
 									/>
-									<div v-else>
+									<div v-else-if="typeof record[area.data.columnName] !== 'undefined' && record[area.data.columnName] !== null && record[area.data.columnName] !== ''">
 										<h3 class="inline">
 											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
 										</h3>
@@ -62,6 +62,14 @@
 										</span>
 										<span v-else>
 											{{ record[area.data.columnName] }}
+										</span>
+									</div>
+									<div v-else>
+										<h3 class="inline">
+											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
+										</h3>
+										<span>
+											<em>(None)</em>
 										</span>
 									</div>
 								</div>
@@ -201,7 +209,7 @@
 												{{ getOptionLabel(field.constraint, record[field.columnName]) }}
 											</span>
 											<span v-else>
-												{{ record[field.columnName] }}
+												{{ typeof record[field.columnName] === 'boolean' ? record[field.columnName] ? 'Yes' : 'No' : record[field.columnName] }}
 											</span>
 										</div>
 									</div>
@@ -570,6 +578,7 @@
 				});
 			},
 			columnShouldBeDisplayed (column) {
+				if (this.mode === 'view' && column.showOnView) return true;
 				if (!column.depends) {
 					if (column.automated) return false;
 					return true;

@@ -16,11 +16,11 @@
   "author": "",
   "license": "GPL-3.0",
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
-    "@babel/plugin-transform-regenerator": "^7.4.0",
-    "@babel/polyfill": "^7.4.0",
-    "@babel/preset-env": "^7.4.2",
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.3",
+    "@babel/plugin-transform-regenerator": "^7.4.3",
+    "@babel/polyfill": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
     "@tinymce/tinymce-vue": "^2.0.0",
     "babel-loader": "^8.0.5",
     "clean-webpack-plugin": "^2.0.1",
@@ -49,7 +49,7 @@
     "source-map": "^0.7.3",
     "style-loader": "^0.23.1",
     "superagent": "^5.0.2",
-    "sweetalert2": "^8.8.0",
+    "sweetalert2": "^8.8.1",
     "terser-webpack-plugin": "^1.2.3",
     "url-polyfill": "^1.1.5",
     "vue": "^2.6.10",
@@ -66,7 +66,7 @@
     "webpack-visualizer-plugin": "^0.1.11"
   },
   "dependencies": {
-    "bluebird": "^3.5.3",
+    "bluebird": "^3.5.4",
     "express": "^4.16.4",
     "mssql": "^5.0.5",
     "readline-sync": "^1.4.9"

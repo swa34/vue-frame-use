@@ -1,3 +1,6 @@
+/* global swal */
+import { logError } from '@/modules/caesdb';
+
 export default {
 	failedCommentSubmission: (title, messages) => {
 		swal({
@@ -128,7 +131,7 @@ export default {
 		swal({
 			type: 'success',
 			title: 'Awesome!',
-			text: 'Your ' +  + ' has been saved successfully.',
+			text: `Your ${title} has been saved successfully.`,
 			confirmButtonText: 'OK'
 		}).then((result) => {
 			if (result.value) {

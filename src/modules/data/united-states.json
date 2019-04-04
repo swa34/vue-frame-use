@@ -1,4 +1,5 @@
-[{ "abbreviation": "AL", "name": "Alabama" },
+[
+	{ "abbreviation": "AL", "name": "Alabama" },
 	{ "abbreviation": "AK", "name": "Alaska" },
 	{ "abbreviation": "AZ", "name": "Arizona" },
 	{ "abbreviation": "AR", "name": "Arkansas" },
@@ -49,4 +50,5 @@
 	{ "abbreviation": "WA", "name": "Washington" },
 	{ "abbreviation": "WV", "name": "West Virginia" },
 	{ "abbreviation": "WI", "name": "Wisconsin" },
-	{ "abbreviation": "WY", "name": "Wyoming" }]
+	{ "abbreviation": "WY", "name": "Wyoming" }
+]

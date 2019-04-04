@@ -1,23 +1,25 @@
 <template lang="html">
 	<div>
-		<h1>Research Farm Project</h1>
-		<div class="button-container">
-			<button
-				v-if="!isNewProject && userHasEditRights"
-				type="button"
-				class="edit-view-toggle"
-				@click="toggleMode"
-			>
-				{{ mode === 'edit' ? 'View' : 'Edit' }}
-			</button>
-			<button
-				v-if="!isNewProject"
-				type="button"
-				class="duplication"
-				@click="duplicateProject"
-			>
-				Duplicate
-			</button>
+		<div class="header">
+			<h1>Research Farm Project</h1>
+			<div class="button-container">
+				<button
+					v-if="!isNewProject && userHasEditRights"
+					type="button"
+					class="edit-view-toggle"
+					@click="toggleMode"
+				>
+					{{ mode === 'edit' ? 'View' : 'Edit' }}
+				</button>
+				<button
+					v-if="!isNewProject"
+					type="button"
+					class="duplication"
+					@click="duplicateProject"
+				>
+					Duplicate
+				</button>
+			</div>
 		</div>
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
@@ -276,6 +278,20 @@
 </script>
 
 <style lang="scss" scoped>
+	div.header {
+		display: flex;
+		justify-content: space-between;
+		align-items: stretch;
+		h1 { align-self: center; }
+		@media screen and (max-width: 1080px) {
+			display: block;
+			h1 { margin-bottom: .5rem; }
+			button[type="button"] {
+				padding: .5rem;
+				margin: 0;
+			}
+		}
+	}
 	div.submit {
 		div.button-container {
 			display: flex;

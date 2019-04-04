@@ -21,10 +21,10 @@
 					</div>
 				</div>
 				<div v-else-if="typeToShow(column) === 'text'">
+					<h3>
+						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
+					</h3>
 					<p>
-						<h3>
-							{{ column.prettyName || getPrettyColumnName(column.columnName) }}
-						</h3>
 						{{ getDisplayText(column) }}
 					</p>
 				</div>
@@ -34,6 +34,8 @@
 </template>
 
 <script>
+	/* global activeUserId */
+	/* global caesCache */
 	import alert from '@/modules/applications/caes_research_farm_project/alert';
 	import projectSchema from '@/schemas/caes_research_farm_project/project';
 	import SmartInput from '@/views/elements/SmartInput';
@@ -43,10 +45,10 @@
 		getProjectsRevisionStatusId,
 		statusesIndexedByName
 	} from '@/modules/applications/caes_research_farm_project/status-handling';
+	import { logError } from '@/modules/caesdb';
 	import { addComment } from '@/modules/caesdb/caes_research_farm_project';
 
 	export default {
-		/* global activeUserId */
 		name: 'RoutingAndApproval',
 		components: { SmartInput },
 		props: {
@@ -78,6 +80,7 @@
 		methods: {
 			getPrettyColumnName,
 			columnShouldBeDisplayed (column) {
+				if (this.mode === 'view' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
 				if (!column.depends) return true;
 				if (Array.isArray(column.depends.column)) {
 					return column.depends.test(column.depends.column.map(column => {
@@ -101,6 +104,7 @@
 					logError('Invalid action for comment submission alert.');
 					return;
 				}
+				let status = this.$store.state.project.STATUS_ID;
 				if (action === 'approve') {
 					status = getProjectsNextStatusId(this.$store.state.project);
 				} else if (action === 'returnForReview') {
