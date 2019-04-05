@@ -210,6 +210,7 @@
 	import importantDateSchema from '@/schemas/caes_research_farm_project/important_date';
 	import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
 	import SmartInput from '@/views/elements/SmartInput';
+	import { getCriteriaStructure } from '@/modules/caesdb';
 
 	import {
 		getObjectIndexedByKeyFromArray,
@@ -247,6 +248,7 @@
 		computed: {
 			columnsToBeDisplayed () { return importantDateSchema.columns.filter(c => !c.automated); },
 			fetched () { return this.$store.state.supplementalAnimalInformation.fetched; },
+			isNew () { return this.$store.state.project.ID === null; },
 			newImportantDateIsValid () {
 				return importantDateSchema.columns.reduce((isValid, column) => {
 					let val = this.newImportantDate[column.columnName];
@@ -290,6 +292,7 @@
 			} else {
 				this.localRecord = records[0];
 			}
+			if (!this.isNew) this.fetchExistingData();
 		},
 		methods: {
 			addNewImportantDate () {
@@ -298,6 +301,30 @@
 					output[column.columnName] = null;
 					return output;
 				}, {});
+			},
+			async fetchExistingData () {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, async (err, critStruct) => {
+					if (err) {
+						logError(err);
+					} else {
+						critStruct[this.schema.criteria.string] = this.$store.state.project.ID;
+						try {
+							const result = await this.schema.fetchExisting(critStruct);
+							if (result.success) {
+								const animalInfo = result.data[0];
+								console.log('got animal info');
+								for (let key in this.record) {
+									console.log(`setting ${key}`);
+									if (animalInfo[key]) this.record[key] = animalInfo[key];
+								}
+							} else {
+								logError(result.err);
+							}
+						} catch (err) {
+							logError(err);
+						}
+					}
+				})
 			},
 			getPrettyColumnName,
 			getResponiblePartyNameFromId (id) {

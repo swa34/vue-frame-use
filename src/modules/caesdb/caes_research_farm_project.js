@@ -38,6 +38,26 @@ export const getProject = async (criteriaStructure, callback) => {
 	}
 };
 
+export const getSupplementalAnimalInfo = async criteriaStructure => {
+	try {
+		const url = generateUrl('supplementalAnimalInfo', apiPrefix);
+		const data = await makeAsyncPostRequest(url, criteriaStructure);
+		return { success: true, data };
+	} catch (err) {
+		return { success: false, err };
+	}
+};
+
+export const getSupplementalPlantInfo = async criteriaStructure => {
+	try {
+		const url = generateUrl('supplementalPlantInfo', apiPrefix);
+		const data = await makeAsyncPostRequest(url, criteriaStructure);
+		return { success: true, data };
+	} catch (err) {
+		return { success: false, err };
+	}
+};
+
 export const saveProject = async projectBlob => {
 	try {
 		const url = generateUrl('saveProject', apiPrefix);

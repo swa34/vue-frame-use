@@ -51,7 +51,7 @@ const schema = {
 	columns: [
 		{
 			columnName: 'ID',
-			prettyName: 'Project ID',
+			prettyName: 'Project Number',
 			type: 'int',
 			immutable: true,
 			automated: true,

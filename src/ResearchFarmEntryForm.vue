@@ -117,7 +117,7 @@
 		data () {
 			return {
 				duplicationSchema: projectDuplicationSchema,
-				mode: 'view',
+				mode: 'edit',
 				schema: getSortedSchema(schema),
 				statusesIndexedByName
 			};
@@ -181,6 +181,8 @@
 			// This function will only ever be run once
 			if (this.isNewProject) this.initializeNewProject();
 			this.setDocumentTitle();
+			// Set mode
+			if (url.getParam('pk_id')) this.mode = 'view';
 		},
 		methods: {
 			duplicateProject () {

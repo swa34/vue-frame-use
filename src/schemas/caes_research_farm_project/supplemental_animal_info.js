@@ -1,7 +1,14 @@
 import importantDateSchema from '@/schemas/caes_research_farm_project/important_date';
+import { getSupplementalAnimalInfo } from '@/modules/caesdb/caes_research_farm_project';
 
 const supplementalAnimalInfoSchema = {
 	title: 'Supplemental Animal Information',
+	databaseName: 'CAES_RESEARCH_FARM_PROJECT',
+	tablePrefix: 'CRFP_SUPPLEMENTAL_ANIMAL_INFO',
+	criteria: {
+		string: 'criteria_PROJECT_ID_eq'
+	},
+	fetchExisting: getSupplementalAnimalInfo,
 	columns: [
 		{
 			columnName: 'ID',
