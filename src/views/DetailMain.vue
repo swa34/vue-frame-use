@@ -60,6 +60,11 @@
 										<span v-if="(area.data.inputType === 'select' || sqlToHtml(area.data) === 'select')">
 											{{ getOptionLabel(area.data.constraint, record[area.data.columnName]) }}
 										</span>
+										<span v-else-if="area.data.inputType === 'file'">
+											<a :href="`${application.attachmentWebPath}${record[area.data.columnName]}`">
+												{{ record[area.data.columnName] }}
+											</a>
+										</span>
 										<span v-else>
 											{{ record[area.data.columnName] }}
 										</span>
@@ -355,11 +360,12 @@
 		},
 		data () {
 			return {
+				application: caesCache.application ? caesCache.application : { attachmentWebPath: '/' },
 				helpMessage: {
 					show: false,
 					name: ''
 				},
-				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
+				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0,
 				sectionsToDisplay: this.schema.sections.map(s => s.title)
 			};
 		},
@@ -410,8 +416,8 @@
 		mounted () {
 			// Set up the watcher for pending requests
 			setInterval(() => {
-				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0)) {
-					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0;
+				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0)) {
+					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0;
 				}
 			}, 300);
 

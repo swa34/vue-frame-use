@@ -32,6 +32,20 @@ export const getCriteriaStructure = (databaseName, tablePrefix, callback) => {
 		});
 };
 
+// Async Criteria Structure Fetcher
+export const asyncGetCriteriaStructure = (databaseName, tablePrefix) => {
+	if (!tablePrefix) {
+		logError(new Error('Cannot fetch criteria structure: table prefix is undefined'));
+		return;
+	}
+	if (!databaseName) {
+		logError(new Error('Cannot fetch criteria structure: database name is undefined'));
+		return;
+	}
+	const url = `${apiPrefix}criteriaStructure.json?TablePrefix=${tablePrefix}&DatabaseName=${databaseName}`;
+	return request.get(url);
+};
+
 // Error logging function
 export const logError = (err, dump = {}, trace = null) => {
 	// If in development mode, log the error to the console

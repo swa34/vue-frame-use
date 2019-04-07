@@ -1,5 +1,14 @@
+import { getImportantDates } from '@/modules/caesdb/caes_research_farm_project';
+import { databaseName } from '@/schemas/caes_research_farm_project';
+
 const importantDateSchema = {
 	title: 'Important Date',
+	databaseName,
+	fetchExisting: getImportantDates,
+	tablePrefix: 'CRFP_IMPORTANT_DATE',
+	criteria: {
+		string: 'criteria_SUPPLEMENTAL_ANIMAL_INFO_ID_eq'
+	},
 	columns: [
 		{
 			columnName: 'SUPPLEMENTAL_ANIMAL_INFO_ID',

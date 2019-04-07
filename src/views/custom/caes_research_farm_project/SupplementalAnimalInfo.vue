@@ -210,9 +210,12 @@
 	import importantDateSchema from '@/schemas/caes_research_farm_project/important_date';
 	import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
 	import SmartInput from '@/views/elements/SmartInput';
-	import { getCriteriaStructure } from '@/modules/caesdb';
-
 	import {
+		asyncGetCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
+	import {
+		formatDates,
 		getObjectIndexedByKeyFromArray,
 		getPrettyColumnName
 	} from '@/modules/utilities';
@@ -247,7 +250,10 @@
 		},
 		computed: {
 			columnsToBeDisplayed () { return importantDateSchema.columns.filter(c => !c.automated); },
-			fetched () { return this.$store.state.supplementalAnimalInformation.fetched; },
+			fetched: {
+				get () { return this.$store.state.supplementalAnimalInformation.fetched; },
+				set (val) { this.$store.state.supplementalAnimalInformation.fetched = val; }
+			},
 			isNew () { return this.$store.state.project.ID === null; },
 			newImportantDateIsValid () {
 				return importantDateSchema.columns.reduce((isValid, column) => {
@@ -302,29 +308,62 @@
 					return output;
 				}, {});
 			},
-			async fetchExistingData () {
-				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, async (err, critStruct) => {
-					if (err) {
+			fetchExistingData () {
+				const getAnimalInfoCritStruct = async () => {
+					try {
+						const critStruct = await asyncGetCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix);
+						return critStruct;
+					} catch (err) {
 						logError(err);
-					} else {
-						critStruct[this.schema.criteria.string] = this.$store.state.project.ID;
-						try {
-							const result = await this.schema.fetchExisting(critStruct);
-							if (result.success) {
-								const animalInfo = result.data[0];
-								console.log('got animal info');
-								for (let key in this.record) {
-									console.log(`setting ${key}`);
-									if (animalInfo[key]) this.record[key] = animalInfo[key];
-								}
-							} else {
-								logError(result.err);
-							}
-						} catch (err) {
-							logError(err);
-						}
 					}
-				})
+				};
+				const getImportantDateCritStruct = async () => {
+					try {
+						const critStruct = await asyncGetCriteriaStructure(this.importantDateSchema.databaseName, this.importantDateSchema.tablePrefix);
+						return critStruct;
+					} catch (err) {
+						logError(err);
+					}
+				};
+				const getImportantDates = async animalInfoId => {
+					const critStruct = await getImportantDateCritStruct();
+					if (!critStruct) return;
+					critStruct[this.importantDateSchema.criteria.string] = animalInfoId;
+					try {
+						const result = await this.importantDateSchema.fetchExisting(critStruct);
+						if (result.success) {
+							formatDates(this.importantDateSchema.columns.filter(c => c.type === 'datetime').map(c => c.columnName), result.data);
+							result.data.forEach(importantDate => {
+								this.record.importantDates.push(importantDate);
+							});
+							this.fetched = true;
+						}
+					} catch (err) {
+						logError(err);
+					}
+				};
+				const getAnimalInfo = async () => {
+					const critStruct = await getAnimalInfoCritStruct();
+					if (!critStruct) return;
+					critStruct[this.schema.criteria.string] = this.$store.state.project.ID;
+					try {
+						const result = await this.schema.fetchExisting(critStruct);
+						if (result.success) {
+							const animalInfo = result.data[0];
+							for (let key in this.record) {
+								if (animalInfo[key]) this.record[key] = animalInfo[key];
+							}
+							this.fetched = true;
+							getImportantDates(animalInfo.ID);
+						} else {
+							logError(result.err);
+						}
+					} catch (err) {
+						logError(err);
+					}
+				};
+
+				if (!this.fetched) getAnimalInfo();
 			},
 			getPrettyColumnName,
 			getResponiblePartyNameFromId (id) {

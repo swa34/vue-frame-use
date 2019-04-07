@@ -101,6 +101,10 @@
 <script>
 	/* global caesCache */
 	import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '@/modules/caesdb';
 	import { getObjectIndexedByKeyFromArray } from '@/modules/utilities';
 
 	export default {
@@ -123,6 +127,7 @@
 			};
 		},
 		computed: {
+			isNew () { return this.$store.state.project.ID === null; },
 			record: {
 				get () {
 					let records = this.$store.state.supplementalPlantInformation.records;
@@ -158,12 +163,34 @@
 			} else {
 				this.localRecord = records[0];
 			}
+			if (!this.isNew) this.fetchExistingData();
 		},
 		methods: {
+			fetchExistingData () {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, async (err, critStruct) => {
+					if (err) {
+						logError(err);
+					} else {
+						critStruct[this.schema.criteria.string] = this.$store.state.project.ID;
+						try {
+							const result = await this.schema.fetchExisting(critStruct);
+							if (result.success) {
+								const plantInfo = result.data[0];
+								for (let key in this.record) {
+									if (plantInfo[key]) this.record[key] = plantInfo[key];
+								}
+							} else {
+								logError(result.err);
+							}
+						} catch (err) {
+							logError(err);
+						}
+					}
+				});
+			},
 			getResponsiblePartyNameFromId (id) {
 				if (!id) return null;
 				const index = this.responsiblePartyOptions.map(o => o.ID).indexOf(id);
-				console.log(index);
 				if (index === -1) return 'Unknown';
 				return this.responsiblePartyOptions[index].NAME || 'Unknown';
 			}

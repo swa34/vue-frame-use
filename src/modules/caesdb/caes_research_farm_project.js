@@ -38,6 +38,16 @@ export const getProject = async (criteriaStructure, callback) => {
 	}
 };
 
+export const getImportantDates = async criteriaStructure => {
+	try {
+		const url = generateUrl('importantDates', apiPrefix);
+		const data = await makeAsyncPostRequest(url, criteriaStructure);
+		return { success: true, data };
+	} catch (err) {
+		return { success: false, err };
+	}
+};
+
 export const getSupplementalAnimalInfo = async criteriaStructure => {
 	try {
 		const url = generateUrl('supplementalAnimalInfo', apiPrefix);
@@ -59,6 +69,7 @@ export const getSupplementalPlantInfo = async criteriaStructure => {
 };
 
 export const saveProject = async projectBlob => {
+	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
 	try {
 		const url = generateUrl('saveProject', apiPrefix);
 		// const data = await makeAsyncPostRequest(url, project, false);
@@ -68,8 +79,10 @@ export const saveProject = async projectBlob => {
 			.attach('PLOT_MAP_ATTACHMENT_PATH', projectBlob.project.PLOT_MAP_ATTACHMENT_PATH)
 			.attach('CALENDAR_ATTACHMENT_PATH', projectBlob.project.CALENDAR_ATTACHMENT_PATH)
 			.field('projectBlob', JSON.stringify(projectBlob));
+		--window.pendingRequests;
 		return data;
 	} catch (err) {
+		--window.pendingRequests;
 		logError(err);
 		return failureMessage;
 	}

@@ -1,5 +1,14 @@
+import { databaseName } from '@/schemas/caes_research_farm_project';
+import { getSupplementalPlantInfo } from '@/modules/caesdb/caes_research_farm_project';
+
 const supplementalPlantInfoSchema = {
 	title: 'Supplemental Plant Information',
+	databaseName,
+	tablePrefix: 'CRFP_SUPPLEMENTAL_PLANT_INFO',
+	criteria: {
+		string: 'criteria_PROJECT_ID_eq'
+	},
+	fetchExisting: getSupplementalPlantInfo,
 	columns: [
 		{
 			columnName: 'ID',
