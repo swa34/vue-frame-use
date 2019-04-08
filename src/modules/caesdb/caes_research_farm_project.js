@@ -28,6 +28,16 @@ export const getDepartmentHeadCollegeId = async personnelId => {
 	}
 };
 
+export const deleteProject = async projectId => {
+	try {
+		const url = generateUrl('deleteProject', apiPrefix);
+		const data = await makeAsyncPostRequest(url, { projectId });
+		return { success: true, data };
+	} catch (err) {
+		return { success: false, err };
+	}
+};
+
 export const getProject = async (criteriaStructure, callback) => {
 	try {
 		const url = generateUrl('project', apiPrefix);

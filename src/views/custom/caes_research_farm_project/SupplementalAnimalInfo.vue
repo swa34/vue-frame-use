@@ -349,12 +349,14 @@
 					try {
 						const result = await this.schema.fetchExisting(critStruct);
 						if (result.success) {
-							const animalInfo = result.data[0];
-							for (let key in this.record) {
-								if (animalInfo[key]) this.record[key] = animalInfo[key];
+							if (result.data.length > 0) {
+								const animalInfo = result.data[0];
+								for (let key in this.record) {
+									if (animalInfo[key]) this.record[key] = animalInfo[key];
+								}
+								getImportantDates(animalInfo.ID);
 							}
 							this.fetched = true;
-							getImportantDates(animalInfo.ID);
 						} else {
 							logError(result.err);
 						}

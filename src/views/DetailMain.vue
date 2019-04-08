@@ -53,6 +53,9 @@
 										:fetched="record._fetched"
 										@show-help="showHelp(area.data)"
 									/>
+									<div v-else-if="mode === 'view' && area.data.customComponentForViewMode">
+										<component :is="area.data.customComponentForViewMode.component" :options="area.data.customComponentForViewMode.options" />
+									</div>
 									<div v-else-if="typeof record[area.data.columnName] !== 'undefined' && record[area.data.columnName] !== null && record[area.data.columnName] !== ''">
 										<h3 class="inline">
 											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
@@ -184,6 +187,7 @@
 											{{ area.data.title }}
 										</h3>
 									</legend>
+									<p v-if="area.data.description">{{ area.data.description }}</p>
 									<div
 										v-for="field in area.data.fields"
 										:key="field.columnName"
@@ -753,6 +757,7 @@
 	fieldset {
 		display: flex;
 		flex-wrap: wrap;
+		p:first-of-type { margin-top: 0; }
 		&.view-mode {
 			display: block;
 			margin: 1rem 0;

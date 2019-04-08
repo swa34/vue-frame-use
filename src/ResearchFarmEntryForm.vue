@@ -19,12 +19,29 @@
 				>
 					Duplicate
 				</button>
+				<button
+					v-if="!isNewProject && userIsAdmin"
+					type="button"
+					class="delete"
+					@click="removeProject"
+				>
+					Delete
+				</button>
 			</div>
 		</div>
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
 			:duplication-schema="duplicationSchema"
 		/>
+		<p>
+			<strong>Research Farm Project Outline and Responsibility</strong>
+			<br />
+			Land requests for spring/summer projects should be made no later than Feb
+			15.  Land requests for fall/winter should be made no later than Aug 1.
+		</p>
+		<p>
+			Please contact Kelly Eisele at (706) 542-2151 with any questions.
+		</p>
 		<DetailMain
 			:schema="schema"
 			:mode="mode"
@@ -101,7 +118,10 @@
 	} from '@/modules/utilities';
 	import { getSortedSchema } from '@/modules/schemaTools';
 	import { logError } from '@/modules/caesdb';
-	import { saveProject } from '@/modules/caesdb/caes_research_farm_project';
+	import {
+		deleteProject,
+		saveProject
+	} from '@/modules/caesdb/caes_research_farm_project';
 	import {
 		getProjectsNextStatusId,
 		getProjectsRevisionStatusId,
@@ -168,9 +188,7 @@
 				if (Boolean(activeUser.IS_ADMINISTRATOR) === true) return true;
 				return this.approvers.indexOf(activeUserId) !== -1;
 			},
-			userIsAdmin () {
-				return Boolean(activeUser.IS_ADMINISTRATOR);
-			},
+			userIsAdmin () { return Boolean(activeUser.IS_ADMINISTRATOR); },
 			userIsApprover () {
 				if (!activeUserId) return false;
 				return this.approvers.indexOf(activeUserId) !== -1;
@@ -185,6 +203,19 @@
 			if (url.getParam('pk_id')) this.mode = 'view';
 		},
 		methods: {
+			async removeProject () {
+				try {
+					const response = await deleteProject(this.ID);
+					if (response.success) {
+						alert.successfulDelete(this.schema.title.toLowerCase());
+					} else {
+						alert.failedDelete(this.schema.title.toLowerCase(), response.Messages);
+					}
+				} catch (err) {
+					logError(err);
+					alert.failedDelete(this.schema.title.toLowerCase(), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
+				}
+			},
 			duplicateProject () {
 				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&DuplicateId=${this.ID}`;
 			},
@@ -214,7 +245,7 @@
 				if (response.SUCCESS) {
 					alert.successfulReject(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
-					alert.failedReject(this.schema.title.toLowerCase, response.MESSAGES);
+					alert.failedReject(this.schema.title.toLowerCase(), response.MESSAGES);
 				}
 			},
 			async saveProjectWithoutSubmitting () {
@@ -280,11 +311,15 @@
 </script>
 
 <style lang="scss" scoped>
+	$red: #6c3129;
 	div.header {
 		display: flex;
 		justify-content: space-between;
 		align-items: stretch;
 		h1 { align-self: center; }
+		div.button-container {
+			button.delete { background: $red; }
+		}
 		@media screen and (max-width: 1080px) {
 			display: block;
 			h1 { margin-bottom: .5rem; }
@@ -302,7 +337,7 @@
 				margin-right: .5rem;
 				&.submit-for-approval, &.approve { background: #406242; }
 				&.needs-review { background: #f7b538; color: #000; }
-				&.reject { background: #6c3129; }
+				&.reject, &.delete { background: $red; }
 			}
 		}
 	}

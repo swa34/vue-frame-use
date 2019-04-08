@@ -17,6 +17,20 @@ export default {
 			`.trim()
 		});
 	},
+	failedDelete: (title, messages) => {
+		swal({
+			type: 'error',
+			title: 'Oops!',
+			html: `
+				<p>
+					We were unable to delete the ${title} due to the following issues:
+				</p>
+				<div style="text-align: left;">
+					${messages}
+				</div>
+			`.trim()
+		});
+	},
 	failedReject: (title, messages) => {
 		swal({
 			type: 'error',
@@ -99,6 +113,16 @@ export default {
 				// They clicked OK
 				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
 			}
+		});
+	},
+	successfulDelete: title => {
+		swal({
+			type: 'success',
+			title: 'Awesome!',
+			text: `You have successfully deleted this ${title}.`,
+			confirmButtonText: 'OK'
+		}).then((result) => {
+			window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm`;
 		});
 	},
 	successfulReject: (title, projectId) => {

@@ -175,9 +175,11 @@
 						try {
 							const result = await this.schema.fetchExisting(critStruct);
 							if (result.success) {
-								const plantInfo = result.data[0];
-								for (let key in this.record) {
-									if (plantInfo[key]) this.record[key] = plantInfo[key];
+								if (result.data.length > 0) {
+									const plantInfo = result.data[0];
+									for (let key in this.record) {
+										if (plantInfo[key]) this.record[key] = plantInfo[key];
+									}
 								}
 							} else {
 								logError(result.err);

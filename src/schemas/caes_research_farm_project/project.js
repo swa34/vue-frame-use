@@ -1,4 +1,5 @@
 /* global caesCache */
+import CaesPersonnelDetails from '@/views/custom/caes_research_farm_project/CaesPersonnelDetails';
 import RoutingAndApproval from '@/views/custom/caes_research_farm_project/RoutingAndApproval';
 import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
@@ -128,6 +129,10 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 3
+			},
+			customComponentForViewMode: {
+				component: CaesPersonnelDetails,
+				options: { isPrinciple: true }
 			}
 		},
 		{
@@ -307,6 +312,10 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 3
+			},
+			customComponentForViewMode: {
+				component: CaesPersonnelDetails,
+				options: { isPrinciple: false }
 			}
 		},
 		{
@@ -930,6 +939,9 @@ const schema = {
 			fieldsets: [
 				{
 					title: 'Project Involves Plants/Animals',
+					description: `Use the checkboxes below to indicate plant or animal
+					project (if "animal" or "plants and animals" is chosen, an AUP number
+					must be entered in order for the form to send.)`,
 					columns: [
 						'INVOLVES_PLANTS',
 						'INVOLVES_ANIMALS'
