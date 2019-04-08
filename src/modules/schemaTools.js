@@ -6,10 +6,11 @@ const enableConstraintValues = schema => {
 };
 
 const sortingFunction = (a, b) => {
-	if (!a.order || !b.order) return -1;
+	if (!a.order || !b.order) return 0;
 	if (a.order === -1 && b.order === -1) return 0;
 	if (a.order === -1) return 1;
 	if (b.order === -1) return -1;
+
 	return a.order - b.order;
 };
 
@@ -84,7 +85,7 @@ const getUnsortedSections = schema => {
 					if (section.fieldsets) {
 						// Check if column belongs to a fieldset in its section
 						let sectionBelongsToFieldset = false;
-						section.fieldsets.forEach(fieldset => {
+						section.fieldsets.forEach((fieldset, index) => {
 							if (fieldset.columns && fieldset.columns.indexOf(column.columnName) !== -1) {
 								sectionBelongsToFieldset = true;
 								const indexOfExistingArea = section.areas.map(a => a.data.title).indexOf(fieldset.title);
@@ -93,6 +94,7 @@ const getUnsortedSections = schema => {
 									// need to make a new one
 									const area = {
 										type: 'fieldset',
+										order: fieldset.order,
 										data: {
 											...fieldset,
 											fields: [column]

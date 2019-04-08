@@ -68,7 +68,7 @@ const schema = {
 			automated: true,
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -77,7 +77,7 @@ const schema = {
 			required: true,
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -92,7 +92,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -101,7 +101,7 @@ const schema = {
 			required: true,
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: [ 'inline' ]
 		},
@@ -111,7 +111,7 @@ const schema = {
 			required: true,
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: [ 'inline' ]
 		},
@@ -127,7 +127,7 @@ const schema = {
 			allowNullOption: true,
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -140,7 +140,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: [ 'inline' ]
 		},
@@ -154,7 +154,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: [ 'inline' ]
 		},
@@ -168,7 +168,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: [ 'inline' ],
 			breakAfter: true
@@ -184,7 +184,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -199,7 +199,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			breakAfter: true
@@ -214,7 +214,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -228,7 +228,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			breakAfter: true
@@ -243,7 +243,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -257,7 +257,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			constraint: {
@@ -277,7 +277,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -291,7 +291,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -306,7 +306,7 @@ const schema = {
 			allowNullOption: true,
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -315,7 +315,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -325,7 +325,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -335,7 +335,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			breakAfter: true
@@ -347,7 +347,7 @@ const schema = {
 			inputType: 'email',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -358,7 +358,7 @@ const schema = {
 			inputType: 'tel',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			breakAfter: true
@@ -369,7 +369,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -379,7 +379,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			breakAfter: true
@@ -390,7 +390,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -400,7 +400,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline'],
 			constraint: {
@@ -416,7 +416,7 @@ const schema = {
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -431,7 +431,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -445,7 +445,7 @@ const schema = {
 			},
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			}
 		},
 		{
@@ -454,7 +454,7 @@ const schema = {
 			type: 'bit',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -464,7 +464,7 @@ const schema = {
 			type: 'bit',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -474,7 +474,7 @@ const schema = {
 			type: 'bit',
 			grouping: {
 				section: 'General Information',
-				order: 1
+				order: 3
 			},
 			customClasses: ['inline']
 		},
@@ -793,11 +793,18 @@ const schema = {
 		},
 		{
 			columnName: 'STATUS_ID',
+			prettyName: 'Status',
 			type: 'int',
 			automated: true,
+			showOnView: true,
 			grouping: {
-				section: 'Routing and Approval',
-				order: 1
+				section: 'General Information',
+				order: 2
+			},
+			constraint: {
+				values: caesCache.data.crfp.status,
+				foreignKey: 'ID',
+				foreignLabel: 'NAME'
 			}
 		},
 		{
@@ -855,6 +862,7 @@ const schema = {
 			fieldsets: [
 				{
 					title: 'Dates',
+					order: 3,
 					columns: [
 						'START_DATE',
 						'END_DATE'
@@ -862,6 +870,7 @@ const schema = {
 				},
 				{
 					title: 'Non-CAES Principle Investigator',
+					order: 3,
 					columns: [
 						'PI_FIRST_NAME',
 						'PI_MIDDLE_NAME',
@@ -882,6 +891,7 @@ const schema = {
 				},
 				{
 					title: 'Non-CAES Secondary Contact',
+					order: 3,
 					columns: [
 						'SECONDARY_CONTACT_FIRST_NAME',
 						'SECONDARY_CONTACT_MIDDLE_NAME',
@@ -901,6 +911,7 @@ const schema = {
 				},
 				{
 					title: 'Areas to Which the Project Pertains',
+					order: 3,
 					columns: [
 						'IS_RESEARCH',
 						'IS_EXTENSION',

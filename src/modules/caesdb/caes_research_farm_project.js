@@ -75,9 +75,9 @@ export const saveProject = async projectBlob => {
 		// const data = await makeAsyncPostRequest(url, project, false);
 		const data = await request
 			.post(url)
-			.attach('TREATMENT_LIST_ATTACHMENT_PATH', projectBlob.project.TREATMENT_LIST_ATTACHMENT_PATH)
-			.attach('PLOT_MAP_ATTACHMENT_PATH', projectBlob.project.PLOT_MAP_ATTACHMENT_PATH)
-			.attach('CALENDAR_ATTACHMENT_PATH', projectBlob.project.CALENDAR_ATTACHMENT_PATH)
+			.attach('TREATMENT_LIST_ATTACHMENT_PATH', projectBlob.project.TREATMENT_LIST_ATTACHMENT_PATH instanceof File ? projectBlob.project.TREATMENT_LIST_ATTACHMENT_PATH : null)
+			.attach('PLOT_MAP_ATTACHMENT_PATH', projectBlob.project.PLOT_MAP_ATTACHMENT_PATH instanceof File ? projectBlob.project.PLOT_MAP_ATTACHMENT_PATH : null)
+			.attach('CALENDAR_ATTACHMENT_PATH', projectBlob.project.CALENDAR_ATTACHMENT_PATH instanceof File ? projectBlob.project.CALENDAR_ATTACHMENT_PATH : null)
 			.field('projectBlob', JSON.stringify(projectBlob));
 		--window.pendingRequests;
 		return data;
