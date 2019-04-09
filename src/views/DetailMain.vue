@@ -187,7 +187,7 @@
 											{{ area.data.title }}
 										</h3>
 									</legend>
-									<p v-if="area.data.description">{{ area.data.description }}</p>
+									<p v-if="area.data.description" class="description">{{ area.data.description }}</p>
 									<div
 										v-for="field in area.data.fields"
 										:key="field.columnName"
@@ -758,6 +758,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		p:first-of-type { margin-top: 0; }
+		p.description { flex-basis: 100%; }
 		&.view-mode {
 			display: block;
 			margin: 1rem 0;

@@ -58,11 +58,16 @@
 				biological hazards, animal use).
 			</p>
 			<div class="button-container">
-				<button type="button" class="button" @click="saveProjectWithoutSubmitting">
+				<button
+					v-if="isNewProject || userIsOriginator"
+					type="button"
+					class="button"
+					@click="saveProjectWithoutSubmitting"
+				>
 					Save Without Submitting
 				</button>
 				<button
-					v-if="userIsOriginator || userIsAdmin"
+					v-if="isNewProject || userIsOriginator"
 					type="button"
 					class="button submit-for-approval"
 					@click="submitProject"
@@ -70,7 +75,15 @@
 					Submit for Approval
 				</button>
 				<button
-					v-if="userIsApprover || userIsAdmin"
+					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
+					type="button"
+					class="button"
+					@click="saveProjectWithoutSubmitting"
+				>
+					Save Without Status Change
+				</button>
+				<button
+					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button approve"
 					@click="submitProject"
@@ -78,7 +91,7 @@
 					Approve this Project
 				</button>
 				<button
-					v-if="userIsApprover || userIsAdmin"
+					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button needs-review"
 					@click="submitProjectForReview"
@@ -86,7 +99,7 @@
 					Project Needs Revision
 				</button>
 				<button
-					v-if="userIsApprover || userIsAdmin"
+					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button reject"
 					@click="rejectProject"
@@ -250,7 +263,7 @@
 			},
 			async saveProjectWithoutSubmitting () {
 				const projectBlob = this.getPreparedStoreForSubmit();
-				if (this.isNewProject) {
+				if ((this.isNewProject || this.userIsOriginator || !projectBlob.project.STATUS_ID) && !this.userIsApprover) {
 					const indexOfStatus = caesCache.data.crfp.status.map(s => s.NAME).indexOf('Saved Without Submission');
 					if (indexOfStatus === -1) {
 						logError('Unable to save project.  Unable to set status for saving without submission.');
@@ -258,12 +271,13 @@
 					}
 					projectBlob.project.STATUS_ID = caesCache.data.crfp.status[indexOfStatus].ID;
 				}
-				const response = await saveProject(projectBlob);
+				let response = await saveProject(projectBlob);
+				response = await response.body;
 				if (response.SUCCESS) {
 					if (this.isNewProject) {
 						alert.successfulSave(this.schema.title.toLowerCase(), response.PROJECT_ID);
 					} else {
-						alert.successfulChanges();
+						alert.successfulChanges(response.PROJECT_ID);
 					}
 				} else {
 					alert.failedSave(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
@@ -283,10 +297,8 @@
 			async submitProject () {
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = this.projectsNextStatusId;
-				console.log(projectBlob.project);
 				let response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
-				console.log(response);
 				response = await response.body;
 				if (response.SUCCESS) {
 					alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);

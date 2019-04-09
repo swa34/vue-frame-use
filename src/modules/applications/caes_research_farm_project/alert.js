@@ -91,8 +91,11 @@ export default {
 			`.trim()
 		});
 	},
-	successfulChanges: () => {
-		swal('Awesome!', 'Your changes have been saved successfully.', 'success');
+	successfulChanges: projectId => {
+		swal('Awesome!', 'Your changes have been saved successfully.', 'success')
+			.then(() => {
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
+			});
 	},
 	successfulCommentSubmission: (title, projectId, action) => {
 		if (['approve', 'returnForReview', 'reject'].indexOf(action) === -1) {
@@ -108,12 +111,7 @@ export default {
 			type: 'success',
 			title: 'Awesome!',
 			text: `Your comments have been submitted successfully, and the ${title} has been ${actionText[action]}`
-		}).then(result => {
-			if (result.value) {
-				// They clicked OK
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
-			}
-		});
+		}).then(() => { window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`; });
 	},
 	successfulDelete: title => {
 		swal({
@@ -157,11 +155,8 @@ export default {
 			title: 'Awesome!',
 			text: `Your ${title} has been saved successfully.`,
 			confirmButtonText: 'OK'
-		}).then((result) => {
-			if (result.value) {
-				// They clicked OK
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
-			}
+		}).then(() => {
+			window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
 		});
 	},
 	successfulSubmit: (title, submitter, projectId) => {

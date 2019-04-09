@@ -17,7 +17,7 @@
 						:field="column"
 						:fetched="record._fetched"
 					/>
-					<div v-if="column.extra && column.extra.needsApprovalButtons" class="button-container">
+					<div v-if="mode === 'view' && column.extra && column.extra.needsApprovalButtons" class="button-container">
 						<button type="button" class="approve" @click="submitComments(column.columnName, record[column.columnName], 'approve')">
 							Approve this Project
 						</button>
@@ -43,6 +43,7 @@
 </template>
 
 <script>
+	/* global activeUser */
 	/* global activeUserId */
 	/* global caesCache */
 	import alert from '@/modules/applications/caes_research_farm_project/alert';
@@ -84,11 +85,22 @@
 			record: {
 				get () { return this.$store.state.project; },
 				set (val) { this.$store.state.project = val; }
+			},
+			status () {
+				// Grab the index of the project's current status
+				const statusIndex = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.record.STATUS_ID);
+				// If it's not found, assume it's a new project and so no comment
+				// sections should be displayed.
+				if (statusIndex === -1) return null;
+				// Grab the status from the cache
+				const status = caesCache.data.crfp.status[statusIndex];
+				return status;
 			}
 		},
 		methods: {
 			getPrettyColumnName,
 			columnShouldBeDisplayed (column) {
+				if (this.mode === 'view' && column.type === 'nvarchar' && ((activeUserId === this.record[column.extra.personnelColumn] || activeUser.IS_ADMINISTRATOR) && this.status.NAME === column.extra.status)) return true;
 				if (this.mode === 'view' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
 				if (!column.depends) return true;
 				if (Array.isArray(column.depends.column)) {
@@ -133,16 +145,10 @@
 				if (column.type === 'int') return this.mode === 'edit' ? 'input' : 'text';
 				// Else, if it's a comment section, so we have more work to do
 				if (column.type === 'nvarchar') {
-					// Grab the index of the project's current status
-					const statusIndex = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.record.STATUS_ID);
-					// If it's not found, assume it's a new project and so no comment
-					// sections should be displayed.
-					if (statusIndex === -1) return false;
-					// Grab the status from the cache
-					const status = caesCache.data.crfp.status[statusIndex];
-					// If the current user is the approver and the project is pending
-					// their approval, an input should be shown.
-					if (activeUserId === this.record[column.extra.personnelColumn] && status.NAME === column.extra.status) return 'input';
+					// If the current user is the approver or an administrator and the
+					// project is pending the approver's approval, an input should be
+					// shown.
+					if ((activeUserId === this.record[column.extra.personnelColumn] || activeUser.IS_ADMINISTRATOR) && this.status.NAME === column.extra.status) return 'input';
 					// If the approval date for this comment section is not null, display
 					// the comments as plain text.
 					if (this.record[column.extra.dateColumn]) return 'text';
