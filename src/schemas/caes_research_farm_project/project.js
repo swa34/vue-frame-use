@@ -78,7 +78,7 @@ const schema = {
 			required: true,
 			grouping: {
 				section: 'General Information',
-				order: 3
+				order: 1
 			}
 		},
 		{
@@ -632,7 +632,7 @@ const schema = {
 			extra: {
 				dateColumn: 'SUPERINTENDENT_APPROVAL_DATE',
 				needsApprovalButtons: true,
-				personnelColumn: 'SUPERINTENDENT_PERSONNEL_ID',
+				personnelColumn: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
 				status: 'Pending Superintendent Approval'
 			}
 		},

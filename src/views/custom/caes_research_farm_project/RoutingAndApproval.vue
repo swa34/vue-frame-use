@@ -100,7 +100,7 @@
 		methods: {
 			getPrettyColumnName,
 			columnShouldBeDisplayed (column) {
-				if (this.mode === 'view' && column.type === 'nvarchar' && ((activeUserId === this.record[column.extra.personnelColumn] || activeUser.IS_ADMINISTRATOR) && this.status.NAME === column.extra.status)) return true;
+				if (this.mode === 'view' && column.type === 'nvarchar') return true;
 				if (this.mode === 'view' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
 				if (!column.depends) return true;
 				if (Array.isArray(column.depends.column)) {
@@ -148,7 +148,7 @@
 					// If the current user is the approver or an administrator and the
 					// project is pending the approver's approval, an input should be
 					// shown.
-					if ((activeUserId === this.record[column.extra.personnelColumn] || activeUser.IS_ADMINISTRATOR) && this.status.NAME === column.extra.status) return 'input';
+					if ((activeUserId === this.record[column.extra.personnelColumn] || activeUser.IS_ADMINISTRATOR) && this.status && this.status.NAME === column.extra.status) return 'input';
 					// If the approval date for this comment section is not null, display
 					// the comments as plain text.
 					if (this.record[column.extra.dateColumn]) return 'text';

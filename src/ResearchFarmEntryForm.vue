@@ -117,6 +117,7 @@
 	/* global caesCache */
 	import alert from '@/modules/applications/caes_research_farm_project/alert';
 	import schema from '@/schemas/caes_research_farm_project/project';
+	import dateFormat from 'dateformat';
 	import DetailMain from '@/views/DetailMain';
 	import DuplicationModal from '@/views/DuplicationModal';
 	import projectDuplicationSchema from '@/schemas/caes_research_farm_project/duplication/project';
@@ -199,12 +200,41 @@
 			userHasEditRights () {
 				if (this.userIsOriginator) return true;
 				if (Boolean(activeUser.IS_ADMINISTRATOR) === true) return true;
-				return this.approvers.indexOf(activeUserId) !== -1;
+				return this.userIsCurrentApprover;
 			},
 			userIsAdmin () { return Boolean(activeUser.IS_ADMINISTRATOR); },
 			userIsApprover () {
 				if (!activeUserId) return false;
 				return this.approvers.indexOf(activeUserId) !== -1;
+			},
+			userIsCurrentApprover () {
+				if (!this.STATUS_ID) return false;
+				// If they're not the approver, they're not the current one either
+				if (!this.userIsApprover) return false;
+				console.log('user is at least approver');
+				// Find the name of the project's current status
+				const indexOfStatusId = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.STATUS_ID);
+				if (indexOfStatusId === -1) return false;
+				console.log('found index of current status');
+				const currentStatusName = caesCache.data.crfp.status[indexOfStatusId].NAME;
+				if (!currentStatusName) return false;
+				console.log(`found status name: ${currentStatusName}`);
+
+				// Filter the columns down to columns containing extra status/personnel data
+				const columnsWithExtraStatus = schema.columns.filter(c => c.extra && c.extra.status);
+				// Grab the index of the column for the current pending approver
+				const indexOfColumnForPersonnel = columnsWithExtraStatus.map(c => c.extra.status).indexOf(currentStatusName);
+				if (indexOfColumnForPersonnel === -1) return false;
+				console.log('found index of personnel extra');
+				// Grab that personnel id string
+				const personnelString = columnsWithExtraStatus[indexOfColumnForPersonnel].extra.personnelColumn;
+				// If it's not there, we're in trouble
+				if (!personnelString) return false;
+				console.log(`found personnel string: ${personnelString}`);
+				// Finally, determine whether the current user is that approver
+				const isCurrentApprover = this[personnelString] === activeUserId;
+				console.log(`is current approver: ${isCurrentApprover}`);
+				return isCurrentApprover;
 			},
 			userIsOriginator () { return this.ORIGINATOR_ID === activeUserId; }
 		},
@@ -249,12 +279,32 @@
 				schema.columns.filter(c => c.inputType === 'file').forEach(column => {
 					schemaLessStore.project[column.columnName] = this.$store.state.project[column.columnName];
 				});
+				caesCache.data.crfp.status.filter(status => {
+					const approvalStatusNames = [
+						'Pending Superintendent Approval',
+						'Pending Department Head Approval',
+						'Pending Final Site Approver Approval',
+						'Pending Office of Associate Dean of Research Approval'
+					];
+					return approvalStatusNames.indexOf(status.NAME) !== -1;
+				}).forEach(status => {
+					const approvalDateString = status.NAME
+						.replace(/^Pending (Superintendent|Department Head|Final Site Approver|Office of)(?: Approval| Associate Dean of )(Research)?.*/, '$1 $2')
+						.trim()
+						.toUpperCase()
+						.replace(/ /g, '_') + '_APPROVAL_DATE';
+					if (schemaLessStore.project.STATUS_ID === status.ID) {
+						const now = new Date();
+						schemaLessStore.project[approvalDateString] = dateFormat(now, 'isoDateTime');
+					}
+				});
 				return schemaLessStore;
 			},
 			async rejectProject () {
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = this.statusesIndexedByName['Rejected'];
-				const response = await saveProject(projectBlob);
+				let response = await saveProject(projectBlob);
+				response = await response.body;
 				if (response.SUCCESS) {
 					alert.successfulReject(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
@@ -309,7 +359,8 @@
 			async submitProjectForReview () {
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = getProjectsRevisionStatusId(projectBlob.project);
-				const response = await saveProject(projectBlob);
+				let response = await saveProject(projectBlob);
+				response = await response.body;
 				if (response.SUCCESS) {
 					alert.successfulReturnForReview(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
