@@ -82,16 +82,36 @@
 				:style="field.style"
 				@input="$emit('input', $event.target.checked)"
 			/>
-			<input
-				v-else-if="fieldType === 'file'"
-				type="file"
-				:files="[value]"
-				:accepted="field.acceptedTypes ? field.acceptedTypes.join(', ') : false"
-				:required="field.required"
-				:disabled="field.immutable"
-				:style="field.style"
-				@change="$emit('input', $event.target.files[0] || null)"
-			/>
+			<div v-else-if="fieldType === 'file'">
+				<input
+					v-if="value === null"
+					type="file"
+					:files="[value]"
+					:accepted="field.acceptedTypes ? field.acceptedTypes.join(', ') : false"
+					:required="field.required"
+					:disabled="field.immutable"
+					:style="field.style"
+					@change="$emit('input', $event.target.files[0] || null)"
+				/>
+				<div v-else-if="isFile(value)">
+					<span>
+						{{ value.name }}
+					</span>
+					<br />
+					<button type="button" class="button file-delete" @click="$emit('reset-value')">
+						Delete
+					</button>
+				</div>
+				<div v-else>
+					<a :href="`${application.attachmentWebPath}${value}`">
+						{{ value }}
+					</a>
+					<br />
+					<button type="button" class="button file-delete" @click="$emit('delete-file')">
+						Delete
+					</button>
+				</div>
+			</div>
 			<input
 				v-else-if="fieldType === 'text'"
 				:type="fieldType"
@@ -117,6 +137,7 @@
 </template>
 
 <script>
+	/* global caesCache */
 	import Editor from '@tinymce/tinymce-vue';
 	import FuzzySelect from '@/views/elements/FuzzySelect';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
@@ -124,6 +145,7 @@
 		getPrettyColumnName,
 		sqlToHtml
 	} from '@/modules/utilities';
+	import { isFile } from '@/modules/utilities/validation';
 
 	export default {
 		name: 'SmartInput',
@@ -161,7 +183,12 @@
 				]
 			}
 		},
-		data () { return { dependentValue: null }; },
+		data () {
+			return {
+				application: caesCache.application,
+				dependentValue: null
+			};
+		},
 		computed: {
 			dependentColumnValue () {
 				if (!this.field.depends || !this.field.depends.column) return null;
@@ -179,6 +206,7 @@
 			this.updateDependentValue();
 		},
 		methods: {
+			isFile,
 			setDefaultValue () {
 				this.$emit('input', this.field.defaultValue);
 			},
@@ -199,4 +227,9 @@
 	}
 	label legend h4 { margin: 0; }
 	input[type="number"] { width: auto; }
+	button.file-delete {
+		background-color: #6c3129;
+		font-size: .8em;
+		padding: .5em;
+	}
 </style>

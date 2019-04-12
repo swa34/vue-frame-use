@@ -94,7 +94,7 @@ export default {
 	successfulChanges: projectId => {
 		swal('Awesome!', 'Your changes have been saved successfully.', 'success')
 			.then(() => {
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
 			});
 	},
 	successfulCommentSubmission: (title, projectId, action) => {
@@ -111,7 +111,7 @@ export default {
 			type: 'success',
 			title: 'Awesome!',
 			text: `Your comments have been submitted successfully, and the ${title} has been ${actionText[action]}`
-		}).then(() => { window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`; });
+		}).then(() => { window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`; });
 	},
 	successfulDelete: title => {
 		swal({
@@ -132,7 +132,7 @@ export default {
 		}).then((result) => {
 			if (result.value) {
 				// They clicked OK
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
 			}
 		});
 	},
@@ -145,7 +145,7 @@ export default {
 		}).then((result) => {
 			if (result.value) {
 				// They clicked OK
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
 			}
 		});
 	},
@@ -156,7 +156,7 @@ export default {
 			text: `Your ${title} has been saved successfully.`,
 			confirmButtonText: 'OK'
 		}).then(() => {
-			window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
+			window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
 		});
 	},
 	successfulSubmit: (title, submitter, projectId) => {
@@ -177,7 +177,7 @@ export default {
 		}).then((result) => {
 			if (result.value) {
 				// They clicked OK
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&pk_id=${projectId}`;
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
 			}
 		});
 	}

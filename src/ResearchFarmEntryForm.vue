@@ -272,7 +272,7 @@
 				});
 			},
 			duplicateProject () {
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&DuplicateId=${this.ID}`;
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&DuplicateId=${this.ID}`;
 			},
 			initializeNewProject () {
 				this.ORIGINATOR_ID = activeUserId;

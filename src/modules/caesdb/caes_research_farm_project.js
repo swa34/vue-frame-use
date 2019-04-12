@@ -28,6 +28,16 @@ export const getDepartmentHeadCollegeId = async personnelId => {
 	}
 };
 
+export const deleteFile = async (projectId, columnName, fileName) => {
+	try {
+		const url = generateUrl('deleteFile', apiPrefix);
+		const data = await makeAsyncPostRequest(url, { projectId, columnName, fileName });
+		return { success: data.SUCCESS, messages: data.MESSAGES };
+	} catch (err) {
+		return { success: false, messages: err };
+	}
+};
+
 export const deleteProject = async projectId => {
 	try {
 		const url = generateUrl('deleteProject', apiPrefix);

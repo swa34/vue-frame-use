@@ -52,6 +52,8 @@
 										:field="area.data"
 										:fetched="record._fetched"
 										@show-help="showHelp(area.data)"
+										@delete-file="deleteFile(area.data)"
+										@reset-value="record[area.data.columnName] = null"
 									/>
 									<div v-else-if="mode === 'view' && area.data.customComponentForViewMode">
 										<component :is="area.data.customComponentForViewMode.component" :options="area.data.customComponentForViewMode.options" />
@@ -471,6 +473,31 @@
 			isFile,
 			isString,
 			getPrettyColumnName,
+			deleteFile (column) {
+				swal.fire({
+				  title: 'Are you sure?',
+				  text: 'This will also delete the file from the server.',
+				  type: 'warning',
+				  showCancelButton: true,
+				  confirmButtonColor: '#6c3129',
+				  cancelButtonColor: '#004e60',
+				  confirmButtonText: 'Yes, delete it!'
+				}).then(async result => {
+				  if (result.value) {
+						try {
+							const response = await column.deleteFile(this.record.ID, this.record[column.columnName]);
+							if (response.success) {
+								this.record[column.columnName] = null;
+							} else {
+								alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), response.messages);
+							}
+						} catch (err) {
+							logError(err);
+							alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
+						}
+				  }
+				});
+			},
 			getSectionClasses (section) {
 				if (typeof section.disableFlex === 'undefined') return 'flex-section';
 				if (section.disableFlex === true) return '';

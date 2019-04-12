@@ -7,6 +7,7 @@ import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/s
 import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
 import usStates from '@/modules/data/united-states';
 import {
+	deleteFile,
 	getDepartmentHeadCollegeId,
 	getProject
 } from '@/modules/caesdb/caes_research_farm_project';
@@ -523,6 +524,9 @@ const schema = {
 			prettyName: 'Treatment List',
 			type: 'nvarchar',
 			inputType: 'file',
+			deleteFile: (projectId, fileName) => {
+				return deleteFile(projectId, 'TREATMENT_LIST_ATTACHMENT_PATH', fileName);
+			},
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -533,6 +537,9 @@ const schema = {
 			prettyName: 'Plot Map',
 			type: 'nvarchar',
 			inputType: 'file',
+			deleteFile: (projectId, fileName) => {
+				return deleteFile(projectId, 'PLOT_MAP_ATTACHMENT_PATH', fileName);
+			},
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -543,6 +550,9 @@ const schema = {
 			prettyName: 'Calendar',
 			type: 'nvarchar',
 			inputType: 'file',
+			deleteFile: (projectId, fileName) => {
+				return deleteFile(projectId, 'CALENDAR_ATTACHMENT_PATH', fileName);
+			},
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
