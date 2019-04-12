@@ -63,11 +63,18 @@
 										<span v-if="(area.data.inputType === 'select' || sqlToHtml(area.data) === 'select')">
 											{{ getOptionLabel(area.data.constraint, record[area.data.columnName]) }}
 										</span>
-										<span v-else-if="area.data.inputType === 'file'">
-											<a :href="`${application.attachmentWebPath}${record[area.data.columnName]}`">
+										<div v-else-if="area.data.inputType === 'file'">
+											<a
+												v-if="isString(record[area.data.columnName])"
+												:href="`${application.attachmentWebPath}${record[area.data.columnName]}`">
 												{{ record[area.data.columnName] }}
 											</a>
-										</span>
+											<div v-else-if="isFile(record[area.data.columnName])">
+												<span>{{ record[area.data.columnName].name }}</span>
+												<br />
+												<em class="is-small">(Not yet uploaded)</em>
+											</div>
+										</div>
 										<span v-else>
 											{{ record[area.data.columnName] }}
 										</span>
@@ -296,6 +303,10 @@
 		stringFormats
 	} from '@/modules/utilities';
 	import {
+		isFile,
+		isString
+	} from '@/modules/utilities/validation';
+	import {
 		getCriteriaStructure,
 		logError
 	} from '@/modules/caesdb';
@@ -457,6 +468,8 @@
 		},
 		// The methods available to this component during render
 		methods: {
+			isFile,
+			isString,
 			getPrettyColumnName,
 			getSectionClasses (section) {
 				if (typeof section.disableFlex === 'undefined') return 'flex-section';
@@ -754,6 +767,7 @@
 </script>
 
 <style lang="scss">
+	em.is-small { font-size: .75em; }
 	fieldset {
 		display: flex;
 		flex-wrap: wrap;

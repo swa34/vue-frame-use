@@ -246,18 +246,30 @@
 			if (url.getParam('pk_id')) this.mode = 'view';
 		},
 		methods: {
-			async removeProject () {
-				try {
-					const response = await deleteProject(this.ID);
-					if (response.success) {
-						alert.successfulDelete(this.schema.title.toLowerCase());
-					} else {
-						alert.failedDelete(this.schema.title.toLowerCase(), response.Messages);
-					}
-				} catch (err) {
-					logError(err);
-					alert.failedDelete(this.schema.title.toLowerCase(), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
-				}
+			removeProject () {
+				swal.fire({
+				  title: 'Are you sure?',
+				  text: "You won't be able to revert this!",
+				  type: 'warning',
+				  showCancelButton: true,
+				  confirmButtonColor: '#6c3129',
+				  cancelButtonColor: '#004e60',
+				  confirmButtonText: 'Yes, delete it!'
+				}).then(async result => {
+				  if (result.value) {
+						try {
+							const response = await deleteProject(this.ID);
+							if (response.success) {
+								alert.successfulDelete(this.schema.title.toLowerCase());
+							} else {
+								alert.failedDelete(this.schema.title.toLowerCase(), response.Messages);
+							}
+						} catch (err) {
+							logError(err);
+							alert.failedDelete(this.schema.title.toLowerCase(), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
+						}
+				  }
+				});
 			},
 			duplicateProject () {
 				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?public=projectForm&DuplicateId=${this.ID}`;

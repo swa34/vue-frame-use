@@ -24,6 +24,8 @@
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
+				:minlength="field.minlength"
+				:maxlength="field.maxlength"
 				@input="$emit('input', $event.target.value)"
 			>
 			</textarea>
@@ -89,6 +91,17 @@
 				:disabled="field.immutable"
 				:style="field.style"
 				@change="$emit('input', $event.target.files[0] || null)"
+			/>
+			<input
+				v-else-if="fieldType === 'text'"
+				:type="fieldType"
+				:value="value"
+				:required="field.required"
+				:disabled="field.immutable"
+				:style="field.style"
+				:minlength="field.minlength"
+				:maxlength="field.maxlength"
+				@input="$emit('input', $event.target.value)"
 			/>
 			<input
 				v-else

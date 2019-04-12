@@ -492,6 +492,7 @@ const schema = {
 			prettyName: 'Justification',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			maxlength: 1250,
 			grouping: {
 				section: 'Summary of Project',
 				order: 1
@@ -502,6 +503,7 @@ const schema = {
 			prettyName: 'Objectives',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			maxlength: 1250,
 			grouping: {
 				section: 'Summary of Project',
 				order: 2
