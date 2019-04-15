@@ -1,6 +1,5 @@
 <template lang="html">
 	<div>
-		{{ INVOLVES_PLANTS }}
 		<div class="header">
 			<h1>Research Farm Project</h1>
 			<div class="button-container">
