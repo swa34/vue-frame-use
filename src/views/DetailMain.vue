@@ -197,38 +197,40 @@
 										</h3>
 									</legend>
 									<p v-if="area.data.description" class="description">{{ area.data.description }}</p>
-									<div
-										v-for="field in area.data.fields"
-										:key="field.columnName"
-										:class="field.customClasses ? field.customClasses.join(' ') : ''"
-									>
-										<div v-if="field.isFlexBreak" class="flex-break"></div>
-										<SmartInput
-											v-else-if="mode === 'edit' && field.type === 'int'"
-											v-model.number="record[field.columnName]"
-											:field="field"
-											:is-inside-fieldset="true"
-											:fetched="record._fetched"
-											@show-help="showHelp(field)"
-										/>
-										<SmartInput
-											v-else-if="mode === 'edit'"
-											v-model="record[field.columnName]"
-											:field="field"
-											:is-inside-fieldset="true"
-											:fetched="record._fetched"
-											@show-help="showHelp(field)"
-										/>
-										<div v-else class="view-mode-wrapper">
-											<h4 class="inline">
-												{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
-											</h4>
-											<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
-												{{ getOptionLabel(field.constraint, record[field.columnName]) }}
-											</span>
-											<span v-else>
-												{{ typeof record[field.columnName] === 'boolean' ? record[field.columnName] ? 'Yes' : 'No' : record[field.columnName] }}
-											</span>
+									<div class="flex-container">
+										<div
+											v-for="field in area.data.fields"
+											:key="field.columnName"
+											:class="field.customClasses ? field.customClasses.join(' ') : ''"
+										>
+											<div v-if="field.isFlexBreak" class="flex-break"></div>
+											<SmartInput
+												v-else-if="mode === 'edit' && field.type === 'int'"
+												v-model.number="record[field.columnName]"
+												:field="field"
+												:is-inside-fieldset="true"
+												:fetched="record._fetched"
+												@show-help="showHelp(field)"
+											/>
+											<SmartInput
+												v-else-if="mode === 'edit'"
+												v-model="record[field.columnName]"
+												:field="field"
+												:is-inside-fieldset="true"
+												:fetched="record._fetched"
+												@show-help="showHelp(field)"
+											/>
+											<div v-else class="view-mode-wrapper">
+												<h4 class="inline">
+													{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
+												</h4>
+												<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
+													{{ getOptionLabel(field.constraint, record[field.columnName]) }}
+												</span>
+												<span v-else>
+													{{ typeof record[field.columnName] === 'boolean' ? record[field.columnName] ? 'Yes' : 'No' : record[field.columnName] }}
+												</span>
+											</div>
 										</div>
 									</div>
 								</fieldset>
@@ -796,29 +798,32 @@
 <style lang="scss">
 	em.is-small { font-size: .75em; }
 	fieldset {
-		display: flex;
-		flex-wrap: wrap;
-		p:first-of-type { margin-top: 0; }
-		p.description { flex-basis: 100%; }
-		&.view-mode {
-			display: block;
-			margin: 1rem 0;
-			legend h3 { margin: 0; }
-			div.view-mode-wrapper {
-				display: flex;
-				h4 {
-					margin: 0 .5rem 0 0;
-					line-height: 1.6em;
+		div.flex-container {
+			display: flex;
+			flex-wrap: wrap;
+			div {
+				flex-basis: 100%;
+				&.inline {
+					flex-basis: auto;
+					margin-right: .5rem;
 				}
+				label legend h3 { font-size: .75rem; }
 			}
 		}
-		div {
-			flex-basis: 100%;
-			&.inline {
-				flex-basis: auto;
-				margin-right: .5rem;
+		p:first-of-type { margin-top: 0; }
+		&.view-mode {
+			margin: 1rem 0;
+			legend h3 { margin: 0; }
+			div.flex-container {
+				display: block;
+				div.view-mode-wrapper {
+					display: flex;
+					h4 {
+						margin: 0 .5rem 0 0;
+						line-height: 1.6em;
+					}
+				}
 			}
-			label legend h3 { font-size: .75rem; }
 		}
 	}
 	div.submit {

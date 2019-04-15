@@ -80,7 +80,7 @@
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
-				@input="$emit('input', $event.target.checked)"
+				@change="$emit('input', $event.target.checked)"
 			/>
 			<div v-else-if="fieldType === 'file'">
 				<input
