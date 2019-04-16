@@ -17,7 +17,7 @@
 			<div v-if="mode === 'edit'">
 				<p>
 					<label>
-						<h4>AUP Number</h4>
+						<h4>AUP Number <em class="required-asterisk">*</em></h4>
 						<input v-model="record.AUP_NUMBER" type="text" required />
 					</label>
 				</p>
@@ -381,3 +381,7 @@
 		}
 	};
 </script>
+
+<style lang="scss" scoped>
+	em.required-asterisk { color: #6c3129; }
+</style>

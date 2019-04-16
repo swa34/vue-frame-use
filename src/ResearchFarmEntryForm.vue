@@ -42,6 +42,7 @@
 		<p>
 			Please contact Kelly Eisele at (706) 542-2151 with any questions.
 		</p>
+		<hr />
 		<DetailMain
 			:schema="schema"
 			:mode="mode"

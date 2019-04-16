@@ -8,28 +8,17 @@
 				General Plant Project Info
 			</h3>
 			<p>
-				<label class="checkbox">
-					<input
-						v-model="record.IS_SAFE"
-						type="checkbox"
-						:disabled="mode === 'view'"
-					/>
-					<span>
-						{{ columns.IS_SAFE.prettyName }}
-					</span>
-				</label>
-			</p>
-			<p>
-				<label class="checkbox">
-					<input
-						v-model="record.MUST_BE_DESTROYED"
-						type="checkbox"
-						:disabled="mode === 'view'"
-					/>
-					<span>
-						{{ columns.MUST_BE_DESTROYED.prettyName }}
-					</span>
-				</label>
+				<div class="radio-container">
+					<label class="radio">
+						<input v-model="record.IS_SAFE" type="radio" :value="columns['IS_SAFE'].options.true.value" :disabled="mode === 'view'" />
+						<span>{{ columns['IS_SAFE'].options.true.label }}</span>
+					</label>
+					<br />
+					<label class="radio">
+						<input v-model="record.IS_SAFE" type="radio" :value="columns['IS_SAFE'].options.false.value" :disabled="mode === 'view'" />
+						<span>{{ columns['IS_SAFE'].options.false.label }}</span>
+					</label>
+				</div>
 			</p>
 			<div v-if="mode === 'edit'">
 				<p>
@@ -164,6 +153,10 @@
 				this.localRecord = records[0];
 			}
 			if (!this.isNew) this.fetchExistingData();
+			// Set default values
+			this.schema.columns.forEach(column => {
+				if (column.default !== undefined && column.default !== null && this.record[column.columnName] === null) this.record[column.columnName] = column.default;
+			});
 		},
 		methods: {
 			fetchExistingData () {
@@ -201,9 +194,10 @@
 </script>
 
 <style lang="scss" scoped>
-	label.checkbox {
+	label.checkbox, label.radio {
 		display: flex;
 		input { margin-right: 1rem; }
 		span { flex-grow: 1; }
 	}
+	em.required-asterisk { color: #6c3129; }
 </style>

@@ -121,6 +121,7 @@ const schema = {
 			columnName: 'PI_PERSONNEL_ID',
 			prettyName: 'CAES Principle Investigator',
 			type: 'int',
+			caveat: 'Required.  If not populated, a non-CAES Principle Investigator must be entered.',
 			constraint: {
 				values: caesCache.data.crfp.principleInvestigators,
 				foreignKey: 'PERSONNEL_ID',
@@ -140,24 +141,6 @@ const schema = {
 			columnName: 'PI_FIRST_NAME',
 			prettyName: 'First Name',
 			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'PI_MIDDLE_NAME',
-			prettyName: 'Middle Name',
-			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 3
@@ -168,10 +151,6 @@ const schema = {
 			columnName: 'PI_LAST_NAME',
 			prettyName: 'Last Name',
 			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 3
@@ -184,10 +163,6 @@ const schema = {
 			prettyName: 'Email Address',
 			type: 'nvarchar',
 			inputType: 'email',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 3
@@ -199,106 +174,32 @@ const schema = {
 			prettyName: 'Phone Number',
 			type: 'nvarchar',
 			inputType: 'tel',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 3
 			},
 			customClasses: ['inline'],
 			breakAfter: true
-		},
-		{
-			columnName: 'PI_ADDRESS_1',
-			prettyName: 'Address',
-			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
-		},
-		{
-			columnName: 'PI_ADDRESS_2',
-			prettyName: 'Address (Cont.)',
-			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline'],
-			breakAfter: true
-		},
-		{
-			columnName: 'PI_CITY',
-			prettyName: 'City',
-			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
-		},
-		{
-			columnName: 'PI_STATE',
-			prettyName: 'State',
-			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline'],
-			constraint: {
-				values: usStates,
-				foreignKey: 'abbreviation',
-				foreignLabel: 'name'
-			},
-			defaultValue: 'GA'
-		},
-		{
-			columnName: 'PI_ZIPCODE',
-			prettyName: 'ZIP Code',
-			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_DEPARTMENT',
 			prettyName: 'Department Name',
 			type: 'nvarchar',
-			depends: {
-				column: 'PI_PERSONNEL_ID',
-				test: nullTest
-			},
 			grouping: {
 				section: 'General Information',
 				order: 3
-			}
+			},
+			customClasses: ['inline']
+		},
+		{
+			columnName: 'PI_ORGANIZATION',
+			prettyName: 'Organization',
+			type: 'nvarchar',
+			grouping: {
+				section: 'General Information',
+				order: 3
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_PERSONNEL_ID',
@@ -322,16 +223,6 @@ const schema = {
 		{
 			columnName: 'SECONDARY_CONTACT_FIRST_NAME',
 			prettyName: 'First Name',
-			type: 'nvarchar',
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
-		},
-		{
-			columnName: 'SECONDARY_CONTACT_MIDDLE_NAME',
-			prettyName: 'Middle Name',
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
@@ -374,8 +265,8 @@ const schema = {
 			breakAfter: true
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_ADDRESS_1',
-			prettyName: 'Address',
+			columnName: 'SECONDARY_CONTACT_DEPARTMENT',
+			prettyName: 'Department Name',
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
@@ -384,45 +275,8 @@ const schema = {
 			customClasses: ['inline']
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_ADDRESS_2',
-			prettyName: 'Address (Cont.)',
-			type: 'nvarchar',
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline'],
-			breakAfter: true
-		},
-		{
-			columnName: 'SECONDARY_CONTACT_CITY',
-			prettyName: 'City',
-			type: 'nvarchar',
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
-		},
-		{
-			columnName: 'SECONDARY_CONTACT_STATE',
-			prettyName: 'State',
-			type: 'nvarchar',
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline'],
-			constraint: {
-				values: usStates,
-				foreignKey: 'abbreviation',
-				foreignLabel: 'name'
-			},
-			defaultValue: 'GA'
-		},
-		{
-			columnName: 'SECONDARY_CONTACT_ZIPCODE',
-			prettyName: 'ZIP Code',
+			columnName: 'SECONDARY_CONTACT_ORGANIZATION',
+			prettyName: 'Organization',
 			type: 'nvarchar',
 			grouping: {
 				section: 'General Information',
@@ -434,6 +288,7 @@ const schema = {
 			columnName: 'COMMODITY_ID',
 			prettyName: 'Commodity',
 			type: 'int',
+			required: true,
 			constraint: {
 				values: caesCache.data.crfp.commodity,
 				foreignKey: 'ID',
@@ -445,9 +300,28 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'COMMODITY_OTHER',
+			prettyName: 'Other Commodity',
+			type: 'nvarchar',
+			required: true,
+			depends: {
+				column: 'COMMODITY_ID',
+				test (val) {
+					const otherCommodityIndex = caesCache.data.crfp.commodity.map(c => c.LABEL).indexOf('Other');
+					if (otherCommodityIndex < 0) return false;
+					return val === caesCache.data.crfp.commodity[otherCommodityIndex].ID;
+				}
+			},
+			grouping: {
+				section: 'General Information',
+				order: 3
+			}
+		},
+		{
 			columnName: 'DISCIPLINE_ID',
 			prettyName: 'Discipline',
 			type: 'int',
+			required: true,
 			constraint: {
 				values: caesCache.data.crfp.discipline,
 				foreignKey: 'ID',
@@ -459,34 +333,24 @@ const schema = {
 			}
 		},
 		{
-			columnName: 'IS_RESEARCH',
-			prettyName: 'Research',
-			type: 'bit',
+			columnName: 'PROJECT_AREA',
+			prettyName: 'Area to Which the Project Pertains',
+			type: 'nvarchar',
+			inputType: 'radio',
+			required: true,
 			grouping: {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: ['inline']
-		},
-		{
-			columnName: 'IS_EXTENSION',
-			prettyName: 'Extension',
-			type: 'bit',
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
-		},
-		{
-			columnName: 'IS_TEACHING',
-			prettyName: 'Teaching',
-			type: 'bit',
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customClasses: ['inline']
+			constraint: {
+				foreignKey: 'name',
+				foreignLabel: 'name',
+				values: [
+					{	name: 'Research' },
+					{ name: 'Extension' },
+					{ name: 'Teaching' }
+				]
+			}
 		},
 		{
 			columnName: 'RATIONALE',
@@ -494,6 +358,8 @@ const schema = {
 			type: 'nvarchar',
 			inputType: 'textarea',
 			maxlength: 1250,
+			caveat: 'Maximum of 250 words',
+			required: true,
 			grouping: {
 				section: 'Summary of Project',
 				order: 1
@@ -505,6 +371,8 @@ const schema = {
 			type: 'nvarchar',
 			inputType: 'textarea',
 			maxlength: 1250,
+			caveat: 'Maximum of 250 words',
+			required: true,
 			grouping: {
 				section: 'Summary of Project',
 				order: 2
@@ -514,6 +382,7 @@ const schema = {
 			columnName: 'PLAN_OF_WORK',
 			type: 'nvarchar',
 			inputType: 'textarea',
+			required: true,
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
@@ -594,6 +463,7 @@ const schema = {
 			columnName: 'OTHER_FUNDING_SOURCE',
 			prettyName: 'Specify Funding Agency',
 			type: 'nvarchar',
+			required: true,
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
 				order: 1
@@ -602,8 +472,10 @@ const schema = {
 		{
 			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
 			prettyName: 'Financial Support Available for Project',
-			description: 'Please enter the US dollar amount of funding available for this project.',
+			description: 'Please enter the US dollar amount (cash, in-kind contributions) of funding available for this project.',
 			type: 'int',
+			required: true,
+			default: 0,
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
 				order: 1
@@ -613,6 +485,7 @@ const schema = {
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
 			prettyName: 'Station Superintendent',
 			type: 'int',
+			immutable: true,
 			getDependentValue: getResearchFarmDependentValueFn('SUPERINTENDENT_PERSONNEL_ID'),
 			constraint: {
 				values: caesCache.data.crfp.superintendents,
@@ -661,6 +534,7 @@ const schema = {
 			columnName: 'DEPARTMENT_HEAD_PERSONNEL_ID',
 			prettyName: 'Department Head',
 			type: 'int',
+			immutable: true,
 			constraint: {
 				values: caesCache.data.crfp.departmentHeads,
 				foreignKey: 'PERSONNEL_ID',
@@ -720,6 +594,7 @@ const schema = {
 			columnName: 'FINAL_SITE_APPROVER_PERSONNEL_ID',
 			prettyName: 'Final Site Approver',
 			type: 'int',
+			immutable: true,
 			constraint: {
 				values: caesCache.data.crfp.finalSiteApprovers,
 				foreignKey: 'PERSONNEL_ID',
@@ -768,6 +643,7 @@ const schema = {
 			columnName: 'OFFICE_OF_RESEARCH_PERSONNEL_ID',
 			prettyName: 'Office of Research',
 			type: 'int',
+			immutable: true,
 			constraint: {
 				values: caesCache.data.crfp.officeOfResearchApprovers,
 				foreignKey: 'PERSONNEL_ID',
@@ -892,18 +768,14 @@ const schema = {
 				{
 					title: 'Non-CAES Principle Investigator',
 					order: 3,
+					caveat: 'Required if CAES Principle Investigator is not selected.',
 					columns: [
 						'PI_FIRST_NAME',
-						'PI_MIDDLE_NAME',
 						'PI_LAST_NAME',
 						'PI_EMAIL',
 						'PI_PHONE',
-						'PI_ADDRESS_1',
-						'PI_ADDRESS_2',
-						'PI_CITY',
-						'PI_STATE',
-						'PI_ZIPCODE',
-						'PI_DEPARTMENT'
+						'PI_DEPARTMENT',
+						'PI_ORGANIZATION'
 					],
 					depends: {
 						column: 'PI_PERSONNEL_ID',
@@ -915,29 +787,16 @@ const schema = {
 					order: 3,
 					columns: [
 						'SECONDARY_CONTACT_FIRST_NAME',
-						'SECONDARY_CONTACT_MIDDLE_NAME',
 						'SECONDARY_CONTACT_LAST_NAME',
 						'SECONDARY_CONTACT_EMAIL',
 						'SECONDARY_CONTACT_PHONE',
-						'SECONDARY_CONTACT_ADDRESS_1',
-						'SECONDARY_CONTACT_ADDRESS_2',
-						'SECONDARY_CONTACT_CITY',
-						'SECONDARY_CONTACT_STATE',
-						'SECONDARY_CONTACT_ZIPCODE'
+						'SECONDARY_CONTACT_DEPARTMENT',
+						'SECONDARY_CONTACT_ORGANIZATION'
 					],
 					depends: {
 						column: 'SECONDARY_CONTACT_PERSONNEL_ID',
 						test: nullTest
 					}
-				},
-				{
-					title: 'Areas to Which the Project Pertains',
-					order: 3,
-					columns: [
-						'IS_RESEARCH',
-						'IS_EXTENSION',
-						'IS_TEACHING'
-					]
 				}
 			]
 		},

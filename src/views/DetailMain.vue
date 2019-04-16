@@ -13,6 +13,11 @@
 				<p>Loading...</p>
 			</div>
 		</div>
+		<p v-if="mode === 'edit' && hasRequiredFields">
+			<em>
+				Required fields marked by an <span class="is-red">*</span>
+			</em>
+		</p>
 		<section v-for="section in schema.sections" :key="section.title">
 			<h2 class="head section-heading" @click="toggleSection(section)">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
@@ -194,6 +199,9 @@
 									<legend>
 										<h3>
 											{{ area.data.title }}
+											<em v-if="area.data.caveat" class="is-small">
+												({{ area.data.caveat }})
+											</em>
 										</h3>
 									</legend>
 									<p v-if="area.data.description" class="description">{{ area.data.description }}</p>
@@ -380,6 +388,15 @@
 		data () {
 			return {
 				application: caesCache.application ? caesCache.application : { attachmentWebPath: '/' },
+				hasRequiredFields: this.schema.sections.reduce((hasRequiredFields, section) => {
+					if (section.areas) {
+						section.areas.forEach(area => {
+							if (area.data.required) hasRequiredFields = true;
+						});
+					}
+
+					return hasRequiredFields;
+				}, false),
 				helpMessage: {
 					show: false,
 					name: ''
@@ -796,8 +813,10 @@
 </script>
 
 <style lang="scss">
+	span.is-red { color: #6c3129; }
 	em.is-small { font-size: .75em; }
 	fieldset {
+		legend h3 em.is-small { font-weight: normal; }
 		div.flex-container {
 			display: flex;
 			flex-wrap: wrap;

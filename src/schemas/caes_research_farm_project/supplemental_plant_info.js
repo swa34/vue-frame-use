@@ -24,19 +24,24 @@ const supplementalPlantInfoSchema = {
 		},
 		{
 			columnName: 'IS_SAFE',
-			prettyName: 'By checking this box, the principle investigators confirm that all of the resulting plant material is safe for livestock consumption and/or consumer markets.',
 			type: 'bit',
-			required: true
-		},
-		{
-			columnName: 'MUST_BE_DESTROYED',
-			prettyName: 'By checking this box, the principle investigators confirm that all or some portion of the resulting plant material must be destroyed.',
-			type: 'bit',
-			required: true
+			required: true,
+			inputType: 'radio',
+			default: false,
+			options: {
+				true: {
+					value: true,
+					label: 'By checking this box, the principle investigators confirm that all of the resulting plant material is safe for livestock consumption and/or consumer markets.'
+				},
+				false: {
+					value: false,
+					label: 'By checking this box, the principle investigators confirm that all or some portion of the resulting plant material must be destroyed.'
+				}
+			}
 		},
 		{
 			columnName: 'FIELD_NAME',
-			prettyName: 'Experimental field name of designation (will be populated by superintendent at a later time)',
+			prettyName: 'Experimental field name or designation (will be populated by superintendent at a later time)',
 			type: 'nvarchar'
 		},
 		{

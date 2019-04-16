@@ -1,18 +1,26 @@
 <template lang="html">
 	<div>
-		<label :class="fieldType === 'checkbox' && isInsideFieldset ? 'flex' : ''">
+		<label v-if="fieldType !== 'radio'" :class="fieldType === 'checkbox' && isInsideFieldset ? 'flex' : ''">
 			<legend v-if="displayLabel">
 				<h3 v-if="!isInsideFieldset">
 					{{ fieldName }}
 					<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
 						<HelpCircleIcon />
 					</a>
+					<em v-if="field.required" class="required-asterisk">*</em>
+					<em v-if="field.caveat" class="is-small">
+						({{ field.caveat }})
+					</em>
 				</h3>
 				<h4 v-else>
 					{{ fieldName }}
 					<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
 						<HelpCircleIcon />
 					</a>
+					<em v-if="field.required" class="required-asterisk">*</em>
+					<em v-if="field.caveat" class="is-small">
+						({{ field.caveat }})
+					</em>
 				</h4>
 				<p v-if="field.description">
 					{{ field.description }}
@@ -133,6 +141,41 @@
 				@input="$emit('input', $event.target.value)"
 			/>
 		</label>
+		<div v-else-if="fieldType === 'radio'" class="radio-container">
+			<h3 v-if="!isInsideFieldset">
+				{{ fieldName }}
+				<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
+					<HelpCircleIcon />
+				</a>
+				<em v-if="field.required" class="required-asterisk">*</em>
+				<em v-if="field.caveat" class="is-small">
+					({{ field.caveat }})
+				</em>
+			</h3>
+			<h4 v-else>
+				{{ fieldName }}
+				<a v-if="field.helpMessageName" class="help-link" @click="$emit('show-help')">
+					<HelpCircleIcon />
+				</a>
+				<em v-if="field.required" class="required-asterisk">*</em>
+				<em v-if="field.caveat" class="is-small">
+					({{ field.caveat }})
+				</em>
+			</h4>
+			<label
+				v-for="option in field.constraint.values"
+				:key="option[field.constraint.foreignKey]"
+			>
+				<input
+					type="radio"
+					:name="fieldName"
+					:checked="value === option[field.constraint.foreignKey]"
+					:value="option[field.constraint.foreignKey]"
+					@change="$emit('input', $event.target.value)"
+				/>
+				<span>{{ option[field.constraint.foreignLabel] }}</span>
+			</label>
+		</div>
 	</div>
 </template>
 
@@ -218,6 +261,7 @@
 </script>
 
 <style lang="scss" scoped>
+	$red: #6c3129;
 	label {
 		&.flex {
 			display: flex;
@@ -228,8 +272,15 @@
 	label legend h4 { margin: 0; }
 	input[type="number"] { width: auto; }
 	button.file-delete {
-		background-color: #6c3129;
+		background-color: $red;
 		font-size: .8em;
 		padding: .5em;
+	}
+	h3, h4 {
+		em.is-small { font-weight: normal; }
+		em.required-asterisk { color: $red; }
+	}
+	div.radio-container {
+		label:not(:last-of-type) { padding-right: 1rem; }
 	}
 </style>
