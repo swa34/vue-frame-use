@@ -334,7 +334,7 @@
 					}
 					projectBlob.project.STATUS_ID = caesCache.data.crfp.status[indexOfStatus].ID;
 				}
-				let response = await saveProject(projectBlob);
+				let response = await saveProject(projectBlob, true);
 				response = await response.body;
 				if (response.SUCCESS) {
 					if (this.isNewProject) {

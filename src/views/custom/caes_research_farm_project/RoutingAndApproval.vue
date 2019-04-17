@@ -15,8 +15,9 @@
 					<SmartInput
 						v-model="record[column.columnName]"
 						:field="column"
-						:fetched="record._fetched"
+						:fetched="false"
 					/>
+					<!--:fetched="record._fetched"-->
 					<div v-if="mode === 'view' && column.extra && column.extra.needsApprovalButtons" class="button-container">
 						<button type="button" class="approve" @click="submitComments(column.columnName, record[column.columnName], 'approve')">
 							Approve this Project

@@ -88,7 +88,7 @@ export const getSupplementalPlantInfo = async criteriaStructure => {
 	}
 };
 
-export const saveProject = async projectBlob => {
+export const saveProject = async (projectBlob, saveOnly = false) => {
 	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
 	try {
 		const url = generateUrl('saveProject', apiPrefix);
@@ -98,7 +98,8 @@ export const saveProject = async projectBlob => {
 			.attach('TREATMENT_LIST_ATTACHMENT_PATH', projectBlob.project.TREATMENT_LIST_ATTACHMENT_PATH instanceof File ? projectBlob.project.TREATMENT_LIST_ATTACHMENT_PATH : null)
 			.attach('PLOT_MAP_ATTACHMENT_PATH', projectBlob.project.PLOT_MAP_ATTACHMENT_PATH instanceof File ? projectBlob.project.PLOT_MAP_ATTACHMENT_PATH : null)
 			.attach('CALENDAR_ATTACHMENT_PATH', projectBlob.project.CALENDAR_ATTACHMENT_PATH instanceof File ? projectBlob.project.CALENDAR_ATTACHMENT_PATH : null)
-			.field('projectBlob', JSON.stringify(projectBlob));
+			.field('projectBlob', JSON.stringify(projectBlob))
+			.field('saveOnly', JSON.stringify(saveOnly));
 		--window.pendingRequests;
 		return data;
 	} catch (err) {
