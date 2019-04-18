@@ -10,7 +10,7 @@
 			has been approved.
 		</p>
 		<div v-for="column in columns" :key="column.columnName">
-			<div v-if="columnShouldBeDisplayed(column)">
+			<div v-show="columnShouldBeDisplayed(column)">
 				<div v-if="typeToShow(column) === 'input'">
 					<SmartInput
 						v-model="record[column.columnName]"
@@ -103,6 +103,7 @@
 			columnShouldBeDisplayed (column) {
 				if (this.mode === 'view' && column.type === 'nvarchar') return true;
 				if (this.mode === 'view' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
+				if (this.mode === 'edit' && column.type !== 'nvarchar' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
 				if (!column.depends) return true;
 				if (Array.isArray(column.depends.column)) {
 					return column.depends.test(column.depends.column.map(column => {

@@ -1,4 +1,5 @@
 /* global caesCache */
+/* global activeUserId */ 
 import CaesPersonnelDetails from '@/views/custom/caes_research_farm_project/CaesPersonnelDetails';
 import RoutingAndApproval from '@/views/custom/caes_research_farm_project/RoutingAndApproval';
 import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
@@ -66,6 +67,7 @@ const schema = {
 		{
 			columnName: 'ORIGINATOR_ID',
 			type: 'int',
+			default: activeUserId,
 			immutable: true,
 			automated: true,
 			grouping: {
@@ -161,6 +163,7 @@ const schema = {
 		{
 			columnName: 'PI_EMAIL',
 			prettyName: 'Email Address',
+			placeholder: 'name@domain.com',
 			type: 'nvarchar',
 			inputType: 'email',
 			grouping: {
@@ -172,6 +175,7 @@ const schema = {
 		{
 			columnName: 'PI_PHONE',
 			prettyName: 'Phone Number',
+			placeholder: 'xxx-xxx-xxxx',
 			type: 'nvarchar',
 			inputType: 'tel',
 			grouping: {
@@ -244,6 +248,7 @@ const schema = {
 		{
 			columnName: 'SECONDARY_CONTACT_EMAIL',
 			prettyName: 'Email Address',
+			placeholder: 'name@domain.com',
 			type: 'nvarchar',
 			inputType: 'email',
 			grouping: {
@@ -255,6 +260,7 @@ const schema = {
 		{
 			columnName: 'SECONDARY_CONTACT_PHONE',
 			prettyName: 'Phone Number',
+			placeholder: 'xxx-xxx-xxxx',
 			type: 'nvarchar',
 			inputType: 'tel',
 			grouping: {

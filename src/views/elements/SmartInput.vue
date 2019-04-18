@@ -124,6 +124,7 @@
 				v-else-if="fieldType === 'text'"
 				:type="fieldType"
 				:value="value"
+				:placeholder="field.placeholder"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
@@ -132,9 +133,42 @@
 				@input="$emit('input', $event.target.value)"
 			/>
 			<input
+				v-else-if="fieldType === 'date'"
+				type="date"
+				placeholder="yyyy-mm-dd"
+				:value="value"
+				:required="field.required"
+				:disabled="field.immutable"
+				:style="field.style"
+				@input="$emit('input', $event.target.value)"
+			/>
+			<input
+				v-else-if="fieldType === 'tel'"
+				type="tel"
+				pattern="(\+[0-9]+ )?[0-9]{3}-[0-9]{3}-[0-9]{4}"
+				:value="value"
+				:placeholder="field.placeholder"
+				:required="field.required"
+				:disabled="field.immutable"
+				:style="field.style"
+				@input="$emit('input', $event.target.value)"
+			/>
+			<input
+				v-else-if="fieldType === 'email'"
+				type="email"
+				pattern="[^@]+@[^@]+\.[A-Za-z]+"
+				:value="value"
+				:placeholder="field.placeholder"
+				:required="field.required"
+				:disabled="field.immutable"
+				:style="field.style"
+				@input="$emit('input', $event.target.value)"
+			/>
+			<input
 				v-else
 				:type="fieldType"
 				:value="value"
+				:placeholder="field.placeholder"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"

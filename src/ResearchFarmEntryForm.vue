@@ -58,25 +58,8 @@
 				approved by the relevant committees as appropriate (radiological safety,
 				biological hazards, animal use).
 			</p>
-			<div class="button-container">
+			<div v-if="!isNewProject && !savedWithoutSubmit && (userIsApprover || userIsAdmin)" class="button-container">
 				<button
-					v-if="isNewProject || userIsOriginator"
-					type="button"
-					class="button"
-					@click="saveProjectWithoutSubmitting"
-				>
-					Save Without Submitting
-				</button>
-				<button
-					v-if="isNewProject || userIsOriginator"
-					type="button"
-					class="button submit-for-approval"
-					@click="submitProject"
-				>
-					Submit for Approval
-				</button>
-				<button
-					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button"
 					@click="saveProjectWithoutSubmitting"
@@ -84,7 +67,6 @@
 					Save Without Status Change
 				</button>
 				<button
-					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button approve"
 					@click="submitProject"
@@ -92,7 +74,6 @@
 					Approve this Project
 				</button>
 				<button
-					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button needs-review"
 					@click="submitProjectForReview"
@@ -100,12 +81,27 @@
 					Project Needs Revision
 				</button>
 				<button
-					v-if="!isNewProject && (userIsApprover || userIsAdmin)"
 					type="button"
 					class="button reject"
 					@click="rejectProject"
 				>
 					Reject this Project
+				</button>
+			</div>
+			<div v-else-if="isNewProject || userIsOriginator || (savedWithoutSubmit && userIsAdmin)" class="button-container">
+				<button
+					type="button"
+					class="button"
+					@click="saveProjectWithoutSubmitting"
+				>
+					Save Without Submitting
+				</button>
+				<button
+					type="button"
+					class="button submit-for-approval"
+					@click="submitProject"
+				>
+					Submit for Approval
 				</button>
 			</div>
 		</div>
@@ -198,6 +194,14 @@
 			isDuplicatedProject () { return this.duplicateId !== null && this.duplicateId !== false; },
 			isNewProject () { return url.getParam('new') !== null || url.getParam('NEW') !== null; },
 			projectsNextStatusId () { return getProjectsNextStatusId(this.$store.state.project); },
+			savedWithoutSubmit () { 
+				if (!this.STATUS_ID) return false;
+				// Find the name of the project's current status
+				const indexOfStatusId = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.STATUS_ID);
+				if (indexOfStatusId === -1) return false;
+				const currentStatusName = caesCache.data.crfp.status[indexOfStatusId].NAME;
+				return currentStatusName === 'Saved Without Submission';
+			},
 			userHasEditRights () {
 				if (this.userIsOriginator) return true;
 				if (Boolean(activeUser.IS_ADMINISTRATOR) === true) return true;
@@ -212,29 +216,23 @@
 				if (!this.STATUS_ID) return false;
 				// If they're not the approver, they're not the current one either
 				if (!this.userIsApprover) return false;
-				console.log('user is at least approver');
 				// Find the name of the project's current status
 				const indexOfStatusId = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.STATUS_ID);
 				if (indexOfStatusId === -1) return false;
-				console.log('found index of current status');
 				const currentStatusName = caesCache.data.crfp.status[indexOfStatusId].NAME;
 				if (!currentStatusName) return false;
-				console.log(`found status name: ${currentStatusName}`);
 
 				// Filter the columns down to columns containing extra status/personnel data
 				const columnsWithExtraStatus = schema.columns.filter(c => c.extra && c.extra.status);
 				// Grab the index of the column for the current pending approver
 				const indexOfColumnForPersonnel = columnsWithExtraStatus.map(c => c.extra.status).indexOf(currentStatusName);
 				if (indexOfColumnForPersonnel === -1) return false;
-				console.log('found index of personnel extra');
 				// Grab that personnel id string
 				const personnelString = columnsWithExtraStatus[indexOfColumnForPersonnel].extra.personnelColumn;
 				// If it's not there, we're in trouble
 				if (!personnelString) return false;
-				console.log(`found personnel string: ${personnelString}`);
 				// Finally, determine whether the current user is that approver
 				const isCurrentApprover = this[personnelString] === activeUserId;
-				console.log(`is current approver: ${isCurrentApprover}`);
 				return isCurrentApprover;
 			},
 			userIsOriginator () { return this.ORIGINATOR_ID === activeUserId; }
@@ -308,7 +306,7 @@
 						.replace(/ /g, '_') + '_APPROVAL_DATE';
 					if (schemaLessStore.project.STATUS_ID === status.ID) {
 						const now = new Date();
-						schemaLessStore.project[approvalDateString] = dateFormat(now, 'isoDateTime');
+						schemaLessStore.project[approvalDateString] = dateFormat(now, 'yyyy-mm-dd HH:MM:ss');
 					}
 				});
 				return schemaLessStore;
