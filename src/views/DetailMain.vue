@@ -199,6 +199,7 @@
 									<legend>
 										<h3>
 											{{ area.data.title }}
+											<em v-if="area.data.required && mode === 'edit'" class="required-asterisk">*</em>
 											<em v-if="area.data.caveat" class="is-small">
 												({{ area.data.caveat }})
 											</em>
@@ -813,6 +814,7 @@
 </script>
 
 <style lang="scss">
+	em.required-asterisk { color: #6c3129; }
 	span.is-red { color: #6c3129; }
 	em.is-small { font-size: .75em; }
 	fieldset {

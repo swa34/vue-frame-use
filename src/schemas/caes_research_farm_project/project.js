@@ -1,5 +1,5 @@
 /* global caesCache */
-/* global activeUserId */ 
+/* global activeUserId */
 import CaesPersonnelDetails from '@/views/custom/caes_research_farm_project/CaesPersonnelDetails';
 import RoutingAndApproval from '@/views/custom/caes_research_farm_project/RoutingAndApproval';
 import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
@@ -466,14 +466,44 @@ const schema = {
 			}
 		},
 		{
-			columnName: 'OTHER_FUNDING_SOURCE',
-			prettyName: 'Specify Funding Agency',
+			columnName: 'FEDERAL_FUNDING_SOURCE',
+			prettyName: 'Federal',
 			type: 'nvarchar',
-			required: true,
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
 				order: 1
-			}
+			},
+			customClasses: [ 'inline' ]
+		},
+		{
+			columnName: 'STATE_FUNDING_SOURCE',
+			prettyName: 'State',
+			type: 'nvarchar',
+			grouping: {
+				section: 'Additional Responsibilities and Funding',
+				order: 1
+			},
+			customClasses: [ 'inline' ]
+		},
+		{
+			columnName: 'COMMODITY_FUNDING_SOURCE',
+			prettyName: 'Commodity',
+			type: 'nvarchar',
+			grouping: {
+				section: 'Additional Responsibilities and Funding',
+				order: 1
+			},
+			customClasses: [ 'inline' ]
+		},
+		{
+			columnName: 'OTHER_FUNDING_SOURCE',
+			prettyName: 'Other',
+			type: 'nvarchar',
+			grouping: {
+				section: 'Additional Responsibilities and Funding',
+				order: 1
+			},
+			customClasses: [ 'inline' ]
 		},
 		{
 			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
@@ -828,7 +858,19 @@ const schema = {
 		},
 		{
 			title: 'Additional Responsibilities and Funding',
-			order: 4
+			order: 4,
+			fieldsets: [
+				{
+					title: 'Specify Funding Agencies',
+					required: true,
+					columns: [
+						'FEDERAL_FUNDING_SOURCE',
+						'STATE_FUNDING_SOURCE',
+						'COMMODITY_FUNDING_SOURCE',
+						'OTHER_FUNDING_SOURCE',
+					]
+				}
+			]
 		},
 		{
 			title: 'Routing and Approval',
