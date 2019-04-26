@@ -73,9 +73,7 @@ const projectDuplication = {
 				columns: [
 					'COMMODITY_ID',
 					'DISCIPLINE_ID',
-					'IS_RESEARCH',
-					'IS_EXTENSION',
-					'IS_TEACHING'
+					'PROJECT_AREA'
 				]
 			}
 		},
@@ -113,6 +111,9 @@ const projectDuplication = {
 			areas: {
 				columns: [
 					'SAFETY_REQUIREMENTS',
+					'FEDERAL_FUNDING_SOURCE',
+					'STATE_FUNDING_SOURCE',
+					'COMMODITY_FUNDING_SOURCE',
 					'OTHER_FUNDING_SOURCE',
 					'FINANCIAL_SUPPORT_AVAILABLE'
 				]

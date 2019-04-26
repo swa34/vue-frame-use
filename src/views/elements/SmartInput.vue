@@ -124,6 +124,7 @@
 				v-else-if="fieldType === 'text'"
 				:type="fieldType"
 				:value="value"
+				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				:placeholder="field.placeholder"
 				:required="field.required"
 				:disabled="field.immutable"
@@ -137,6 +138,7 @@
 				type="date"
 				placeholder="yyyy-mm-dd"
 				:value="value"
+				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
@@ -147,6 +149,7 @@
 				type="tel"
 				pattern="(\+[0-9]+ )?[0-9]{3}-[0-9]{3}-[0-9]{4}"
 				:value="value"
+				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				:placeholder="field.placeholder"
 				:required="field.required"
 				:disabled="field.immutable"
@@ -158,6 +161,7 @@
 				type="email"
 				pattern="[^@]+@[^@]+\.[A-Za-z]+"
 				:value="value"
+				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				:placeholder="field.placeholder"
 				:required="field.required"
 				:disabled="field.immutable"
@@ -168,6 +172,7 @@
 				v-else
 				:type="fieldType"
 				:value="value"
+				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				:placeholder="field.placeholder"
 				:required="field.required"
 				:disabled="field.immutable"
@@ -203,6 +208,7 @@
 				<input
 					type="radio"
 					:name="fieldName"
+					:class="field.customClasses ? field.customClasses.join(' ') : ''"
 					:checked="value === option[field.constraint.foreignKey]"
 					:value="option[field.constraint.foreignKey]"
 					@change="$emit('input', $event.target.value)"
@@ -296,6 +302,7 @@
 
 <style lang="scss" scoped>
 	$red: #6c3129;
+	input[type="text"].is-extra-wide { width: 28.5rem; }
 	label {
 		&.flex {
 			display: flex;

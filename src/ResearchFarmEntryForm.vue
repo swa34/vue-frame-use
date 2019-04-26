@@ -62,28 +62,28 @@
 				<button
 					type="button"
 					class="button"
-					@click="saveProjectWithoutSubmitting"
+					@click="saveProjectWithoutSubmitting()"
 				>
 					Save Without Status Change
 				</button>
 				<button
 					type="button"
 					class="button approve"
-					@click="submitProject"
+					@click="submitProject()"
 				>
 					Approve this Project
 				</button>
 				<button
 					type="button"
 					class="button needs-review"
-					@click="submitProjectForReview"
+					@click="submitProjectForReview()"
 				>
 					Project Needs Revision
 				</button>
 				<button
 					type="button"
 					class="button reject"
-					@click="rejectProject"
+					@click="rejectProject()"
 				>
 					Reject this Project
 				</button>
@@ -92,14 +92,14 @@
 				<button
 					type="button"
 					class="button"
-					@click="saveProjectWithoutSubmitting"
+					@click="saveProjectWithoutSubmitting()"
 				>
 					Save Without Submitting
 				</button>
 				<button
 					type="button"
 					class="button submit-for-approval"
-					@click="submitProject"
+					@click="submitProject(true)"
 				>
 					Submit for Approval
 				</button>
@@ -194,7 +194,7 @@
 			isDuplicatedProject () { return this.duplicateId !== null && this.duplicateId !== false; },
 			isNewProject () { return url.getParam('new') !== null || url.getParam('NEW') !== null; },
 			projectsNextStatusId () { return getProjectsNextStatusId(this.$store.state.project); },
-			savedWithoutSubmit () { 
+			savedWithoutSubmit () {
 				if (!this.STATUS_ID) return false;
 				// Find the name of the project's current status
 				const indexOfStatusId = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.STATUS_ID);
@@ -204,6 +204,7 @@
 			},
 			userHasEditRights () {
 				if (this.userIsOriginator) return true;
+				if (this.userIsPi) return true;
 				if (Boolean(activeUser.IS_ADMINISTRATOR) === true) return true;
 				return this.userIsCurrentApprover;
 			},
@@ -235,7 +236,8 @@
 				const isCurrentApprover = this[personnelString] === activeUserId;
 				return isCurrentApprover;
 			},
-			userIsOriginator () { return this.ORIGINATOR_ID === activeUserId; }
+			userIsOriginator () { return this.ORIGINATOR_ID === activeUserId; },
+			userIsPi () { return this.PI_PERSONNEL_ID === activeUserId; }
 		},
 		mounted () {
 			// This function will only ever be run once
@@ -271,7 +273,7 @@
 				});
 			},
 			duplicateProject () {
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&DuplicateId=${this.ID}`;
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&new&DuplicateId=${this.ID}`;
 			},
 			initializeNewProject () {
 				this.ORIGINATOR_ID = activeUserId;
@@ -355,9 +357,15 @@
 					document.title = `View Research Farm Project | ${document.title}`;
 				}
 			},
-			async submitProject () {
+			async submitProject (isBeingSubmittedForApproval = false) {
+				console.log(isBeingSubmittedForApproval);
 				const projectBlob = this.getPreparedStoreForSubmit();
-				projectBlob.project.STATUS_ID = this.projectsNextStatusId;
+				if (isBeingSubmittedForApproval) {
+					console.log('project being submitted for approval');
+					projectBlob.project.STATUS_ID = getProjectsNextStatusId(this.$store.state.project, true);
+				} else {
+					projectBlob.project.STATUS_ID = this.projectsNextStatusId;
+				}
 				let response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
 				response = await response.body;

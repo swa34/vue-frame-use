@@ -82,7 +82,8 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 1
-			}
+			},
+			customClasses: ['is-extra-wide']
 		},
 		{
 			columnName: 'PARTICIPATING_RESEARCH_FARM_ID',

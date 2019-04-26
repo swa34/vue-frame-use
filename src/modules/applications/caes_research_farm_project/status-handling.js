@@ -5,8 +5,8 @@ export const statusesIndexedByName = caesCache.data.crfp.status.reduce((newIndex
 	return newIndex;
 }, {});
 
-export const getProjectsNextStatusId = project => {
-	let currentStatus = project.STATUS_ID;
+export const getProjectsNextStatusId = (project, isBeingSubmittedForApproval = false) => {
+	let currentStatus = isBeingSubmittedForApproval ? null : project.STATUS_ID;
 	if (!currentStatus) currentStatus = statusesIndexedByName['Saved Without Submission'];
 	const statusesIndexedById = caesCache.data.crfp.status.reduce((newIndex, status) => {
 		newIndex[status.ID] = status.NAME;
