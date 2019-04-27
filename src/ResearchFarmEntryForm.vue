@@ -112,6 +112,7 @@
 	/* global activeUser */
 	/* global activeUserId */
 	/* global caesCache */
+	/* global swal */
 	import alert from '@/modules/applications/caes_research_farm_project/alert';
 	import schema from '@/schemas/caes_research_farm_project/project';
 	import dateFormat from 'dateformat';
@@ -249,15 +250,15 @@
 		methods: {
 			removeProject () {
 				swal.fire({
-				  title: 'Are you sure?',
-				  text: "You won't be able to revert this!",
-				  type: 'warning',
-				  showCancelButton: true,
-				  confirmButtonColor: '#6c3129',
-				  cancelButtonColor: '#004e60',
-				  confirmButtonText: 'Yes, delete it!'
+					title: 'Are you sure?',
+					text: "You won't be able to revert this!",
+					type: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#6c3129',
+					cancelButtonColor: '#004e60',
+					confirmButtonText: 'Yes, delete it!'
 				}).then(async result => {
-				  if (result.value) {
+					if (result.value) {
 						try {
 							const response = await deleteProject(this.ID);
 							if (response.success) {
@@ -269,7 +270,7 @@
 							logError(err);
 							alert.failedDelete(this.schema.title.toLowerCase(), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
 						}
-				  }
+					}
 				});
 			},
 			duplicateProject () {

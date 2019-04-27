@@ -165,7 +165,7 @@
 							<SmartInput
 								v-if="mode === 'edit'"
 								v-model="importantDate[column.columnName]"
-								:displayLabel="false"
+								:display-label="false"
 								:field="column"
 								:fetched="fetched"
 							/>
@@ -183,7 +183,7 @@
 						<td v-for="column in columnsToBeDisplayed" :key="column.columnName">
 							<SmartInput
 								v-model="newImportantDate[column.columnName]"
-								:displayLabel="false"
+								:display-label="false"
 								:field="column"
 								:fetched="fetched"
 							/>
@@ -217,7 +217,8 @@
 	import {
 		formatDates,
 		getObjectIndexedByKeyFromArray,
-		getPrettyColumnName
+		getPrettyColumnName,
+		url
 	} from '@/modules/utilities';
 
 	export default {
@@ -254,6 +255,21 @@
 				get () { return this.$store.state.supplementalAnimalInformation.fetched; },
 				set (val) { this.$store.state.supplementalAnimalInformation.fetched = val; }
 			},
+			duplicateId () {
+				return [
+					'duplicateId',
+					'duplicateID',
+					'DUPLICATEID',
+					'duplicateid',
+					'DuplicateID',
+					'DuplicateId',
+					'DuPlIcAtEiD'
+				].reduce((duplicateId, param) => {
+					if (url.getParam(param) !== null) duplicateId = url.getParam(param);
+					return duplicateId;
+				}, false);
+			},
+			isDuplicate () { return this.duplicateId !== false; },
 			isNew () { return this.$store.state.project.ID === null; },
 			newImportantDateIsValid () {
 				return importantDateSchema.columns.reduce((isValid, column) => {
@@ -273,6 +289,11 @@
 					if (records.length < 1) records.push(val);
 					records[0] = val;
 				}
+			},
+			shouldBeDuplicated () {
+				if (!this.$store.state.duplication) return false;
+				if (!this.$store.state.duplication.associations) return false;
+				return this.$store.state.duplication.associations.supplementalAnimalInformation === true;
 			},
 			tableGroups () {
 				let tableGroups = [];
@@ -298,7 +319,8 @@
 			} else {
 				this.localRecord = records[0];
 			}
-			if (!this.isNew) this.fetchExistingData();
+			if (!this.isNew) this.fetchExistingData(this.$store.state.project.ID);
+			else if (this.isDuplicate && this.shouldBeDuplicated) this.fetchExistingData(this.duplicateId);
 		},
 		methods: {
 			addNewImportantDate () {
@@ -308,7 +330,7 @@
 					return output;
 				}, {});
 			},
-			fetchExistingData () {
+			fetchExistingData (projectId) {
 				const getAnimalInfoCritStruct = async () => {
 					try {
 						const critStruct = await asyncGetCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix);
@@ -333,7 +355,13 @@
 						const result = await this.importantDateSchema.fetchExisting(critStruct);
 						if (result.success) {
 							formatDates(this.importantDateSchema.columns.filter(c => c.type === 'datetime').map(c => c.columnName), result.data);
+							const keysToSkipIfDuplicate = ['SUPPLEMENTAL_ANIMAL_INFO_ID'];
 							result.data.forEach(importantDate => {
+								if (this.isDuplicate) {
+									keysToSkipIfDuplicate.forEach(key => {
+										importantDate[key] = null;
+									});
+								}
 								this.record.importantDates.push(importantDate);
 							});
 							this.fetched = true;
@@ -345,13 +373,15 @@
 				const getAnimalInfo = async () => {
 					const critStruct = await getAnimalInfoCritStruct();
 					if (!critStruct) return;
-					critStruct[this.schema.criteria.string] = this.$store.state.project.ID;
+					critStruct[this.schema.criteria.string] = projectId;
 					try {
 						const result = await this.schema.fetchExisting(critStruct);
 						if (result.success) {
 							if (result.data.length > 0) {
 								const animalInfo = result.data[0];
+								const keysToSkipIfDuplicate = ['ID', 'PROJECT_ID'];
 								for (let key in this.record) {
+									if (this.isDuplicate && keysToSkipIfDuplicate.indexOf(key) !== -1) continue;
 									if (animalInfo[key]) this.record[key] = animalInfo[key];
 								}
 								getImportantDates(animalInfo.ID);

@@ -94,7 +94,10 @@
 		getCriteriaStructure,
 		logError
 	} from '@/modules/caesdb';
-	import { getObjectIndexedByKeyFromArray } from '@/modules/utilities';
+	import {
+		getObjectIndexedByKeyFromArray,
+		url
+	} from '@/modules/utilities';
 
 	export default {
 		name: 'SupplementalPlantInfo',
@@ -116,6 +119,21 @@
 			};
 		},
 		computed: {
+			duplicateId () {
+				return [
+					'duplicateId',
+					'duplicateID',
+					'DUPLICATEID',
+					'duplicateid',
+					'DuplicateID',
+					'DuplicateId',
+					'DuPlIcAtEiD'
+				].reduce((duplicateId, param) => {
+					if (url.getParam(param) !== null) duplicateId = url.getParam(param);
+					return duplicateId;
+				}, false);
+			},
+			isDuplicate () { return this.duplicateId !== false; },
 			isNew () { return this.$store.state.project.ID === null; },
 			record: {
 				get () {
@@ -128,6 +146,11 @@
 					if (records.length < 1) records.push(val);
 					records[0] = val;
 				}
+			},
+			shouldBeDuplicated () {
+				if (!this.$store.state.duplication) return false;
+				if (!this.$store.state.duplication.associations) return false;
+				return this.$store.state.duplication.associations.supplementalPlantInformation === true;
 			},
 			tableGroups () {
 				return supplementalPlantInfoSchema.columns
@@ -152,25 +175,28 @@
 			} else {
 				this.localRecord = records[0];
 			}
-			if (!this.isNew) this.fetchExistingData();
+			if (!this.isNew) this.fetchExistingData(this.$store.state.project.ID);
+			else if (this.isDuplicate && this.shouldBeDuplicated) this.fetchExistingData(this.duplicateId);
 			// Set default values
 			this.schema.columns.forEach(column => {
 				if (column.default !== undefined && column.default !== null && this.record[column.columnName] === null) this.record[column.columnName] = column.default;
 			});
 		},
 		methods: {
-			fetchExistingData () {
+			fetchExistingData (projectId) {
 				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, async (err, critStruct) => {
 					if (err) {
 						logError(err);
 					} else {
-						critStruct[this.schema.criteria.string] = this.$store.state.project.ID;
+						critStruct[this.schema.criteria.string] = projectId;
 						try {
 							const result = await this.schema.fetchExisting(critStruct);
 							if (result.success) {
 								if (result.data.length > 0) {
 									const plantInfo = result.data[0];
+									const keysToSkipIfDuplicate = ['ID', 'PROJECT_ID'];
 									for (let key in this.record) {
+										if (this.isDuplicate && keysToSkipIfDuplicate.indexOf(key) !== -1) continue;
 										if (plantInfo[key]) this.record[key] = plantInfo[key];
 									}
 								}
