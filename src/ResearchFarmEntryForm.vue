@@ -40,7 +40,8 @@
 			15.  Land requests for fall/winter should be made no later than Aug 1.
 		</p>
 		<p>
-			Please contact Kelly Eisele at (706) 542-2151 with any questions.
+			Please contact Kelly Eisele at (706) 542-2151 or 
+			<a href="mailto:agresch@uga.edu">agresch@uga.edu</a> with any questions.
 		</p>
 		<hr />
 		<DetailMain

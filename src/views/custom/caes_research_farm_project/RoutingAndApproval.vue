@@ -4,8 +4,7 @@
 			The form will be routed electronically to the appropriate
 			department or unit head, REC or Farm Superintendent, and finally the
 			individual responsible for the REC (usually an assistant or associate
-			dean). Please ensure the correct individuals are selected for the three
-			levels. The form can be returned at any approval level with requested
+			dean). The form can be returned at any approval level with requested
 			changes. The form submitter will be notified by e-mail once the project
 			has been approved.
 		</p>

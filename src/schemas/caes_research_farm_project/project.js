@@ -141,6 +141,25 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'SECONDARY_CONTACT_PERSONNEL_ID',
+			prettyName: 'CAES Secondary Contact',
+			type: 'int',
+			constraint: {
+				values: caesCache.data.crfp.secondaryContacts,
+				foreignKey: 'PERSONNEL_ID',
+				foreignLabel: 'FULL_NAME_LAST_FIRST'
+			},
+			allowNullOption: true,
+			grouping: {
+				section: 'General Information',
+				order: 3
+			},
+			customComponentForViewMode: {
+				component: CaesPersonnelDetails,
+				options: { isPrinciple: false }
+			}
+		},
+		{
 			columnName: 'PI_FIRST_NAME',
 			prettyName: 'First Name',
 			type: 'nvarchar',
@@ -159,7 +178,6 @@ const schema = {
 				order: 3
 			},
 			customClasses: [ 'inline' ],
-			breakAfter: true
 		},
 		{
 			columnName: 'PI_EMAIL',
@@ -184,7 +202,6 @@ const schema = {
 				order: 3
 			},
 			customClasses: ['inline'],
-			breakAfter: true
 		},
 		{
 			columnName: 'PI_DEPARTMENT',
@@ -207,25 +224,6 @@ const schema = {
 			customClasses: ['inline']
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_PERSONNEL_ID',
-			prettyName: 'CAES Secondary Contact',
-			type: 'int',
-			constraint: {
-				values: caesCache.data.crfp.secondaryContacts,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'FULL_NAME_LAST_FIRST'
-			},
-			allowNullOption: true,
-			grouping: {
-				section: 'General Information',
-				order: 3
-			},
-			customComponentForViewMode: {
-				component: CaesPersonnelDetails,
-				options: { isPrinciple: false }
-			}
-		},
-		{
 			columnName: 'SECONDARY_CONTACT_FIRST_NAME',
 			prettyName: 'First Name',
 			type: 'nvarchar',
@@ -244,7 +242,6 @@ const schema = {
 				order: 3
 			},
 			customClasses: ['inline'],
-			breakAfter: true
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_EMAIL',
@@ -269,7 +266,6 @@ const schema = {
 				order: 3
 			},
 			customClasses: ['inline'],
-			breakAfter: true
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_DEPARTMENT',
@@ -509,7 +505,7 @@ const schema = {
 		{
 			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
 			prettyName: 'Financial Support Available for Project',
-			description: 'Please enter the US dollar amount (cash, in-kind contributions) of funding available for this project.',
+			description: 'Please enter the dollar amount (cash or value of in-kind contributions) of funding available for this project.',
 			type: 'int',
 			required: true,
 			default: 0,

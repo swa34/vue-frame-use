@@ -22,7 +22,7 @@ const projectDuplication = {
 			}
 		},
 		'Dates': {
-			duplicate: false,
+			duplicate: true,
 			areas: {
 				columns: [
 					'START_DATE',
@@ -93,14 +93,14 @@ const projectDuplication = {
 			}
 		},
 		'Plant Science Project Information': {
-			duplicate: false,
+			duplicate: true,
 			areas: {
 				columns: ['INVOLVES_PLANTS'],
 				associations: ['supplementalPlantInformation']
 			}
 		},
 		'Animal Science Project Information': {
-			duplicate: false,
+			duplicate: true,
 			areas: {
 				columns: ['INVOLVES_ANIMALS'],
 				associations: ['supplementalAnimalInformation']
