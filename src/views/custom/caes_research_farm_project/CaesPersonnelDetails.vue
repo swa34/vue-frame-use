@@ -11,7 +11,7 @@
 			<br />
 			<a :href="`mailto:${personnel.email}`">{{ personnel.email }}</a>
 			<br />
-			{{ personnel.phone }}
+			<a :href="`tel:${personnel.phone}`">{{ personnel.phone }}</a>
 			<br />
 			<!-- {{ personnel.department }} -->
 		</p>
@@ -29,7 +29,7 @@
 			options: {
 				type: Object,
 				required: false,
-				default: { isPrinciple: true }
+				default: () => ({ isPrinciple: true })
 			}
 		},
 		data () {

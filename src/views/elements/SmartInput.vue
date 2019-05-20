@@ -146,8 +146,9 @@
 			/>
 			<input
 				v-else-if="fieldType === 'tel'"
+				ref="telInput"
 				type="tel"
-				pattern="(\+[0-9]+ )?[0-9]{3}-[0-9]{3}-[0-9]{4}"
+				pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
 				:value="value"
 				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				:placeholder="field.placeholder"
@@ -224,6 +225,7 @@
 	import Editor from '@tinymce/tinymce-vue';
 	import FuzzySelect from '@/views/elements/FuzzySelect';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import InputMask from 'inputmask';
 	import {
 		getPrettyColumnName,
 		sqlToHtml
@@ -287,6 +289,11 @@
 		mounted () {
 			if (this.field.defaultValue) this.setDefaultValue();
 			this.updateDependentValue();
+
+			if (this.fieldType === 'tel') {
+				const phoneMask = new InputMask('(999) 999-9999');
+				phoneMask.mask(this.$refs.telInput);
+			}
 		},
 		methods: {
 			isFile,

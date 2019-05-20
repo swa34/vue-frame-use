@@ -7,8 +7,8 @@
 			NOTE: An Animal Use Protocol (AUP) must be completed for each project
 			involving animals, even if no treatments are applied to the animals and no
 			data are collected from the animals. This would include, for example,
-			studies in which animals are used for grazing forage trials or used to
-			create runoff in field studies.
+			studies in which animals are used for grazing trials or used to	create
+			runoff in field studies.
 		</p>
 		<div>
 			<h3>

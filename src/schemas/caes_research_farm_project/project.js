@@ -6,7 +6,6 @@ import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/Su
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
 import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
 import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
-import usStates from '@/modules/data/united-states';
 import {
 	deleteFile,
 	getDepartmentHeadCollegeId,
@@ -177,7 +176,7 @@ const schema = {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: [ 'inline' ],
+			customClasses: [ 'inline' ]
 		},
 		{
 			columnName: 'PI_EMAIL',
@@ -194,14 +193,14 @@ const schema = {
 		{
 			columnName: 'PI_PHONE',
 			prettyName: 'Phone Number',
-			placeholder: 'xxx-xxx-xxxx',
+			placeholder: '(xxx) xxx-xxxx',
 			type: 'nvarchar',
 			inputType: 'tel',
 			grouping: {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: ['inline'],
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_DEPARTMENT',
@@ -241,7 +240,7 @@ const schema = {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: ['inline'],
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_EMAIL',
@@ -258,14 +257,14 @@ const schema = {
 		{
 			columnName: 'SECONDARY_CONTACT_PHONE',
 			prettyName: 'Phone Number',
-			placeholder: 'xxx-xxx-xxxx',
+			placeholder: '(xxx) xxx-xxxx',
 			type: 'nvarchar',
 			inputType: 'tel',
 			grouping: {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: ['inline'],
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'SECONDARY_CONTACT_DEPARTMENT',
@@ -300,7 +299,8 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 3
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'COMMODITY_OTHER',
@@ -318,7 +318,8 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 3
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'DISCIPLINE_ID',
@@ -333,7 +334,8 @@ const schema = {
 			grouping: {
 				section: 'General Information',
 				order: 3
-			}
+			},
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PROJECT_AREA',
@@ -830,6 +832,15 @@ const schema = {
 						column: 'SECONDARY_CONTACT_PERSONNEL_ID',
 						test: nullTest
 					}
+				},
+				{
+					title: 'Commodity/Discipline',
+					order: 3,
+					columns: [
+						'COMMODITY_ID',
+						'COMMODITY_OTHER',
+						'DISCIPLINE_ID'
+					]
 				}
 			]
 		},
@@ -864,7 +875,7 @@ const schema = {
 						'FEDERAL_FUNDING_SOURCE',
 						'STATE_FUNDING_SOURCE',
 						'COMMODITY_FUNDING_SOURCE',
-						'OTHER_FUNDING_SOURCE',
+						'OTHER_FUNDING_SOURCE'
 					]
 				}
 			]

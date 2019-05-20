@@ -73,7 +73,8 @@
 										<div v-else-if="area.data.inputType === 'file'">
 											<a
 												v-if="isString(record[area.data.columnName])"
-												:href="`${application.attachmentWebPath}${record[area.data.columnName]}`">
+												:href="`${application.attachmentWebPath}${record[area.data.columnName]}`"
+											>
 												{{ record[area.data.columnName] }}
 											</a>
 											<div v-else-if="isFile(record[area.data.columnName])">
@@ -205,40 +206,50 @@
 											</em>
 										</h3>
 									</legend>
-									<p v-if="area.data.description" class="description">{{ area.data.description }}</p>
+									<p v-if="area.data.description" class="description">
+										{{ area.data.description }}
+									</p>
 									<div class="flex-container">
 										<div
 											v-for="field in area.data.fields"
 											:key="field.columnName"
 											:class="field.customClasses ? field.customClasses.join(' ') : ''"
 										>
-											<div v-if="field.isFlexBreak" class="flex-break"></div>
-											<SmartInput
-												v-else-if="mode === 'edit' && field.type === 'int'"
-												v-model.number="record[field.columnName]"
-												:field="field"
-												:is-inside-fieldset="true"
-												:fetched="record._fetched"
-												@show-help="showHelp(field)"
-											/>
-											<SmartInput
-												v-else-if="mode === 'edit'"
-												v-model="record[field.columnName]"
-												:field="field"
-												:is-inside-fieldset="true"
-												:fetched="record._fetched"
-												@show-help="showHelp(field)"
-											/>
-											<div v-else class="view-mode-wrapper">
-												<h4 class="inline">
-													{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
-												</h4>
-												<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
-													{{ getOptionLabel(field.constraint, record[field.columnName]) }}
-												</span>
-												<span v-else>
-													{{ typeof record[field.columnName] === 'boolean' ? record[field.columnName] ? 'Yes' : 'No' : record[field.columnName] }}
-												</span>
+											<div v-if="dependencyMet(field)">
+												<div v-if="field.isFlexBreak" class="flex-break"></div>
+												<SmartInput
+													v-else-if="mode === 'edit' && field.type === 'int'"
+													v-model.number="record[field.columnName]"
+													:field="field"
+													:is-inside-fieldset="true"
+													:fetched="record._fetched"
+													@show-help="showHelp(field)"
+												/>
+												<SmartInput
+													v-else-if="mode === 'edit'"
+													v-model="record[field.columnName]"
+													:field="field"
+													:is-inside-fieldset="true"
+													:fetched="record._fetched"
+													@show-help="showHelp(field)"
+												/>
+												<div v-else class="view-mode-wrapper">
+													<h4 class="inline">
+														{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
+													</h4>
+													<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
+														{{ getOptionLabel(field.constraint, record[field.columnName]) }}
+													</span>
+													<a v-else-if="field.inputType === 'email'" :href="`mailto:${record[field.columnName]}`">
+														{{ record[field.columnName] }}
+													</a>
+													<a v-else-if="field.inputType === 'tel'" :href="`tel:${record[field.columnName]}`">
+														{{ record[field.columnName] }}
+													</a>
+													<span v-else>
+														{{ typeof record[field.columnName] === 'boolean' ? record[field.columnName] ? 'Yes' : 'No' : record[field.columnName] }}
+													</span>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -291,6 +302,7 @@
 <!-- The script portion of the component -->
 <script>
 	/* global activeUserID */
+	/* global caesCache */
 	/* global notify */
 	/* global swal */
 	// Import required modules
@@ -495,15 +507,15 @@
 			getPrettyColumnName,
 			deleteFile (column) {
 				swal.fire({
-				  title: 'Are you sure?',
-				  text: 'This will also delete the file from the server.',
-				  type: 'warning',
-				  showCancelButton: true,
-				  confirmButtonColor: '#6c3129',
-				  cancelButtonColor: '#004e60',
-				  confirmButtonText: 'Yes, delete it!'
+					title: 'Are you sure?',
+					text: 'This will also delete the file from the server.',
+					type: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#6c3129',
+					cancelButtonColor: '#004e60',
+					confirmButtonText: 'Yes, delete it!'
 				}).then(async result => {
-				  if (result.value) {
+					if (result.value) {
 						try {
 							const response = await column.deleteFile(this.record.ID, this.record[column.columnName]);
 							if (response.success) {
@@ -515,7 +527,7 @@
 							logError(err);
 							alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
 						}
-				  }
+					}
 				});
 			},
 			getSectionClasses (section) {
