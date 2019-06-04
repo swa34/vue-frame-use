@@ -1,5 +1,5 @@
 <template lang="html">
-  <div v-if="schema.columns && records.length > 0">
+	<div v-if="schema.columns && records.length > 0">
 		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
 			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
@@ -80,26 +80,60 @@
 
 	export default {
 		name: 'DataMultiTable',
-		beforeDestroy () {
-			if (this.depends) {
-				if (this.depends.column) {
-					if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.$store.state.schema.title || this.$store.state.schema.table)][this.depends.column])) {
-						this.records = [];
-					}
-				} else if (this.depends.association) {
-					if (this.depends.useValues) {
-						if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.depends.association)].records, this.$store.state.schema)) {
-							this.records = [];
-						}
-					} else {
-						if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.depends.association)].records)) {
-							this.records = [];
-						}
-					}
-				}
+		components: { HelpCircleIcon },
+		props: {
+			associatedColumn: {
+				type: String,
+				default: null
+			},
+			depends: {
+				type: Object,
+				default: null
+			},
+			description: {
+				type: String,
+				default: null
+			},
+			filter: {
+				type: Object,
+				default: null
+			},
+			helpMessageName: {
+				type: String,
+				default: null
+			},
+			identifier: {
+				type: Object,
+				default: null
+			},
+			mode: {
+				type: String,
+				default: 'view',
+				validator: modeValidator
+			},
+			optionColumnName: {
+				type: String,
+				required: true
+			},
+			schema: {
+				type: Object,
+				required: true
+			},
+			showTotals: {
+				type: Boolean
+			},
+			title: {
+				type: String,
+				default: null
 			}
 		},
-		components: { HelpCircleIcon },
+		data () {
+			return {
+				criteriaStructure: {},
+				filterRecords: [],
+				localRecords: []
+			};
+		},
 		computed: {
 			duplication () {
 				return this.$store.state.duplication;
@@ -108,70 +142,56 @@
 				get () { return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched; },
 				set (val) { this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched = val; }
 			},
-			filteredColumns: {
-				get () {
-					let filteredColumns = [];
-					this.schema.columns.forEach((column) => {
-						if (this.columnShouldBeDisplayed(column)) filteredColumns.push(column);
-					});
-					return filteredColumns;
-				}
+			filteredColumns () {
+				return this.schema.columns.filter(column => this.columnShouldBeDisplayed(column));
 			},
-			filteredOptions: {
-				get () {
-					// If no filter was specified, return the unfiltered options
-					if (!this.filter) return this.options;
-					// We need to make sure that all specified associations are satisfied
-					// before we show any options, so we create this int to count as we
-					// process associations
-					let associationsSelected = 0;
-					// Loop through each of the filter's associations, so that we can
-					// populate the filter's criteria structure
-					this.filter.associations.forEach((association) => {
-						// Create an array to hold that association's values
-						let associatedValues = [];
-						// Get the records from the specified association in the store
-						this.$store.state[stringFormats.camelCase(association.title)].records.forEach((record) => {
-							// If our associated values array doesn't have the record yet, add
-							// it.
-							if (associatedValues.indexOf(record[association.column]) === -1) associatedValues.push(record[association.column]);
-						});
-						// If values have been set on the association, then we can assume
-						// we've successfully processed that association.  So, increment our
-						// counter.
-						if (associatedValues.length > 0) associationsSelected++;
-						// And push those values the criteria structure specified in the
-						// filter.
-						this.filter.criteriaStructure['criteria_' + (association.criteriaColumn || association.column) + '_eq'] = associatedValues;
-					});
-					// Once our criteria structure is populated with values, run
-					// the filter function to get the filtered records.
-					const filteredRecords = filter(this.filterRecords, this.filter.criteriaStructure);
-					// Then grab the values from those filtered records.
-					const filteredValues = filteredRecords.map(r => r[this.filter.optionColumn]);
-					// Create an empty array to hold them
-					const filteredOptions = [];
-					// Loop through each of the options
-					this.options.forEach((option) => {
-						// And if the option's value is in the filteredValues array, push
-						// the option into our filtered options array
-						if (filteredValues.indexOf(option.key) !== -1) filteredOptions.push(option);
-					});
-					// If our counter says we've got all the data for all associations,
-					// return our filtered options.  If all associations have not been
-					// satisfied, return an empty array.
-					return associationsSelected === this.filter.associations.length ? filteredOptions : [];
-				}
+			filteredOptions () {
+				// If no filter was specified, return the unfiltered options
+				if (!this.filter) return this.options;
+				// We need to make sure that all specified associations are satisfied
+				// before we show any options, so we create this int to count as we
+				// process associations
+				let associationsSelected = 0;
+				// Loop through each of the filter's associations, so that we can
+				// populate the filter's criteria structure
+				this.filter.associations.forEach((association) => {
+					// Create an array to hold that association's values
+					const associatedValues = this.$store.state[stringFormats.camelCase(association.title)].records
+						.map(record => record[association.column])
+						.filter((column, i, arr) => arr.indexOf(column) === i);
+					// If values have been set on the association, then we can assume
+					// we've successfully processed that association.  So, increment our
+					// counter.
+					if (associatedValues.length > 0) associationsSelected++;
+					// And push those values the criteria structure specified in the
+					// filter.
+					this.filter.criteriaStructure[`criteria_${association.criteriaColumn || association.column}_eq`] = associatedValues;
+				});
+				// Once our criteria structure is populated with values, run
+				// the filter function to get the filtered records.
+				const filteredRecords = filter(this.filterRecords, this.filter.criteriaStructure);
+				// Then grab the values from those filtered records.
+				const filteredValues = filteredRecords.map(r => r[this.filter.optionColumn]);
+				// Create an empty array to hold them
+				const filteredOptions = [];
+				// Loop through each of the options
+				this.options.forEach((option) => {
+					// And if the option's value is in the filteredValues array, push
+					// the option into our filtered options array
+					if (filteredValues.indexOf(option.key) !== -1) filteredOptions.push(option);
+				});
+				// If our counter says we've got all the data for all associations,
+				// return our filtered options.  If all associations have not been
+				// satisfied, return an empty array.
+				return associationsSelected === this.filter.associations.length ? filteredOptions : [];
 			},
-			optionColumn: {
-				get () {
-					for (let i = 0; i < this.schema.columns.length; ++i) {
-						const column = this.schema.columns[i];
-						if (column.columnName === this.optionColumnName) return column;
-						if (i === this.schema.columns.length - 1) {
-							logError(new Error('Could not find option column'));
-							return null;
-						}
+			optionColumn () {
+				for (let i = 0; i < this.schema.columns.length; ++i) {
+					const column = this.schema.columns[i];
+					if (column.columnName === this.optionColumnName) return column;
+					if (i === this.schema.columns.length - 1) {
+						logError(new Error('Could not find option column'));
+						return null;
 					}
 				}
 			},
@@ -195,12 +215,137 @@
 				}
 			}
 		},
-		data () {
-			return {
-				criteriaStructure: {},
-				filterRecords: [],
-				localRecords: []
+		watch: {
+			duplication: {
+				handler () {
+					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
+						this.getExistingRecords();
+					}
+				},
+				deep: true
+			},
+			filteredOptions (oldOptions, newOptions) {
+				const populateRecords = () => {
+					this.filteredOptions.forEach((option) => {
+						this.records.push(this.generateRecord(option));
+					});
+				};
+
+				const updateRecords = () => {
+					let shouldUpdate = true;
+					if (this.filter && this.filterRecords.length < 1) shouldUpdate = false;
+
+					if (shouldUpdate) {
+						const records = [];
+						// const optionsMap = this.filteredOptions.map(o => o.key);
+						const recordsMap = this.records.map(r => r[this.optionColumnName]);
+						this.filteredOptions.forEach((option) => {
+							const record = this.generateRecord(option);
+							const existingRecord = this.records[recordsMap.indexOf(option.key)];
+							for (let key in existingRecord) {
+								if (key !== this.optionColumnName && existingRecord[key] !== null) record[key] = existingRecord[key];
+							}
+							records.push(record);
+						});
+						this.records = records;
+					}
+				};
+
+				this.records.length > 0 ? updateRecords() : populateRecords();
+			}
+		},
+		mounted () {
+			const component = this;
+
+			let dateFields = [];
+			component.schema.columns.forEach((column) => {
+				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
+			});
+
+			const getFilterRecords = () => {
+				if (component.filter.getValues) {
+					component.filter.getValues((err, data) => {
+						if (err) logError(err);
+						if (data) component.filterRecords = data;
+					});
+				} else {
+					logError(new Error('Filter does not contain function to get values'));
+				}
 			};
+
+			const getConstraintData = () => {
+				component.schema.columns.forEach((column) => {
+					if (column.constraint && column.constraint.values && column.constraint.values.length > 0) {
+						let values = [];
+						column.constraint.values.forEach((result) => {
+							if (result.originalValue) {
+								values.push(result);
+							} else {
+								const value = {
+									key: result[column.constraint.foreignKey],
+									label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+									originalValue: result
+								};
+								values.push(value);
+							}
+						});
+						column.constraint.values = values;
+					} else if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
+						column.constraint.getValues((err, data) => {
+							if (err) logError(err);
+							if (data) {
+								let values = [];
+								data.forEach((result) => {
+									const value = {
+										key: result[column.constraint.foreignKey],
+										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+										originalValue: result
+									};
+									values.push(value);
+								});
+								column.constraint.values = values;
+							}
+						});
+					}
+				});
+			};
+
+			const fetchCriteriaStructure = () => {
+				getCriteriaStructure(component.filter.databaseName, component.filter.tablePrefix, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						component.criteriaStructure = data;
+					}
+				});
+			};
+
+			getConstraintData();
+			if (component.filter) {
+				getFilterRecords();
+				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
+			}
+			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
+				if (!this.fetched) this.getExistingRecords();
+			}
+		},
+		beforeDestroy () {
+			if (this.depends) {
+				if (this.depends.column) {
+					if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.$store.state.schema.title || this.$store.state.schema.table)][this.depends.column])) {
+						this.records = [];
+					}
+				} else if (this.depends.association) {
+					if (this.depends.useValues) {
+						if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.depends.association)].records, this.$store.state.schema)) {
+							this.records = [];
+						}
+					} else {
+						if (!this.depends.test(this.$store.state[stringFormats.camelCase(this.depends.association)].records)) {
+							this.records = [];
+						}
+					}
+				}
+			}
 		},
 		methods: {
 			columnShouldBeDisplayed (column) {
@@ -303,158 +448,6 @@
 				return hasValue;
 			},
 			sqlToHtml
-		},
-		mounted () {
-			const component = this;
-
-			let dateFields = [];
-			component.schema.columns.forEach((column) => {
-				if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
-			});
-
-			const getFilterRecords = () => {
-				if (component.filter.getValues) {
-					component.filter.getValues((err, data) => {
-						if (err) logError(err);
-						if (data) component.filterRecords = data;
-					});
-				} else {
-					logError(new Error('Filter does not contain function to get values'));
-				}
-			};
-
-			const getConstraintData = () => {
-				component.schema.columns.forEach((column) => {
-					if (column.constraint && column.constraint.values && column.constraint.values.length > 0) {
-						let values = [];
-						column.constraint.values.forEach((result) => {
-							if (result.originalValue) {
-								values.push(result);
-							} else {
-								const value = {
-									key: result[column.constraint.foreignKey],
-									label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
-									originalValue: result
-								};
-								values.push(value);
-							}
-						});
-						column.constraint.values = values;
-					} else if (column.constraint && column.constraint.values && column.constraint.values.length < 1 && column.constraint.getValues) {
-						column.constraint.getValues((err, data) => {
-							if (err) logError(err);
-							if (data) {
-								let values = [];
-								data.forEach((result) => {
-									const value = {
-										key: result[column.constraint.foreignKey],
-										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
-										originalValue: result
-									};
-									values.push(value);
-								});
-								column.constraint.values = values;
-							}
-						});
-					}
-				});
-			};
-
-			const fetchCriteriaStructure = () => {
-				getCriteriaStructure(component.filter.databaseName, component.filter.tablePrefix, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						component.criteriaStructure = data;
-					}
-				});
-			};
-
-			getConstraintData();
-			if (component.filter) {
-				getFilterRecords();
-				if (component.filter.fetchCriteriaStructure) fetchCriteriaStructure();
-			}
-			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				if (!this.fetched) this.getExistingRecords();
-			}
-		},
-		props: {
-			'associatedColumn': {
-				type: String
-			},
-			'depends': {
-				type: Object
-			},
-			'description': {
-				type: String
-			},
-			'filter': {
-				type: Object
-			},
-			'helpMessageName': {
-				type: String
-			},
-			'identifier': {
-				type: Object
-			},
-			'mode': {
-				type: String,
-				default: 'view',
-				validator: modeValidator
-			},
-			'optionColumnName': {
-				type: String,
-				required: true
-			},
-			'schema': {
-				type: Object,
-				required: true
-			},
-			'showTotals': {
-				type: Boolean
-			},
-			'title': {
-				type: String
-			}
-		},
-		watch: {
-			duplication: {
-				handler () {
-					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
-						this.getExistingRecords();
-					}
-				},
-				deep: true
-			},
-			filteredOptions (oldOptions, newOptions) {
-				const populateRecords = () => {
-					this.filteredOptions.forEach((option) => {
-						this.records.push(this.generateRecord(option));
-					});
-				};
-
-				const updateRecords = () => {
-					let shouldUpdate = true;
-					if (this.filter && this.filterRecords.length < 1) shouldUpdate = false;
-
-					if (shouldUpdate) {
-						const records = [];
-						// const optionsMap = this.filteredOptions.map(o => o.key);
-						const recordsMap = this.records.map(r => r[this.optionColumnName]);
-						this.filteredOptions.forEach((option) => {
-							const record = this.generateRecord(option);
-							const existingRecord = this.records[recordsMap.indexOf(option.key)];
-							for (let key in existingRecord) {
-								if (key !== this.optionColumnName && existingRecord[key] !== null) record[key] = existingRecord[key];
-							}
-							records.push(record);
-						});
-						this.records = records;
-					}
-				};
-
-				this.records.length > 0 ? updateRecords() : populateRecords();
-			}
 		}
 	};
 </script>

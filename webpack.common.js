@@ -1,6 +1,6 @@
-const CleanWebpackPlugin	= require('clean-webpack-plugin');
-const path								= require('path');
-const { VueLoaderPlugin }	= require('vue-loader');
+const path										= require('path');
+const { CleanWebpackPlugin }	= require('clean-webpack-plugin');
+const { VueLoaderPlugin }			= require('vue-loader');
 
 const resolve = dir => path.join(__dirname, dir);
 
