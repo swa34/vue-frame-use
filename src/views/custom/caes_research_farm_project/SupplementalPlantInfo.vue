@@ -7,19 +7,28 @@
 			<h3>
 				General Plant Project Info
 			</h3>
-			<p>
-				<div class="radio-container">
-					<label class="radio">
-						<input v-model="record.IS_SAFE" type="radio" :value="columns['IS_SAFE'].options.true.value" :disabled="mode === 'view'" />
-						<span>{{ columns['IS_SAFE'].options.true.label }}</span>
-					</label>
-					<br />
-					<label class="radio">
-						<input v-model="record.IS_SAFE" type="radio" :value="columns['IS_SAFE'].options.false.value" :disabled="mode === 'view'" />
-						<span>{{ columns['IS_SAFE'].options.false.label }}</span>
-					</label>
-				</div>
-			</p>
+			<div class="radio-container">
+				<label class="radio">
+					<input
+						v-model="record.IS_SAFE"
+						type="radio"
+						:value="columns['IS_SAFE'].options.true.value"
+						:disabled="mode === 'view'"
+					/>
+					<span>{{ columns['IS_SAFE'].options.true.label }}</span>
+				</label>
+				<br />
+				<label class="radio">
+					<input
+						v-model="record.IS_SAFE"
+						type="radio"
+						:value="columns['IS_SAFE'].options.false.value"
+						:disabled="mode === 'view'"
+					/>
+					<span>{{ columns['IS_SAFE'].options.false.label }}</span>
+				</label>
+			</div>
+			<br />
 			<div v-if="mode === 'edit'">
 				<p>
 					<label>
@@ -29,14 +38,12 @@
 				</p>
 			</div>
 			<div v-else>
-				<p>
-					<h4>
-						{{ columns.FIELD_NAME.prettyName }}
-					</h4>
-					<span>
-						{{ record.FIELD_NAME }}
-					</span>
-				</p>
+				<h4>
+					{{ columns.FIELD_NAME.prettyName }}
+				</h4>
+				<span>
+					{{ record.FIELD_NAME }}
+				</span>
 			</div>
 		</div>
 		<div>
