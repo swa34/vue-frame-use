@@ -2,7 +2,7 @@
 	<div v-if="schema.columns && records.length > 0">
 		<h3 v-if="title || schema.title">
 			{{ title || schema.title }}
-			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
+			<a v-if="helpMessageName && mode === 'edit'" class="help-link" @click="$emit('show-help')">
 				<HelpCircleIcon />
 			</a>
 		</h3>
@@ -18,25 +18,35 @@
 			</caption> -->
 			<thead>
 				<tr>
-					<th v-for="column in filteredColumns">
+					<th v-for="column in filteredColumns" :key="column.columnName">
 						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 					</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="record in records" v-bind:key="record[optionColumnName]" :class="mode === 'view' && !recordHasValue(record) ? 'hide-on-print' : ''">
-					<td v-for="column in filteredColumns">
+				<tr v-for="record in records" :key="record[optionColumnName]" :class="mode === 'view' && !recordHasValue(record) ? 'hide-on-print' : ''">
+					<td v-for="column in filteredColumns" :key="column.columnName">
 						<span v-if="column.columnName === optionColumnName">
 							{{ getOptionLabel(record[optionColumnName]) }}
 						</span>
 						<label v-else-if="mode === 'edit' && columnShouldBeEditable(column)">
 							<select v-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :disabled="column.immutable">
-								<option v-for="value in column.constraint.values" :value="value.key">
+								<option v-for="value in column.constraint.values" :key="value.key" :value="value.key">
 									{{ value.label }}
 								</option>
 							</select>
-							<input v-else-if="sqlToHtml(column) === 'number'" type="number" v-model.number="record[column.columnName]" :min="column.min || 0" :disabled="column.immutable" />
-							<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :disabled="column.immutable" />
+							<input
+								v-else-if="sqlToHtml(column) === 'number'"
+								v-model.number="record[column.columnName]"
+								type="number" :min="column.min || 0"
+								:disabled="column.immutable"
+							/>
+							<input
+								v-else
+								v-model="record[column.columnName]"
+								:type="sqlToHtml(column)"
+								:disabled="column.immutable"
+							/>
 						</label>
 						<span v-else>
 							{{ record[column.columnName] }}
@@ -46,7 +56,7 @@
 			</tbody>
 			<tfoot v-if="showTotals">
 				<tr>
-					<td v-for="(column, index) in filteredColumns">
+					<td v-for="(column, index) in filteredColumns" :key="index">
 						<span v-if="index === 0">
 							Total
 						</span>
@@ -186,14 +196,11 @@
 				return associationsSelected === this.filter.associations.length ? filteredOptions : [];
 			},
 			optionColumn () {
-				for (let i = 0; i < this.schema.columns.length; ++i) {
-					const column = this.schema.columns[i];
-					if (column.columnName === this.optionColumnName) return column;
-					if (i === this.schema.columns.length - 1) {
-						logError(new Error('Could not find option column'));
-						return null;
-					}
-				}
+				return this.schema.columns
+					.reduce((optionColumn, column, i, arr) => {
+						if (column.columnName === this.optionColumnName) optionColumn = column;
+						if (i === arr.length - 1 && optionColumn === null) logError(new Error('Could not find option column'));
+					}, null);
 			},
 			options: {
 				get () {

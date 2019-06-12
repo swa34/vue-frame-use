@@ -1,7 +1,7 @@
 <template lang="html">
 	<form>
 		<!-- Loop through each of the columns specified in the schema -->
-		<div v-for="column in schema.columns">
+		<div v-for="column in schema.columns" :key="column.columnName">
 			<transition appear name="fade">
 				<!--
 					If the column should be displayed, create a fieldset to hold the fields
@@ -21,25 +21,45 @@
 							Pretty straightforward here: use the approriate input type depending
 							on what type of data we're working with
 						-->
-						<textarea v-if="sqlToHtml(column) === 'textarea'" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable">
-							{{ record[column.columnName] }}
+						<textarea
+							v-if="sqlToHtml(column) === 'textarea'"
+							v-model="record[column.columnName]"
+							:required="false && column.required"
+							:disabled="column.immutable"
+						>
 						</textarea>
 						<Editor
 							v-else-if="column.inputType === 'richtext' || sqlToHtml(column) === 'richtext'"
 							v-model="record[column.columnName]"
 						/>
-						<select v-else-if="sqlToHtml(column) === 'select'" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable">
-							<option v-for="value in column.constraint.values" :value="value[column.constraint.foreignKey]">
+						<select
+							v-else-if="sqlToHtml(column) === 'select'"
+							v-model="record[column.columnName]"
+							:required="false && column.required"
+							:disabled="column.immutable"
+						>
+							<option v-for="value in column.constraint.values" :key="value[column.constraint.foreignKey]" :value="value[column.constraint.foreignKey]">
 								{{ value[column.constraint.foreignLabel] }}
 							</option>
 						</select>
-						<input v-else :type="sqlToHtml(column)" v-model="record[column.columnName]" :required="false && column.required" :disabled="column.immutable" />
+						<input
+							v-else
+							v-model="record[column.columnName]"
+							:type="sqlToHtml(column)"
+							:required="false && column.required"
+							:disabled="column.immutable"
+						/>
 					</label>
 				</fieldset>
 			</transition>
 		</div>
 		<!-- If no data store, add a button to update this record individually -->
-		<input v-if="!$store" class="button" value="Save" type="submit" />
+		<input
+			v-if="!$store"
+			class="button"
+			value="Save"
+			type="submit"
+		/>
 	</form>
 </template>
 
@@ -63,33 +83,16 @@
 		name: 'DatabaseForm',
 		components: { Editor },
 		props: {
-			'schema': {
+			schema: {
 				type: Object,
 				required: true
 			},
-			'identifier': {
+			identifier: {
 				type: [
 					Object,
 					Boolean
-				]
-			}
-		},
-		computed: {
-			record: {
-				get () {
-					// If there's a store, return the store's record, else just return the
-					// local record.
-					return this.$store ? this.$store.state[stringFormats.camelCase(this.schema.title)] : this.localRecord;
-				},
-				set (val) {
-					// Similarly, if there's a store, set the store's record to the value,
-					// and if not set the local record.
-					if (this.$store) {
-						this.$store.state[stringFormats.camelCase(this.schema.title)] = val;
-					} else {
-						this.localRecord = val;
-					}
-				}
+				],
+				default: () => false
 			}
 		},
 		data () {
@@ -108,26 +111,21 @@
 				};
 			}
 		},
-		methods: {
-			getPrettyColumnName,
-			sqlToHtml,
-			// A function to determine if a column should be displayed or not
-			columnShouldBeDisplayed (column) {
-				// Check if the column has a dependency
-				if (!column.depends) {
-					if (column.automated) return false;
-					// if ((!this.identifier || !this.identifier.key || (this.identifier.key && !this.identifier.value)) && column.automated) {
-					// 	// If no identifier was passed in, or no identifier key was passed
-					// 	// in, or if a key was passed in without a value, AND the column is
-					// 	// set as automated, don't show the column.
-					// 	return false;
-					// }
-					// Otherwise, do.
-					return true;
-				} else {
-					// If the column has a dependency, run the depend's test on the
-					// specified value to determine if the column should be shown or not.
-					return column.depends.test(this.record[column.depends.column]);
+		computed: {
+			record: {
+				get () {
+					// If there's a store, return the store's record, else just return the
+					// local record.
+					return this.$store ? this.$store.state[stringFormats.camelCase(this.schema.title)] : this.localRecord;
+				},
+				set (val) {
+					// Similarly, if there's a store, set the store's record to the value,
+					// and if not set the local record.
+					if (this.$store) {
+						this.$store.state[stringFormats.camelCase(this.schema.title)] = val;
+					} else {
+						this.localRecord = val;
+					}
 				}
 			}
 		},
@@ -204,6 +202,29 @@
 			if (component.identifier) getMainData();
 			// Regardless, get all column constraint data
 			getConstraintData();
+		},
+		methods: {
+			getPrettyColumnName,
+			sqlToHtml,
+			// A function to determine if a column should be displayed or not
+			columnShouldBeDisplayed (column) {
+				// Check if the column has a dependency
+				if (!column.depends) {
+					if (column.automated) return false;
+					// if ((!this.identifier || !this.identifier.key || (this.identifier.key && !this.identifier.value)) && column.automated) {
+					// 	// If no identifier was passed in, or no identifier key was passed
+					// 	// in, or if a key was passed in without a value, AND the column is
+					// 	// set as automated, don't show the column.
+					// 	return false;
+					// }
+					// Otherwise, do.
+					return true;
+				} else {
+					// If the column has a dependency, run the depend's test on the
+					// specified value to determine if the column should be shown or not.
+					return column.depends.test(this.record[column.depends.column]);
+				}
+			}
 		}
 	};
 </script>

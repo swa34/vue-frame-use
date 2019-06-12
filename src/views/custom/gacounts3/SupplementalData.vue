@@ -2,13 +2,13 @@
 	<div>
 		<h4 v-if="forSubReport">
 			Supplemental Data
-			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+			<a class="help-link" @click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })">
 				<HelpCircleIcon />
 			</a>
 		</h4>
 		<h3 v-else>
 			Supplemental Data
-			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+			<a class="help-link" @click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })">
 				<HelpCircleIcon />
 			</a>
 		</h3>
@@ -34,6 +34,7 @@
 			<tbody>
 				<tr
 					v-for="record in recordsSortedBySortOrder"
+					:key="record.FIELD_ID"
 					:class="`${mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''} ${isHeaderField(record.FIELD_ID) ? 'supplemental-subheading' : ''}`"
 				>
 					<td v-if="isHeaderField(record.FIELD_ID)" colspan="100%">
@@ -49,12 +50,24 @@
 							<option :value="null">
 								(None)
 							</option>
-							<option v-for="option in getFieldOptions(record)" :value="option.ID">
+							<option v-for="option in getFieldOptions(record)" :key="option.ID" :value="option.ID">
 								{{ option.LABEL }}
 							</option>
 						</select>
-						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
-						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
+						<input
+							v-else-if="getFieldInputType(record) === 'number'"
+							v-model="record.FIELD_VALUE"
+							:required="fieldIsRequired(record)"
+							type="number"
+							min="0"
+							step="any"
+						/>
+						<input
+							v-else
+							v-model="record.FIELD_VALUE"
+							:type="getFieldInputType(record)"
+							:required="fieldIsRequired(record)"
+						/>
 					</td>
 					<td v-else-if="record.FIELD_VALUE && !isHeaderField(record.FIELD_ID)">
 						<span v-if="getFieldInputType(record) === 'select'">
@@ -111,6 +124,7 @@
 
 	export default {
 		name: 'SupplementalData',
+		components: { HelpCircleIcon },
 		props: {
 			forSubReport: {
 				type: Boolean,
@@ -122,7 +136,26 @@
 				validator: modeValidator
 			}
 		},
-		components: { HelpCircleIcon },
+		data () {
+			return {
+				criteriaStructureTemplates: {
+					fieldOption: {},
+					reportField: {}
+				},
+				existingRecords: [],
+				fieldOptions: [],
+				fieldTypes: caesCache.data.gc3.fieldType,
+				fieldTypesWithLabels: [
+					'String Data',
+					'Option Data'
+				],
+				fieldTypeIDsWithLabels: [
+					2	// String data
+					// 4		// Option data
+				],
+				reportFields: []
+			};
+		},
 		computed: {
 			dependenciesMet () {
 				return this.programAreas.length > 0 && this.reportType !== null && this.topics.length > 0;
@@ -207,25 +240,142 @@
 				return this.$store.state.topics.records.map(r => r.TOPIC_ID);
 			}
 		},
-		data () {
-			return {
-				criteriaStructureTemplates: {
-					fieldOption: {},
-					reportField: {}
-				},
-				existingRecords: [],
-				fieldOptions: [],
-				fieldTypes: caesCache.data.gc3.fieldType,
-				fieldTypesWithLabels: [
-					'String Data',
-					'Option Data'
-				],
-				fieldTypeIDsWithLabels: [
-					2	// String data
-					// 4		// Option data
-				],
-				reportFields: []
+		watch: {
+			existingRecords () {
+				// We only want to run populate records here if we already know our
+				// valid fields.  Else, we might lose the user's changes to existing
+				// records.  Ask Gabe to tell you the tale of how he arrived at this
+				// conclusion.
+				if (this.reportFields.length > 0) this.populateRecords();
+			},
+			fieldIDs (newFieldIDs, oldFieldIDs) {
+				// Populate records with updated fields
+				this.populateRecords();
+				// A function to fetch options for fields that need them
+				const fetchOptions = (fieldsThatNeedOptions) => {
+					const criteriaStructure = Object.assign({}, this.criteriaStructureTemplates.fieldOption);
+					criteriaStructure.criteria_FIELD_ID_eq = fieldsThatNeedOptions;
+					getFieldOptions(criteriaStructure, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							data.forEach((fieldOption) => {
+								if (this.fieldOptions.map(o => o.ID).indexOf(fieldOption.ID) === -1) this.fieldOptions.push(fieldOption);
+							});
+						}
+					});
+				};
+
+				// A function to check if any fields need options
+				const checkForNeededOptions = () => {
+					// Create an array to hold field IDs that need options
+					const fieldsThatNeedOptions = [];
+					// Then check to see if any of them are the field types that need
+					// field options fetched by looping through each of the fields
+					this.reportFields.forEach((field) => {
+						// And checking if they're one of the new fields *and* if their type
+						// needs options
+						if (diffedIDs.indexOf(field.FIELD_ID) !== -1 && this.fieldTypesIndexedByID[field.REPORT_FIELD_TYPE_ID].LABEL === 'Option Data') {
+							// If it meets that criteria, it needs options so push it into the
+							// array
+							fieldsThatNeedOptions.push(field.FIELD_ID);
+						}
+					});
+					if (fieldsThatNeedOptions.length > 0) fetchOptions(fieldsThatNeedOptions);
+				};
+
+				// Get an array of new IDs (if any)
+				const diffedIDs = newFieldIDs.filter(val => oldFieldIDs.indexOf(val) === -1);
+				// If there are actually any new IDs, run our option fetcher function
+				if (diffedIDs.length > 0) checkForNeededOptions();
+			},
+			programAreas (newAreas, oldAreas) {
+				// Only do anything if dependencies are met
+				if (this.dependenciesMet) {
+					if (oldAreas.length > newAreas.length) {
+						// A program area has been removed, so we just need to filter our
+						// existing fields.
+						this.reportFields = filter(this.reportFields, this.reportFieldCriteriaStructure);
+					} else {
+						// A program area has been added, so we need to fetch missing fields
+						// based on the added area
+						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
+						criteriaStructure.criteria_AREA_ID_eq = newAreas.filter(val => oldAreas.indexOf(val) === -1);
+						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
+						getAssociationReportTypeField(criteriaStructure, (err, data) => {
+							if (err) logError(err);
+							if (data) {
+								data.forEach((field) => {
+									if (this.fieldIDs.indexOf(field.FIELD_ID) === -1) this.reportFields.push(field);
+								});
+							}
+						});
+					}
+				}
+			},
+			reportType (newType, oldType) {
+				// Only do anything if dependencies are met
+				if (this.dependenciesMet) {
+					// We need to fetch new fields based on the new report type
+					this.populateReportFields();
+				}
+			},
+			topics (newTopics, oldTopics) {
+				// Only do anything if dependencies are met
+				if (this.dependenciesMet) {
+					if (oldTopics.length > newTopics.length) {
+						// A topic has been removed, so we just need to filter out existing
+						// fields
+						this.reportFields = filter(this.reportFields, this.reportFieldCriteriaStructure);
+					} else {
+						// A topic has been added, so we need to fetch missing fields based
+						// on the added topic
+						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
+						criteriaStructure.criteria_TOPIC_ID_eq = newTopics.filter(val => oldTopics.indexOf(val) === -1);
+						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
+						getAssociationReportTypeField(criteriaStructure, (err, data) => {
+							if (err) logError(err);
+							if (data) {
+								data.forEach((field) => {
+									if (this.fieldIDs.indexOf(field.FIELD_ID) === -1) this.reportFields.push(field);
+								});
+							}
+						});
+					}
+				}
+			}
+		},
+		mounted () {
+			// Fetch some things we need
+			getCriteriaStructure('GACOUNTS3', 'GC3_FIELD_OPTION', (err, data) => {
+				if (err) logError(err);
+				if (data) this.criteriaStructureTemplates.fieldOption = data;
+			});
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
+				if (err) logError(err);
+				if (data) this.criteriaStructureTemplates.reportField = data;
+				this.populateReportFields();
+			});
+
+			const fetchExistingRecords = () => {
+				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
+				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
+				getCriteriaStructure('GACOUNTS3', tablePrefix, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						let critStruct = data;
+						if (this.forSubReport) {
+							critStruct.criteria_SUB_REPORT_ID_eq = this.$store.state.subschemas.subReport.subReport.ID || -1;
+						} else {
+							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
+						}
+						getFields(critStruct, (err, data) => {
+							if (err) logError(err);
+							if (data) this.existingRecords = data;
+						});
+					}
+				});
 			};
+			if ((this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) && !this.fetched) fetchExistingRecords();
 		},
 		methods: {
 			fieldIsRequired (record) {
@@ -341,143 +491,6 @@
 						this.reportFields = newReportFields;
 					}
 				});
-			}
-		},
-		mounted () {
-			// Fetch some things we need
-			getCriteriaStructure('GACOUNTS3', 'GC3_FIELD_OPTION', (err, data) => {
-				if (err) logError(err);
-				if (data) this.criteriaStructureTemplates.fieldOption = data;
-			});
-			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
-				if (err) logError(err);
-				if (data) this.criteriaStructureTemplates.reportField = data;
-				this.populateReportFields();
-			});
-
-			const fetchExistingRecords = () => {
-				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
-				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
-				getCriteriaStructure('GACOUNTS3', tablePrefix, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						let critStruct = data;
-						if (this.forSubReport) {
-							critStruct.criteria_SUB_REPORT_ID_eq = this.$store.state.subschemas.subReport.subReport.ID || -1;
-						} else {
-							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
-						}
-						getFields(critStruct, (err, data) => {
-							if (err) logError(err);
-							if (data) this.existingRecords = data;
-						});
-					}
-				});
-			};
-			if ((this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) && !this.fetched) fetchExistingRecords();
-		},
-		watch: {
-			existingRecords () {
-				// We only want to run populate records here if we already know our
-				// valid fields.  Else, we might lose the user's changes to existing
-				// records.  Ask Gabe to tell you the tale of how he arrived at this
-				// conclusion.
-				if (this.reportFields.length > 0) this.populateRecords();
-			},
-			fieldIDs (newFieldIDs, oldFieldIDs) {
-				// Populate records with updated fields
-				this.populateRecords();
-				// A function to fetch options for fields that need them
-				const fetchOptions = (fieldsThatNeedOptions) => {
-					const criteriaStructure = Object.assign({}, this.criteriaStructureTemplates.fieldOption);
-					criteriaStructure.criteria_FIELD_ID_eq = fieldsThatNeedOptions;
-					getFieldOptions(criteriaStructure, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							data.forEach((fieldOption) => {
-								if (this.fieldOptions.map(o => o.ID).indexOf(fieldOption.ID) === -1) this.fieldOptions.push(fieldOption);
-							});
-						}
-					});
-				};
-
-				// A function to check if any fields need options
-				const checkForNeededOptions = () => {
-					// Create an array to hold field IDs that need options
-					const fieldsThatNeedOptions = [];
-					// Then check to see if any of them are the field types that need
-					// field options fetched by looping through each of the fields
-					this.reportFields.forEach((field) => {
-						// And checking if they're one of the new fields *and* if their type
-						// needs options
-						if (diffedIDs.indexOf(field.FIELD_ID) !== -1 && this.fieldTypesIndexedByID[field.REPORT_FIELD_TYPE_ID].LABEL === 'Option Data') {
-							// If it meets that criteria, it needs options so push it into the
-							// array
-							fieldsThatNeedOptions.push(field.FIELD_ID);
-						}
-					});
-					if (fieldsThatNeedOptions.length > 0) fetchOptions(fieldsThatNeedOptions);
-				};
-
-				// Get an array of new IDs (if any)
-				const diffedIDs = newFieldIDs.filter(val => oldFieldIDs.indexOf(val) === -1);
-				// If there are actually any new IDs, run our option fetcher function
-				if (diffedIDs.length > 0) checkForNeededOptions();
-			},
-			programAreas (newAreas, oldAreas) {
-				// Only do anything if dependencies are met
-				if (this.dependenciesMet) {
-					if (oldAreas.length > newAreas.length) {
-						// A program area has been removed, so we just need to filter our
-						// existing fields.
-						this.reportFields = filter(this.reportFields, this.reportFieldCriteriaStructure);
-					} else {
-						// A program area has been added, so we need to fetch missing fields
-						// based on the added area
-						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
-						criteriaStructure.criteria_AREA_ID_eq = newAreas.filter(val => oldAreas.indexOf(val) === -1);
-						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
-						getAssociationReportTypeField(criteriaStructure, (err, data) => {
-							if (err) logError(err);
-							if (data) {
-								data.forEach((field) => {
-									if (this.fieldIDs.indexOf(field.FIELD_ID) === -1) this.reportFields.push(field);
-								});
-							}
-						});
-					}
-				}
-			},
-			reportType (newType, oldType) {
-				// Only do anything if dependencies are met
-				if (this.dependenciesMet) {
-					// We need to fetch new fields based on the new report type
-					this.populateReportFields();
-				}
-			},
-			topics (newTopics, oldTopics) {
-				// Only do anything if dependencies are met
-				if (this.dependenciesMet) {
-					if (oldTopics.length > newTopics.length) {
-						// A topic has been removed, so we just need to filter out existing
-						// fields
-						this.reportFields = filter(this.reportFields, this.reportFieldCriteriaStructure);
-					} else {
-						// A topic has been added, so we need to fetch missing fields based
-						// on the added topic
-						const criteriaStructure = Object.assign({}, this.reportFieldCriteriaStructure);
-						criteriaStructure.criteria_TOPIC_ID_eq = newTopics.filter(val => oldTopics.indexOf(val) === -1);
-						criteriaStructure.criteria_FIELD_ID_neq = this.fieldIDs;
-						getAssociationReportTypeField(criteriaStructure, (err, data) => {
-							if (err) logError(err);
-							if (data) {
-								data.forEach((field) => {
-									if (this.fieldIDs.indexOf(field.FIELD_ID) === -1) this.reportFields.push(field);
-								});
-							}
-						});
-					}
-				}
 			}
 		}
 	};

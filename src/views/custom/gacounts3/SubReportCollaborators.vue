@@ -556,7 +556,7 @@
 					if (err) logError(err);
 					if (data) {
 						this.ownerState.plannedPrograms = data;
-					};
+					}
 				});
 			};
 

@@ -60,7 +60,7 @@
 				const data = await this.messageFetcher(this.messageName);
 				if (data.length < 1) this.$emit('close-model');
 				this.helpMessageHTML = data.trim();
-			} catch {
+			} catch (err) {
 				this.$emit('close-modal');
 			}
 		}
