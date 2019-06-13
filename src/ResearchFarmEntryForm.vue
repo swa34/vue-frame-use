@@ -17,7 +17,7 @@
 					class="duplication"
 					@click="duplicateProject"
 				>
-					Duplicate
+					Copy
 				</button>
 				<button
 					v-if="!isNewProject && userIsAdmin"

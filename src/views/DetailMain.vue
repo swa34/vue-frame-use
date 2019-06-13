@@ -44,8 +44,26 @@
 						>
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
+									<component
+										v-if="area.data.customComponent && dependencyMet(area.data) && area.data.type === 'int'"
+										v-model.number="record[area.data.columnName]"
+										:is="area.data.customComponent"
+										:mode="getMode(area.data)"
+										@show-help="showHelp"
+										@expand-section="expandSection"
+										@collapse-section="collapseSection"
+									/>
+									<component
+										v-else-if="area.data.customComponent && dependencyMet(area.data)"
+										v-model="record[area.data.columnName]"
+										:is="area.data.customComponent"
+										:mode="getMode(area.data)"
+										@show-help="showHelp"
+										@expand-section="expandSection"
+										@collapse-section="collapseSection"
+									/>
 									<SmartInput
-										v-if="mode === 'edit' && area.data.type === 'int'"
+										v-else-if="mode === 'edit' && area.data.type === 'int'"
 										v-model.number="record[area.data.columnName]"
 										:field="area.data"
 										:fetched="record._fetched"

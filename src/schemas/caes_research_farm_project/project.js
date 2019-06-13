@@ -1,6 +1,7 @@
 /* global caesCache */
 /* global activeUserId */
 import CaesPersonnelDetails from '@/views/custom/caes_research_farm_project/CaesPersonnelDetails';
+import FinancialSupport from '@/views/custom/caes_research_farm_project/FinancialSupport';
 import RoutingAndApproval from '@/views/custom/caes_research_farm_project/RoutingAndApproval';
 import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
 import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
@@ -404,7 +405,8 @@ const schema = {
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
-			}
+			},
+			customClasses: [ 'inline' ]
 		},
 		{
 			columnName: 'PLOT_MAP_ATTACHMENT_PATH',
@@ -417,7 +419,8 @@ const schema = {
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
-			}
+			},
+			customClasses: [ 'inline' ]
 		},
 		{
 			columnName: 'CALENDAR_ATTACHMENT_PATH',
@@ -430,7 +433,8 @@ const schema = {
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
-			}
+			},
+			customClasses: [ 'inline' ]
 		},
 		{
 			columnName: 'INVOLVES_PLANTS',
@@ -514,7 +518,8 @@ const schema = {
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
 				order: 1
-			}
+			},
+			customComponent: FinancialSupport
 		},
 		{
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
@@ -852,6 +857,14 @@ const schema = {
 			title: 'Scientist and Station Responsibilities',
 			order: 3,
 			fieldsets: [
+				{
+					title: 'Attachments',
+					columns: [
+						'TREATMENT_LIST_ATTACHMENT_PATH',
+						'PLOT_MAP_ATTACHMENT_PATH',
+						'CALENDAR_ATTACHMENT_PATH'
+					]
+				},
 				{
 					title: 'Project Involves Plants/Animals',
 					description: `Use the checkboxes below to indicate plant or animal
