@@ -252,7 +252,7 @@
 			removeProject () {
 				swal.fire({
 					title: 'Are you sure?',
-					text: "You won't be able to revert this!",
+					text: 'You won\'t be able to revert this!',
 					type: 'warning',
 					showCancelButton: true,
 					confirmButtonColor: '#6c3129',
@@ -269,7 +269,7 @@
 							}
 						} catch (err) {
 							logError(err);
-							alert.failedDelete(this.schema.title.toLowerCase(), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
+							alert.failedDelete(this.schema.title.toLowerCase(), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
 						}
 					}
 				});

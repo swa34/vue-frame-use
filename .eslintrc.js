@@ -21,7 +21,11 @@ module.exports = {
 	],
 	'rules': {
 		// JavaScript
-		'indent': [ 'error', 'tab' ],
+		'indent': [
+			'error',
+			'tab',
+			{ 'SwitchCase': 1 }
+		],
 		'linebreak-style': [ 'error', 'unix' ],
 		'quotes': [ 'error', 'single' ],
 		'semi': [ 'error', 'always' ],
@@ -38,7 +42,7 @@ module.exports = {
 		'vue/script-indent': [
 			'error',
 			'tab',
-			{ 'baseIndent': 1 }
+			{ 'baseIndent': 1, 'switchCase': 1 }
 		]
 	},
 	'overrides': [
