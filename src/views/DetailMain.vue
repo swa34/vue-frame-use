@@ -543,7 +543,7 @@
 							}
 						} catch (err) {
 							logError(err);
-							alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), `<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>`);
+							alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
 						}
 					}
 				});
@@ -574,7 +574,7 @@
 			deleteRecord () {
 				swal({
 					title: 'Are you sure?',
-					text: "You won't be able to undo this!",
+					text: 'You won\'t be able to undo this!',
 					type: 'warning',
 					showCancelButton: true,
 					confirmButtonText: 'Yes, delete it!'

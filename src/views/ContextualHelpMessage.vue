@@ -1,8 +1,8 @@
 <template lang="html">
-  <div class="modal-container" v-if="messageName" v-on:click="closeModal">
+	<div v-if="messageName" class="modal-container" @click="closeModal">
 		<div class="modal">
 			<span class="close">
-				<div v-on:click="closeModal">
+				<div @click="closeModal">
 					<XIcon />
 				</div>
 			</span>
@@ -21,6 +21,10 @@
 
 	export default {
 		name: 'ContextualHelpMessage',
+		components: {
+			Spinner,
+			XIcon
+		},
 		props: {
 			messageFetcher: {
 				type: Function,
@@ -30,10 +34,6 @@
 				type: String,
 				required: true
 			}
-		},
-		components: {
-			Spinner,
-			XIcon
 		},
 		data () {
 			return {
@@ -46,6 +46,15 @@
 				helpMessageHTML: ''
 			};
 		},
+		async mounted () {
+			try {
+				const data = await this.messageFetcher(this.messageName);
+				if (data.length < 1) this.$emit('close-model');
+				this.helpMessageHTML = data.trim();
+			} catch (err) {
+				this.$emit('close-modal');
+			}
+		},
 		methods: {
 			closeModal (event) {
 				const modalShouldBeClosed = this.cssSelectorsForClosingModal.reduce((modalShouldBeClosed, selector) => {
@@ -53,15 +62,6 @@
 					return modalShouldBeClosed;
 				}, false);
 				if (modalShouldBeClosed) this.$emit('close-modal');
-			}
-		},
-		async mounted () {
-			try {
-				const data = await this.messageFetcher(this.messageName);
-				if (data.length < 1) this.$emit('close-model');
-				this.helpMessageHTML = data.trim();
-			} catch {
-				this.$emit('close-modal');
 			}
 		}
 	};

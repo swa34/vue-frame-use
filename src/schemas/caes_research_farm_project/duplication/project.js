@@ -50,22 +50,22 @@ const projectDuplication = {
 			}
 		},
 		'Secondary Contact': {
-		  duplicate: true,
-		  areas: {
-		    columns: [
-		      'SECONDARY_CONTACT_PERSONNEL_ID',
-		      'SECONDARY_CONTACT_FIRST_NAME',
-		      'SECONDARY_CONTACT_MIDDLE_NAME',
-		      'SECONDARY_CONTACT_LAST_NAME',
-		      'SECONDARY_CONTACT_EMAIL',
-		      'SECONDARY_CONTACT_PHONE',
-		      'SECONDARY_CONTACT_ADDRESS_1',
-		      'SECONDARY_CONTACT_ADDRESS_2',
-		      'SECONDARY_CONTACT_CITY',
-		      'SECONDARY_CONTACT_STATE',
-		      'SECONDARY_CONTACT_ZIPCODE'
-		    ]
-		  }
+			duplicate: true,
+			areas: {
+				columns: [
+					'SECONDARY_CONTACT_PERSONNEL_ID',
+					'SECONDARY_CONTACT_FIRST_NAME',
+					'SECONDARY_CONTACT_MIDDLE_NAME',
+					'SECONDARY_CONTACT_LAST_NAME',
+					'SECONDARY_CONTACT_EMAIL',
+					'SECONDARY_CONTACT_PHONE',
+					'SECONDARY_CONTACT_ADDRESS_1',
+					'SECONDARY_CONTACT_ADDRESS_2',
+					'SECONDARY_CONTACT_CITY',
+					'SECONDARY_CONTACT_STATE',
+					'SECONDARY_CONTACT_ZIPCODE'
+				]
+			}
 		},
 		'Commodity, Discipline, and Areas to Which the Project Pertains': {
 			duplicate: true,

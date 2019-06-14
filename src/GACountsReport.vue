@@ -3,27 +3,52 @@
 		<div class="heading-container">
 			<h1>Activity Report</h1>
 			<div class="spacer"></div>
-			<button v-if="!isNew && !userIsOwner && userCanFileSubReport" v-on:click="redirectToSubReportEntry" type="button" class="file-sub-report hide-on-print">
+			<button
+				v-if="!isNew && !userIsOwner && userCanFileSubReport"
+				type="button"
+				class="file-sub-report hide-on-print"
+				@click="redirectToSubReportEntry"
+			>
 				{{ userCollaboratorRecord.HAS_REPORTED === 0 ? 'File' : 'Edit' }} Sub-Report
 			</button>
-			<button v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0" v-on:click="redirectToSubReportRejection" type="button" class="reject-sub-report hide-on-print">
+			<button
+				v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0"
+				type="button"
+				class="reject-sub-report hide-on-print"
+				@click="redirectToSubReportRejection"
+			>
 				Decline Sub-Report
 			</button>
-			<button v-if="!isNew" v-on:click="redirectToDuplication" type="button" class="hide-on-print">
+			<button
+				v-if="!isNew"
+				type="button"
+				class="hide-on-print"
+				@click="redirectToDuplication"
+			>
 				Duplicate
 			</button>
-			<button v-if="(userIsOwner || userIsAdmin) && !isNew && mode === 'edit'" v-on:click="deleteReport" type="button" class="hide-on-print delete">
+			<button
+				v-if="(userIsOwner || userIsAdmin) && !isNew && mode === 'edit'"
+				type="button"
+				class="hide-on-print delete"
+				@click="deleteReport"
+			>
 				Delete
 			</button>
-			<button v-if="(userIsOwner || userIsAdmin) && !isNew" v-on:click="toggleMode" type="button" class="hide-on-print">
+			<button
+				v-if="(userIsOwner || userIsAdmin) && !isNew"
+				type="button"
+				class="hide-on-print"
+				@click="toggleMode"
+			>
 				{{ mode === 'edit' ? 'Print View' : 'Edit View' }}
 			</button>
 			<button
 				v-if="!isNew && duplicateRecord.hasBeenFetched"
-				v-on:click="updateReportTemplateStatus"
 				type="button"
 				:class="`favorite ${duplicateRecord.IS_TEMPLATE ? 'filled-in': ''} hide-on-print`"
 				title="Making a report a favorite will pin it to your GACounts homepage, allowing for easier duplication."
+				@click="updateReportTemplateStatus"
 			>
 				<div v-if="duplicateRecord.IS_TEMPLATE">
 					<span class="icon-wrapper">
@@ -45,14 +70,14 @@
 		</div>
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
-			:duplicationSchema="duplicationSchema"
+			:duplication-schema="duplicationSchema"
 		/>
 		<DetailMain
 			v-if="isNew || identifier !== null"
 			:schema="schema"
 			:identifier="identifier || false"
 			:mode="mode"
-			:userIsOwner="userIsOwner"
+			:user-is-owner="userIsOwner"
 		/>
 		<div v-else>
 			<h2>
@@ -63,7 +88,7 @@
 			</p>
 			<form>
 				<label>
-					<button type="button" v-on:click="reloadPage">
+					<button type="button" @click="reloadPage">
 						Enter a new report
 					</button>
 				</label>
@@ -75,10 +100,10 @@
 						<span>
 							Enter a report ID to lookup an existing report
 						</span>
-						<input type="number" v-model="inputID" min="0" />
+						<input v-model="inputID" type="number" min="0" />
 					</label>
 					<label>
-						<button type="button" v-on:click="reloadPage">
+						<button type="button" @click="reloadPage">
 							Go
 						</button>
 					</label>
@@ -147,39 +172,6 @@
 			DetailMain,
 			DuplicationModal
 		},
-		computed: {
-			...getComputed(schema),
-			duplication () {
-				return this.$store.state.duplication;
-			},
-			schemaLessStore: {
-				get () {
-					let schemaLessStore = Object.assign({}, this.$store.state);
-					delete schemaLessStore.schema;
-					if (schemaLessStore.subschemas) {
-						for (let key in schemaLessStore.subschemas) {
-							delete schemaLessStore.subschemas[key].schema;
-						}
-					}
-					return schemaLessStore;
-				}
-			},
-			userCanFileSubReport () {
-				return this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID) !== -1 && !this.userCollaboratorRecord.IS_REJECTED;
-			},
-			userCollaboratorRecord () {
-				const userCollaboratorRecordIndex = this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID);
-				if (userCollaboratorRecordIndex === -1) return {};
-				const userCollaboratorRecord = this.$store.state.collaborators.records[userCollaboratorRecordIndex];
-				return userCollaboratorRecord;
-			},
-			userIsAdmin () {
-				return Boolean(activeUser.IS_ADMINISTRATOR);
-			},
-			userIsOwner () {
-				return this.OWNER_ID === activeUserID;
-			}
-		},
 		data () {
 			// Determine if entering new record
 			const isNew = url.getParam('new') !== null;
@@ -232,11 +224,85 @@
 
 			return data;
 		},
+		computed: {
+			...getComputed(schema),
+			duplication () {
+				return this.$store.state.duplication;
+			},
+			schemaLessStore: {
+				get () {
+					let schemaLessStore = Object.assign({}, this.$store.state);
+					delete schemaLessStore.schema;
+					if (schemaLessStore.subschemas) {
+						for (let key in schemaLessStore.subschemas) {
+							delete schemaLessStore.subschemas[key].schema;
+						}
+					}
+					return schemaLessStore;
+				}
+			},
+			userCanFileSubReport () {
+				return this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID) !== -1 && !this.userCollaboratorRecord.IS_REJECTED;
+			},
+			userCollaboratorRecord () {
+				const userCollaboratorRecordIndex = this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID);
+				if (userCollaboratorRecordIndex === -1) return {};
+				const userCollaboratorRecord = this.$store.state.collaborators.records[userCollaboratorRecordIndex];
+				return userCollaboratorRecord;
+			},
+			userIsAdmin () {
+				return Boolean(activeUser.IS_ADMINISTRATOR);
+			},
+			userIsOwner () {
+				return this.OWNER_ID === activeUserID;
+			}
+		},
+		watch: {
+			ID () {
+				// Once we have a report ID, we need to check if the user has a
+				// duplicated report record for this report
+				if (!isNaN(this.ID)) {
+					getCriteriaStructure('GACOUNTS3', 'GC3_DUPLICATED_REPORT', (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							let critStruct = data;
+							critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
+							critStruct.criteria_REPORT_ID_eq.push(this.ID);
+							getDuplicatedReport(critStruct, (err, data) => {
+								if (err) logError(err);
+								this.duplicateRecord.REPORT_ID = this.ID;
+								if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
+								this.duplicateRecord.hasBeenFetched = true;
+							});
+						}
+					});
+				}
+			},
+			TITLE () {
+				if (!this.isNew && this.breadCrumbsHaveNotBeenSet && this.TITLE !== null && this.TITLE !== '') {
+					this.setBreadCrumbs();
+					this.breadCrumbsHaveNotBeenSet = false;
+				}
+			}
+		},
+		mounted () {
+			this.watchFields = true;
+			if (this.userIsOwner) this.mode = 'edit';
+			if (url.getParam('new') !== null) this.OWNER_ID = activeUserID;
+			// Set the page title
+			if (this.isNew && this.isDuplicate) {
+				document.title = `Duplicate Activity Report | ${document.title}`;
+			} else if (this.isNew) {
+				document.title = `New Activity Report | ${document.title}`;
+			} else {
+				document.title = `View Activity Report | ${document.title}`;
+			}
+		},
 		methods: {
 			deleteReport () {
 				swal({
 					title: 'Are you sure?',
-					text: "You won't be able to undo this!",
+					text: 'You won\'t be able to undo this!',
 					type: 'warning',
 					showCancelButton: true,
 					confirmButtonText: 'Yes, delete it!'
@@ -314,48 +380,7 @@
 				});
 			}
 		},
-		mounted () {
-			this.watchFields = true;
-			if (this.userIsOwner) this.mode = 'edit';
-			if (url.getParam('new') !== null) this.OWNER_ID = activeUserID;
-			// Set the page title
-			if (this.isNew && this.isDuplicate) {
-				document.title = `Duplicate Activity Report | ${document.title}`;
-			} else if (this.isNew) {
-				document.title = `New Activity Report | ${document.title}`;
-			} else {
-				document.title = `View Activity Report | ${document.title}`;
-			}
-		},
-		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value'))),
-		watch: {
-			ID () {
-				// Once we have a report ID, we need to check if the user has a
-				// duplicated report record for this report
-				if (!isNaN(this.ID)) {
-					getCriteriaStructure('GACOUNTS3', 'GC3_DUPLICATED_REPORT', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							let critStruct = data;
-							critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
-							critStruct.criteria_REPORT_ID_eq.push(this.ID);
-							getDuplicatedReport(critStruct, (err, data) => {
-								if (err) logError(err);
-								this.duplicateRecord.REPORT_ID = this.ID;
-								if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
-								this.duplicateRecord.hasBeenFetched = true;
-							});
-						}
-					});
-				}
-			},
-			TITLE () {
-				if (!this.isNew && this.breadCrumbsHaveNotBeenSet && this.TITLE !== null && this.TITLE !== '') {
-					this.setBreadCrumbs();
-					this.breadCrumbsHaveNotBeenSet = false;
-				}
-			}
-		}
+		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
 	};
 </script>
 

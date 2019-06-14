@@ -10,7 +10,7 @@
 					<label>
 						<h4>
 							Type of Issue
-							<a v-on:click="$emit('show-help', { helpMessageName: 'NewReportPlanOfWork' })" class="help-link">
+							<a class="help-link" @click="$emit('show-help', { helpMessageName: 'NewReportPlanOfWork' })">
 								<HelpCircleIcon />
 							</a>
 						</h4>
@@ -35,7 +35,7 @@
 								Please select the local issue to which this sub-report best applies.
 							</p>
 							<select v-model="ownerSubReport.PLANNED_PROGRAM_ID">
-								<option v-for="program in ownerState.plannedPrograms" :value="program.ID">
+								<option v-for="program in ownerState.plannedPrograms"	:key="program.ID" :value="program.ID">
 									{{ program.NAME }}
 								</option>
 							</select>
@@ -54,7 +54,7 @@
 							Please select the state issue to which this sub-report best applies.
 						</p>
 						<select v-if="statePlannedPrograms.length > 0" v-model="ownerSubReport.STATE_PLANNED_PROGRAM_ID">
-							<option v-for="program in statePlannedPrograms" :value="program.ID">
+							<option v-for="program in statePlannedPrograms" :key="program.ID" :value="program.ID">
 								{{ program.NAME }}
 							</option>
 						</select>
@@ -68,7 +68,7 @@
 				<div v-if="ownerCriteriaStructures.associationReportTypeRole">
 					<h4>
 						Roles
-						<a v-on:click="$emit('show-help', { helpMessageName: 'ReportRole' })" class="help-link">
+						<a class="help-link" @click="$emit('show-help', { helpMessageName: 'ReportRole' })">
 							<HelpCircleIcon />
 						</a>
 					</h4>
@@ -76,9 +76,9 @@
 						Please select the role(s) which best describe your involvement in the reported activities.
 					</p>
 					<ul v-if="reportType !== -1" class="checkbox">
-						<li v-for="role in ownerRoleTypes">
+						<li v-for="role in ownerRoleTypes" :key="role.SUB_REPORT_ROLE_LABEL">
 							<label>
-								<input type="checkbox" :value="generateRoleRecord(role)" v-model="ownerRoles" />
+								<input v-model="ownerRoles" type="checkbox" :value="generateRoleRecord(role)" />
 								<span>
 									{{ role.SUB_REPORT_ROLE_LABEL }}
 								</span>
@@ -90,7 +90,7 @@
 				<div v-if="ownerContacts.length > 0">
 					<h4>
 						{{ ownerID === activeUserID ? 'Your' : getPersonnelNameFromID(ownerID) + '\'s' }} Contacts
-						<a v-on:click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })" class="help-link">
+						<a class="help-link" @click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })">
 							<HelpCircleIcon />
 						</a>
 					</h4>
@@ -109,12 +109,12 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-for="contact in ownerContacts">
+							<tr v-for="contact in ownerContacts" :key="contact.TYPE_ID">
 								<td>
 									{{ getContactLabelFromID(contact.TYPE_ID) }}
 								</td>
 								<td>
-									<input type="number" v-model.number="contact.QUANTITY" min="0" />
+									<input v-model.number="contact.QUANTITY" type="number" min="0" />
 								</td>
 							</tr>
 						</tbody>
@@ -138,9 +138,9 @@
 				-->
 				<SupplementalData
 					v-if="!needExistingData || ownerSubReport.ID !== null"
-					v-on:show-help="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })"
-					:forSubReport="true"
+					:for-sub-report="true"
 					:mode="mode"
+					@show-help="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })"
 				/>
 				<!-- Outcome, Impact, Achievements -->
 				<div>
@@ -148,7 +148,7 @@
 						<h4>
 							Outcome, Impact, and Achievements
 						</h4>
-						<div v-for="outcome in ownerOutcomes">
+						<div v-for="outcome in ownerOutcomes" :key="outcome.ID">
 							<textarea v-model="outcome.MEMO"></textarea>
 						</div>
 					</label>
@@ -157,15 +157,20 @@
 			<div v-else class="subreport-section">
 				<SubReportPlainText
 					:data="getOwnerSubReportData()"
-					:roleTypes="ownerRoleTypes"
+					:role-types="ownerRoleTypes"
 				/>
 			</div>
 		</div>
 		<transition-group appear name="fade">
-			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
+			<div v-for="collaborator in collaboratorsWithoutOwner" :key="collaborator.PERSONNEL_ID">
 				<h3>
 					{{ collaborator.DISPLAY_NAME || getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
-					<button v-if="!needExistingData || (needExistingData && mode === 'edit' && (editMode === 'owner' || editMode === 'admin') && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
+					<button
+						v-if="!needExistingData || (needExistingData && mode === 'edit' && (editMode === 'owner' || editMode === 'admin') && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))"
+						type="button"
+						class="button small"
+						@click="removeCollaborator(collaborator)"
+					>
 						Remove
 					</button>
 				</h3>
@@ -196,8 +201,8 @@
 			</p>
 			<FuzzySelect
 				v-model="newCollaborator.PERSONNEL_ID"
-				v-on:addCollaborator="addCollaborator"
 				:options="personnelForFuzzySelect"
+				@addCollaborator="addCollaborator"
 			/>
 		</div>
 	</div>
@@ -247,6 +252,50 @@
 			SubReportPlainText,
 			SupplementalData
 		},
+		props: {
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
+			}
+		},
+		data () {
+			const data = {
+				activeUserID,
+				collaboratorRecords: {
+					contacts: [],
+					outcomes: [],
+					plannedPrograms: [],
+					roles: [],
+					subReports: [],
+					supplementalData: []
+				},
+				contactTypes: [],
+				criteriaStructureTemplates: {
+					associationReportTypeContactType: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeContactType),
+					associationReportTypeRole: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeRole),
+					plannedProgram: cfToJs(caesCache.criteriaStructures.fpw.plannedProgram),
+					subReport: cfToJs(caesCache.criteriaStructures.gc3.subReport)
+				},
+				hostname: window.location.hostname,
+				newCollaborator: {
+					REPORT_ID: this.reportID || null,
+					PERSONNEL_ID: null,
+					IS_REJECTED: false
+				},
+				ownerState: {
+					contacts: [],
+					plannedPrograms: [],
+					supplementalData: [],
+					unfilteredRoleTypes: []
+				},
+				personnel: [],
+				retiredPersonnel: [],
+				statePlannedPrograms: []
+			};
+
+			return data;
+		},
 		computed: {
 			allSubReportIDs () {
 				let subReportIDs = [];
@@ -264,6 +313,7 @@
 					this.$store.state.collaborators.records = val;
 				}
 			},
+			collaboratorsWithoutOwner () { return this.collaborators.filter(c => c.PERSONNEL_ID !== this.ownerID); },
 			duplication () {
 				let duplication = {
 					getCollaborators: false,
@@ -360,42 +410,260 @@
 				return reportTypeRecords.length > 0 ? reportTypeRecords[0].TYPE_ID : -1;
 			}
 		},
-		data () {
-			const data = {
-				activeUserID,
-				collaboratorRecords: {
-					contacts: [],
-					outcomes: [],
-					plannedPrograms: [],
-					roles: [],
-					subReports: [],
-					supplementalData: []
-				},
-				contactTypes: [],
-				criteriaStructureTemplates: {
-					associationReportTypeContactType: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeContactType),
-					associationReportTypeRole: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeRole),
-					plannedProgram: cfToJs(caesCache.criteriaStructures.fpw.plannedProgram),
-					subReport: cfToJs(caesCache.criteriaStructures.gc3.subReport)
-				},
-				hostname: window.location.hostname,
-				newCollaborator: {
-					REPORT_ID: this.reportID || null,
-					PERSONNEL_ID: null,
-					IS_REJECTED: false
-				},
-				ownerState: {
-					contacts: [],
-					plannedPrograms: [],
-					supplementalData: [],
-					unfilteredRoleTypes: []
-				},
-				personnel: [],
-				retiredPersonnel: [],
-				statePlannedPrograms: []
+		watch: {
+			collaborators () {
+				this.fetchMissingPersonnel();
+			},
+			reportContacts () {
+				this.populateOwnerContactsRecords();
+			}
+		},
+		mounted () {
+			const fetchPlannedPrograms = () => {
+				const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+				this.collaboratorRecords.subReports.forEach((subReport) => {
+					if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
+				});
+				if (this.ownerSubReport.PLANNED_PROGRAM_ID) critStruct.criteria_ID_eq.push(this.ownerSubReport.PLANNED_PROGRAM_ID);
+				if (critStruct.criteria_ID_eq.length > 0) {
+					getPlannedPrograms(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							data.forEach((record) => {
+								if (record.ID === this.ownerSubReport.PLANNED_PROGRAM_ID) {
+									this.ownerState.plannedPrograms.push(record);
+								} else if (this.needExistingData) {
+									this.collaboratorRecords.plannedPrograms.push(record);
+								}
+							});
+						}
+					});
+				}
 			};
 
-			return data;
+			const fetchCollaborators = () => {
+				const critStruct = caesCache.criteriaStructures.gc3.reportPersonnel;
+				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
+				if (critStruct.criteria_REPORT_ID_eq.length > 0) {
+					getReportPersonnel(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							this.collaborators = data;
+						}
+					});
+				}
+			};
+
+			const fetchSupplementalData = () => {
+				const critStruct = caesCache.criteriaStructures.gc3.associationSubReportField;
+				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
+					getAssociationSubReportField(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							data.forEach((record) => {
+								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+									this.ownerState.supplementalData.push(record);
+								} else if (this.needExistingData) {
+									this.collaboratorRecords.supplementalData.push(record);
+								}
+							});
+						}
+					});
+				}
+			};
+
+			const fetchContacts = () => {
+				const critStruct = caesCache.criteriaStructures.gc3.subReportContact;
+				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
+					getSubReportContact(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							const ownerContactsMap = this.ownerContacts.map(c => c.TYPE_ID);
+							data.forEach((record) => {
+								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+									const index = ownerContactsMap.indexOf(record.TYPE_ID);
+									if (index !== -1) {
+										this.ownerContacts[index].QUANTITY = record.QUANTITY;
+									} else {
+										this.ownerState.contacts.push(record);
+									}
+								} else if (this.needExistingData) {
+									this.collaboratorRecords.contacts.push(record);
+								}
+							});
+						}
+					});
+				}
+			};
+
+			const fetchContactTypes = () => {
+				getContactTypes((err, data) => {
+					if (err) logError(err);
+					if (data) this.contactTypes = data;
+				});
+			};
+
+			const fetchOutcomes = () => {
+				getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						const critStruct = data;
+						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+						if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
+							getSubReportPurposeAchievements(critStruct, (err, data) => {
+								if (err) logError(err);
+								if (data) {
+									data.forEach((record) => {
+										if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+											if (this.duplication.getSubReport) {
+												record.ID = null;
+												record.SUB_REPORT_ID = null;
+												record.REPORT_ID = null;
+											}
+											this.ownerOutcomes = [record];
+										} else if (this.needExistingData) {
+											if (this.duplication.getSubReport) {
+												record.ID = null;
+												record.SUB_REPORT_ID = null;
+												record.REPORT_ID = null;
+											}
+											this.collaboratorRecords.outcomes.push(record);
+										}
+									});
+								}
+							});
+						}
+					}
+				});
+			};
+
+			const fetchPersonnel = () => {
+				getPersonnel((err, data) => {
+					if (err) logError(err);
+					if (data) {
+						this.personnel = data;
+						this.fetchMissingPersonnel();
+					}
+				});
+			};
+
+			const fetchOwnerPlannedPrograms = () => {
+				let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
+				critStruct.criteria_PersonnelMayFileUnder = activeUserID;
+				getPlannedPrograms(critStruct, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						this.ownerState.plannedPrograms = data;
+					}
+				});
+			};
+
+			const fetchRoles = () => {
+				const critStruct = caesCache.criteriaStructures.gc3.associationSubReportRole;
+				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
+				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
+					getAssociationSubReportRole(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							data.forEach((record) => {
+								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
+									if (this.editMode === 'owner' || this.editMode === 'admin') delete record.SUB_REPORT_ROLE_LABEL;
+									this.ownerRoles.push(record);
+								} else if (this.needExistingData) {
+									this.collaboratorRecords.roles.push(record);
+								}
+							});
+						}
+					});
+				}
+			};
+
+			const fetchRoleTypes = () => {
+				getAssociationReportTypeRole((err, data) => {
+					if (err) logError(err);
+					if (data) {
+						this.ownerState.unfilteredRoleTypes = data;
+					}
+				});
+			};
+
+			const fetchStatePlannedPrograms = () => {
+				getStatePlannedPrograms((err, data) => {
+					if (err) logError(err);
+					if (data) this.statePlannedPrograms = data;
+				});
+			};
+
+			const fetchSubReports = (callback) => {
+				const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
+				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
+				getSubReport(critStruct, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						data.forEach((record) => {
+							const subReport = { ISSUE_TYPE: null };
+							[
+								'ID',
+								'USER_ID',
+								'ACTUAL_SUBMITTER_ID',
+								'REPORT_ID',
+								'PLANNED_PROGRAM_ID',
+								'STATE_PLANNED_PROGRAM_ID',
+								'IS_HIGHLIGHTED',
+								'DATE_CREATED',
+								'DATE_LAST_UPDATED'
+							].forEach((key) => {
+								if (record[key]) subReport[key] = record[key];
+							});
+							if (subReport.USER_ID === this.ownerID) {
+								subReport.ISSUE_TYPE = subReport.PLANNED_PROGRAM_ID ? 'local' : 'state';
+								this.ownerSubReport = subReport;
+							} else if (this.needExistingData) {
+								this.collaboratorRecords.subReports.push(subReport);
+							}
+						});
+						callback();
+					}
+				});
+			};
+
+			const fetchExistingData = () => {
+				fetchCollaborators();
+				fetchSubReports(() => {
+					fetchContacts();
+					fetchPlannedPrograms();
+					fetchSupplementalData();
+					fetchOutcomes();
+					fetchRoles();
+				});
+				this.fetched = true;
+			};
+
+			fetchPersonnel();
+			fetchStatePlannedPrograms();
+
+			if (this.editMode === 'owner' || this.editMode === 'admin') {
+				fetchOwnerPlannedPrograms();
+				fetchRoleTypes();
+				fetchContactTypes();
+				this.populateOwnerContactsRecords();
+				this.populateOwnerOutcomeRecord();
+			}
+			if (this.needExistingData && !this.fetched) {
+				fetchExistingData();
+			} else if (this.duplication.getCollaborators || this.duplication.getSubReport) {
+				if (this.duplication.getCollaborators) fetchCollaborators();
+				if (this.duplication.getSubReport) {
+					fetchSubReports(() => {
+						fetchContacts();
+						fetchSupplementalData();
+						fetchOutcomes();
+						fetchRoles();
+					});
+				}
+			}
 		},
 		methods: {
 			addCollaborator () {
@@ -544,268 +812,6 @@
 					sum += Number(obj[key]);
 				});
 				return sum;
-			}
-		},
-		mounted () {
-			const fetchPlannedPrograms = () => {
-				const critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-				this.collaboratorRecords.subReports.forEach((subReport) => {
-					if (subReport.PLANNED_PROGRAM_ID && critStruct.criteria_ID_eq.indexOf(subReport.PLANNED_PROGRAM_ID) === -1) critStruct.criteria_ID_eq.push(subReport.PLANNED_PROGRAM_ID);
-				});
-				if (this.ownerSubReport.PLANNED_PROGRAM_ID) critStruct.criteria_ID_eq.push(this.ownerSubReport.PLANNED_PROGRAM_ID);
-				if (critStruct.criteria_ID_eq.length > 0) {
-					getPlannedPrograms(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							data.forEach((record) => {
-								if (record.ID === this.ownerSubReport.PLANNED_PROGRAM_ID) {
-									this.ownerState.plannedPrograms.push(record);
-								} else if (this.needExistingData) {
-									this.collaboratorRecords.plannedPrograms.push(record);
-								}
-							});
-						}
-					});
-				}
-			};
-
-			const fetchCollaborators = () => {
-				const critStruct = caesCache.criteriaStructures.gc3.reportPersonnel;
-				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
-				if (critStruct.criteria_REPORT_ID_eq.length > 0) {
-					getReportPersonnel(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							this.collaborators = data;
-						}
-					});
-				}
-			};
-
-			const fetchSupplementalData = () => {
-				const critStruct = caesCache.criteriaStructures.gc3.associationSubReportField;
-				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
-					getAssociationSubReportField(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							data.forEach((record) => {
-								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-									this.ownerState.supplementalData.push(record);
-								} else if (this.needExistingData) {
-									this.collaboratorRecords.supplementalData.push(record);
-								}
-							});
-						}
-					});
-				}
-			};
-
-			const fetchContacts = () => {
-				const critStruct = caesCache.criteriaStructures.gc3.subReportContact;
-				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
-					getSubReportContact(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							const ownerContactsMap = this.ownerContacts.map(c => c.TYPE_ID);
-							data.forEach((record) => {
-								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-									const index = ownerContactsMap.indexOf(record.TYPE_ID);
-									if (index !== -1) {
-										this.ownerContacts[index].QUANTITY = record.QUANTITY;
-									} else {
-										this.ownerState.contacts.push(record);
-									}
-								} else if (this.needExistingData) {
-									this.collaboratorRecords.contacts.push(record);
-								}
-							});
-						}
-					});
-				}
-			};
-
-			const fetchContactTypes = () => {
-				getContactTypes((err, data) => {
-					if (err) logError(err);
-					if (data) this.contactTypes = data;
-				});
-			};
-
-			const fetchOutcomes = () => {
-				getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						const critStruct = data;
-						critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-						if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
-							getSubReportPurposeAchievements(critStruct, (err, data) => {
-								if (err) logError(err);
-								if (data) {
-									data.forEach((record) => {
-										if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-											if (this.duplication.getSubReport) {
-												record.ID = null;
-												record.SUB_REPORT_ID = null;
-												record.REPORT_ID = null;
-											}
-											this.ownerOutcomes = [record];
-										} else if (this.needExistingData) {
-											if (this.duplication.getSubReport) {
-												record.ID = null;
-												record.SUB_REPORT_ID = null;
-												record.REPORT_ID = null;
-											}
-											this.collaboratorRecords.outcomes.push(record);
-										}
-									});
-								}
-							});
-						}
-					}
-				});
-			};
-
-			const fetchPersonnel = () => {
-				getPersonnel((err, data) => {
-					if (err) logError(err);
-					if (data) {
-						this.personnel = data;
-						this.fetchMissingPersonnel();
-					}
-				});
-			};
-
-			const fetchOwnerPlannedPrograms = () => {
-				let critStruct = Object.assign({}, this.criteriaStructureTemplates.plannedProgram);
-				critStruct.criteria_PersonnelMayFileUnder = activeUserID;
-				getPlannedPrograms(critStruct, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						this.ownerState.plannedPrograms = data;
-					};
-				});
-			};
-
-			const fetchRoles = () => {
-				const critStruct = caesCache.criteriaStructures.gc3.associationSubReportRole;
-				critStruct.criteria_SUB_REPORT_ID_eq = this.allSubReportIDs;
-				if (critStruct.criteria_SUB_REPORT_ID_eq.length > 0) {
-					getAssociationSubReportRole(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							data.forEach((record) => {
-								if (record.SUB_REPORT_ID === this.ownerSubReport.ID) {
-									if (this.editMode === 'owner' || this.editMode === 'admin') delete record.SUB_REPORT_ROLE_LABEL;
-									this.ownerRoles.push(record);
-								} else if (this.needExistingData) {
-									this.collaboratorRecords.roles.push(record);
-								}
-							});
-						}
-					});
-				}
-			};
-
-			const fetchRoleTypes = () => {
-				getAssociationReportTypeRole((err, data) => {
-					if (err) logError(err);
-					if (data) {
-						this.ownerState.unfilteredRoleTypes = data;
-					}
-				});
-			};
-
-			const fetchStatePlannedPrograms = () => {
-				getStatePlannedPrograms((err, data) => {
-					if (err) logError(err);
-					if (data) this.statePlannedPrograms = data;
-				});
-			};
-
-			const fetchSubReports = (callback) => {
-				const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
-				critStruct.criteria_REPORT_ID_eq = [this.reportID || url.getParam('duplicateID')];
-				getSubReport(critStruct, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						data.forEach((record) => {
-							const subReport = { ISSUE_TYPE: null };
-							[
-								'ID',
-								'USER_ID',
-								'ACTUAL_SUBMITTER_ID',
-								'REPORT_ID',
-								'PLANNED_PROGRAM_ID',
-								'STATE_PLANNED_PROGRAM_ID',
-								'IS_HIGHLIGHTED',
-								'DATE_CREATED',
-								'DATE_LAST_UPDATED'
-							].forEach((key) => {
-								if (record[key]) subReport[key] = record[key];
-							});
-							if (subReport.USER_ID === this.ownerID) {
-								subReport.ISSUE_TYPE = subReport.PLANNED_PROGRAM_ID ? 'local' : 'state';
-								this.ownerSubReport = subReport;
-							} else if (this.needExistingData) {
-								this.collaboratorRecords.subReports.push(subReport);
-							}
-						});
-						callback();
-					}
-				});
-			};
-
-			const fetchExistingData = () => {
-				fetchCollaborators();
-				fetchSubReports(() => {
-					fetchContacts();
-					fetchPlannedPrograms();
-					fetchSupplementalData();
-					fetchOutcomes();
-					fetchRoles();
-				});
-				this.fetched = true;
-			};
-
-			fetchPersonnel();
-			fetchStatePlannedPrograms();
-
-			if (this.editMode === 'owner' || this.editMode === 'admin') {
-				fetchOwnerPlannedPrograms();
-				fetchRoleTypes();
-				fetchContactTypes();
-				this.populateOwnerContactsRecords();
-				this.populateOwnerOutcomeRecord();
-			}
-			if (this.needExistingData && !this.fetched) {
-				fetchExistingData();
-			} else if (this.duplication.getCollaborators || this.duplication.getSubReport) {
-				if (this.duplication.getCollaborators) fetchCollaborators();
-				if (this.duplication.getSubReport) {
-					fetchSubReports(() => {
-						fetchContacts();
-						fetchSupplementalData();
-						fetchOutcomes();
-						fetchRoles();
-					});
-				}
-			}
-		},
-		props: {
-			'mode': {
-				type: String,
-				default: 'view',
-				validator: modeValidator
-			}
-		},
-		watch: {
-			collaborators () {
-				this.fetchMissingPersonnel();
-			},
-			reportContacts () {
-				this.populateOwnerContactsRecords();
 			}
 		}
 	};

@@ -20,7 +20,7 @@
 					Local Issue
 				</h3>
 				<select v-if="plannedPrograms.length > 0" v-model="record.PLANNED_PROGRAM_ID">
-					<option v-for="program in plannedPrograms" :value="program.ID">
+					<option v-for="program in plannedPrograms" :key="program.ID" :value="program.ID">
 						{{ program.NAME }}
 					</option>
 				</select>
@@ -35,7 +35,7 @@
 					State Issue
 				</h3>
 				<select v-model="record.STATE_PLANNED_PROGRAM_ID">
-					<option v-for="program in statePlannedPrograms" :value="program.ID">
+					<option v-for="program in statePlannedPrograms" :key="program.ID" :value="program.ID">
 						{{ program.NAME }}
 					</option>
 				</select>
@@ -47,9 +47,9 @@
 				Roles
 			</h3>
 			<ul v-if="reportType !== -1" class="checkbox">
-				<li v-for="role in roleTypes">
+				<li v-for="role in roleTypes" :key="role.ROLE_ID">
 					<label>
-						<input type="checkbox" :value="generateRoleRecord(role)" v-model="roles" />
+						<input v-model="roles" type="checkbox" :value="generateRoleRecord(role)" />
 						<span>
 							{{ role.SUB_REPORT_ROLE_LABEL }}
 						</span>
@@ -73,12 +73,12 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="contact in contacts">
+				<tr v-for="contact in contacts" :key="contact.TYPE_ID">
 					<td>
 						{{ getContactLabelFromID(contact.TYPE_ID) }}
 					</td>
 					<td>
-						<input type="number" v-model.number="contact.QUANTITY" min="0" />
+						<input v-model.number="contact.QUANTITY" type="number" min="0" />
 					</td>
 				</tr>
 			</tbody>
@@ -94,16 +94,14 @@
 			</tfoot>
 		</table>
 		<!-- Supplemental Data -->
-		<SupplementalData
-			:forSubReport="true"
-		/>
+		<SupplementalData :for-sub-report="true" />
 		<!-- Outcome, Impact, Achievements -->
 		<div>
 			<label>
 				<h3>
 					Outcome, Impact, and Achievements
 				</h3>
-				<div v-for="outcome in outcomes">
+				<div v-for="outcome in outcomes" :key="outcome.ID">
 					<textarea v-model="outcome.MEMO"></textarea>
 				</div>
 			</label>
@@ -137,6 +135,20 @@
 		name: 'SubReportForReport',
 		components: {
 			SupplementalData
+		},
+		data () {
+			return {
+				contactTypes: [],
+				criteriaStructureTemplates: {
+					associationReportTypeContactType: {},
+					associationReportTypeRole: {},
+					subReport: {}
+				},
+				issueType: 'local',
+				plannedPrograms: [],
+				statePlannedPrograms: [],
+				unfilteredRoleTypes: []
+			};
 		},
 		computed: {
 			contacts: {
@@ -217,69 +229,10 @@
 				return sum;
 			}
 		},
-		data () {
-			return {
-				contactTypes: [],
-				criteriaStructureTemplates: {
-					associationReportTypeContactType: {},
-					associationReportTypeRole: {},
-					subReport: {}
-				},
-				issueType: 'local',
-				plannedPrograms: [],
-				statePlannedPrograms: [],
-				unfilteredRoleTypes: []
-			};
-		},
-		methods: {
-			getContactLabelFromID (id) {
-				const index = this.contactTypes.map(t => t.ID).indexOf(id);
-				if (index === -1) return '';
-				return this.contactTypes[index].LABEL;
-			},
-			generateRoleRecord (role) {
-				return {
-					SUB_REPORT_ID: this.record.ID,
-					ROLE_ID: role.ROLE_ID
-				};
-			},
-			populateContactsRecords () {
-				if (this.neededReportValues.contacts.length > 0) {
-					const contacts = [];
-					this.neededReportValues.contacts.forEach((record) => {
-						let newRecord = Object.assign({}, record);
-						newRecord.QUANTITY = null;
-						contacts.push(newRecord);
-					});
-					this.contacts = contacts;
-				} else if (this.contacts.length < 1) {
-					getAssociationReportTypeContactType((err, data) => {
-						if (err) logError(err);
-						if (data) {
-							data.forEach((record) => {
-								if (record.REPORT_TYPE_ID === this.reportType) {
-									this.contacts.push({
-										REPORT_ID: this.reportId,
-										TYPE_ID: record.CONTACT_TYPE_ID,
-										QUANTITY: null
-									});
-								}
-							});
-						}
-					});
-				}
-			},
-			populateOutcomeRecord () {
-				this.outcomes.push({
-					ID: null,
-					REPORT_ID: null,
-					USER_ID: null,
-					MEMO: null,
-					DATE_CREATED: null
-				});
-			},
-			importReportData () {
-				this.record = Object.assign(this.record, this.neededReportValues.report);
+		watch: {
+			neededReportValues (values) {
+				this.importReportData();
+				this.populateContactsRecords();
 			}
 		},
 		mounted () {
@@ -463,10 +416,55 @@
 			};
 			if (this.reportId !== null || typeof url.getParam('duplicateID') === 'string') fetchExistingData();
 		},
-		watch: {
-			neededReportValues (values) {
-				this.importReportData();
-				this.populateContactsRecords();
+		methods: {
+			getContactLabelFromID (id) {
+				const index = this.contactTypes.map(t => t.ID).indexOf(id);
+				if (index === -1) return '';
+				return this.contactTypes[index].LABEL;
+			},
+			generateRoleRecord (role) {
+				return {
+					SUB_REPORT_ID: this.record.ID,
+					ROLE_ID: role.ROLE_ID
+				};
+			},
+			populateContactsRecords () {
+				if (this.neededReportValues.contacts.length > 0) {
+					const contacts = [];
+					this.neededReportValues.contacts.forEach((record) => {
+						let newRecord = Object.assign({}, record);
+						newRecord.QUANTITY = null;
+						contacts.push(newRecord);
+					});
+					this.contacts = contacts;
+				} else if (this.contacts.length < 1) {
+					getAssociationReportTypeContactType((err, data) => {
+						if (err) logError(err);
+						if (data) {
+							data.forEach((record) => {
+								if (record.REPORT_TYPE_ID === this.reportType) {
+									this.contacts.push({
+										REPORT_ID: this.reportId,
+										TYPE_ID: record.CONTACT_TYPE_ID,
+										QUANTITY: null
+									});
+								}
+							});
+						}
+					});
+				}
+			},
+			populateOutcomeRecord () {
+				this.outcomes.push({
+					ID: null,
+					REPORT_ID: null,
+					USER_ID: null,
+					MEMO: null,
+					DATE_CREATED: null
+				});
+			},
+			importReportData () {
+				this.record = Object.assign(this.record, this.neededReportValues.report);
 			}
 		}
 	};
