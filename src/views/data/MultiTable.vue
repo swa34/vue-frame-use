@@ -53,6 +53,16 @@
 						</span>
 					</td>
 				</tr>
+				<tr v-for="record in viewableOldRecords" :key="record[optionColumnName]">
+					<td v-for="column in filteredColumns" :key="column.columnName">
+						<span v-if="column.columnName === optionColumnName">
+							{{ getUnfilteredOptionLabel(record[optionColumnName]) }}
+						</span>
+						<span v-else>
+							{{ record[column.columnName] }}
+						</span>
+					</td>
+				</tr>
 			</tbody>
 			<tfoot v-if="showTotals">
 				<tr>
@@ -141,7 +151,8 @@
 			return {
 				criteriaStructure: {},
 				filterRecords: [],
-				localRecords: []
+				localRecords: [],
+				oldRecords: []
 			};
 		},
 		computed: {
@@ -200,6 +211,8 @@
 					.reduce((optionColumn, column, i, arr) => {
 						if (column.columnName === this.optionColumnName) optionColumn = column;
 						if (i === arr.length - 1 && optionColumn === null) logError(new Error('Could not find option column'));
+
+						return optionColumn;
 					}, null);
 			},
 			options: {
@@ -220,6 +233,10 @@
 						this.localRecords = val;
 					}
 				}
+			},
+			viewableOldRecords () {
+				if (this.mode === 'edit') return [];
+				return this.oldRecords;
 			}
 		},
 		watch: {
@@ -409,13 +426,20 @@
 									this.schema.prepareFromRetrieval(data, this.records);
 								} else {
 									data.forEach((existingRecord) => {
+										let foundMatch = false;
 										this.records.forEach((record) => {
 											if (record[this.optionColumn.columnName] === existingRecord[this.optionColumn.columnName]) {
 												for (let key in record) {
-													if (existingRecord.hasOwnProperty(key) && record[key] === null) record[key] = existingRecord[key];
+													if (existingRecord.hasOwnProperty(key) && record[key] === null) {
+														record[key] = existingRecord[key];
+														foundMatch = true;
+													}
 												}
 											}
 										});
+										if (!foundMatch) {
+											this.oldRecords.push(existingRecord);
+										}
 									});
 								}
 								this.fetched = true;
@@ -443,6 +467,11 @@
 					sum += typeof record[column.columnName] === 'number' ? record[column.columnName] : 0;
 				});
 				return sum;
+			},
+			getUnfilteredOptionLabel (key) {
+				const optionKeys = this.options.map(o => o.key);
+				const optionLabels = this.options.map(o => o.label);
+				return optionLabels[optionKeys.indexOf(key)];
 			},
 			recordExistsForId (id) {
 				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;

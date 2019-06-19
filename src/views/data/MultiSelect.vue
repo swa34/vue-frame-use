@@ -136,7 +136,7 @@
 					Array,
 					Object
 				],
-				default: () => []
+				default: null
 			},
 			// A string containing the name for this section's help message
 			'helpMessageName': {
