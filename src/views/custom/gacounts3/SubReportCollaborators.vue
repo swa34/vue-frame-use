@@ -753,7 +753,7 @@
 				return data;
 			},
 			getPersonnelNameFromID (id) {
-				let index = this.personnel.map(p => p.ID).indexOf(id);
+				let index = this.personnel.map(p => p.PERSONNEL_ID).indexOf(id);
 				if (index === -1) {
 					index = this.retiredPersonnel.map(p => p.PERSONNEL_ID).indexOf(id);
 					if (index === -1) return 'Unknown';
