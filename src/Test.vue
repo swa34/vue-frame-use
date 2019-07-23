@@ -12,7 +12,8 @@
 </template>
 
 <script>
-	import ContextualHelpMessage from '@/views/data/ContextualHelpMessage';
+	import ContextualHelpMessage from '~/views/data/ContextualHelpMessage';
+
 	export default {
 		name: 'Test',
 		components: {

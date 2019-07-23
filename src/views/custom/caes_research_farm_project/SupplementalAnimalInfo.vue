@@ -207,19 +207,19 @@
 
 <script>
 	/* global caesCache */
-	import importantDateSchema from '@/schemas/caes_research_farm_project/important_date';
-	import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
-	import SmartInput from '@/views/elements/SmartInput';
+	import importantDateSchema from '~/schemas/caes_research_farm_project/important_date';
+	import supplementalAnimalInfoSchema from '~/schemas/caes_research_farm_project/supplemental_animal_info';
+	import SmartInput from '~/views/elements/SmartInput';
 	import {
 		asyncGetCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		formatDates,
 		getObjectIndexedByKeyFromArray,
 		getPrettyColumnName,
 		url
-	} from '@/modules/utilities';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'SupplementalAnimalInfo',

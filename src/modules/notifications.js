@@ -1,4 +1,4 @@
-import { logError } from '@/modules/caesdb';
+import { logError } from '~/modules/caesdb';
 
 const constructNotificationMessage = (name, titles) => {
 	if (titles.length < 1) {

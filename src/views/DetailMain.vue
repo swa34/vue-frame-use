@@ -45,18 +45,18 @@
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
 									<component
+										:is="area.data.customComponent"
 										v-if="area.data.customComponent && dependencyMet(area.data) && area.data.type === 'int'"
 										v-model.number="record[area.data.columnName]"
-										:is="area.data.customComponent"
 										:mode="getMode(area.data)"
 										@show-help="showHelp"
 										@expand-section="expandSection"
 										@collapse-section="collapseSection"
 									/>
 									<component
+										:is="area.data.customComponent"
 										v-else-if="area.data.customComponent && dependencyMet(area.data)"
 										v-model="record[area.data.columnName]"
-										:is="area.data.customComponent"
 										:mode="getMode(area.data)"
 										@show-help="showHelp"
 										@expand-section="expandSection"
@@ -324,35 +324,35 @@
 	/* global notify */
 	/* global swal */
 	// Import required modules
-	import DetailMain from '@/views/DetailMain';
-	import ContextualHelpMessage from '@/views/ContextualHelpMessage';
-	import SmartInput from '@/views/elements/SmartInput';
-	import Spinner from 'vue-simple-spinner';
-	import prepareForCf from '@/modules/prepareForCf';
+	import ContextualHelpMessage from '~/views/ContextualHelpMessage';
 	import ChevronDownIcon from 'vue-feather-icons/icons/ChevronDownIcon';
 	import ChevronRightIcon from 'vue-feather-icons/icons/ChevronRightIcon';
+	import DetailMain from '~/views/DetailMain';
+	import prepareForCf from '~/modules/prepareForCf';
+	import SmartInput from '~/views/elements/SmartInput';
+	import Spinner from 'vue-simple-spinner';
 	import {
 		DataForm,
 		DataMultiSelect,
 		DataMultiTable,
 		DataRadio,
 		DataTable
-	} from '@/views/data';
+	} from '~/views/data';
 	import {
 		deepObjectAssign,
 		formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
-	} from '@/modules/utilities';
+	} from '~/modules/utilities';
 	import {
 		isFile,
 		isString
-	} from '@/modules/utilities/validation';
+	} from '~/modules/utilities/validation';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 
 	// Export the actual component
 	export default {

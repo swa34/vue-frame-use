@@ -3,12 +3,12 @@
 /* global notify */
 
 // Required modules
-import prepareForCf from '@/modules/prepareForCf';
+import prepareForCf from '~/modules/prepareForCf';
 import request from 'superagent';
 import {
 	cfToJs,
 	jsToCf
-} from '@/modules/criteriaUtils';
+} from '~/modules/criteriaUtils';
 
 const apiPrefix = '/rest/global/';
 

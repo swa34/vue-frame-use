@@ -1,5 +1,5 @@
-import associationDeveloperApplicationSchema from '@/schemas/caes_error_log/association_developer_application';
-import errorReportSchema from '@/schemas/caes_error_log/error_report';
+import associationDeveloperApplicationSchema from '~/schemas/caes_error_log/association_developer_application';
+import errorReportSchema from '~/schemas/caes_error_log/error_report';
 
 const schema = {
 	database: 'CAES_ERROR_LOG',

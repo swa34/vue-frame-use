@@ -1,7 +1,7 @@
 /* global caesCache */
 
-import { getResidenceDemographic } from '@/modules/caesdb/gacounts3';
-import { enableConstraintValues } from '@/modules/schemaTools';
+import { getResidenceDemographic } from '~/modules/caesdb/gacounts3';
+import { enableConstraintValues } from '~/modules/schemaTools';
 
 const schema = {
 	title: 'Residence Demographics',

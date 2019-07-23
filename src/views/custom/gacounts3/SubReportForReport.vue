@@ -111,11 +111,11 @@
 
 <script>
 	/* global activeUserID */
-	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
+	import SupplementalData from '~/views/custom/gacounts3/SupplementalData';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
@@ -127,9 +127,9 @@
 		getSubReport,
 		getSubReportContact,
 		getSubReportPurposeAchievements
-	} from '@/modules/caesdb/gacounts3';
-	import { filter } from '@/modules/criteriaUtils';
-	import { url } from '@/modules/utilities';
+	} from '~/modules/caesdb/gacounts3';
+	import { filter } from '~/modules/criteriaUtils';
+	import { url } from '~/modules/utilities';
 
 	export default {
 		name: 'SubReportForReport',

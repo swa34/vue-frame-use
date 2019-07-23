@@ -1,5 +1,5 @@
 // Pull in required modules
-import { stringFormats } from '@/modules/utilities';
+import { stringFormats } from '~/modules/utilities';
 import Vue from 'vue';
 import Vuex from 'vuex';
 

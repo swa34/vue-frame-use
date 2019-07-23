@@ -1,6 +1,6 @@
 /* global caesCache */
 
-import { getAssociationReportKeyword } from '@/modules/caesdb/gacounts3';
+import { getAssociationReportKeyword } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Keyword Associations',

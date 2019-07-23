@@ -1,4 +1,5 @@
 const path										= require('path');
+const Visualizer							= require('webpack-visualizer-plugin');
 const { CleanWebpackPlugin }	= require('clean-webpack-plugin');
 const { VueLoaderPlugin }			= require('vue-loader');
 
@@ -11,6 +12,7 @@ module.exports = {
 	},
 	plugins: [
 		new CleanWebpackPlugin(),
+		new Visualizer(),
 		new VueLoaderPlugin()
 	],
 	resolve: {
@@ -20,7 +22,7 @@ module.exports = {
 			'.json'
 		],
 		alias: {
-			'@': resolve('src')
+			'~': resolve('src')
 		}
 	},
 	module: {

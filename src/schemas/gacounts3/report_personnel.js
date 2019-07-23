@@ -1,7 +1,7 @@
 import {
 	getPersonnel,
 	getReportPersonnel
-} from '@/modules/caesdb/gacounts3';
+} from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Collaborator',

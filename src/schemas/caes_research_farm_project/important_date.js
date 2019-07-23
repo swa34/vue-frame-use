@@ -1,5 +1,5 @@
-import { getImportantDates } from '@/modules/caesdb/caes_research_farm_project';
-import { databaseName } from '@/schemas/caes_research_farm_project';
+import { getImportantDates } from '~/modules/caesdb/caes_research_farm_project';
+import { databaseName } from '~/schemas/caes_research_farm_project';
 
 const importantDateSchema = {
 	title: 'Important Date',

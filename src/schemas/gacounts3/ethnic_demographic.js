@@ -1,7 +1,7 @@
 /* global caesCache */
 
-import { getEthnicDemographic } from '@/modules/caesdb/gacounts3';
-import { enableConstraintValues } from '@/modules/schemaTools';
+import { getEthnicDemographic } from '~/modules/caesdb/gacounts3';
+import { enableConstraintValues } from '~/modules/schemaTools';
 
 const schema = {
 	title: 'Report Ethnicity Demographics',

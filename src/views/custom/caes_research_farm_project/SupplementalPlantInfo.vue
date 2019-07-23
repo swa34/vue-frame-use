@@ -96,15 +96,15 @@
 
 <script>
 	/* global caesCache */
-	import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
+	import supplementalPlantInfoSchema from '~/schemas/caes_research_farm_project/supplemental_plant_info';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		getObjectIndexedByKeyFromArray,
 		url
-	} from '@/modules/utilities';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'SupplementalPlantInfo',

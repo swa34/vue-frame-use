@@ -1,6 +1,6 @@
-import importantDateSchema from '@/schemas/caes_research_farm_project/important_date';
-import { databaseName } from '@/schemas/caes_research_farm_project';
-import { getSupplementalAnimalInfo } from '@/modules/caesdb/caes_research_farm_project';
+import importantDateSchema from '~/schemas/caes_research_farm_project/important_date';
+import { databaseName } from '~/schemas/caes_research_farm_project';
+import { getSupplementalAnimalInfo } from '~/modules/caesdb/caes_research_farm_project';
 
 const supplementalAnimalInfoSchema = {
 	title: 'Supplemental Animal Information',

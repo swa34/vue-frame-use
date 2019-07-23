@@ -1,5 +1,5 @@
 /* global swal */
-import { logError } from '@/modules/caesdb';
+import { logError } from '~/modules/caesdb';
 
 export default {
 	failedCommentSubmission: (title, messages) => {

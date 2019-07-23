@@ -1,18 +1,18 @@
 /* global caesCache */
 /* global activeUserId */
-import CaesPersonnelDetails from '@/views/custom/caes_research_farm_project/CaesPersonnelDetails';
-import FinancialSupport from '@/views/custom/caes_research_farm_project/FinancialSupport';
-import RoutingAndApproval from '@/views/custom/caes_research_farm_project/RoutingAndApproval';
-import SupplementalAnimalInfo from '@/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
-import SupplementalPlantInfo from '@/views/custom/caes_research_farm_project/SupplementalPlantInfo';
-import supplementalAnimalInfoSchema from '@/schemas/caes_research_farm_project/supplemental_animal_info';
-import supplementalPlantInfoSchema from '@/schemas/caes_research_farm_project/supplemental_plant_info';
+import CaesPersonnelDetails from '~/views/custom/caes_research_farm_project/CaesPersonnelDetails';
+import FinancialSupport from '~/views/custom/caes_research_farm_project/FinancialSupport';
+import RoutingAndApproval from '~/views/custom/caes_research_farm_project/RoutingAndApproval';
+import SupplementalAnimalInfo from '~/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
+import SupplementalPlantInfo from '~/views/custom/caes_research_farm_project/SupplementalPlantInfo';
+import supplementalAnimalInfoSchema from '~/schemas/caes_research_farm_project/supplemental_animal_info';
+import supplementalPlantInfoSchema from '~/schemas/caes_research_farm_project/supplemental_plant_info';
 import {
 	deleteFile,
 	getDepartmentHeadCollegeId,
 	getProject
-} from '@/modules/caesdb/caes_research_farm_project';
-import { logError } from '@/modules/caesdb';
+} from '~/modules/caesdb/caes_research_farm_project';
+import { logError } from '~/modules/caesdb';
 
 const nullTest = val => val === null || val === '';
 const notNullTest = val => !nullTest(val);

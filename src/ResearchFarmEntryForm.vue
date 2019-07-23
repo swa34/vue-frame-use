@@ -114,32 +114,32 @@
 	/* global activeUserId */
 	/* global caesCache */
 	/* global swal */
-	import alert from '@/modules/applications/caes_research_farm_project/alert';
-	import schema from '@/schemas/caes_research_farm_project/project';
+	import alert from '~/modules/applications/caes_research_farm_project/alert';
 	import dateFormat from 'dateformat';
-	import DetailMain from '@/views/DetailMain';
-	import DuplicationModal from '@/views/DuplicationModal';
-	import projectDuplicationSchema from '@/schemas/caes_research_farm_project/duplication/project';
+	import DetailMain from '~/views/DetailMain';
+	import DuplicationModal from '~/views/DuplicationModal';
+	import projectDuplicationSchema from '~/schemas/caes_research_farm_project/duplication/project';
+	import schema from '~/schemas/caes_research_farm_project/project';
+	import { getSortedSchema } from '~/modules/schemaTools';
+	import { logError } from '~/modules/caesdb';
 	import {
 		getComputed,
 		getStore
-	} from '@/modules/store';
+	} from '~/modules/store';
 	import {
 		deepObjectAssign,
 		stringFormats,
 		url
-	} from '@/modules/utilities';
-	import { getSortedSchema } from '@/modules/schemaTools';
-	import { logError } from '@/modules/caesdb';
+	} from '~/modules/utilities';
 	import {
 		deleteProject,
 		saveProject
-	} from '@/modules/caesdb/caes_research_farm_project';
+	} from '~/modules/caesdb/caes_research_farm_project';
 	import {
 		getProjectsNextStatusId,
 		getProjectsRevisionStatusId,
 		statusesIndexedByName
-	} from '@/modules/applications/caes_research_farm_project/status-handling';
+	} from '~/modules/applications/caes_research_farm_project/status-handling';
 
 	export default {
 		name: 'ResearchFarmEntryForm',

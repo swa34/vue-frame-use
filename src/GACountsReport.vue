@@ -121,27 +121,27 @@
 	/* global swal */
 
 	// Import required modules
-	import DetailMain from '@/views/DetailMain';
-	import DuplicationModal from '@/views/DuplicationModal';
-	import schema from '@/schemas/gacounts3/report';
-	import duplicationSchema from '@/schemas/gacounts3/duplication/report';
+	import DetailMain from '~/views/DetailMain';
+	import DuplicationModal from '~/views/DuplicationModal';
+	import duplicationSchema from '~/schemas/gacounts3/duplication/report';
+	import schema from '~/schemas/gacounts3/report';
+	import { getSortedSchema } from '~/modules/schemaTools';
 	import {
 		getComputed,
 		getStore
-	} from '@/modules/store';
+	} from '~/modules/store';
 	import {
 		stringFormats,
 		url
-	} from '@/modules/utilities';
-	import { getSortedSchema } from '@/modules/schemaTools';
+	} from '~/modules/utilities';
 	import {
 		getCriteriaStructure,
 		logError,
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		getDuplicatedReport,
 		postReportTemplateStatus
-	} from '@/modules/caesdb/gacounts3';
+	} from '~/modules/caesdb/gacounts3';
 
 	// Configure notifications
 	notify.configure({

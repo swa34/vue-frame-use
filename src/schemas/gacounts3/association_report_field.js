@@ -1,6 +1,6 @@
 /* global caesCache */
 
-import { enableConstraintValues } from '@/modules/schemaTools';
+import { enableConstraintValues } from '~/modules/schemaTools';
 
 const schema = {
 	columns: [

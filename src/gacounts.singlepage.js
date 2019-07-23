@@ -3,12 +3,12 @@ import 'url-polyfill';
 // Polyfill for Element.matches and IE11
 import 'element-matches';
 // Import our main App
-import GACountsReport from '@/GACountsReport';
-// import Test from '@/Test';
+import GACountsReport from '~/GACountsReport';
+// import Test from '~/Test';
 import Vue from 'vue';
-import { logError } from '@/modules/caesdb';
+import { logError } from '~/modules/caesdb';
 
-Vue.filter('capitalize', (str) => {
+Vue.filter('capitalize', str => {
 	if (!str) return '';
 	str = str.toString();
 	return str.charAt(0).toUpperCase() + str.slice(1);

@@ -19,14 +19,14 @@ import {
 	residenceDemographicSchema,
 	subReportSchema,
 	targetAudienceSchema
-} from '@/schemas/gacounts3';
+} from '~/schemas/gacounts3';
 import {
 	ccdAssociationKeywordTopicCriteriaStructure
-} from '@/criteriaStructures/caes_central_database';
+} from '~/criteriaStructures/caes_central_database';
 import {
 	gc3AssociationReportTypeContactTypeCriteriaStructure,
 	gc3TargetAudienceCriteriaStructure
-} from '@/criteriaStructures/gacounts3';
+} from '~/criteriaStructures/gacounts3';
 import {
 	deleteReport,
 	getAssociationKeywordTopic,
@@ -36,12 +36,12 @@ import {
 	getContextualHelpMessageHTML,
 	getReport,
 	postReportData
-} from '@/modules/caesdb/gacounts3';
-import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
-import MediaProducedComponent from '@/views/custom/gacounts3/MediaProduced';
-import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
-import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
-import SubReportCollaborators from '@/views/custom/gacounts3/SubReportCollaborators';
+} from '~/modules/caesdb/gacounts3';
+import FourHImportComponent from '~/views/custom/gacounts3/FourHImport';
+import MediaProducedComponent from '~/views/custom/gacounts3/MediaProduced';
+import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
+import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForReport';
+import SubReportCollaborators from '~/views/custom/gacounts3/SubReportCollaborators';
 
 // Adjust the racial demographic schema to suit our needs
 const altRacialDemographicSchema = Object.assign({}, racialDemographicSchema);

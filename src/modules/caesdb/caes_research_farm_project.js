@@ -3,7 +3,7 @@ import {
 	generateUrl,
 	logError,
 	makeAsyncPostRequest
-} from '@/modules/caesdb';
+} from '~/modules/caesdb';
 
 const apiPrefix = '/rest/caesresearchfarmproject/';
 

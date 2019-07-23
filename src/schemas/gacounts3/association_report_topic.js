@@ -1,7 +1,7 @@
 import {
 	getAssociationReportTopic,
 	getAssociationTopicArea
-} from '@/modules/caesdb/gacounts3';
+} from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Topics',

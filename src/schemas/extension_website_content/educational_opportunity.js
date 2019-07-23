@@ -1,5 +1,5 @@
-import associationOpportunityTopicSchema from '@/schemas/extension_website_content/association_opportunity_topic';
-import opportunityDateSchema from '@/schemas/extension_website_content/opportunity_date';
+import associationOpportunityTopicSchema from '~/schemas/extension_website_content/association_opportunity_topic';
+import opportunityDateSchema from '~/schemas/extension_website_content/opportunity_date';
 
 const schema = {
 	database: 'EXTENSION_WEBSITE_CONTENT',

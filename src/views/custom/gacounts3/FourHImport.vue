@@ -53,13 +53,13 @@
 	/* global swal */
 	import Spinner from 'vue-simple-spinner';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
-	import { logError } from '@/modules/caesdb';
+	import { logError } from '~/modules/caesdb';
 	import {
 		get4HActivity,
 		get4HActivityList,
 		getCounties
-	} from '@/modules/caesdb/gacounts3';
-	import { url } from '@/modules/utilities';
+	} from '~/modules/caesdb/gacounts3';
+	import { url } from '~/modules/utilities';
 
 	export default {
 		name: 'FourHImport',

@@ -1,7 +1,7 @@
 /* global caesCache */
 
-import { enableConstraintValues } from '@/modules/schemaTools';
-import { getSubReportContact } from '@/modules/caesdb/gacounts3';
+import { enableConstraintValues } from '~/modules/schemaTools';
+import { getSubReportContact } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Sub-Report Contacts',

@@ -1,4 +1,4 @@
-import oitContentManagerListSchema from '@/schemas/caes_central_database/oit_content_manager_list';
+import oitContentManagerListSchema from '~/schemas/caes_central_database/oit_content_manager_list';
 
 const schema = {
 	database: 'CAES_CENTRAL_DATABASE',

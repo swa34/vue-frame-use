@@ -17,7 +17,7 @@
 <script>
 	import Spinner from 'vue-simple-spinner';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
-	import { logError } from '@/modules/caesdb';
+	import { logError } from '~/modules/caesdb';
 
 	export default {
 		name: 'ContextualHelpMessage',

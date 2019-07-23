@@ -1,5 +1,5 @@
-import associationPersonnelModuleSchema from '@/schemas/caes_central_database/association_personnel_module';
-import associationWorkingGroupModuleSchema from '@/schemas/caes_central_database/association_working_group_module';
+import associationPersonnelModuleSchema from '~/schemas/caes_central_database/association_personnel_module';
+import associationWorkingGroupModuleSchema from '~/schemas/caes_central_database/association_working_group_module';
 
 const schema = {
 	database: 'CAES_CENTRAL_DATABASE',

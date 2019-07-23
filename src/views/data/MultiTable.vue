@@ -84,19 +84,19 @@
 </template>
 
 <script>
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
-	import { filter } from '@/modules/criteriaUtils';
+	} from '~/modules/caesdb';
+	import { filter } from '~/modules/criteriaUtils';
 	import {
 		// formatDates,
 		getPrettyColumnName,
 		modeValidator,
 		sqlToHtml,
 		stringFormats
-	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'DataMultiTable',

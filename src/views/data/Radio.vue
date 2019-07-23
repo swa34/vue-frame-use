@@ -62,16 +62,16 @@
 	/* global notify */
 
 	// Import required modules
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import { constructNotificationMessage } from '~/modules/notifications';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		modeValidator,
 		stringFormats
-	} from '@/modules/utilities';
-	import { constructNotificationMessage } from '@/modules/notifications';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	// Export the actual component
 	export default {

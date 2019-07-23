@@ -8,7 +8,13 @@
 					{{ `allocated${farmText}.` }}
 				</p>
 			</legend>
-			<input type="number" required="true" min="0" :value="value" @input="$emit('input', $event.target.value)" />
+			<input
+				type="number"
+				required="true"
+				min="0"
+				:value="value"
+				@input="$emit('input', $event.target.value)"
+			/>
 		</label>
 		<div v-else>
 			<h3>Financial Support Allocated{{ farmText }}</h3>

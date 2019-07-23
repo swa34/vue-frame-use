@@ -95,22 +95,22 @@
 
 <script>
 	/* global caesCache */
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import { filter } from '~/modules/criteriaUtils';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		getAssociationReportField,
 		getAssociationReportTypeField,
 		getAssociationSubReportField,
 		getFieldOptions
-	} from '@/modules/caesdb/gacounts3';
-	import { filter } from '@/modules/criteriaUtils';
+	} from '~/modules/caesdb/gacounts3';
 	import {
 		modeValidator,
 		url
-	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	// An object containing input types corresponding to field types
 	const fieldTypeInputTypes = {

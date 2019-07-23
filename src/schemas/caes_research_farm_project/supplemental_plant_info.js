@@ -1,5 +1,5 @@
-import { databaseName } from '@/schemas/caes_research_farm_project';
-import { getSupplementalPlantInfo } from '@/modules/caesdb/caes_research_farm_project';
+import { databaseName } from '~/schemas/caes_research_farm_project';
+import { getSupplementalPlantInfo } from '~/modules/caesdb/caes_research_farm_project';
 
 const supplementalPlantInfoSchema = {
 	title: 'Supplemental Plant Information',

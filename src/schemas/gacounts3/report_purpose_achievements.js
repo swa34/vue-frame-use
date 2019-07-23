@@ -1,6 +1,6 @@
 import {
 	getReportPurposeAchievements
-} from '@/modules/caesdb/gacounts3';
+} from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Outcome, Impact, and Achievements',

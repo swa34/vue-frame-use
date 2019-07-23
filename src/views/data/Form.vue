@@ -72,11 +72,11 @@
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
-	} from '@/modules/utilities';
+	} from '~/modules/utilities';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 
 	// Export the actual component
 	export default {

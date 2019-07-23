@@ -1,8 +1,8 @@
 import {
 	getMediaDistributed,
 	getMediaType
-} from '@/modules/caesdb/gacounts3';
-import { enableConstraintValues } from '@/modules/schemaTools';
+} from '~/modules/caesdb/gacounts3';
+import { enableConstraintValues } from '~/modules/schemaTools';
 
 const schema = {
 	title: 'Media Distributed',

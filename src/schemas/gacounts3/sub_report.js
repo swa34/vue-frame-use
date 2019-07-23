@@ -1,11 +1,11 @@
 /* global activeUserID */
 /* global actualUserID */
 
-import associationSubReportRoleSchema from '@/schemas/gacounts3/association_sub_report_role';
+import associationSubReportRoleSchema from '~/schemas/gacounts3/association_sub_report_role';
 import {
 	getPlannedPrograms,
 	getStatePlannedPrograms
-} from '@/modules/caesdb/gacounts3';
+} from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Sub-Report',

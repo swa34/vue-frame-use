@@ -124,19 +124,19 @@
 
 <script>
 	/* global activeUserID */
-	import FuzzySelect from '@/views/elements/FuzzySelect';
+	import FuzzySelect from '~/views/elements/FuzzySelect';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		formatDates,
 		getPrettyColumnName,
 		modeValidator,
 		sqlToHtml,
 		stringFormats
-	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'DataTable',

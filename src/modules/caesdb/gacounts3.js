@@ -4,7 +4,7 @@ import {
 	logError,
 	makeGetRequest,
 	makePostRequest
-} from '@/modules/caesdb';
+} from '~/modules/caesdb';
 
 const apiPrefix = '/rest/gacounts/';
 

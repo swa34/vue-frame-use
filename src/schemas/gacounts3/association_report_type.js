@@ -1,6 +1,6 @@
 /* global caesCache */
 
-import { getAssociationReportType } from '@/modules/caesdb/gacounts3';
+import { getAssociationReportType } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Type Associations',

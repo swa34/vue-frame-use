@@ -33,7 +33,8 @@
 
 <script>
 	import XIcon from 'vue-feather-icons/icons/XIcon';
-	import { url } from '@/modules/utilities';
+	import { url } from '~/modules/utilities';
+
 	export default {
 		name: 'DuplicationModal',
 		components: { XIcon },

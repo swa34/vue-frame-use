@@ -212,13 +212,14 @@
 	/* global activeUser */
 	/* global activeUserID */
 	/* global caesCache */
-	import FuzzySelect from '@/views/elements/FuzzySelect';
-	import SubReportPlainText from '@/views/custom/gacounts3/SubReportPlainText';
-	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
+	import FuzzySelect from '~/views/elements/FuzzySelect';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import SubReportPlainText from '~/views/custom/gacounts3/SubReportPlainText';
+	import SupplementalData from '~/views/custom/gacounts3/SupplementalData';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
@@ -233,16 +234,15 @@
 		getSubReport,
 		getSubReportContact,
 		getSubReportPurposeAchievements
-	} from '@/modules/caesdb/gacounts3';
+	} from '~/modules/caesdb/gacounts3';
 	import {
 		cfToJs,
 		filter
-	} from '@/modules/criteriaUtils';
+	} from '~/modules/criteriaUtils';
 	import {
 		modeValidator,
 		url
-	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'SubReportCollaborators',

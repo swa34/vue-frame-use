@@ -46,17 +46,17 @@
 	/* global activeUser */
 	/* global activeUserId */
 	/* global caesCache */
-	import alert from '@/modules/applications/caes_research_farm_project/alert';
-	import projectSchema from '@/schemas/caes_research_farm_project/project';
-	import SmartInput from '@/views/elements/SmartInput';
-	import { getPrettyColumnName } from '@/modules/utilities';
+	import alert from '~/modules/applications/caes_research_farm_project/alert';
+	import projectSchema from '~/schemas/caes_research_farm_project/project';
+	import SmartInput from '~/views/elements/SmartInput';
+	import { getPrettyColumnName } from '~/modules/utilities';
 	import {
 		getProjectsNextStatusId,
 		getProjectsRevisionStatusId,
 		statusesIndexedByName
-	} from '@/modules/applications/caes_research_farm_project/status-handling';
-	import { logError } from '@/modules/caesdb';
-	import { addComment } from '@/modules/caesdb/caes_research_farm_project';
+	} from '~/modules/applications/caes_research_farm_project/status-handling';
+	import { logError } from '~/modules/caesdb';
+	import { addComment } from '~/modules/caesdb/caes_research_farm_project';
 
 	export default {
 		name: 'RoutingAndApproval',

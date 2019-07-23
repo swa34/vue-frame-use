@@ -155,7 +155,7 @@
 				:required="field.required"
 				:disabled="field.immutable"
 				:style="field.style"
-				@input="$emit('input', $event.target.value)"
+				@input="handlePhoneInput"
 			/>
 			<input
 				v-else-if="fieldType === 'email'"
@@ -223,14 +223,14 @@
 <script>
 	/* global caesCache */
 	import Editor from '@tinymce/tinymce-vue';
-	import FuzzySelect from '@/views/elements/FuzzySelect';
+	import FuzzySelect from '~/views/elements/FuzzySelect';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
-	import InputMask from 'inputmask';
+	import { isFile } from '~/modules/utilities/validation';
+	import { phoneInputMask } from '~/modules/utilities/input-masking';
 	import {
 		getPrettyColumnName,
 		sqlToHtml
-	} from '@/modules/utilities';
-	import { isFile } from '@/modules/utilities/validation';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'SmartInput',
@@ -289,13 +289,12 @@
 		mounted () {
 			if (this.field.defaultValue) this.setDefaultValue();
 			this.updateDependentValue();
-
-			if (this.fieldType === 'tel') {
-				const phoneMask = new InputMask('(999) 999-9999');
-				phoneMask.mask(this.$refs.telInput);
-			}
 		},
 		methods: {
+			handlePhoneInput (e) {
+				phoneInputMask(e);
+				this.$emit('input', e.target.value);
+			},
 			isFile,
 			setDefaultValue () {
 				this.$emit('input', this.field.defaultValue);

@@ -70,13 +70,13 @@
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		getMediaProduction,
 		getMediaReviewType,
 		getMediaType
-	} from '@/modules/caesdb/gacounts3';
-	import { modeValidator } from '@/modules/utilities';
+	} from '~/modules/caesdb/gacounts3';
+	import { modeValidator } from '~/modules/utilities';
 
 	export default {
 		name: 'MediaProduced',
