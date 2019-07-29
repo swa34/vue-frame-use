@@ -1,13 +1,11 @@
 /* global caesCache */
 
-import { enableConstraintValues } from '@/modules/schemaTools';
-import {
-	getReportTargetAudience
-	// getTargetAudiences
-} from '@/modules/caesdb';
+import { enableConstraintValues } from '~/modules/schemaTools';
+import { getReportTargetAudience } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Target Audiences',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_TARGET_AUDIENCE',
 	criteria: {
 		string: 'critieria_REPORT_ID_eq'
@@ -26,7 +24,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getTargetAudiences,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.targetAudienceType

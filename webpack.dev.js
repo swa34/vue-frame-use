@@ -1,6 +1,5 @@
 const common			= require('./webpack.common.js');
 const merge				= require('webpack-merge');
-const Visualizer	= require('webpack-visualizer-plugin');
 
 module.exports = merge(common, {
 	mode: 'development',
@@ -36,7 +35,6 @@ module.exports = merge(common, {
 			}
 		]
 	},
-	plugins: [ new Visualizer() ],
 	resolve: {
 		alias: {
 			vue: 'vue/dist/vue'

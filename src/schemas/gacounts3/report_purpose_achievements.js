@@ -1,9 +1,10 @@
 import {
 	getReportPurposeAchievements
-} from '@/modules/caesdb';
+} from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Outcome, Impact, and Achievements',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_REPORT_PURPOSE_ACHIEVEMENTS',
 	criteria: {
 		string: 'criteria_ID_eq'

@@ -1,9 +1,9 @@
 <template lang="html">
-  <div v-if="displayedGroups.length > 0 && filteredOptions.length > 0">
+	<div v-if="displayedGroups.length > 0 && filteredOptions.length > 0">
 		<!-- Show the title if there is one -->
 		<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
 			{{ (title || schema.title) + (mode === 'view' ? ':' : '') }}
-			<a v-if="helpMessageName && mode === 'edit'" v-on:click="$emit('show-help')" class="help-link">
+			<a v-if="helpMessageName && mode === 'edit'" class="help-link" @click="$emit('show-help')">
 				<HelpCircleIcon />
 			</a>
 		</h3>
@@ -16,7 +16,7 @@
 			(None)
 		</p>
 		<!-- Loop through each of the groups -->
-		<div v-for="group in groups">
+		<div v-for="group in groups" :key="group.id">
 			<!--
 				And if either no groups to show were specified, or the current group
 				made the cut...
@@ -30,7 +30,7 @@
 						</h4>
 						<!-- Then, create a list to hold each of the group's options -->
 						<transition-group name="list-complete" tag="ul" class="checkbox">
-							<li v-for="option in group.options" v-bind:key="option[optionID]" class="list-complete-item">
+							<li v-for="option in group.options" :key="option[optionID]" class="list-complete-item">
 								<label>
 									<!--
 										Show a checkbox for the option, here's prop explanations:
@@ -38,7 +38,12 @@
 										v-model: Says where to store the record when checked
 										disabled: Depends on whether editing is enabled or not.
 									-->
-									<input type="checkbox" :value="generateRecord(option)" v-model="records" v-on:click="notifyOfChanges" />
+									<input
+										v-model="records"
+										type="checkbox"
+										:value="generateRecord(option)"
+										@click="notifyOfChanges"
+									/>
 									<!-- The option's label -->
 									<span>
 										{{ option[optionLabel || optionID] }}
@@ -63,8 +68,8 @@
 						<strong v-if="group.name">
 							{{ group.name }}:
 						</strong>
-						<span v-for="(option, index) in getOptionsThatHaveRecords(group.options)" v-bind:key="option[optionID]">
-							{{ option[optionLabel || optionID] + (index < getOptionsThatHaveRecords(group.options).length - 1 ? ',' : '') }}
+						<span v-for="(option, index) in getOptionsThatHaveRecords(group.options)" :key="option[optionID]">
+							{{ getViewModeOptionLabel(group, option, index) }}
 						</span>
 					</div>
 				</div>
@@ -77,26 +82,28 @@
 	/* global activeUserID */
 	/* global notify */
 	// Import required modules
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import { filter } from '~/modules/criteriaUtils';
+	import { constructNotificationMessage } from '~/modules/notifications';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 	import {
 		modeValidator,
 		stringFormats
-	} from '@/modules/utilities';
-	import { filter } from '@/modules/criteriaUtils';
-	import { constructNotificationMessage } from '@/modules/notifications';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	// Export the actual component
 	export default {
 		// Component's name
 		name: 'DataMultiSelect',
+		components: { HelpCircleIcon },
 		// Component's properties, which are set by the parent component
 		props: {
 			'affects': {
-				type: Object
+				type: Object,
+				default: null
 			},
 			// The column of the records to use as the value for the checkboxes
 			'associatedColumn': {
@@ -105,34 +112,41 @@
 			},
 			// Description of the data
 			'description': {
-				type: String
+				type: String,
+				default: ''
 			},
 			// An object containing information for filtering out options
 			'filter': {
-				type: Object
+				type: Object,
+				default: null
 			},
 			// The column to group records with
 			'groupBy': {
-				type: String
+				type: String,
+				default: ''
 			},
 			// The column to get the group labels from
 			'groupLabel': {
-				type: String
+				type: String,
+				default: ''
 			},
 			// An array or object specifying which groups should be displayed
 			'groupsToShow': {
 				type: [
 					Array,
 					Object
-				]
+				],
+				default: null
 			},
 			// A string containing the name for this section's help message
 			'helpMessageName': {
-				type: String
+				type: String,
+				default: ''
 			},
 			// An identifier, used when viewing an existing record
 			'identifier': {
-				type: Object
+				type: Object,
+				default: null
 			},
 			// The display mode
 			'mode': {
@@ -147,10 +161,43 @@
 			},
 			// Title of the fieldset
 			'title': {
-				type: String
+				type: String,
+				default: ''
 			}
 		},
-		components: { HelpCircleIcon },
+		// Data must be a function, and it returns the simple variables that are to
+		// be used by the component
+		data () {
+			// Create our main data object
+			const data = {
+				changeCount: 0,						// Used to track changes for notifications
+				filterRecords: [],				// The array to store the filter's records in
+				groups: [],								// Array to hold groups of options
+				localRecords: [],					// Local records array, used if no data store
+				optionDescription: null,	// The column holding the option's description
+				optionID: null,						// The column holding the option's ID
+				optionLabel: null,				// The column holding the option's label
+				options: []								// The array to hold all, unfiltered, options
+			};
+
+			// We need to loop through each of the schema's columns to find the column
+			// that has the constraint pertaining to the options to be selected so
+			// that we can extract the ID, Label, and Description column names
+			this.schema.columns.forEach((column) => {
+				// If the column's name is the associated column and the column has a
+				// constraint, it's the one we're looking for!
+				if (column.columnName === this.associatedColumn && column.constraint) {
+					// So, set the ID, Label, and Description values accordingly.  If no
+					// description, set description to false.
+					data.optionID = column.constraint.foreignKey;
+					data.optionLabel = column.constraint.foreignLabel;
+					data.optionDescription = column.constraint.foreignDescription || false;
+				}
+			});
+
+			// Finally, return the data!
+			return data;
+		},
 		// Computed values are values that are generated by a function rather than
 		// just plain variables
 		computed: {
@@ -281,181 +328,6 @@
 				}
 			}
 		},
-		// Data must be a function, and it returns the simple variables that are to
-		// be used by the component
-		data () {
-			// Create our main data object
-			const data = {
-				changeCount: 0,						// Used to track changes for notifications
-				filterRecords: [],				// The array to store the filter's records in
-				groups: [],								// Array to hold groups of options
-				localRecords: [],					// Local records array, used if no data store
-				optionDescription: null,	// The column holding the option's description
-				optionID: null,						// The column holding the option's ID
-				optionLabel: null,				// The column holding the option's label
-				options: []								// The array to hold all, unfiltered, options
-			};
-
-			// We need to loop through each of the schema's columns to find the column
-			// that has the constraint pertaining to the options to be selected so
-			// that we can extract the ID, Label, and Description column names
-			this.schema.columns.forEach((column) => {
-				// If the column's name is the associated column and the column has a
-				// constraint, it's the one we're looking for!
-				if (column.columnName === this.associatedColumn && column.constraint) {
-					// So, set the ID, Label, and Description values accordingly.  If no
-					// description, set description to false.
-					data.optionID = column.constraint.foreignKey;
-					data.optionLabel = column.constraint.foreignLabel;
-					data.optionDescription = column.constraint.foreignDescription || false;
-				}
-			});
-
-			// Finally, return the data!
-			return data;
-		},
-		// Methods/functions that are available to the component during render (and
-		// elsewhere)
-		methods: {
-			// The function to check all the boxes of a group when clicked
-			checkAll (group) {
-				// Loop through the group's options
-				group.options.forEach((option) => {
-					// Generate a record from the option
-					const record = this.generateRecord(option);
-					// Then see if the record is already in our records array and if it
-					// isn't, add it.
-					const recordIndex = this.records.map(e => e[this.associatedColumn]).indexOf(record[this.associatedColumn]);
-					if (recordIndex === -1)	this.records.push(record);
-				});
-			},
-			// Function to uncheck all options of a group when clicked.  Basically the
-			// opposite of the checkAll function (can you believe it?!)
-			uncheckAll (group) {
-				group.options.forEach((option) => {
-					const record = this.generateRecord(option);
-					const recordIndex = this.records.map(e => e[this.associatedColumn]).indexOf(record[this.associatedColumn]);
-					if (recordIndex !== -1) this.records.splice(recordIndex, 1);
-				});
-			},
-			getOptionsThatHaveRecords (options) {
-				let newOptions = [];
-				options.forEach((option) => {
-					if (this.recordExistsForId(option[this.optionID])) newOptions.push(option);
-				});
-				return newOptions;
-			},
-			// Generates a record from an option, to be stored in the component's
-			// records array
-			generateRecord (option) {
-				// Create the record object
-				const record = {};
-				// Then loop through the schema's columns to set the appropriate values
-				// in the record.
-				this.schema.columns.forEach((column) => {
-					if (column.columnName === this.associatedColumn) {
-						record[column.columnName] = option[this.optionID];
-					} else {
-						record[column.columnName] = this.identifier.value || null;
-					}
-				});
-				// Then return the record
-				return record;
-			},
-			getRecords () {
-				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						let critStruct = data;
-						critStruct[this.identifier.criteriaString] = this.identifier.value;
-						this.schema.fetchExisting(critStruct, (err, data) => {
-							if (err) logError(err);
-							if (data) {
-								let convertedRecords = [];
-								data.forEach((record) => {
-									let convertedRecord = {};
-									this.schema.columns.forEach((column) => {
-										convertedRecord[column.columnName] = record[column.columnName];
-									});
-									convertedRecords.push(convertedRecord);
-								});
-								this.records = convertedRecords;
-								this.fetched = true;
-							}
-						});
-					}
-				});
-			},
-			recordExistsForId (id) {
-				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;
-			},
-			notifyOfChanges () {
-				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {
-					notify.log(constructNotificationMessage(this.title, this.affects.titles));
-				}
-				++this.changeCount;
-			}
-		},
-		// The mounted function is run every time the component is mounted/rendered
-		// onto the page.
-		mounted () {
-			// Alias 'this' to component
-			const component = this;
-
-			// Function to get all options available
-			const getOptions = () => {
-				// Loop through the schema's columns looking for the associated column
-				// with a constraint
-				component.schema.columns.forEach((column) => {
-					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.values && column.constraint.values.length > 0) {
-						component.options = column.constraint.values;
-					} else if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
-						if (column.constraint.tablePrefix) {
-							// If the constraint has a tablePrefix, we need to get a criteria
-							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) logError(err);
-								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
-								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) logError(err);
-									if (data) component.options = data;
-								});
-							});
-						} else {
-							// If no table prefix, just fetch the data
-							column.constraint.getValues((err, data) => {
-								if (err) logError(err);
-								if (data) component.options = data;
-							});
-						}
-					} else if (column.columnName === component.associatedColumn) {
-						// If we find the associated column but it doesn't have a constraint
-						// we're in an error condition, so log it to the console.
-						logError(new Error('ID Column does not have necessary constraint information.'));
-					}
-				});
-			};
-
-			// Gets records used to filter options
-			const getFilterRecords = () => {
-				if (component.filter.getValues) {
-					component.filter.getValues((err, data) => {
-						if (err) logError(err);
-						if (data) component.filterRecords = data;
-					});
-				} else {
-					logError(new Error('Filter does not contain function to get values'));
-				}
-			};
-
-			// Get our options
-			getOptions();
-			// If an identifier is present, get the existing records
-			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				if (!this.fetched) this.getRecords();
-			}
-			// If a filter was specified, get the filter records
-			if (component.filter) getFilterRecords();
-		},
 		// Holds functions corresponding to computed values that will be run every
 		// time the computed value changes.
 		watch: {
@@ -529,6 +401,154 @@
 				// however for somereason valid options is empty when it shouldn't be.
 				// This hackishly fixes it.
 				if (this.validOptions.length > 0) this.records = validRecords;
+			}
+		},
+		// The mounted function is run every time the component is mounted/rendered
+		// onto the page.
+		mounted () {
+			// Alias 'this' to component
+			const component = this;
+
+			// Function to get all options available
+			const getOptions = () => {
+				// Loop through the schema's columns looking for the associated column
+				// with a constraint
+				component.schema.columns.forEach((column) => {
+					if (column.columnName === component.associatedColumn && column.constraint && column.constraint.values && column.constraint.values.length > 0) {
+						component.options = column.constraint.values;
+					} else if (column.columnName === component.associatedColumn && column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) logError(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) logError(err);
+									if (data) component.options = data;
+								});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) logError(err);
+								if (data) component.options = data;
+							});
+						}
+					} else if (column.columnName === component.associatedColumn) {
+						// If we find the associated column but it doesn't have a constraint
+						// we're in an error condition, so log it to the console.
+						logError(new Error('ID Column does not have necessary constraint information.'));
+					}
+				});
+			};
+
+			// Gets records used to filter options
+			const getFilterRecords = () => {
+				if (component.filter.getValues) {
+					component.filter.getValues((err, data) => {
+						if (err) logError(err);
+						if (data) component.filterRecords = data;
+					});
+				} else {
+					logError(new Error('Filter does not contain function to get values'));
+				}
+			};
+
+			// Get our options
+			getOptions();
+			// If an identifier is present, get the existing records
+			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
+				if (!this.fetched) this.getRecords();
+			}
+			// If a filter was specified, get the filter records
+			if (component.filter) getFilterRecords();
+		},
+		// Methods/functions that are available to the component during render (and
+		// elsewhere)
+		methods: {
+			// The function to check all the boxes of a group when clicked
+			checkAll (group) {
+				// Loop through the group's options
+				group.options.forEach((option) => {
+					// Generate a record from the option
+					const record = this.generateRecord(option);
+					// Then see if the record is already in our records array and if it
+					// isn't, add it.
+					const recordIndex = this.records.map(e => e[this.associatedColumn]).indexOf(record[this.associatedColumn]);
+					if (recordIndex === -1)	this.records.push(record);
+				});
+			},
+			// Function to uncheck all options of a group when clicked.  Basically the
+			// opposite of the checkAll function (can you believe it?!)
+			uncheckAll (group) {
+				group.options.forEach((option) => {
+					const record = this.generateRecord(option);
+					const recordIndex = this.records.map(e => e[this.associatedColumn]).indexOf(record[this.associatedColumn]);
+					if (recordIndex !== -1) this.records.splice(recordIndex, 1);
+				});
+			},
+			getOptionsThatHaveRecords (options) {
+				let newOptions = [];
+				options.forEach((option) => {
+					if (this.recordExistsForId(option[this.optionID])) newOptions.push(option);
+				});
+				return newOptions;
+			},
+			getViewModeOptionLabel (group, option, index) {
+				let label = option[this.optionLabel || this.optionID];
+				if (index < this.getOptionsThatHaveRecords(group.options).length - 1) label += ',';
+
+				return label;
+			},
+			// Generates a record from an option, to be stored in the component's
+			// records array
+			generateRecord (option) {
+				// Create the record object
+				const record = {};
+				// Then loop through the schema's columns to set the appropriate values
+				// in the record.
+				this.schema.columns.forEach((column) => {
+					if (column.columnName === this.associatedColumn) {
+						record[column.columnName] = option[this.optionID];
+					} else {
+						record[column.columnName] = this.identifier.value || null;
+					}
+				});
+				// Then return the record
+				return record;
+			},
+			getRecords () {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						let critStruct = data;
+						critStruct[this.identifier.criteriaString] = this.identifier.value;
+						this.schema.fetchExisting(critStruct, (err, data) => {
+							if (err) logError(err);
+							if (data) {
+								let convertedRecords = [];
+								data.forEach((record) => {
+									let convertedRecord = {};
+									this.schema.columns.forEach((column) => {
+										convertedRecord[column.columnName] = record[column.columnName];
+									});
+									convertedRecords.push(convertedRecord);
+								});
+								this.records = convertedRecords;
+								this.fetched = true;
+							}
+						});
+					}
+				});
+			},
+			recordExistsForId (id) {
+				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;
+			},
+			notifyOfChanges () {
+				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {
+					notify.log(constructNotificationMessage(this.title, this.affects.titles));
+				}
+				++this.changeCount;
 			}
 		}
 	};

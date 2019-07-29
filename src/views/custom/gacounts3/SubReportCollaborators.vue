@@ -10,7 +10,7 @@
 					<label>
 						<h4>
 							Type of Issue
-							<a v-on:click="$emit('show-help', { helpMessageName: 'NewReportPlanOfWork' })" class="help-link">
+							<a class="help-link" @click="$emit('show-help', { helpMessageName: 'NewReportPlanOfWork' })">
 								<HelpCircleIcon />
 							</a>
 						</h4>
@@ -35,7 +35,7 @@
 								Please select the local issue to which this sub-report best applies.
 							</p>
 							<select v-model="ownerSubReport.PLANNED_PROGRAM_ID">
-								<option v-for="program in ownerState.plannedPrograms" :value="program.ID">
+								<option v-for="program in ownerState.plannedPrograms"	:key="program.ID" :value="program.ID">
 									{{ program.NAME }}
 								</option>
 							</select>
@@ -54,7 +54,7 @@
 							Please select the state issue to which this sub-report best applies.
 						</p>
 						<select v-if="statePlannedPrograms.length > 0" v-model="ownerSubReport.STATE_PLANNED_PROGRAM_ID">
-							<option v-for="program in statePlannedPrograms" :value="program.ID">
+							<option v-for="program in statePlannedPrograms" :key="program.ID" :value="program.ID">
 								{{ program.NAME }}
 							</option>
 						</select>
@@ -68,7 +68,7 @@
 				<div v-if="ownerCriteriaStructures.associationReportTypeRole">
 					<h4>
 						Roles
-						<a v-on:click="$emit('show-help', { helpMessageName: 'ReportRole' })" class="help-link">
+						<a class="help-link" @click="$emit('show-help', { helpMessageName: 'ReportRole' })">
 							<HelpCircleIcon />
 						</a>
 					</h4>
@@ -76,9 +76,9 @@
 						Please select the role(s) which best describe your involvement in the reported activities.
 					</p>
 					<ul v-if="reportType !== -1" class="checkbox">
-						<li v-for="role in ownerRoleTypes">
+						<li v-for="role in ownerRoleTypes" :key="role.SUB_REPORT_ROLE_LABEL">
 							<label>
-								<input type="checkbox" :value="generateRoleRecord(role)" v-model="ownerRoles" />
+								<input v-model="ownerRoles" type="checkbox" :value="generateRoleRecord(role)" />
 								<span>
 									{{ role.SUB_REPORT_ROLE_LABEL }}
 								</span>
@@ -90,7 +90,7 @@
 				<div v-if="ownerContacts.length > 0">
 					<h4>
 						{{ ownerID === activeUserID ? 'Your' : getPersonnelNameFromID(ownerID) + '\'s' }} Contacts
-						<a v-on:click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })" class="help-link">
+						<a class="help-link" @click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })">
 							<HelpCircleIcon />
 						</a>
 					</h4>
@@ -109,12 +109,12 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-for="contact in ownerContacts">
+							<tr v-for="contact in ownerContacts" :key="contact.TYPE_ID">
 								<td>
 									{{ getContactLabelFromID(contact.TYPE_ID) }}
 								</td>
 								<td>
-									<input type="number" v-model.number="contact.QUANTITY" min="0" />
+									<input v-model.number="contact.QUANTITY" type="number" min="0" />
 								</td>
 							</tr>
 						</tbody>
@@ -138,9 +138,9 @@
 				-->
 				<SupplementalData
 					v-if="!needExistingData || ownerSubReport.ID !== null"
-					v-on:show-help="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })"
-					:forSubReport="true"
+					:for-sub-report="true"
 					:mode="mode"
+					@show-help="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })"
 				/>
 				<!-- Outcome, Impact, Achievements -->
 				<div>
@@ -148,7 +148,7 @@
 						<h4>
 							Outcome, Impact, and Achievements
 						</h4>
-						<div v-for="outcome in ownerOutcomes">
+						<div v-for="outcome in ownerOutcomes" :key="outcome.ID">
 							<textarea v-model="outcome.MEMO"></textarea>
 						</div>
 					</label>
@@ -157,15 +157,20 @@
 			<div v-else class="subreport-section">
 				<SubReportPlainText
 					:data="getOwnerSubReportData()"
-					:roleTypes="ownerRoleTypes"
+					:role-types="ownerRoleTypes"
 				/>
 			</div>
 		</div>
 		<transition-group appear name="fade">
-			<div v-for="collaborator in collaborators" v-if="collaborator.PERSONNEL_ID !== ownerID" v-bind:key="collaborator.PERSONNEL_ID">
+			<div v-for="collaborator in collaboratorsWithoutOwner" :key="collaborator.PERSONNEL_ID">
 				<h3>
 					{{ collaborator.DISPLAY_NAME || getPersonnelNameFromID(collaborator.PERSONNEL_ID) }}
-					<button v-if="!needExistingData || (needExistingData && mode === 'edit' && (editMode === 'owner' || editMode === 'admin') && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))" v-on:click="removeCollaborator(collaborator)" type="button" class="button small">
+					<button
+						v-if="!needExistingData || (needExistingData && mode === 'edit' && (editMode === 'owner' || editMode === 'admin') && (!collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1))"
+						type="button"
+						class="button small"
+						@click="removeCollaborator(collaborator)"
+					>
 						Remove
 					</button>
 				</h3>
@@ -196,8 +201,8 @@
 			</p>
 			<FuzzySelect
 				v-model="newCollaborator.PERSONNEL_ID"
-				v-on:addCollaborator="addCollaborator"
 				:options="personnelForFuzzySelect"
+				@addCollaborator="addCollaborator"
 			/>
 		</div>
 	</div>
@@ -207,16 +212,20 @@
 	/* global activeUser */
 	/* global activeUserID */
 	/* global caesCache */
-	import FuzzySelect from '@/views/elements/FuzzySelect';
-	import SubReportPlainText from '@/views/custom/gacounts3/SubReportPlainText';
-	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
+	import FuzzySelect from '~/views/elements/FuzzySelect';
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import SubReportPlainText from '~/views/custom/gacounts3/SubReportPlainText';
+	import SupplementalData from '~/views/custom/gacounts3/SupplementalData';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '~/modules/caesdb';
 	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
 		getAssociationSubReportField,
 		getAssociationSubReportRole,
 		getContactTypes,
-		getCriteriaStructure,
 		getPersonnel,
 		getPersonnelWithCriteria,
 		getPlannedPrograms,
@@ -224,18 +233,16 @@
 		getStatePlannedPrograms,
 		getSubReport,
 		getSubReportContact,
-		getSubReportPurposeAchievements,
-		logError
-	} from '@/modules/caesdb';
+		getSubReportPurposeAchievements
+	} from '~/modules/caesdb/gacounts3';
 	import {
 		cfToJs,
 		filter
-	} from '@/modules/criteriaUtils';
+	} from '~/modules/criteriaUtils';
 	import {
 		modeValidator,
 		url
-	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	export default {
 		name: 'SubReportCollaborators',
@@ -244,6 +251,50 @@
 			HelpCircleIcon,
 			SubReportPlainText,
 			SupplementalData
+		},
+		props: {
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
+			}
+		},
+		data () {
+			const data = {
+				activeUserID,
+				collaboratorRecords: {
+					contacts: [],
+					outcomes: [],
+					plannedPrograms: [],
+					roles: [],
+					subReports: [],
+					supplementalData: []
+				},
+				contactTypes: [],
+				criteriaStructureTemplates: {
+					associationReportTypeContactType: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeContactType),
+					associationReportTypeRole: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeRole),
+					plannedProgram: cfToJs(caesCache.criteriaStructures.fpw.plannedProgram),
+					subReport: cfToJs(caesCache.criteriaStructures.gc3.subReport)
+				},
+				hostname: window.location.hostname,
+				newCollaborator: {
+					REPORT_ID: this.reportID || null,
+					PERSONNEL_ID: null,
+					IS_REJECTED: false
+				},
+				ownerState: {
+					contacts: [],
+					plannedPrograms: [],
+					supplementalData: [],
+					unfilteredRoleTypes: []
+				},
+				personnel: [],
+				retiredPersonnel: [],
+				statePlannedPrograms: []
+			};
+
+			return data;
 		},
 		computed: {
 			allSubReportIDs () {
@@ -262,6 +313,7 @@
 					this.$store.state.collaborators.records = val;
 				}
 			},
+			collaboratorsWithoutOwner () { return this.collaborators.filter(c => c.PERSONNEL_ID !== this.ownerID); },
 			duplication () {
 				let duplication = {
 					getCollaborators: false,
@@ -358,190 +410,12 @@
 				return reportTypeRecords.length > 0 ? reportTypeRecords[0].TYPE_ID : -1;
 			}
 		},
-		data () {
-			const data = {
-				activeUserID,
-				collaboratorRecords: {
-					contacts: [],
-					outcomes: [],
-					plannedPrograms: [],
-					roles: [],
-					subReports: [],
-					supplementalData: []
-				},
-				contactTypes: [],
-				criteriaStructureTemplates: {
-					associationReportTypeContactType: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeContactType),
-					associationReportTypeRole: cfToJs(caesCache.criteriaStructures.gc3.associationReportTypeRole),
-					plannedProgram: cfToJs(caesCache.criteriaStructures.fpw.plannedProgram),
-					subReport: cfToJs(caesCache.criteriaStructures.gc3.subReport)
-				},
-				hostname: window.location.hostname,
-				newCollaborator: {
-					REPORT_ID: this.reportID || null,
-					PERSONNEL_ID: null,
-					IS_REJECTED: false
-				},
-				ownerState: {
-					contacts: [],
-					plannedPrograms: [],
-					supplementalData: [],
-					unfilteredRoleTypes: []
-				},
-				personnel: [],
-				retiredPersonnel: [],
-				statePlannedPrograms: []
-			};
-
-			return data;
-		},
-		methods: {
-			addCollaborator () {
-				if (this.newCollaborator.PERSONNEL_ID) {
-					this.collaborators.push(Object.assign({}, this.newCollaborator));
-					this.newCollaborator = {
-						REPORT_ID: this.reportID || null,
-						PERSONNEL_ID: null,
-						IS_REJECTED: false
-					};
-				}
+		watch: {
+			collaborators () {
+				this.fetchMissingPersonnel();
 			},
-			removeCollaborator (collaborator) {
-				this.collaborators.splice(this.collaborators.indexOf(collaborator), 1);
-			},
-			fetchMissingPersonnel () {
-				const critStruct = cfToJs(caesCache.criteriaStructures.ccd.personnel);
-				critStruct.criteria_PERSONNEL_ID_eq = this.collaborators.map(c => c.PERSONNEL_ID);
-				if (this.personnel.map(p => p.PERSONNEL_ID).indexOf(this.ownerID) === -1) critStruct.criteria_PERSONNEL_ID_eq.push(this.ownerID);
-				if (critStruct.criteria_PERSONNEL_ID_eq.length > 0) {
-					getPersonnelWithCriteria(critStruct, (err, records) => {
-						if (err) console.error(err);
-						this.retiredPersonnel = records;
-					});
-				}
-			},
-			getCollaboratorPlannedProgramFromID (id) {
-				const collabProgramsMap = this.collaboratorRecords.plannedPrograms.map(p => p.ID);
-				const index = collabProgramsMap.indexOf(id);
-				if (index === -1) return {};
-				return this.collaboratorRecords.plannedPrograms[index];
-			},
-			getCollaboratorSubReportDataFromID (id) {
-				const data = {
-					contacts: [],
-					outcomes: [],
-					roles: [],
-					subReport: {},
-					supplementalData: []
-				};
-				this.collaboratorRecords.subReports.forEach((subReport) => {
-					if (subReport.USER_ID === id) data.subReport = subReport;
-				});
-				this.collaboratorRecords.contacts.forEach((contact) => {
-					if (contact.SUB_REPORT_ID === data.subReport.ID) data.contacts.push(contact);
-				});
-				this.collaboratorRecords.outcomes.forEach((outcome) => {
-					if (outcome.USER_ID === id) data.outcomes.push(outcome);
-				});
-				this.collaboratorRecords.roles.forEach((role) => {
-					if (role.SUB_REPORT_ID === data.subReport.ID) data.roles.push(role);
-				});
-				this.collaboratorRecords.supplementalData.forEach((record) => {
-					if (record.SUB_REPORT_ID === data.subReport.ID) data.supplementalData.push(record);
-				});
-				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
-				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getCollaboratorPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
-				return data;
-			},
-			getContactLabelFromID (id) {
-				const index = this.contactTypes.map(t => t.ID).indexOf(id);
-				if (index === -1) return '';
-				return this.contactTypes[index].LABEL;
-			},
-			getOwnerPlannedProgramFromID (id) {
-				let plannedProgram = {};
-				this.ownerState.plannedPrograms.forEach((program) => {
-					if (program.ID === id) plannedProgram = program;
-				});
-				return plannedProgram;
-			},
-			getOwnerSubReportData () {
-				const data = {
-					contacts: this.ownerContacts,
-					outcomes: this.ownerOutcomes,
-					roles: this.ownerRoles,
-					subReport: this.ownerSubReport,
-					supplementalData: this.ownerState.supplementalData
-				};
-				data.contacts.forEach((contact) => {
-					this.contactTypes.forEach((type) => {
-						if (type.ID === contact.TYPE_ID) contact.CONTACT_TYPE_LABEL = type.LABEL;
-					});
-				});
-				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
-				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getOwnerPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
-				return data;
-			},
-			getPersonnelNameFromID (id) {
-				let index = this.personnel.map(p => p.ID).indexOf(id);
-				if (index === -1) {
-					index = this.retiredPersonnel.map(p => p.PERSONNEL_ID).indexOf(id);
-					if (index === -1) return 'Unknown';
-					return this.retiredPersonnel[index].DISPLAY_NAME;
-				} else {
-					const personnel = this.personnel[index];
-					return personnel.DISPLAY_NAME;
-				}
-			},
-			getStatePlannedProgramFromID (id) {
-				let statePlannedProgram = {};
-				this.statePlannedPrograms.forEach((program) => {
-					if (program.ID === id) statePlannedProgram = program;
-				});
-
-				return statePlannedProgram;
-			},
-			generateRoleRecord (role) {
-				return {
-					SUB_REPORT_ID: this.ownerSubReport.ID || null,
-					ROLE_ID: role.ROLE_ID
-				};
-			},
-			populateOwnerContactsRecords () {
-				getAssociationReportTypeContactType((err, data) => {
-					if (err) logError(err);
-					if (data) {
-						data.forEach((record) => {
-							if (record.REPORT_TYPE_ID === this.reportType) {
-								if (this.ownerContacts.map(c => c.TYPE_ID).indexOf(record.CONTACT_TYPE_ID) === -1) {
-									this.ownerContacts.push({
-										SUB_REPORT_ID: this.ownerSubReport.ID || null,
-										TYPE_ID: record.CONTACT_TYPE_ID,
-										QUANTITY: null
-									});
-								}
-							}
-						});
-					}
-				});
-			},
-			populateOwnerOutcomeRecord () {
-				if (this.ownerOutcomes.length < 1) {
-					this.ownerOutcomes = [{
-						ID: null,
-						REPORT_ID: null,
-						USER_ID: null,
-						MEMO: null,
-						DATE_CREATED: null
-					}];
-				}
-			},
-			sum (objArr, key) {
-				let sum = 0;
-				objArr.forEach((obj) => {
-					sum += Number(obj[key]);
-				});
-				return sum;
+			reportContacts () {
+				this.populateOwnerContactsRecords();
 			}
 		},
 		mounted () {
@@ -632,7 +506,7 @@
 			};
 
 			const fetchOutcomes = () => {
-				getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+				getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						const critStruct = data;
@@ -682,7 +556,7 @@
 					if (err) logError(err);
 					if (data) {
 						this.ownerState.plannedPrograms = data;
-					};
+					}
 				});
 			};
 
@@ -791,19 +665,153 @@
 				}
 			}
 		},
-		props: {
-			'mode': {
-				type: String,
-				default: 'view',
-				validator: modeValidator
-			}
-		},
-		watch: {
-			collaborators () {
-				this.fetchMissingPersonnel();
+		methods: {
+			addCollaborator () {
+				if (this.newCollaborator.PERSONNEL_ID) {
+					this.collaborators.push(Object.assign({}, this.newCollaborator));
+					this.newCollaborator = {
+						REPORT_ID: this.reportID || null,
+						PERSONNEL_ID: null,
+						IS_REJECTED: false
+					};
+				}
 			},
-			reportContacts () {
-				this.populateOwnerContactsRecords();
+			removeCollaborator (collaborator) {
+				this.collaborators.splice(this.collaborators.indexOf(collaborator), 1);
+			},
+			fetchMissingPersonnel () {
+				const critStruct = cfToJs(caesCache.criteriaStructures.ccd.personnel);
+				critStruct.criteria_PERSONNEL_ID_eq = this.collaborators.map(c => c.PERSONNEL_ID);
+				if (this.personnel.map(p => p.PERSONNEL_ID).indexOf(this.ownerID) === -1) critStruct.criteria_PERSONNEL_ID_eq.push(this.ownerID);
+				if (critStruct.criteria_PERSONNEL_ID_eq.length > 0) {
+					getPersonnelWithCriteria(critStruct, (err, records) => {
+						if (err) console.error(err);
+						this.retiredPersonnel = records;
+					});
+				}
+			},
+			getCollaboratorPlannedProgramFromID (id) {
+				const collabProgramsMap = this.collaboratorRecords.plannedPrograms.map(p => p.ID);
+				const index = collabProgramsMap.indexOf(id);
+				if (index === -1) return {};
+				return this.collaboratorRecords.plannedPrograms[index];
+			},
+			getCollaboratorSubReportDataFromID (id) {
+				const data = {
+					contacts: [],
+					outcomes: [],
+					roles: [],
+					subReport: {},
+					supplementalData: []
+				};
+				this.collaboratorRecords.subReports.forEach((subReport) => {
+					if (subReport.USER_ID === id) data.subReport = subReport;
+				});
+				this.collaboratorRecords.contacts.forEach((contact) => {
+					if (contact.SUB_REPORT_ID === data.subReport.ID) data.contacts.push(contact);
+				});
+				this.collaboratorRecords.outcomes.forEach((outcome) => {
+					if (outcome.USER_ID === id) data.outcomes.push(outcome);
+				});
+				this.collaboratorRecords.roles.forEach((role) => {
+					if (role.SUB_REPORT_ID === data.subReport.ID) data.roles.push(role);
+				});
+				this.collaboratorRecords.supplementalData.forEach((record) => {
+					if (record.SUB_REPORT_ID === data.subReport.ID) data.supplementalData.push(record);
+				});
+				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
+				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getCollaboratorPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
+				return data;
+			},
+			getContactLabelFromID (id) {
+				const index = this.contactTypes.map(t => t.ID).indexOf(id);
+				if (index === -1) return '';
+				return this.contactTypes[index].LABEL;
+			},
+			getOwnerPlannedProgramFromID (id) {
+				let plannedProgram = {};
+				this.ownerState.plannedPrograms.forEach((program) => {
+					if (program.ID === id) plannedProgram = program;
+				});
+				return plannedProgram;
+			},
+			getOwnerSubReportData () {
+				const data = {
+					contacts: this.ownerContacts,
+					outcomes: this.ownerOutcomes,
+					roles: this.ownerRoles,
+					subReport: this.ownerSubReport,
+					supplementalData: this.ownerState.supplementalData
+				};
+				data.contacts.forEach((contact) => {
+					this.contactTypes.forEach((type) => {
+						if (type.ID === contact.TYPE_ID) contact.CONTACT_TYPE_LABEL = type.LABEL;
+					});
+				});
+				if (data.subReport.STATE_PLANNED_PROGRAM_ID) data.subReport.statePlannedProgram = this.getStatePlannedProgramFromID(data.subReport.STATE_PLANNED_PROGRAM_ID);
+				if (data.subReport.PLANNED_PROGRAM_ID) data.subReport.plannedProgram = this.getOwnerPlannedProgramFromID(data.subReport.PLANNED_PROGRAM_ID);
+				return data;
+			},
+			getPersonnelNameFromID (id) {
+				let index = this.personnel.map(p => p.PERSONNEL_ID).indexOf(id);
+				if (index === -1) {
+					index = this.retiredPersonnel.map(p => p.PERSONNEL_ID).indexOf(id);
+					if (index === -1) return 'Unknown';
+					return this.retiredPersonnel[index].DISPLAY_NAME;
+				} else {
+					const personnel = this.personnel[index];
+					return personnel.DISPLAY_NAME;
+				}
+			},
+			getStatePlannedProgramFromID (id) {
+				let statePlannedProgram = {};
+				this.statePlannedPrograms.forEach((program) => {
+					if (program.ID === id) statePlannedProgram = program;
+				});
+
+				return statePlannedProgram;
+			},
+			generateRoleRecord (role) {
+				return {
+					SUB_REPORT_ID: this.ownerSubReport.ID || null,
+					ROLE_ID: role.ROLE_ID
+				};
+			},
+			populateOwnerContactsRecords () {
+				getAssociationReportTypeContactType((err, data) => {
+					if (err) logError(err);
+					if (data) {
+						data.forEach((record) => {
+							if (record.REPORT_TYPE_ID === this.reportType) {
+								if (this.ownerContacts.map(c => c.TYPE_ID).indexOf(record.CONTACT_TYPE_ID) === -1) {
+									this.ownerContacts.push({
+										SUB_REPORT_ID: this.ownerSubReport.ID || null,
+										TYPE_ID: record.CONTACT_TYPE_ID,
+										QUANTITY: null
+									});
+								}
+							}
+						});
+					}
+				});
+			},
+			populateOwnerOutcomeRecord () {
+				if (this.ownerOutcomes.length < 1) {
+					this.ownerOutcomes = [{
+						ID: null,
+						REPORT_ID: null,
+						USER_ID: null,
+						MEMO: null,
+						DATE_CREATED: null
+					}];
+				}
+			},
+			sum (objArr, key) {
+				let sum = 0;
+				objArr.forEach((obj) => {
+					sum += Number(obj[key]);
+				});
+				return sum;
 			}
 		}
 	};

@@ -1,7 +1,7 @@
 <template lang="html">
 	<div class="container">
 		<!-- State Issue -->
-		<div class="row" v-if="data.subReport.statePlannedProgram">
+		<div v-if="data.subReport.statePlannedProgram" class="row">
 			<strong>
 				State Issue:
 			</strong>
@@ -10,7 +10,7 @@
 			</span>
 		</div>
 		<!-- Local Issue -->
-		<div class="row" v-if="data.subReport.plannedProgram">
+		<div v-if="data.subReport.plannedProgram" class="row">
 			<strong>
 				Local Issue:
 			</strong>
@@ -24,7 +24,7 @@
 				<strong>
 					Role(s):
 				</strong>
-				<span v-for="(role, index) in data.roles">
+				<span v-for="(role, index) in data.roles" :key="index">
 					{{ role.SUB_REPORT_ROLE_LABEL ? role.SUB_REPORT_ROLE_LABEL : getRoleLabelFromTypeID(role.ROLE_ID) }}{{ index !== data.roles.length - 1 ? ',' : '' }}
 				</span>
 			</div>
@@ -43,7 +43,7 @@
 				<strong>
 					Outcome, Impact, &amp; Achievements:
 				</strong>
-				<span v-for="outcome in data.outcomes">
+				<span v-for="outcome in data.outcomes" :key="outcome.ID">
 					{{ outcome.MEMO }}
 				</span>
 			</div>
@@ -57,7 +57,7 @@
 			</div>
 		</div>
 		<!-- Contacts -->
-		<div class="row" v-if="data.contacts.length > 0">
+		<div v-if="data.contacts.length > 0" class="row">
 			<h4>
 				Contacts
 			</h4>
@@ -73,7 +73,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="contact in data.contacts">
+					<tr v-for="contact in data.contacts" :key="contact.TYPE_ID">
 						<td>
 							{{ contact.CONTACT_TYPE_LABEL }}
 						</td>
@@ -85,7 +85,7 @@
 			</table>
 		</div>
 		<!-- Supplemental Data -->
-		<div class="row" v-if="data.supplementalData.length > 0">
+		<div v-if="data.supplementalData.length > 0" class="row">
 			<h4>
 				Supplemental Data
 			</h4>
@@ -101,7 +101,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="record in data.supplementalData">
+					<tr v-for="record in data.supplementalData" :key="record.FIELD_ID">
 						<td>
 							{{ record.REPORT_FIELD_LABEL }}
 						</td>
@@ -124,7 +124,8 @@
 				required: true
 			},
 			roleTypes: {
-				type: Array
+				type: Array,
+				default: () => []
 			}
 		},
 		data () {

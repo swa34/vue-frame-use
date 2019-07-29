@@ -1,10 +1,11 @@
 <!-- The HTML portion of the component -->
 <template lang="html">
-  <div :class="`${mode}-mode`">
+	<div :class="`${mode}-mode`">
 		<ContextualHelpMessage
-			:messageName="helpMessage.name"
-			v-on:close-modal="hideHelp"
 			v-if="helpMessage.show"
+			:message-fetcher="schema.messageFetcher"
+			:message-name="helpMessage.name"
+			@close-modal="hideHelp"
 		/>
 		<div v-if="requestsInProgress" class="application-loading-overlay">
 			<div class="container">
@@ -12,8 +13,13 @@
 				<p>Loading...</p>
 			</div>
 		</div>
-		<section v-for="section in schema.sections">
-			<h2 v-on:click="toggleSection(section)" class="head section-heading">
+		<p v-if="mode === 'edit' && hasRequiredFields">
+			<em>
+				Required fields marked by an <span class="is-red">*</span>
+			</em>
+		</p>
+		<section v-for="section in schema.sections" :key="section.title">
+			<h2 class="head section-heading" @click="toggleSection(section)">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
 				<ChevronRightIcon v-else class="hide-on-print" />
 				{{ section.title }}
@@ -25,30 +31,86 @@
 				<div v-if="sectionDependenciesMet(section)">
 					<div v-if="section.customComponent">
 						<component
-							v-bind:is="section.customComponent"
-							v-on:show-help="showHelp"
+							:is="section.customComponent"
 							:mode="mode"
+							@show-help="showHelp"
 						/>
 					</div>
-					<div v-else :class="!section.disableFlex ? 'flex-section' : ''">
-						<div v-for="area in section.areas" :class="`area ${area.data.customClasses ? area.data.customClasses.join(' ') : ''}`">
+					<div v-else :class="getSectionClasses(section)">
+						<div
+							v-for="area in section.areas"
+							:key="area.data.title || area.data.columnName"
+							:class="`area ${area.data.customClasses ? area.data.customClasses.join(' ') : ''}`"
+						>
 							<transition appear name="fade">
 								<div v-if="area.type === 'column' && columnShouldBeDisplayed(area.data)">
+									<component
+										:is="area.data.customComponent"
+										v-if="area.data.customComponent && dependencyMet(area.data) && area.data.type === 'int'"
+										v-model.number="record[area.data.columnName]"
+										:mode="getMode(area.data)"
+										@show-help="showHelp"
+										@expand-section="expandSection"
+										@collapse-section="collapseSection"
+									/>
+									<component
+										:is="area.data.customComponent"
+										v-else-if="area.data.customComponent && dependencyMet(area.data)"
+										v-model="record[area.data.columnName]"
+										:mode="getMode(area.data)"
+										@show-help="showHelp"
+										@expand-section="expandSection"
+										@collapse-section="collapseSection"
+									/>
 									<SmartInput
-										v-if="mode === 'edit'"
+										v-else-if="mode === 'edit' && area.data.type === 'int'"
+										v-model.number="record[area.data.columnName]"
+										:field="area.data"
+										:fetched="record._fetched"
+										@show-help="showHelp(area.data)"
+									/>
+									<SmartInput
+										v-else-if="mode === 'edit'"
 										v-model="record[area.data.columnName]"
 										:field="area.data"
-										v-on:show-help="showHelp(area.data)"
+										:fetched="record._fetched"
+										@show-help="showHelp(area.data)"
+										@delete-file="deleteFile(area.data)"
+										@reset-value="record[area.data.columnName] = null"
 									/>
-									<div v-else>
+									<div v-else-if="mode === 'view' && area.data.customComponentForViewMode">
+										<component :is="area.data.customComponentForViewMode.component" :options="area.data.customComponentForViewMode.options" />
+									</div>
+									<div v-else-if="typeof record[area.data.columnName] !== 'undefined' && record[area.data.columnName] !== null && record[area.data.columnName] !== ''">
 										<h3 class="inline">
 											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
 										</h3>
 										<span v-if="(area.data.inputType === 'select' || sqlToHtml(area.data) === 'select')">
 											{{ getOptionLabel(area.data.constraint, record[area.data.columnName]) }}
 										</span>
+										<div v-else-if="area.data.inputType === 'file'">
+											<a
+												v-if="isString(record[area.data.columnName])"
+												:href="`${application.attachmentWebPath}${record[area.data.columnName]}`"
+											>
+												{{ record[area.data.columnName] }}
+											</a>
+											<div v-else-if="isFile(record[area.data.columnName])">
+												<span>{{ record[area.data.columnName].name }}</span>
+												<br />
+												<em class="is-small">(Not yet uploaded)</em>
+											</div>
+										</div>
 										<span v-else>
 											{{ record[area.data.columnName] }}
+										</span>
+									</div>
+									<div v-else>
+										<h3 class="inline">
+											{{ area.data.prettyName || getPrettyColumnName(area.data.columnName) }}:
+										</h3>
+										<span>
+											<em>(None)</em>
 										</span>
 									</div>
 								</div>
@@ -67,91 +129,149 @@
 									<!-- If it uses a custom component, render that component -->
 									<div v-else-if="area.data.customComponent">
 										<component
+											:is="area.data.customComponent"
 											v-if="dependencyMet(area.data)"
-											v-bind:is="area.data.customComponent"
-											v-on:show-help="showHelp"
-											v-on:expand-section="expandSection"
-											v-on:collapse-section="collapseSection"
 											:mode="getMode(area.data)"
+											@show-help="showHelp"
+											@expand-section="expandSection"
+											@collapse-section="collapseSection"
 										/>
 									</div>
 									<!-- If it's a multiselect association, use a data multi select component -->
 									<div v-else-if="area.data.multiSelect">
 										<DataMultiSelect
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
-											:associatedColumn="area.data.associatedColumn"
+											:associated-column="area.data.associatedColumn"
 											:filter="area.data.filter"
-											:groupBy="area.data.groupBy"
-											:groupLabel="area.data.groupLabel"
-											:groupsToShow="area.data.groupsToShow"
+											:group-by="area.data.groupBy"
+											:group-label="area.data.groupLabel"
+											:groups-to-show="area.data.groupsToShow"
 											:identifier="generateIdentifier(area.data)"
 											:schema="area.data.schema"
 											:title="area.data.title"
 											:description="area.data.description"
 											:affects="area.data.affects"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 									<!-- If multiple values are forbidden, use a data radio component -->
 									<div v-else-if="area.data.forbidMultiple">
 										<DataRadio
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:associatedColumn="area.data.associatedColumn"
+											:associated-column="area.data.associatedColumn"
 											:identifier="generateIdentifier(area.data)"
 											:filter="area.data.filter"
 											:description="area.data.description"
 											:affects="area.data.affects"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 									<div v-else-if="area.data.displayAllOptions">
 										<DataMultiTable
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:associatedColumn="area.data.associatedColumn"
+											:associated-column="area.data.associatedColumn"
 											:identifier="generateIdentifier(area.data)"
-											:optionColumnName="area.data.optionColumnName"
+											:option-column-name="area.data.optionColumnName"
 											:filter="area.data.filter"
-											:showTotals="area.data.showTotals"
+											:show-totals="area.data.showTotals"
 											:depends="area.data.depends"
 											:description="area.data.description"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 									<!-- Else, just use a data table component -->
 									<div v-else-if="!identifier.value ? area.data.isAssignable : true">
 										<DataTable
 											v-if="dependencyMet(area.data)"
-											v-on:show-help="showHelp(area.data)"
 											:title="area.data.title"
 											:schema="area.data.schema"
-											:associatedColumn="area.data.foreignKey"
+											:associated-column="area.data.foreignKey"
 											:identifier="generateIdentifier(area.data)"
-											:allowInsert="true"
-											:allowEdit="true"
+											:allow-insert="true"
+											:allow-edit="true"
 											:description="area.data.description"
-											:helpMessageName="area.data.helpMessageName"
+											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
-											:recordLimit="area.data.limit"
+											:record-limit="area.data.limit"
+											@show-help="showHelp(area.data)"
 										/>
 									</div>
 								</div>
 								<div v-else-if="area.type === 'subschema'">
 									<component
-										v-bind:is="area.data.customComponent"
-										v-on:show-help="showHelp"
+										:is="area.data.customComponent"
 										:mode="getMode(area.data)"
+										@show-help="showHelp"
 									/>
 								</div>
+								<fieldset v-else-if="area.type === 'fieldset' && dependencyMet(area.data)" :class="mode === 'view' ? 'view-mode' : ''">
+									<legend>
+										<h3>
+											{{ area.data.title }}
+											<em v-if="area.data.required && mode === 'edit'" class="required-asterisk">*</em>
+											<em v-if="area.data.caveat" class="is-small">
+												({{ area.data.caveat }})
+											</em>
+										</h3>
+									</legend>
+									<p v-if="area.data.description" class="description">
+										{{ area.data.description }}
+									</p>
+									<div class="flex-container">
+										<div
+											v-for="field in area.data.fields"
+											:key="field.columnName"
+											:class="field.customClasses ? field.customClasses.join(' ') : ''"
+										>
+											<div v-if="dependencyMet(field)">
+												<div v-if="field.isFlexBreak" class="flex-break"></div>
+												<SmartInput
+													v-else-if="mode === 'edit' && field.type === 'int'"
+													v-model.number="record[field.columnName]"
+													:field="field"
+													:is-inside-fieldset="true"
+													:fetched="record._fetched"
+													@show-help="showHelp(field)"
+												/>
+												<SmartInput
+													v-else-if="mode === 'edit'"
+													v-model="record[field.columnName]"
+													:field="field"
+													:is-inside-fieldset="true"
+													:fetched="record._fetched"
+													@show-help="showHelp(field)"
+												/>
+												<div v-else class="view-mode-wrapper">
+													<h4 class="inline">
+														{{ field.prettyName || getPrettyColumnName(field.columnName) }}:
+													</h4>
+													<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
+														{{ getOptionLabel(field.constraint, record[field.columnName]) }}
+													</span>
+													<a v-else-if="field.inputType === 'email'" :href="`mailto:${record[field.columnName]}`">
+														{{ record[field.columnName] }}
+													</a>
+													<a v-else-if="field.inputType === 'tel'" :href="`tel:${record[field.columnName]}`">
+														{{ record[field.columnName] }}
+													</a>
+													<span v-else>
+														{{ typeof record[field.columnName] === 'boolean' ? record[field.columnName] ? 'Yes' : 'No' : record[field.columnName] }}
+													</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</fieldset>
 							</transition>
 						</div>
 					</div>
@@ -176,7 +296,7 @@
 				<component v-bind:is="subschema.customComponent" />
 			</div>
 		</div> -->
-		<div v-if="mode === 'edit'" class="submit">
+		<div v-if="mode === 'edit' && useDefaultSubmit" class="submit">
 			<hr />
 			<p>
 				<strong>
@@ -189,45 +309,50 @@
 					If you would like to, you may also <a id="delete-link" v-on:click="deleteRecord" >delete your {{ schema.title }}</a>.
 				</span> -->
 				<br />
-				<button v-on:click="cleanUpData" type="button" class="button">
+				<button type="button" class="button" @click="cleanUpData">
 					Save My {{ schema.title }}
 				</button>
 			</p>
 		</div>
-  </div>
+	</div>
 </template>
 
 <!-- The script portion of the component -->
 <script>
 	/* global activeUserID */
+	/* global caesCache */
 	/* global notify */
 	/* global swal */
 	// Import required modules
-	import DetailMain from '@/views/DetailMain';
-	import ContextualHelpMessage from '@/views/ContextualHelpMessage';
-	import SmartInput from '@/views/elements/SmartInput';
-	import Spinner from 'vue-simple-spinner';
-	import prepareForCf from '@/modules/prepareForCf';
+	import ContextualHelpMessage from '~/views/ContextualHelpMessage';
 	import ChevronDownIcon from 'vue-feather-icons/icons/ChevronDownIcon';
 	import ChevronRightIcon from 'vue-feather-icons/icons/ChevronRightIcon';
+	import DetailMain from '~/views/DetailMain';
+	import prepareForCf from '~/modules/prepareForCf';
+	import SmartInput from '~/views/elements/SmartInput';
+	import Spinner from 'vue-simple-spinner';
 	import {
 		DataForm,
 		DataMultiSelect,
 		DataMultiTable,
 		DataRadio,
 		DataTable
-	} from '@/views/data';
+	} from '~/views/data';
 	import {
 		deepObjectAssign,
 		formatDates,
 		getPrettyColumnName,
 		sqlToHtml,
 		stringFormats
-	} from '@/modules/utilities';
+	} from '~/modules/utilities';
+	import {
+		isFile,
+		isString
+	} from '~/modules/utilities/validation';
 	import {
 		getCriteriaStructure,
 		logError
-	} from '@/modules/caesdb';
+	} from '~/modules/caesdb';
 
 	// Export the actual component
 	export default {
@@ -247,13 +372,81 @@
 			SmartInput,
 			Spinner
 		},
+		// The component's properties, which are set by the parent component.
+		props: {
+			// The schema to be used
+			'schema': {
+				type: Object,
+				required: true
+			},
+			// An optional identifier/selector
+			'identifier': {
+				default: false,
+				type: [
+					Object,
+					Boolean
+				]
+			},
+			// Display mode
+			'mode': {
+				type: String,
+				required: true,
+				default: 'view',
+				validator (value) {
+					return ['edit', 'view'].indexOf(value) !== -1;
+				}
+			},
+			// Should associations be rendered too?
+			'includeAssociations': {
+				type: Boolean,
+				default: true
+			},
+			// How about subschemas?
+			'includeSubSchemas': {
+				type: Boolean,
+				default: true
+			},
+			'userIsOwner': {
+				type: Boolean,
+				default: false
+			},
+			// Show default submit button/verbage?
+			useDefaultSubmit: {
+				type: Boolean,
+				default: true
+			}
+		},
+		data () {
+			return {
+				application: caesCache.application ? caesCache.application : { attachmentWebPath: '/' },
+				hasRequiredFields: this.schema.sections.reduce((hasRequiredFields, section) => {
+					if (section.areas) {
+						section.areas.forEach(area => {
+							if (area.data.required) hasRequiredFields = true;
+						});
+					}
+
+					return hasRequiredFields;
+				}, false),
+				helpMessage: {
+					show: false,
+					name: ''
+				},
+				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0,
+				sectionsToDisplay: this.schema.sections.map(s => s.title)
+			};
+		},
 		computed: {
 			columns: {
 				get () {
 					let columns = [];
 					this.schema.sections.forEach((section) => {
 						section.areas.forEach((area) => {
-							if (area.type === 'column') columns.push(area.data);
+							if (area.type === 'column') {
+								columns.push(area.data);
+							} else if (area.type === 'fieldset') {
+								area.data.fields.forEach(column => { columns.push(column); });
+							}
 						});
 					});
 					return columns;
@@ -279,27 +472,95 @@
 				}
 			}
 		},
-		data () {
-			// let sectionsToDisplay = [];
-			// if (this.identifier.value) {
-			// 	this.schema.sections.forEach((section) => {
-			// 		sectionsToDisplay.push(section.title);
-			// 	});
-			// } else if (this.schema.sections.length > 0) {
-			// 	sectionsToDisplay.push(this.schema.sections[0].title);
-			// }
-			return {
-				helpMessage: {
-					show: false,
-					name: ''
+		watch: {
+			duplication: {
+				handler () {
+					this.getMainData();
 				},
-				requestsInProgress: typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0,
-				sectionsToDisplay: this.schema.sections.map(s => s.title)
+				deep: true
+			}
+		},
+		mounted () {
+			// Set up the watcher for pending requests
+			setInterval(() => {
+				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0)) {
+					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0;
+				}
+			}, 300);
+
+			const getConstraintData = () => {
+				this.columns.forEach((column) => {
+					// We only care about columns that have a constraint and a getValues
+					// function, since those are the ones we have to fetch values for
+					if (column.constraint && column.constraint.getValues) {
+						if (column.constraint.tablePrefix) {
+							// If the constraint has a tablePrefix, we need to get a criteria
+							// structure first, then send our request
+							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
+								if (err) logError(err);
+								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+								column.constraint.getValues(criteriaStructure, (err, data) => {
+									if (err) logError(err);
+									if (data) column.constraint.values = data;
+								});
+							});
+						} else {
+							// If no table prefix, just fetch the data
+							column.constraint.getValues((err, data) => {
+								if (err) logError(err);
+								if (data) column.constraint.values = data;
+							});
+						}
+					}
+				});
 			};
+
+			if (this.identifier) this.getMainData();
+			getConstraintData();
 		},
 		// The methods available to this component during render
 		methods: {
+			isFile,
+			isString,
 			getPrettyColumnName,
+			deleteFile (column) {
+				swal.fire({
+					title: 'Are you sure?',
+					text: 'This will also delete the file from the server.',
+					type: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#6c3129',
+					cancelButtonColor: '#004e60',
+					confirmButtonText: 'Yes, delete it!'
+				}).then(async result => {
+					if (result.value) {
+						try {
+							const response = await column.deleteFile(this.record.ID, this.record[column.columnName]);
+							if (response.success) {
+								this.record[column.columnName] = null;
+							} else {
+								alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), response.messages);
+							}
+						} catch (err) {
+							logError(err);
+							alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
+						}
+					}
+				});
+			},
+			getSectionClasses (section) {
+				if (typeof section.disableFlex === 'undefined') return 'flex-section';
+				if (section.disableFlex === true) return '';
+				if (section.disableFlex === false) return 'flex-section';
+				if (typeof section.disableFlex === 'object' && typeof section.disableFlex.modes !== 'undefined' && Array.isArray(section.disableFlex.modes)) {
+					const disableForViewMode = section.disableFlex.modes.indexOf('view') !== -1;
+					const disableForEditMode = section.disableFlex.modes.indexOf('edit') !== -1;
+					if (disableForViewMode && this.mode === 'view') return '';
+					if (disableForEditMode && this.mode === 'edit') return '';
+					return 'flex-section';
+				}
+				return '';
+			},
 			showHelp (area) {
 				if (area.helpMessageName) {
 					this.helpMessage.name = area.helpMessageName;
@@ -313,7 +574,7 @@
 			deleteRecord () {
 				swal({
 					title: 'Are you sure?',
-					text: "You won't be able to undo this!",
+					text: 'You won\'t be able to undo this!',
 					type: 'warning',
 					showCancelButton: true,
 					confirmButtonText: 'Yes, delete it!'
@@ -371,19 +632,7 @@
 			},
 			// Run validation on the data
 			validateData (store) {
-				// console.log(store);
 				let isValid = true;
-				// this.schema.sections.forEach((section) => {
-				// 	section.areas.forEach((area) => {
-				// 		if (area.data.validate) {
-				// 			const validation = area.data.validate(store);
-				// 			if (validation.isValid !== true) {
-				// 				notify.error(validation.message);
-				// 				isValid = false;
-				// 			};
-				// 		}
-				// 	});
-				// });
 				if (isValid) this.submitData(store);
 			},
 			// Doesn't send anything yet, just pretends like it does
@@ -403,7 +652,6 @@
 									confirmButtonText: 'OK',
 									cancelButtonText: 'Duplicate this ' + this.schema.title.toLowerCase()
 								}).then((result) => {
-									console.log(result);
 									if (result.value) {
 										// They clicked OK
 										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
@@ -429,11 +677,22 @@
 				});
 			},
 			columnShouldBeDisplayed (column) {
+				if (this.mode === 'view' && column.showOnView) return true;
 				if (!column.depends) {
 					if (column.automated) return false;
 					return true;
 				} else {
-					return column.depends.test(this.record[column.depends.column]);
+					if (column.depends.column) {
+						if (typeof column.depends.column === 'string') {
+							return column.depends.test(this.record[column.depends.column]);
+						} else if (Array.isArray(column.depends.column)) {
+							return column.depends.test(column.depends.column.map(column => {
+								return this.record[column];
+							}));
+						}
+					} else {
+						return column.depends.test();
+					}
 				}
 			},
 			// A function to determine if an association's dependency has been met
@@ -469,7 +728,7 @@
 				};
 			},
 			getMainData () {
-				getCriteriaStructure(this.schema.tablePrefix, (err, data) => {
+				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						let critStruct = data;
@@ -488,6 +747,7 @@
 									}
 								}
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.record);
+								this.record._fetched = true;
 							}
 						});
 					}
@@ -510,6 +770,11 @@
 				const label = option[constraint.foreignLabel];
 				return label;
 			},
+			getPrettyColumnNameFromColumnName (columnName) {
+				let columnIndex = this.columns.map(c => c.columnName).indexOf(columnName);
+				if (columnIndex === -1) return columnName;
+				return this.columns[columnIndex].prettyName || getPrettyColumnName(this.columns[columnIndex].columnName);
+			},
 			getSectionDependsMessage (section) {
 				let message = '';
 				let totalDependencies = 0;
@@ -517,12 +782,14 @@
 				if (section.depends.columns) totalDependencies += section.depends.columns.length;
 				if (section.depends.associations) totalDependencies += section.depends.associations.length;
 				if (section.depends.columns) {
-					section.depends.columns.forEach((column) => {
+					section.depends.columns.forEach(column => {
 						++listedDependencies;
-						if (listedDependencies < totalDependencies) {
-							message += 'a <strong>' + column + '</strong>, ';
+						if (totalDependencies === 1) {
+							message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
+						} else if (listedDependencies < totalDependencies) {
+							message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
 						} else {
-							message += 'and a <strong>' + column + '</strong>';
+							message += `and a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
 						}
 					});
 				}
@@ -571,95 +838,44 @@
 					this.sectionsToDisplay.splice(index, 1);
 				}
 			}
-		},
-		mounted () {
-			// Set up the watcher for pending requests
-			setInterval(() => {
-				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0)) {
-					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests !== 0;
-				}
-			}, 300);
-
-			const getConstraintData = () => {
-				this.columns.forEach((column) => {
-					// We only care about columns that have a constraint and a getValues
-					// function, since those are the ones we have to fetch values for
-					if (column.constraint && column.constraint.getValues) {
-						if (column.constraint.tablePrefix) {
-							// If the constraint has a tablePrefix, we need to get a criteria
-							// structure first, then send our request
-							getCriteriaStructure(column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) logError(err);
-								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
-								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) logError(err);
-									if (data) column.constraint.values = data;
-								});
-							});
-						} else {
-							// If no table prefix, just fetch the data
-							column.constraint.getValues((err, data) => {
-								if (err) logError(err);
-								if (data) column.constraint.values = data;
-							});
-						}
-					}
-				});
-			};
-
-			if (this.identifier) this.getMainData();
-			getConstraintData();
-		},
-		// The component's properties, which are set by the parent component.
-		props: {
-			// The schema to be used
-			'schema': {
-				type: Object,
-				required: true
-			},
-			// An optional identifier/selector
-			'identifier': {
-				type: [
-					Object,
-					Boolean
-				]
-			},
-			// Display mode
-			'mode': {
-				type: String,
-				required: true,
-				default: 'view',
-				validator (value) {
-					return ['edit', 'view'].indexOf(value) !== -1;
-				}
-			},
-			// Should associations be rendered too?
-			'includeAssociations': {
-				type: Boolean,
-				default: true
-			},
-			// How about subschemas?
-			'includeSubSchemas': {
-				type: Boolean,
-				default: true
-			},
-			'userIsOwner': {
-				type: Boolean,
-				default: false
-			}
-		},
-		watch: {
-			duplication: {
-				handler () {
-					this.getMainData();
-				},
-				deep: true
-			}
 		}
 	};
 </script>
 
 <style lang="scss">
+	em.required-asterisk { color: #6c3129; }
+	span.is-red { color: #6c3129; }
+	em.is-small { font-size: .75em; }
+	fieldset {
+		legend h3 em.is-small { font-weight: normal; }
+		div.flex-container {
+			display: flex;
+			flex-wrap: wrap;
+			div {
+				flex-basis: 100%;
+				&.inline {
+					flex-basis: auto;
+					margin-right: .5rem;
+				}
+				label legend h3 { font-size: .75rem; }
+			}
+		}
+		p:first-of-type { margin-top: 0; }
+		&.view-mode {
+			margin: 1rem 0;
+			legend h3 { margin: 0; }
+			div.flex-container {
+				display: block;
+				div.view-mode-wrapper {
+					display: flex;
+					h4 {
+						margin: 0 .5rem 0 0;
+						line-height: 1.6em;
+					}
+				}
+			}
+		}
+	}
 	div.submit {
 		hr {
 			margin-top: 2rem;
@@ -667,14 +883,9 @@
 		p {
 			text-align: center;
 			button {
-				// background: cornflowerblue;
 				max-width: 100%;
 				width: 32rem;
 				font-size: 1.25rem;
-				// text-transform: uppercase;
-				// &:hover {
-				// 	background: darken(cornflowerblue, 20%);
-				// }
 			}
 			a#delete-link { cursor: pointer; }
 		}

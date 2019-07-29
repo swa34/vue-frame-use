@@ -20,7 +20,7 @@
 					Local Issue
 				</h3>
 				<select v-if="plannedPrograms.length > 0" v-model="record.PLANNED_PROGRAM_ID">
-					<option v-for="program in plannedPrograms" :value="program.ID">
+					<option v-for="program in plannedPrograms" :key="program.ID" :value="program.ID">
 						{{ program.NAME }}
 					</option>
 				</select>
@@ -35,7 +35,7 @@
 					State Issue
 				</h3>
 				<select v-model="record.STATE_PLANNED_PROGRAM_ID">
-					<option v-for="program in statePlannedPrograms" :value="program.ID">
+					<option v-for="program in statePlannedPrograms" :key="program.ID" :value="program.ID">
 						{{ program.NAME }}
 					</option>
 				</select>
@@ -47,9 +47,9 @@
 				Roles
 			</h3>
 			<ul v-if="reportType !== -1" class="checkbox">
-				<li v-for="role in roleTypes">
+				<li v-for="role in roleTypes" :key="role.ROLE_ID">
 					<label>
-						<input type="checkbox" :value="generateRoleRecord(role)" v-model="roles" />
+						<input v-model="roles" type="checkbox" :value="generateRoleRecord(role)" />
 						<span>
 							{{ role.SUB_REPORT_ROLE_LABEL }}
 						</span>
@@ -73,12 +73,12 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="contact in contacts">
+				<tr v-for="contact in contacts" :key="contact.TYPE_ID">
 					<td>
 						{{ getContactLabelFromID(contact.TYPE_ID) }}
 					</td>
 					<td>
-						<input type="number" v-model.number="contact.QUANTITY" min="0" />
+						<input v-model.number="contact.QUANTITY" type="number" min="0" />
 					</td>
 				</tr>
 			</tbody>
@@ -94,16 +94,14 @@
 			</tfoot>
 		</table>
 		<!-- Supplemental Data -->
-		<SupplementalData
-			:forSubReport="true"
-		/>
+		<SupplementalData :for-sub-report="true" />
 		<!-- Outcome, Impact, Achievements -->
 		<div>
 			<label>
 				<h3>
 					Outcome, Impact, and Achievements
 				</h3>
-				<div v-for="outcome in outcomes">
+				<div v-for="outcome in outcomes" :key="outcome.ID">
 					<textarea v-model="outcome.MEMO"></textarea>
 				</div>
 			</label>
@@ -113,28 +111,44 @@
 
 <script>
 	/* global activeUserID */
-	import SupplementalData from '@/views/custom/gacounts3/SupplementalData';
+	import SupplementalData from '~/views/custom/gacounts3/SupplementalData';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '~/modules/caesdb';
 	import {
 		getAssociationReportTypeContactType,
 		getAssociationReportTypeRole,
 		getAssociationSubReportField,
 		getAssociationSubReportRole,
 		getContactTypes,
-		getCriteriaStructure,
 		getPlannedPrograms,
 		getStatePlannedPrograms,
 		getSubReport,
 		getSubReportContact,
-		getSubReportPurposeAchievements,
-		logError
-	} from '@/modules/caesdb';
-	import { filter } from '@/modules/criteriaUtils';
-	import { url } from '@/modules/utilities';
+		getSubReportPurposeAchievements
+	} from '~/modules/caesdb/gacounts3';
+	import { filter } from '~/modules/criteriaUtils';
+	import { url } from '~/modules/utilities';
 
 	export default {
 		name: 'SubReportForReport',
 		components: {
 			SupplementalData
+		},
+		data () {
+			return {
+				contactTypes: [],
+				criteriaStructureTemplates: {
+					associationReportTypeContactType: {},
+					associationReportTypeRole: {},
+					subReport: {}
+				},
+				issueType: 'local',
+				plannedPrograms: [],
+				statePlannedPrograms: [],
+				unfilteredRoleTypes: []
+			};
 		},
 		computed: {
 			contacts: {
@@ -215,19 +229,186 @@
 				return sum;
 			}
 		},
-		data () {
-			return {
-				contactTypes: [],
-				criteriaStructureTemplates: {
-					associationReportTypeContactType: {},
-					associationReportTypeRole: {},
-					subReport: {}
-				},
-				issueType: 'local',
-				plannedPrograms: [],
-				statePlannedPrograms: [],
-				unfilteredRoleTypes: []
+		watch: {
+			neededReportValues (values) {
+				this.importReportData();
+				this.populateContactsRecords();
+			}
+		},
+		mounted () {
+			this.importReportData();
+			this.populateContactsRecords();
+			this.populateOutcomeRecord();
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
+				if (err) logError(err);
+				if (data) {
+					this.criteriaStructureTemplates.associationReportTypeContactType = data;
+				}
+			});
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
+				if (err) logError(err);
+				if (data) {
+					this.criteriaStructureTemplates.associationReportTypeRole = data;
+				}
+			});
+			getContactTypes((err, data) => {
+				if (err) logError(err);
+				if (data) {
+					this.contactTypes = data;
+				}
+			});
+			getAssociationReportTypeRole((err, data) => {
+				if (err) logError(err);
+				if (data) {
+					this.unfilteredRoleTypes = data;
+				}
+			});
+			getCriteriaStructure('GACOUNTS3', 'FPW_PLANNED_PROGRAM', (err, data) => {
+				if (err) logError(err);
+				if (data) {
+					let critStruct = data;
+					critStruct.criteria_USER_ID_eq.push(activeUserID);
+					getPlannedPrograms(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							this.plannedPrograms = data;
+						}
+					});
+				}
+			});
+			getStatePlannedPrograms((err, data) => {
+				if (err) logError(err);
+				if (data) {
+					this.statePlannedPrograms = data;
+				}
+			});
+
+			const fetchExistingData = () => {
+				const fetchSubReportCriteriaStructure = (callback) => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT', (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							this.criteriaStructureTemplates.subReport = data;
+							callback();
+						}
+					});
+				};
+				const fetchSubReport = (callback) => {
+					const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
+					critStruct.criteria_REPORT_ID_eq = this.reportId || url.getParam('duplicateID');
+					critStruct.criteria_USER_ID_eq = activeUserID;
+					getSubReport(critStruct, (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							const existingSubReport = data[0];
+							[
+								'ID',
+								'USER_ID',
+								'ACTUAL_SUBMITTER_ID',
+								'REPORT_ID',
+								'PLANNED_PROGRAM_ID',
+								'STATE_PLANNED_PROGRAM_ID',
+								'IS_HIGHLIGHTED',
+								'DATE_CREATED',
+								'DATE_LAST_UPDATED'
+							].forEach((key) => {
+								if (existingSubReport[key]) this.record[key] = existingSubReport[key];
+								if (existingSubReport.PLANNED_PROGRAM_ID) {
+									this.issueType = 'local';
+								} else if (existingSubReport.STATE_PLANNED_PROGRAM_ID) {
+									this.issueType = 'state';
+								}
+							});
+							callback();
+						}
+					});
+				};
+
+				const fetchRoles = () => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							const critStruct = data;
+							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
+							getAssociationSubReportRole(critStruct, (err, data) => {
+								if (err) logError(err);
+								if (data) {
+									data.forEach((record) => {
+										delete record.SUB_REPORT_ROLE_LABEL;
+									});
+									this.roles = data;
+								}
+							});
+						}
+					});
+				};
+
+				const fetchContacts = () => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_CONTACT', (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							const critStruct = data;
+							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
+							getSubReportContact(critStruct, (err, data) => {
+								if (err) logError(err);
+								if (data) {
+									const contactsMap = this.contacts.map(c => c.TYPE_ID);
+									data.forEach((record) => {
+										const index = contactsMap.indexOf(record.TYPE_ID);
+										if (index !== -1) this.contacts[index].QUANTITY = record.QUANTITY;
+									});
+								}
+							});
+						}
+					});
+				};
+
+				const fetchSupplementalData = () => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							const critStruct = data;
+							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
+							getAssociationSubReportField(critStruct, (err, data) => {
+								if (err) logError(err);
+								if (data) {
+									const suppDataMap = this.supplementalData.map(d => d.FIELD_ID);
+									data.forEach((record) => {
+										const index = suppDataMap.indexOf(record.FIELD_ID);
+										if (index !== -1) this.supplementalData[index].FIELD_VALUE = record.FIELD_VALUE;
+									});
+								}
+							});
+						}
+					});
+				};
+
+				const fetchOutcomes = () => {
+					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
+						if (err) logError(err);
+						if (data) {
+							const critStruct = data;
+							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
+							getSubReportPurposeAchievements(critStruct, (err, data) => {
+								if (err) logError(err);
+								if (data) {
+									this.outcomes = data;
+								}
+							});
+						}
+					});
+				};
+
+				fetchSubReportCriteriaStructure(() => {
+					fetchSubReport(() => {
+						fetchRoles();
+						fetchContacts();
+						fetchSupplementalData();
+						fetchOutcomes();
+					});
+				});
 			};
+			if (this.reportId !== null || typeof url.getParam('duplicateID') === 'string') fetchExistingData();
 		},
 		methods: {
 			getContactLabelFromID (id) {
@@ -278,193 +459,6 @@
 			},
 			importReportData () {
 				this.record = Object.assign(this.record, this.neededReportValues.report);
-			}
-		},
-		mounted () {
-			this.importReportData();
-			this.populateContactsRecords();
-			this.populateOutcomeRecord();
-			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
-				if (err) logError(err);
-				if (data) {
-					this.criteriaStructureTemplates.associationReportTypeContactType = data;
-				}
-			});
-			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
-				if (err) logError(err);
-				if (data) {
-					this.criteriaStructureTemplates.associationReportTypeRole = data;
-				}
-			});
-			getContactTypes((err, data) => {
-				if (err) logError(err);
-				if (data) {
-					this.contactTypes = data;
-				}
-			});
-			getAssociationReportTypeRole((err, data) => {
-				if (err) logError(err);
-				if (data) {
-					this.unfilteredRoleTypes = data;
-				}
-			});
-			getCriteriaStructure('FPW_PLANNED_PROGRAM', (err, data) => {
-				if (err) logError(err);
-				if (data) {
-					let critStruct = data;
-					critStruct.criteria_USER_ID_eq.push(activeUserID);
-					getPlannedPrograms(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							this.plannedPrograms = data;
-						}
-					});
-				}
-			});
-			getStatePlannedPrograms((err, data) => {
-				if (err) logError(err);
-				if (data) {
-					this.statePlannedPrograms = data;
-				}
-			});
-
-			const fetchExistingData = () => {
-				const fetchSubReportCriteriaStructure = (callback) => {
-					console.log('fetching subreport crit struct');
-					getCriteriaStructure('GC3_SUB_REPORT', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							this.criteriaStructureTemplates.subReport = data;
-							callback();
-						}
-					});
-				};
-				const fetchSubReport = (callback) => {
-					console.log('fetching sub report');
-					const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
-					critStruct.criteria_REPORT_ID_eq = this.reportId || url.getParam('duplicateID');
-					critStruct.criteria_USER_ID_eq = activeUserID;
-					getSubReport(critStruct, (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							const existingSubReport = data[0];
-							[
-								'ID',
-								'USER_ID',
-								'ACTUAL_SUBMITTER_ID',
-								'REPORT_ID',
-								'PLANNED_PROGRAM_ID',
-								'STATE_PLANNED_PROGRAM_ID',
-								'IS_HIGHLIGHTED',
-								'DATE_CREATED',
-								'DATE_LAST_UPDATED'
-							].forEach((key) => {
-								if (existingSubReport[key]) this.record[key] = existingSubReport[key];
-								if (existingSubReport.PLANNED_PROGRAM_ID) {
-									this.issueType = 'local';
-								} else if (existingSubReport.STATE_PLANNED_PROGRAM_ID) {
-									this.issueType = 'state';
-								}
-							});
-							callback();
-						}
-					});
-				};
-
-				const fetchRoles = () => {
-					console.log('fetch subreport roles');
-					getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							const critStruct = data;
-							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
-							getAssociationSubReportRole(critStruct, (err, data) => {
-								if (err) logError(err);
-								if (data) {
-									data.forEach((record) => {
-										delete record.SUB_REPORT_ROLE_LABEL;
-									});
-									this.roles = data;
-								}
-							});
-						}
-					});
-				};
-
-				const fetchContacts = () => {
-					console.log('fetching contacts');
-					getCriteriaStructure('GC3_SUB_REPORT_CONTACT', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							const critStruct = data;
-							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
-							getSubReportContact(critStruct, (err, data) => {
-								if (err) logError(err);
-								if (data) {
-									const contactsMap = this.contacts.map(c => c.TYPE_ID);
-									data.forEach((record) => {
-										const index = contactsMap.indexOf(record.TYPE_ID);
-										if (index !== -1) this.contacts[index].QUANTITY = record.QUANTITY;
-									});
-								}
-							});
-						}
-					});
-				};
-
-				const fetchSupplementalData = () => {
-					console.log('fetching supplemental data');
-					getCriteriaStructure('GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							const critStruct = data;
-							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
-							getAssociationSubReportField(critStruct, (err, data) => {
-								if (err) logError(err);
-								if (data) {
-									const suppDataMap = this.supplementalData.map(d => d.FIELD_ID);
-									data.forEach((record) => {
-										const index = suppDataMap.indexOf(record.FIELD_ID);
-										if (index !== -1) this.supplementalData[index].FIELD_VALUE = record.FIELD_VALUE;
-									});
-								}
-							});
-						}
-					});
-				};
-
-				const fetchOutcomes = () => {
-					console.log('fetching outcomes');
-					getCriteriaStructure('GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							const critStruct = data;
-							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
-							getSubReportPurposeAchievements(critStruct, (err, data) => {
-								if (err) logError(err);
-								if (data) {
-									this.outcomes = data;
-								}
-							});
-						}
-					});
-				};
-
-				fetchSubReportCriteriaStructure(() => {
-					fetchSubReport(() => {
-						fetchRoles();
-						fetchContacts();
-						fetchSupplementalData();
-						fetchOutcomes();
-					});
-				});
-			};
-			if (this.reportId !== null || typeof url.getParam('duplicateID') === 'string') fetchExistingData();
-		},
-		watch: {
-			neededReportValues (values) {
-				this.importReportData();
-				this.populateContactsRecords();
 			}
 		}
 	};

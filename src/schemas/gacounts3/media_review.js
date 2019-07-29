@@ -1,11 +1,12 @@
 import {
 	getMediaReview,
 	getMediaTypeCategory
-} from '@/modules/caesdb';
-import { enableConstraintValues } from '@/modules/schemaTools';
+} from '~/modules/caesdb/gacounts3';
+import { enableConstraintValues } from '~/modules/schemaTools';
 
 const schema = {
 	title: 'Media Reviewed',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_MEDIA_REVIEW',
 	criteria: {
 		string: 'criteria_ID_eq'

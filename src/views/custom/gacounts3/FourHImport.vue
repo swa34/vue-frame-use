@@ -1,12 +1,12 @@
 <template lang="html">
 	<div v-if="isNew">
-		<button type="button" v-on:click="openModal" class="load-modal">
+		<button type="button" class="load-modal" @click="openModal">
 			<img src="/global/images/4h-logo-white-transparent.svg" /> Import 4-H Enrollment Activity Demographics
 		</button>
-		<div v-if="displayModal" class="modal" v-on:click="closeModal">
+		<div v-if="displayModal" class="modal" @click="closeModal">
 			<div class="container">
 				<span class="close">
-					<XIcon v-on:click="closeModal" />
+					<XIcon @click="closeModal" />
 				</span>
 				<h2>
 					4-H Enrollment Activity Import
@@ -18,7 +18,7 @@
 								County
 							</strong>
 							<select v-model="countyName" :disabled="counties.length < 1">
-								<option v-for="county in counties" v-bind:key="county.ID" :value="county.COUNTYNAME">
+								<option v-for="county in counties" :key="county.ID" :value="county.COUNTYNAME">
 									{{ county.COUNTYNAME }}
 								</option>
 							</select>
@@ -27,15 +27,15 @@
 							<strong>
 								Activity
 							</strong>
-							<select v-model="activityID" v-if="!loadingActivityList" :disabled="activities.length < 1">
-								<option v-for="activity in activities" v-bind:key="activity.ACTIVITY_ID" :value="activity.ACTIVITY_ID">
+							<select v-if="!loadingActivityList" v-model="activityID" :disabled="activities.length < 1">
+								<option v-for="activity in activities" :key="activity.ACTIVITY_ID" :value="activity.ACTIVITY_ID">
 									{{ activity.NAME }} - {{ activity.BEGIN_DATE.replace(/ ([0-9]{2}:){2}[0-9]{2}$/, '') }}
 								</option>
 							</select>
 							<Spinner v-else />
 						</label>
 						<div class="button-container">
-							<button type="button" v-on:click="fetchActivity" :disabled="!activityID">
+							<button type="button" :disabled="!activityID" @click="fetchActivity">
 								Import
 							</button>
 						</div>
@@ -53,13 +53,13 @@
 	/* global swal */
 	import Spinner from 'vue-simple-spinner';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
+	import { logError } from '~/modules/caesdb';
 	import {
 		get4HActivity,
 		get4HActivityList,
-		getCounties,
-		logError
-	} from '@/modules/caesdb';
-	import { url } from '@/modules/utilities';
+		getCounties
+	} from '~/modules/caesdb/gacounts3';
+	import { url } from '~/modules/utilities';
 
 	export default {
 		name: 'FourHImport',
@@ -67,8 +67,14 @@
 			Spinner,
 			XIcon
 		},
-		computed: {
-			isNew () { return url.getParam('new') !== null; }
+		props: {
+			'mode': {
+				type: String,
+				default: 'view',
+				validator (value) {
+					return ['edit', 'view'].indexOf(value) !== -1;
+				}
+			}
 		},
 		data () {
 			return {
@@ -80,6 +86,18 @@
 				loadingActivity: false,
 				loadingActivityList: false
 			};
+		},
+		computed: {
+			isNew () { return url.getParam('new') !== null; }
+		},
+		watch: {
+			countyName () {
+				this.activityID = null;
+				this.fetchActivityList();
+			}
+		},
+		mounted () {
+			if (this.isNew) this.fetchCountyList();
 		},
 		methods: {
 			closeModal (event) {
@@ -232,24 +250,6 @@
 				this.loadingActivity = false;
 				this.displayModal = false;
 				swal('Success!', 'Your 4-H activity data has been imported.', 'success');
-			}
-		},
-		mounted () {
-			if (this.isNew) this.fetchCountyList();
-		},
-		props: {
-			'mode': {
-				type: String,
-				default: 'view',
-				validator (value) {
-					return ['edit', 'view'].indexOf(value) !== -1;
-				}
-			}
-		},
-		watch: {
-			countyName () {
-				this.activityID = null;
-				this.fetchActivityList();
 			}
 		}
 	};

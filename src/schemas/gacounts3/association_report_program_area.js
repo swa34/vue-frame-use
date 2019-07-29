@@ -1,12 +1,10 @@
 /* global caesCache */
 
-import {
-	getAssociationReportProgramArea
-	// getProgramAreas
-} from '@/modules/caesdb';
+import { getAssociationReportProgramArea } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Program Areas',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_ASSOCIATION_REPORT_PROGRAM_AREA',
 	criteria: {
 		string: 'criteria_ID_eq'
@@ -27,7 +25,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getProgramAreas,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.programArea

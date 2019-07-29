@@ -1,14 +1,11 @@
 /* global caesCache */
 
-import { enableConstraintValues } from '@/modules/schemaTools';
-import {
-	// getGenders,
-	// getRaces,
-	getRacialDemographic
-} from '@/modules/caesdb';
+import { enableConstraintValues } from '~/modules/schemaTools';
+import { getRacialDemographic } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Racial Demographics',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_RACIAL_DEMOGRAPHIC',
 	criteria: {
 		string: 'criteria_REPORT_ID_eq'
@@ -28,7 +25,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getRaces,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.race
@@ -39,7 +35,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getGenders,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.gender

@@ -16,35 +16,32 @@ import {
 	racialDemographicSchema,
 	reportContactSchema,
 	reportPersonnelSchema,
-	// reportPurposeAchievementsSchema,
 	residenceDemographicSchema,
 	subReportSchema,
 	targetAudienceSchema
-} from '@/schemas/gacounts3';
+} from '~/schemas/gacounts3';
 import {
 	ccdAssociationKeywordTopicCriteriaStructure
-} from '@/criteriaStructures/caes_central_database';
+} from '~/criteriaStructures/caes_central_database';
 import {
 	gc3AssociationReportTypeContactTypeCriteriaStructure,
 	gc3TargetAudienceCriteriaStructure
-} from '@/criteriaStructures/gacounts3';
+} from '~/criteriaStructures/gacounts3';
 import {
 	deleteReport,
-	// getActivityLocationTypes,
 	getAssociationKeywordTopic,
 	getAssociationReportTypeContactType,
 	getAssociationReportTypeProgramArea,
 	getAssociationTargetAudienceProgramArea,
-	// getCounties,
-	// getProgramScopes,
+	getContextualHelpMessageHTML,
 	getReport,
 	postReportData
-} from '@/modules/caesdb';
-import FourHImportComponent from '@/views/custom/gacounts3/FourHImport';
-import MediaProducedComponent from '@/views/custom/gacounts3/MediaProduced';
-import SupplementalDataComponent from '@/views/custom/gacounts3/SupplementalData';
-import SubReportForReportComponent from '@/views/custom/gacounts3/SubReportForReport';
-import SubReportCollaborators from '@/views/custom/gacounts3/SubReportCollaborators';
+} from '~/modules/caesdb/gacounts3';
+import FourHImportComponent from '~/views/custom/gacounts3/FourHImport';
+import MediaProducedComponent from '~/views/custom/gacounts3/MediaProduced';
+import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
+import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForReport';
+import SubReportCollaborators from '~/views/custom/gacounts3/SubReportCollaborators';
 
 // Adjust the racial demographic schema to suit our needs
 const altRacialDemographicSchema = Object.assign({}, racialDemographicSchema);
@@ -164,6 +161,8 @@ const countyIdRequired = (val) => {
 const schema = {
 	title: 'Report',
 	tablePrefix: 'GC3_REPORT',
+	databaseName: 'GACOUNTS3',
+	messageFetcher: getContextualHelpMessageHTML,
 	criteria: {
 		string: 'criteria_ID_eq'
 	},
@@ -211,8 +210,6 @@ const schema = {
 			automated: true,
 			// default: activeUser.PERSONNEL_ID,
 			constraint: {
-				database: 'CAES_CENTRAL_DATABASE',
-				table: 'PERSONNEL',
 				foreignKey: 'ID',
 				values: []
 			},
@@ -228,8 +225,6 @@ const schema = {
 			automated: true,
 			default: actualUser.PERSONNEL_ID,
 			constraint: {
-				database: 'CAES_CENTRAL_DATABASE',
-				table: 'PERSONNEL',
 				foreignKey: 'ID',
 				values: []
 			},
@@ -264,9 +259,6 @@ const schema = {
 			required: true,
 			helpMessageName: 'NewReportScope',
 			constraint: {
-				// getValues: getProgramScopes,
-				// database: 'CAES_CENTRAL_DATABASE',
-				// table: 'PROGRAM_SCOPE',
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.programScope
@@ -291,9 +283,6 @@ const schema = {
 			prettyName: 'Location of Activity',
 			type: 'int',
 			constraint: {
-				// getValues: getActivityLocationTypes,
-				// database: 'GACOUNTS3',
-				// table: 'ACTIVITY_LOCATION_TYPE',
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.gc3.activityLocationType
@@ -321,9 +310,6 @@ const schema = {
 			default: activeUser.COUNTYLISTID,
 			helpMessageName: 'NewReportCounty',
 			constraint: {
-				// getValues: getCounties,
-				// database: 'Portal',
-				// table: 'CountyList',
 				foreignKey: 'COUNTYLISTID',
 				foreignLabel: 'COUNTYNAME',
 				values: caesCache.data.pdb.countyList
@@ -479,8 +465,6 @@ const schema = {
 					column: 'AREA_ID'
 				},
 				getValues: getAssociationReportTypeProgramArea,
-				database: 'GACOUNTS3',
-				table: 'ASSOCIATION_REPORT_TYPE_PROGRAM_AREA',
 				associatedColumn: 'AREA_ID',
 				optionColumn: 'REPORT_TYPE_ID'
 			},

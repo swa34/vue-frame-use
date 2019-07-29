@@ -2,13 +2,13 @@
 	<div>
 		<h4 v-if="forSubReport">
 			Supplemental Data
-			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+			<a class="help-link" @click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })">
 				<HelpCircleIcon />
 			</a>
 		</h4>
 		<h3 v-else>
 			Supplemental Data
-			<a v-on:click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })" class="help-link">
+			<a class="help-link" @click="$emit('show-help', { helpMessageName: 'ReportSupplementalData' })">
 				<HelpCircleIcon />
 			</a>
 		</h3>
@@ -34,6 +34,7 @@
 			<tbody>
 				<tr
 					v-for="record in recordsSortedBySortOrder"
+					:key="record.FIELD_ID"
 					:class="`${mode === 'view' && (record.FIELD_VALUE === null || record.FIELD_VALUE === '') ? 'hide-on-print' : ''} ${isHeaderField(record.FIELD_ID) ? 'supplemental-subheading' : ''}`"
 				>
 					<td v-if="isHeaderField(record.FIELD_ID)" colspan="100%">
@@ -49,12 +50,24 @@
 							<option :value="null">
 								(None)
 							</option>
-							<option v-for="option in getFieldOptions(record)" :value="option.ID">
+							<option v-for="option in getFieldOptions(record)" :key="option.ID" :value="option.ID">
 								{{ option.LABEL }}
 							</option>
 						</select>
-						<input v-else-if="getFieldInputType(record) === 'number'" v-model="record.FIELD_VALUE" :required="fieldIsRequired(record)" type="number" min="0" step="any" />
-						<input v-else v-model="record.FIELD_VALUE" :type="getFieldInputType(record)" :required="fieldIsRequired(record)" />
+						<input
+							v-else-if="getFieldInputType(record) === 'number'"
+							v-model="record.FIELD_VALUE"
+							:required="fieldIsRequired(record)"
+							type="number"
+							min="0"
+							step="any"
+						/>
+						<input
+							v-else
+							v-model="record.FIELD_VALUE"
+							:type="getFieldInputType(record)"
+							:required="fieldIsRequired(record)"
+						/>
 					</td>
 					<td v-else-if="record.FIELD_VALUE && !isHeaderField(record.FIELD_ID)">
 						<span v-if="getFieldInputType(record) === 'select'">
@@ -82,20 +95,22 @@
 
 <script>
 	/* global caesCache */
+	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import { filter } from '~/modules/criteriaUtils';
+	import {
+		getCriteriaStructure,
+		logError
+	} from '~/modules/caesdb';
 	import {
 		getAssociationReportField,
 		getAssociationReportTypeField,
 		getAssociationSubReportField,
-		getCriteriaStructure,
-		getFieldOptions,
-		logError
-	} from '@/modules/caesdb';
-	import { filter } from '@/modules/criteriaUtils';
+		getFieldOptions
+	} from '~/modules/caesdb/gacounts3';
 	import {
 		modeValidator,
 		url
-	} from '@/modules/utilities';
-	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	} from '~/modules/utilities';
 
 	// An object containing input types corresponding to field types
 	const fieldTypeInputTypes = {
@@ -109,6 +124,7 @@
 
 	export default {
 		name: 'SupplementalData',
+		components: { HelpCircleIcon },
 		props: {
 			forSubReport: {
 				type: Boolean,
@@ -120,7 +136,26 @@
 				validator: modeValidator
 			}
 		},
-		components: { HelpCircleIcon },
+		data () {
+			return {
+				criteriaStructureTemplates: {
+					fieldOption: {},
+					reportField: {}
+				},
+				existingRecords: [],
+				fieldOptions: [],
+				fieldTypes: caesCache.data.gc3.fieldType,
+				fieldTypesWithLabels: [
+					'String Data',
+					'Option Data'
+				],
+				fieldTypeIDsWithLabels: [
+					2	// String data
+					// 4		// Option data
+				],
+				reportFields: []
+			};
+		},
 		computed: {
 			dependenciesMet () {
 				return this.programAreas.length > 0 && this.reportType !== null && this.topics.length > 0;
@@ -204,175 +239,6 @@
 			topics () {
 				return this.$store.state.topics.records.map(r => r.TOPIC_ID);
 			}
-		},
-		data () {
-			return {
-				criteriaStructureTemplates: {
-					fieldOption: {},
-					reportField: {}
-				},
-				existingRecords: [],
-				fieldOptions: [],
-				fieldTypes: caesCache.data.gc3.fieldType,
-				fieldTypesWithLabels: [
-					'String Data',
-					'Option Data'
-				],
-				fieldTypeIDsWithLabels: [
-					2	// String data
-					// 4		// Option data
-				],
-				reportFields: []
-			};
-		},
-		methods: {
-			fieldIsRequired (record) {
-				const field = this.getFieldFromRecord(record);
-				return field.IS_REQUIRED;
-			},
-			getFieldFromRecord (record) {
-				return this.reportFields[this.fieldIDs.indexOf(record.FIELD_ID)];
-			},
-			getFieldInputType (record) {
-				const field = this.reportFields[this.fieldIDs.indexOf(record.FIELD_ID)];
-				return this.fieldTypesIndexedByID[field.REPORT_FIELD_TYPE_ID].inputType;
-			},
-			getFieldLabel (fieldId) {
-				const index = this.fieldIDs.indexOf(fieldId);
-				if (index === -1) return '';
-				return this.reportFields[index].REPORT_FIELD_LABEL;
-			},
-			getFieldOptionLabel (optionID) {
-				const index = this.fieldOptions.map(o => o.ID).indexOf(optionID);
-				console.log(index);
-				if (index !== -1) return this.fieldOptions[index].LABEL;
-				return '';
-			},
-			getFieldOptions (record) {
-				const field = this.getFieldFromRecord(record);
-				let options = [];
-				this.fieldOptions.forEach((option) => {
-					if (option.FIELD_ID === field.FIELD_ID) options.push(option);
-				});
-				return options;
-			},
-			getFieldSortOrder (fieldId) {
-				const fieldIndex = this.fieldIDs.indexOf(fieldId);
-				if (fieldIndex === -1) return 0;
-				const field = this.reportFields[fieldIndex];
-				return field.REPORT_FIELD_SORT_ORDER;
-			},
-			isHeaderField (fieldId) {
-				const fieldIndex = this.fieldIDs.indexOf(fieldId);
-				if (fieldIndex === -1) return false;
-				const field = this.reportFields[fieldIndex];
-				const typeIndex = this.fieldTypes.map(t => t.ID).indexOf(field.REPORT_FIELD_TYPE_ID);
-				if (typeIndex === -1) return false;
-				const fieldType = this.fieldTypes[typeIndex];
-				return fieldType.LABEL === 'Header Field';
-			},
-			populateRecords () {
-				// Generates a record from a field, an optional value
-				const generateRecord = (field, value = null) => {
-					return {
-						FIELD_ID: field.FIELD_ID,
-						FIELD_VALUE: value,
-						IS_STRING_DATA: typeof value === 'string'
-					};
-				};
-				// Create an empty array to hold processed records, that will eventually
-				// be assigned to the component's records
-				let records = [];
-				// Loop through each of the applicable report fields fetched from the DB
-				this.reportFields.forEach((field) => {
-					const indexOfFieldInComponentRecords = this.recordFieldIDs.indexOf(field.FIELD_ID);
-					const fieldIsAlreadyPresentInComponentRecords = indexOfFieldInComponentRecords !== -1;
-					const indexOfFieldInRecordsFetchedFromDB = this.existingRecords.map(r => r.FIELD_ID).indexOf(field.FIELD_ID);
-					const fieldIsUsedByRecordsFetchedFromDB = indexOfFieldInRecordsFetchedFromDB !== -1;
-					const fieldUsesOptionLabel = this.fieldTypeIDsWithLabels.indexOf(field.REPORT_FIELD_TYPE_ID) !== -1;
-
-					if (fieldIsAlreadyPresentInComponentRecords) {
-						const componentRecord = this.records[indexOfFieldInComponentRecords];
-						let fieldValue = componentRecord.FIELD_VALUE;
-
-						if (fieldValue === null && fieldIsUsedByRecordsFetchedFromDB) {
-							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
-							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
-						}
-
-						records.push(
-							generateRecord(
-								field,
-								fieldValue
-							)
-						);
-					} else {
-						// Field is not already present in component records
-						let fieldValue = null;
-						if (fieldIsUsedByRecordsFetchedFromDB) {
-							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
-							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
-						}
-						records.push(generateRecord(field, fieldValue));
-					}
-				});
-
-				this.records = records;
-			},
-			populateReportFields () {
-				getAssociationReportTypeField(this.reportFieldCriteriaStructureForCF, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						let uniqueFields = [];
-						let newReportFields = [];
-						data.forEach((field) => {
-							if (uniqueFields.map(f => f.FIELD_ID).indexOf(field.FIELD_ID) === -1) {
-								uniqueFields.push(field);
-								const existingFieldIndex = this.fieldIDs.indexOf(field.FIELD_ID);
-								if (existingFieldIndex === -1) {
-									newReportFields.push(field);
-								} else {
-									newReportFields.push(this.reportFields[existingFieldIndex]);
-								}
-							}
-						});
-						this.reportFields = newReportFields;
-					}
-				});
-			}
-		},
-		mounted () {
-			// Fetch some things we need
-			getCriteriaStructure('GC3_FIELD_OPTION', (err, data) => {
-				if (err) logError(err);
-				if (data) this.criteriaStructureTemplates.fieldOption = data;
-			});
-			getCriteriaStructure('GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
-				if (err) logError(err);
-				if (data) this.criteriaStructureTemplates.reportField = data;
-				this.populateReportFields();
-			});
-
-			const fetchExistingRecords = () => {
-				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
-				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
-				getCriteriaStructure(tablePrefix, (err, data) => {
-					if (err) logError(err);
-					if (data) {
-						let critStruct = data;
-						if (this.forSubReport) {
-							critStruct.criteria_SUB_REPORT_ID_eq = this.$store.state.subschemas.subReport.subReport.ID || -1;
-						} else {
-							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
-						}
-						getFields(critStruct, (err, data) => {
-							if (err) logError(err);
-							if (data) this.existingRecords = data;
-						});
-					}
-				});
-			};
-			if ((this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) && !this.fetched) fetchExistingRecords();
 		},
 		watch: {
 			existingRecords () {
@@ -476,6 +342,154 @@
 						});
 					}
 				}
+			}
+		},
+		mounted () {
+			// Fetch some things we need
+			getCriteriaStructure('GACOUNTS3', 'GC3_FIELD_OPTION', (err, data) => {
+				if (err) logError(err);
+				if (data) this.criteriaStructureTemplates.fieldOption = data;
+			});
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_FIELD', (err, data) => {
+				if (err) logError(err);
+				if (data) this.criteriaStructureTemplates.reportField = data;
+				this.populateReportFields();
+			});
+
+			const fetchExistingRecords = () => {
+				const tablePrefix = this.forSubReport ? 'GC3_ASSOCIATION_SUB_REPORT_FIELD' : 'GC3_ASSOCIATION_REPORT_FIELD';
+				const getFields = this.forSubReport ? getAssociationSubReportField : getAssociationReportField;
+				getCriteriaStructure('GACOUNTS3', tablePrefix, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						let critStruct = data;
+						if (this.forSubReport) {
+							critStruct.criteria_SUB_REPORT_ID_eq = this.$store.state.subschemas.subReport.subReport.ID || -1;
+						} else {
+							critStruct.criteria_REPORT_ID_eq = this.reportID || url.getParam('duplicateID') || -1;
+						}
+						getFields(critStruct, (err, data) => {
+							if (err) logError(err);
+							if (data) this.existingRecords = data;
+						});
+					}
+				});
+			};
+			if ((this.reportID || this.$store.state.duplication.associations.supplementalData || this.$store.state.duplication.subschemas.subReport) && !this.fetched) fetchExistingRecords();
+		},
+		methods: {
+			fieldIsRequired (record) {
+				const field = this.getFieldFromRecord(record);
+				return field.IS_REQUIRED;
+			},
+			getFieldFromRecord (record) {
+				return this.reportFields[this.fieldIDs.indexOf(record.FIELD_ID)];
+			},
+			getFieldInputType (record) {
+				const field = this.reportFields[this.fieldIDs.indexOf(record.FIELD_ID)];
+				return this.fieldTypesIndexedByID[field.REPORT_FIELD_TYPE_ID].inputType;
+			},
+			getFieldLabel (fieldId) {
+				const index = this.fieldIDs.indexOf(fieldId);
+				if (index === -1) return '';
+				return this.reportFields[index].REPORT_FIELD_LABEL;
+			},
+			getFieldOptionLabel (optionID) {
+				const index = this.fieldOptions.map(o => o.ID).indexOf(optionID);
+				if (index !== -1) return this.fieldOptions[index].LABEL;
+				return '';
+			},
+			getFieldOptions (record) {
+				const field = this.getFieldFromRecord(record);
+				let options = [];
+				this.fieldOptions.forEach((option) => {
+					if (option.FIELD_ID === field.FIELD_ID) options.push(option);
+				});
+				return options;
+			},
+			getFieldSortOrder (fieldId) {
+				const fieldIndex = this.fieldIDs.indexOf(fieldId);
+				if (fieldIndex === -1) return 0;
+				const field = this.reportFields[fieldIndex];
+				return field.REPORT_FIELD_SORT_ORDER;
+			},
+			isHeaderField (fieldId) {
+				const fieldIndex = this.fieldIDs.indexOf(fieldId);
+				if (fieldIndex === -1) return false;
+				const field = this.reportFields[fieldIndex];
+				const typeIndex = this.fieldTypes.map(t => t.ID).indexOf(field.REPORT_FIELD_TYPE_ID);
+				if (typeIndex === -1) return false;
+				const fieldType = this.fieldTypes[typeIndex];
+				return fieldType.LABEL === 'Header Field';
+			},
+			populateRecords () {
+				// Generates a record from a field, an optional value
+				const generateRecord = (field, value = null) => {
+					return {
+						FIELD_ID: field.FIELD_ID,
+						FIELD_VALUE: value,
+						IS_STRING_DATA: typeof value === 'string'
+					};
+				};
+				// Create an empty array to hold processed records, that will eventually
+				// be assigned to the component's records
+				let records = [];
+				// Loop through each of the applicable report fields fetched from the DB
+				this.reportFields.forEach((field) => {
+					const indexOfFieldInComponentRecords = this.recordFieldIDs.indexOf(field.FIELD_ID);
+					const fieldIsAlreadyPresentInComponentRecords = indexOfFieldInComponentRecords !== -1;
+					const indexOfFieldInRecordsFetchedFromDB = this.existingRecords.map(r => r.FIELD_ID).indexOf(field.FIELD_ID);
+					const fieldIsUsedByRecordsFetchedFromDB = indexOfFieldInRecordsFetchedFromDB !== -1;
+					const fieldUsesOptionLabel = this.fieldTypeIDsWithLabels.indexOf(field.REPORT_FIELD_TYPE_ID) !== -1;
+
+					if (fieldIsAlreadyPresentInComponentRecords) {
+						const componentRecord = this.records[indexOfFieldInComponentRecords];
+						let fieldValue = componentRecord.FIELD_VALUE;
+
+						if (fieldValue === null && fieldIsUsedByRecordsFetchedFromDB) {
+							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
+							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
+						}
+
+						records.push(
+							generateRecord(
+								field,
+								fieldValue
+							)
+						);
+					} else {
+						// Field is not already present in component records
+						let fieldValue = null;
+						if (fieldIsUsedByRecordsFetchedFromDB) {
+							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
+							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
+						}
+						records.push(generateRecord(field, fieldValue));
+					}
+				});
+
+				this.records = records;
+			},
+			populateReportFields () {
+				getAssociationReportTypeField(this.reportFieldCriteriaStructureForCF, (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						let uniqueFields = [];
+						let newReportFields = [];
+						data.forEach((field) => {
+							if (uniqueFields.map(f => f.FIELD_ID).indexOf(field.FIELD_ID) === -1) {
+								uniqueFields.push(field);
+								const existingFieldIndex = this.fieldIDs.indexOf(field.FIELD_ID);
+								if (existingFieldIndex === -1) {
+									newReportFields.push(field);
+								} else {
+									newReportFields.push(this.reportFields[existingFieldIndex]);
+								}
+							}
+						});
+						this.reportFields = newReportFields;
+					}
+				});
 			}
 		}
 	};

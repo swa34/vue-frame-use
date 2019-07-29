@@ -1,12 +1,10 @@
 /* global caesCache */
 
-import {
-	getAssociationReportKeyword
-	// getKeywords
-} from '@/modules/caesdb';
+import { getAssociationReportKeyword } from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Report Keyword Associations',
+	databaseName: 'GACOUNTS3',
 	tablePrefix: 'GC3_ASSOCIATION_REPORT_KEYWORD',
 	criteria: {
 		string: 'criteria_ID_eq'
@@ -30,7 +28,6 @@ const schema = {
 			type: 'int',
 			required: true,
 			constraint: {
-				// getValues: getKeywords,
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
 				values: caesCache.data.ccd.keyword

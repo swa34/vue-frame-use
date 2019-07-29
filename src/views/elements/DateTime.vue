@@ -1,7 +1,7 @@
 <template lang="html">
 	<div>
-		<input type="date" v-model="date" />
-		<input type="time" v-model="time" />
+		<input v-model="date" type="date" />
+		<input v-model="time" type="time" />
 	</div>
 </template>
 
@@ -10,6 +10,15 @@
 
 	export default {
 		name: 'DateTime',
+		props: {
+			value: {
+				default: null,
+				type: [
+					Number,
+					String
+				]
+			}
+		},
 		computed: {
 			date: {
 				get () {
@@ -30,14 +39,6 @@
 					const newValue = this.date + ' ' + val + ':00';
 					this.$emit('input', newValue);
 				}
-			}
-		},
-		props: {
-			value: {
-				type: [
-					Number,
-					String
-				]
 			}
 		}
 	};

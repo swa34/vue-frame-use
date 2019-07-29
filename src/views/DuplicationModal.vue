@@ -1,8 +1,8 @@
 <template lang="html">
-  <div class="modal" v-on:click="closeModal">
+	<div class="modal" @click="closeModal">
 		<div class="container">
 			<span class="close">
-				<XIcon v-on:click="cancelDuplication" />
+				<XIcon @click="cancelDuplication" />
 			</span>
 			<h2>
 				{{ duplicationSchema.title }}
@@ -12,9 +12,9 @@
 					{{ duplicationSchema.instruction }}
 				</p>
 				<ul>
-					<li v-for="(section, title) in duplicationSchema.sections">
+					<li v-for="(section, title) in duplicationSchema.sections" :key="title">
 						<label>
-							<input type="checkbox" v-model="section.duplicate" v-bind:key="title" :disabled="!dependenciesMet(section)" />
+							<input v-model="section.duplicate" type="checkbox" :disabled="!dependenciesMet(section)" />
 							<span :class="!dependenciesMet(section) ? 'disabled' : ''">
 								{{ title }}
 							</span>
@@ -23,7 +23,7 @@
 				</ul>
 			</div>
 			<div class="button-container">
-				<button type="button" v-on:click="processDuplicationOptions">
+				<button type="button" @:click="processDuplicationOptions">
 					Go
 				</button>
 			</div>
@@ -33,16 +33,20 @@
 
 <script>
 	import XIcon from 'vue-feather-icons/icons/XIcon';
-	import { url } from '@/modules/utilities';
+	import { url } from '~/modules/utilities';
+
 	export default {
 		name: 'DuplicationModal',
+		components: { XIcon },
 		props: {
 			duplicationSchema: {
 				type: Object,
 				required: true
 			}
 		},
-		components: { XIcon },
+		data () {
+			return Object.assign({}, this.duplicationSchema);
+		},
 		computed: {
 			duplication: {
 				get () {
@@ -60,8 +64,15 @@
 				return count;
 			}
 		},
-		data () {
-			return Object.assign({}, this.duplicationSchema);
+		watch: {
+			totalDuplicates () {
+				for (let key in this.sections) {
+					const section = this.sections[key];
+					if (!this.dependenciesMet(section)) {
+						section.duplicate = false;
+					}
+				}
+			}
 		},
 		methods: {
 			cancelDuplication () {
@@ -103,16 +114,6 @@
 				}
 				this.duplication.ready = true;
 				this.duplication.reportID = url.getParam('duplicateID');
-			}
-		},
-		watch: {
-			totalDuplicates () {
-				for (let key in this.sections) {
-					const section = this.sections[key];
-					if (!this.dependenciesMet(section)) {
-						section.duplicate = false;
-					}
-				}
 			}
 		}
 	};

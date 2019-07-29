@@ -1,6 +1,6 @@
 <template lang="html">
-  <div>
-  	<h3>
+	<div>
+		<h3>
 			Media Produced
 		</h3>
 		<fieldset v-if="mode === 'edit'">
@@ -9,7 +9,12 @@
 					Type
 				</h4>
 				<select v-model="record.TYPE_ID">
-					<option v-for="type in mediaTypes" v-bind:key="type.ID" :value="type.ID" :selected="type.LABEL === '(None)'">
+					<option
+						v-for="type in mediaTypes"
+						:key="type.ID"
+						:value="type.ID"
+						:selected="type.LABEL === '(None)'"
+					>
 						{{ type.LABEL }}
 					</option>
 				</select>
@@ -25,7 +30,12 @@
 					Review Type
 				</h4>
 				<select v-model="record.REVIEW_TYPE_ID">
-					<option v-for="type in reviewTypes" v-bind:key="type.ID" :value="type.ID" :selected="type.LABEL === '(None)'">
+					<option
+						v-for="type in reviewTypes"
+						:key="type.ID"
+						:value="type.ID"
+						:selected="type.LABEL === '(None)'"
+					>
 						{{ type.LABEL }}
 					</option>
 				</select>
@@ -53,21 +63,36 @@
 				{{ getReviewTypeLabelFromID(record.REVIEW_TYPE_ID) }}
 			</span>
 		</div>
-  </div>
+	</div>
 </template>
 
 <script>
 	import {
 		getCriteriaStructure,
+		logError
+	} from '~/modules/caesdb';
+	import {
 		getMediaProduction,
 		getMediaReviewType,
-		getMediaType,
-		logError
-	} from '@/modules/caesdb';
-	import { modeValidator } from '@/modules/utilities';
+		getMediaType
+	} from '~/modules/caesdb/gacounts3';
+	import { modeValidator } from '~/modules/utilities';
 
 	export default {
 		name: 'MediaProduced',
+		props: {
+			'mode': {
+				type: String,
+				default: 'view',
+				validator: modeValidator
+			}
+		},
+		data () {
+			return {
+				mediaTypes: [],
+				reviewTypes: []
+			};
+		},
 		computed: {
 			duplication () { return this.$store.state.duplication; },
 			fetched: {
@@ -99,32 +124,9 @@
 			},
 			reportID () { return this.$store.state.report.ID; }
 		},
-		data () {
-			return {
-				mediaTypes: [],
-				reviewTypes: []
-			};
-		},
-		methods: {
-			getMediaTypeLabelFromID (id) {
-				if (id === null) return '';
-				const index = this.mediaTypes.map(t => t.ID).indexOf(id);
-				if (index === -1) return '';
-				return this.mediaTypes[index].LABEL;
-			},
-			getReviewTypeLabelFromID (id) {
-				if (id === null) return '';
-				const index = this.reviewTypes.map(t => t.ID).indexOf(id);
-				if (index === -1) return '';
-				return this.reviewTypes[index].LABEL;
-			},
-			populateRecord () {
-				this.$store.state.mediaProduced.records.push(this.record);
-			}
-		},
 		mounted () {
 			const fetchExisting = () => {
-				getCriteriaStructure('GC3_MEDIA_PRODUCTION', (err, data) => {
+				getCriteriaStructure('GACOUNTS3', 'GC3_MEDIA_PRODUCTION', (err, data) => {
 					if (err) logError(err);
 					if (data) {
 						const critStruct = data;
@@ -178,11 +180,21 @@
 			if ((this.reportID !== null || this.duplication.associations.mediaProduced) && !this.fetched) fetchExisting();
 			if (this.reportID === null && !this.fetched) this.populateRecord();
 		},
-		props: {
-			'mode': {
-				type: String,
-				default: 'view',
-				validator: modeValidator
+		methods: {
+			getMediaTypeLabelFromID (id) {
+				if (id === null) return '';
+				const index = this.mediaTypes.map(t => t.ID).indexOf(id);
+				if (index === -1) return '';
+				return this.mediaTypes[index].LABEL;
+			},
+			getReviewTypeLabelFromID (id) {
+				if (id === null) return '';
+				const index = this.reviewTypes.map(t => t.ID).indexOf(id);
+				if (index === -1) return '';
+				return this.reviewTypes[index].LABEL;
+			},
+			populateRecord () {
+				this.$store.state.mediaProduced.records.push(this.record);
 			}
 		}
 	};

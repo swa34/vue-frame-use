@@ -1,7 +1,7 @@
-import associationStoryAudienceSchema from '@/schemas/caes_news/association_story_audience';
-import associationStoryKeywordSchema from '@/schemas/caes_news/association_story_keyword';
-import associationStorySourceExpertSchema from '@/schemas/caes_news/association_story_source_expert';
-import associationStoryWriterSchema from '@/schemas/caes_news/association_story_writer';
+import associationStoryAudienceSchema from '~/schemas/caes_news/association_story_audience';
+import associationStoryKeywordSchema from '~/schemas/caes_news/association_story_keyword';
+import associationStorySourceExpertSchema from '~/schemas/caes_news/association_story_source_expert';
+import associationStoryWriterSchema from '~/schemas/caes_news/association_story_writer';
 import dateFormat from 'dateformat';
 
 const schema = {

@@ -1,16 +1,14 @@
 /* global activeUserID */
 /* global actualUserID */
 
-import associationSubReportRoleSchema from '@/schemas/gacounts3/association_sub_report_role';
+import associationSubReportRoleSchema from '~/schemas/gacounts3/association_sub_report_role';
 import {
 	getPlannedPrograms,
 	getStatePlannedPrograms
-} from '@/modules/caesdb';
+} from '~/modules/caesdb/gacounts3';
 
 const schema = {
 	title: 'Sub-Report',
-	database: 'GACOUNTS3',
-	table: 'SUB_REPORT',
 	prepareForSubmit: (subReport) => {
 		if (subReport.ISSUE_TYPE === 'local' && subReport.STATE_PLANNED_PROGRAM_ID !== null) subReport.STATE_PLANNED_PROGRAM_ID = null;
 		if (subReport.ISSUE_TYPE === 'state' && subReport.PLANNED_PROGRAM_ID !== null) subReport.PLANNED_PROGRAM_ID = null;
@@ -60,6 +58,7 @@ const schema = {
 			type: 'int',
 			constraint: {
 				getValues: getPlannedPrograms,
+				databaseName: 'FederalPOW',
 				tablePrefix: 'FPW_PLANNED_PROGRAM',
 				criteria: {
 					string: 'criteria_PersonnelMayFileUnder',

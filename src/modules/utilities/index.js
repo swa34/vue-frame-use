@@ -1,5 +1,6 @@
 import deepObjectAssign from './deepObjectAssign';
 import formatDates from './formatDates';
+import getObjectIndexedByKeyFromArray from './getObjectIndexedByKeyFromArray';
 import recursiveAssign from './recursiveAssign';
 import request from './request';
 import sqlToHtml from './sqlToHtml';
@@ -21,6 +22,7 @@ export {
 	deepObjectAssign,
 	formatDates,
 	getPrettyColumnName,
+	getObjectIndexedByKeyFromArray,
 	modeValidator,
 	recursiveAssign,
 	request,
