@@ -209,6 +209,10 @@
 				const targAudMap = this.$store.state.targetAudiences.records.map(r => r.TYPE_ID);
 				const audiences = {
 					PRE_K: targAudMap.indexOf(23),
+					KINDERGARTEN: targAudMap.indexOf(58),
+					ONE: targAudMap.indexOf(59),
+					TWO: targAudMap.indexOf(60),
+					THREE: targAudMap.indexOf(61),
 					FOUR: targAudMap.indexOf(25),
 					FIVE: targAudMap.indexOf(26),
 					SIX: targAudMap.indexOf(27),
@@ -228,8 +232,12 @@
 						this.$store.state.targetAudiences.records[index].QUANTITY = data[key];
 					}
 				}
+
+				// This can likely eventually be removed, as the k3 audience type is no
+				// longer used as of june 2019.  However, legacy reports may still have
+				// the type in use so I'm (gabe) leaving it here for now.
 				const k3Index = targAudMap.indexOf(24);
-				this.$store.state.targetAudiences.records[k3Index].QUANTITY = data.KINDERGARTEN + data.ONE + data.TWO + data.THREE;
+				if (k3Index !== -1) this.$store.state.targetAudiences.records[k3Index].QUANTITY = data.KINDERGARTEN + data.ONE + data.TWO + data.THREE;
 
 				// Supplemental Data
 				const supMap = this.$store.state.supplementalData.records.map(r => r.FIELD_ID);
