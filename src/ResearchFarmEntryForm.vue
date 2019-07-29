@@ -360,10 +360,8 @@
 				}
 			},
 			async submitProject (isBeingSubmittedForApproval = false) {
-				console.log(isBeingSubmittedForApproval);
 				const projectBlob = this.getPreparedStoreForSubmit();
 				if (isBeingSubmittedForApproval) {
-					console.log('project being submitted for approval');
 					projectBlob.project.STATUS_ID = getProjectsNextStatusId(this.$store.state.project, true);
 				} else {
 					projectBlob.project.STATUS_ID = this.projectsNextStatusId;

@@ -285,7 +285,6 @@
 
 			const fetchExistingData = () => {
 				const fetchSubReportCriteriaStructure = (callback) => {
-					console.log('fetching subreport crit struct');
 					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT', (err, data) => {
 						if (err) logError(err);
 						if (data) {
@@ -295,7 +294,6 @@
 					});
 				};
 				const fetchSubReport = (callback) => {
-					console.log('fetching sub report');
 					const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
 					critStruct.criteria_REPORT_ID_eq = this.reportId || url.getParam('duplicateID');
 					critStruct.criteria_USER_ID_eq = activeUserID;
@@ -327,7 +325,6 @@
 				};
 
 				const fetchRoles = () => {
-					console.log('fetch subreport roles');
 					getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_SUB_REPORT_ROLE', (err, data) => {
 						if (err) logError(err);
 						if (data) {
@@ -347,7 +344,6 @@
 				};
 
 				const fetchContacts = () => {
-					console.log('fetching contacts');
 					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_CONTACT', (err, data) => {
 						if (err) logError(err);
 						if (data) {
@@ -368,7 +364,6 @@
 				};
 
 				const fetchSupplementalData = () => {
-					console.log('fetching supplemental data');
 					getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_SUB_REPORT_FIELD', (err, data) => {
 						if (err) logError(err);
 						if (data) {
@@ -389,7 +384,6 @@
 				};
 
 				const fetchOutcomes = () => {
-					console.log('fetching outcomes');
 					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT_PURPOSE_ACHIEVEMENTS', (err, data) => {
 						if (err) logError(err);
 						if (data) {

@@ -69,7 +69,7 @@
 							{{ group.name }}:
 						</strong>
 						<span v-for="(option, index) in getOptionsThatHaveRecords(group.options)" :key="option[optionID]">
-							{{ option[optionLabel || optionID] + (index < getOptionsThatHaveRecords(group.options).length - 1 ? ',' : '') }}
+							{{ getViewModeOptionLabel(group, option, index) }}
 						</span>
 					</div>
 				</div>
@@ -493,6 +493,12 @@
 					if (this.recordExistsForId(option[this.optionID])) newOptions.push(option);
 				});
 				return newOptions;
+			},
+			getViewModeOptionLabel (group, option, index) {
+				let label = option[this.optionLabel || this.optionID];
+				if (index < this.getOptionsThatHaveRecords(group.options).length - 1) label += ',';
+
+				return label;
 			},
 			// Generates a record from an option, to be stored in the component's
 			// records array

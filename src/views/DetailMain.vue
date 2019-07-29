@@ -652,7 +652,6 @@
 									confirmButtonText: 'OK',
 									cancelButtonText: 'Duplicate this ' + this.schema.title.toLowerCase()
 								}).then((result) => {
-									console.log(result);
 									if (result.value) {
 										// They clicked OK
 										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);

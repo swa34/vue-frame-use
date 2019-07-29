@@ -396,7 +396,6 @@
 			},
 			getFieldOptionLabel (optionID) {
 				const index = this.fieldOptions.map(o => o.ID).indexOf(optionID);
-				console.log(index);
 				if (index !== -1) return this.fieldOptions[index].LABEL;
 				return '';
 			},
