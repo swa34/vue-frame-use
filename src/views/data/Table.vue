@@ -341,9 +341,11 @@
 				}
 			},
 			columnShouldBeEditable (column) {
-				// Column is only editable if the fieldsToEdit array exists and contains
-				// the column's name
-				return (!this.identifier.value || this.identifier.key !== column.columnName) && (!this.fieldsToEdit || this.fieldsToEdit.indexOf(column.columnName) !== -1);
+				// Rules for column to be editable:
+				// - No identifier specified OR Column is not identifier column
+				// - No custom list of fields to edit OR column is present in custom
+				// list
+				return (!this.identifier.value || this.identifier.key !== column.columnName) && (this.fieldsToEdit.length === 0 || this.fieldsToEdit.indexOf(column.columnName) !== -1);
 			},
 			deleteRecord (record) {
 				const index = this.records.indexOf(record);
