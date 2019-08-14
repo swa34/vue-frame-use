@@ -15,7 +15,7 @@
 					<th v-for="column in columnsToBeDisplayed" :key="column.columnName">
 						{{ column.prettyName || getPrettyColumnName(column.columnName) }}
 					</th>
-					<th v-if="(allowEdit || allowInsert) && !schema.disableUpdate && !schema.disableInsert">
+					<th v-if="mode === 'edit' && (allowEdit || allowInsert) && !schema.disableUpdate && !schema.disableInsert">
 						<!--
 							No content here, just need empty space for the 'save field' column
 						-->
@@ -205,9 +205,7 @@
 		computed: {
 			allowEdit () { return this.mode === 'edit'; },
 			columnsToBeDisplayed () {
-				return this.schema.columns.filter(column => {
-					return this.columnShouldBeDisplayed(column);
-				});
+				return this.schema.columns.filter(column => this.columnShouldBeDisplayed(column));
 			},
 			duplication () {
 				return this.$store.state.duplication;
@@ -337,7 +335,7 @@
 					// is required, or if fields to display were passed in and the column
 					// is one of those fields.
 					if (column.automated) return false;
-					return !this.fieldsToDisplay || (this.allowInsert && column.required) || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
+					return !this.fieldsToDisplay || this.fieldsToDisplay.length < 1 || (this.allowInsert && column.required) || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
 				}
 			},
 			columnShouldBeEditable (column) {

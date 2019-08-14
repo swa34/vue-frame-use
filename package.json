@@ -1,6 +1,6 @@
 {
   "name": "vue-application-framework",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "",
   "private": true,
   "sideEffects": [
@@ -54,7 +54,7 @@
     "vue-sweetalert2": "^2.1.1",
     "vue-template-compiler": "^2.6.10",
     "vuex": "^3.1.1",
-    "webpack": "^4.39.1",
+    "webpack": "^4.39.2",
     "webpack-cli": "^3.3.6",
     "webpack-merge": "^4.2.1",
     "webpack-visualizer-plugin": "^0.1.11"
