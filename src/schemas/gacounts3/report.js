@@ -151,10 +151,12 @@ const demographicsTest = (records, schema) => {
 };
 
 // Function to determine if a county id is required
-const countyIdRequired = (val) => {
+const countyIdRequired = val => {
 	const activityLocationMap = caesCache.data.gc3.activityLocationType.map(location => location.ID);
 	const activityLocationIndex = activityLocationMap.indexOf(Number(val));
-	return activityLocationIndex !== -1 && !caesCache.data.gc3.activityLocationType[activityLocationIndex].USES_ALTERNATE_TEXT;
+	if (activityLocationIndex === -1) return false;
+	const activityLocationType = caesCache.data.gc3.activityLocationType[activityLocationIndex];
+	return Boolean(activityLocationType.USES_COUNTY_ID);
 };
 
 // And finally define the schema itself
@@ -285,7 +287,11 @@ const schema = {
 			constraint: {
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
-				values: caesCache.data.gc3.activityLocationType
+				values: caesCache.data.gc3.activityLocationType.sort((a, b) => {
+					if (a.LABEL > b.LABEL) return 1;
+					else if (a.LABEL < b.LABEL) return -1;
+					else return 0;
+				})
 			},
 			grouping: {
 				section: 'Main Report Information',
