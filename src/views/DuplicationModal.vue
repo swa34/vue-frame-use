@@ -23,7 +23,7 @@
 				</ul>
 			</div>
 			<div class="button-container">
-				<button type="button" @:click="processDuplicationOptions">
+				<button type="button" @click="processDuplicationOptions">
 					Go
 				</button>
 			</div>
