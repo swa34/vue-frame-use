@@ -74,7 +74,7 @@
 							</p>
 						</td>
 						<td>
-							<select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
+							<!-- <select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
 								<option
 									v-for="option in responsiblePartyOptions"
 									:key="option.ID"
@@ -82,7 +82,18 @@
 								>
 									{{ option.NAME }}
 								</option>
-							</select>
+							</select> -->
+							<div v-if="mode === 'edit'" >
+								<label class="radio" v-for="option in responsiblePartyOptions" :key="option.ID">
+									<input			
+										v-model="record[columnGroup.partyColumn.columnName]"
+										type="radio"
+										:value="option.ID"
+										:disabled="mode === 'view'"
+									/>
+									<span>{{ option.NAME }}</span>
+								</label>
+							</div>
 							<span v-else>
 								{{ getResponsiblePartyNameFromId(record[columnGroup.partyColumn.columnName]) }}
 							</span>
@@ -233,4 +244,7 @@
 		span { flex-grow: 1; }
 	}
 	em.required-asterisk { color: #6c3129; }
+	table tbody tr {
+		td:nth-child(2) {width: 50%;}
+	}
 </style>

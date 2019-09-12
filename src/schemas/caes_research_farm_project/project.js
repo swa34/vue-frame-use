@@ -305,17 +305,9 @@ const schema = {
 		},
 		{
 			columnName: 'COMMODITY_OTHER',
-			prettyName: 'Other Commodity',
+			prettyName: 'Other/Secondary Commodity',
 			type: 'nvarchar',
-			required: true,
-			depends: {
-				column: 'COMMODITY_ID',
-				test (val) {
-					const otherCommodityIndex = caesCache.data.crfp.commodity.map(c => c.LABEL).indexOf('Other');
-					if (otherCommodityIndex < 0) return false;
-					return val === caesCache.data.crfp.commodity[otherCommodityIndex].ID;
-				}
-			},
+			required: false,
 			grouping: {
 				section: 'General Information',
 				order: 3
@@ -340,7 +332,7 @@ const schema = {
 		},
 		{
 			columnName: 'PROJECT_AREA',
-			prettyName: 'Area to Which the Project Pertains',
+			prettyName: 'Primary Area to Which the Project Pertains',
 			type: 'nvarchar',
 			inputType: 'radio',
 			required: true,

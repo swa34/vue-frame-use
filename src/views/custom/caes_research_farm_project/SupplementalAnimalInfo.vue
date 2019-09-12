@@ -36,13 +36,34 @@
 				<p>
 					<label>
 						<h4>{{ columns.SOURCE.prettyName }}</h4>
-						<input v-model="record.SOURCE" type="text" />
+						<!-- <input v-model="record.SOURCE" type="text" /> -->
+						<select v-model="tempSource">
+							<option value="">(Select One)</option>
+							<option>Resident Herd</option>
+							<option>Other Station</option>
+							<option>Outside Source</option>
+						</select>
+					</label>
+					<label v-if="showSourceInput">
+						<!-- <h5>Please Describe Outside Source</h5> -->
+						<input v-model="record.SOURCE" type="text" placeholder="Please describe outside source..." />
 					</label>
 				</p>
 				<p>
 					<label>
 						<h4>{{ columns.FINAL_DISPOSITION.prettyName }}</h4>
-						<input v-model="record.FINAL_DISPOSITION" type="text" />
+						<!-- <input v-model="record.FINAL_DISPOSITION" type="text" /> -->
+						<select v-model="tempDisposition">
+							<option value="">(Select One)</option>
+							<option>Return to Resident Herd</option>
+							<option>Sell</option>
+							<option>Harvest</option>
+							<option>Other</option>
+						</select>
+					</label>
+					<label v-if="showDispositionInput">
+						<!-- <h5>Please Describe Other Disposition</h5> -->
+						<input v-model="record.FINAL_DISPOSITION" type="text" placeholder="Please describe other disposition..." />
 					</label>
 				</p>
 			</div>
@@ -126,7 +147,7 @@
 							</p>
 						</td>
 						<td>
-							<select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
+							<!-- <select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
 								<option
 									v-for="option in responsiblePartyOptions"
 									:key="option.ID"
@@ -134,7 +155,18 @@
 								>
 									{{ option.NAME }}
 								</option>
-							</select>
+							</select> -->
+							<div v-if="mode === 'edit'" >
+								<label class="radio" v-for="option in responsiblePartyOptions" :key="option.ID">
+									<input			
+										v-model="record[columnGroup.partyColumn.columnName]"
+										type="radio"
+										:value="option.ID"
+										:disabled="mode === 'view'"
+									/>
+									<span>{{ option.NAME }}</span>
+								</label>
+							</div>
 							<span v-else>
 								{{ getResponiblePartyNameFromId(record[columnGroup.partyColumn.columnName]) }}
 							</span>
@@ -246,7 +278,11 @@
 					return output;
 				}, {}),
 				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
-				schema: supplementalAnimalInfoSchema
+				schema: supplementalAnimalInfoSchema,
+				showSourceInput: false,
+				showDispositionInput: false,
+				tempSource: '',
+				tempDisposition: ''
 			};
 		},
 		computed: {
@@ -408,10 +444,38 @@
 				const index = this.record.importantDates.map(d => JSON.stringify(d)).indexOf(JSON.stringify(importantDate));
 				this.record.importantDates.splice(index, 1);
 			}
+		},
+		watch: {
+			tempSource (val) {
+				if (val !== 'Outside Source') {
+					this.showSourceInput = false;
+					this.record.SOURCE = val;
+				} else {
+					this.showSourceInput = true;
+					this.record.SOURCE = '';
+				}
+			},
+			tempDisposition (val) {
+				if (val !== 'Other') {
+					this.showDispositionInput = false;
+					this.record.FINAL_DISPOSITION = val;
+				} else {
+					this.showDispositionInput = true;
+					this.record.FINAL_DISPOSITION = '';
+				}
+			}
 		}
 	};
 </script>
 
 <style lang="scss" scoped>
+	label.checkbox, label.radio {
+		display: flex;
+		input { margin-right: 1rem; }
+		span { flex-grow: 1; }
+	}
 	em.required-asterisk { color: #6c3129; }
+	table tbody tr {
+		td:nth-child(2) {width: 50%;}
+	}
 </style>
