@@ -83,9 +83,9 @@
 									{{ option.NAME }}
 								</option>
 							</select> -->
-							<div v-if="mode === 'edit'" >
-								<label class="radio" v-for="option in responsiblePartyOptions" :key="option.ID">
-									<input			
+							<div v-if="mode === 'edit'">
+								<label v-for="option in responsiblePartyOptions" :key="option.ID" class="radio">
+									<input
 										v-model="record[columnGroup.partyColumn.columnName]"
 										type="radio"
 										:value="option.ID"
@@ -101,6 +101,16 @@
 					</tr>
 				</tbody>
 			</table>
+		</div>
+		<div v-if="mode === 'edit'">
+			<label>
+				<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+				<textarea v-model="record.SPECIAL_NEEDS"></textarea>
+			</label>
+		</div>
+		<div v-else>
+			<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+			<p>{{ record.SPECIAL_NEEDS }}</p>
 		</div>
 	</section>
 </template>

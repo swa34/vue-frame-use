@@ -376,16 +376,16 @@ const schema = {
 				order: 2
 			}
 		},
-		{
-			columnName: 'PLAN_OF_WORK',
-			type: 'nvarchar',
-			inputType: 'textarea',
-			required: true,
-			grouping: {
-				section: 'Scientist and Station Responsibilities',
-				order: 1
-			}
-		},
+		// {
+		// 	columnName: 'PLAN_OF_WORK',
+		// 	type: 'nvarchar',
+		// 	inputType: 'textarea',
+		// 	required: true,
+		// 	grouping: {
+		// 		section: 'Scientist and Station Responsibilities',
+		// 		order: 1
+		// 	}
+		// },
 		{
 			columnName: 'TREATMENT_LIST_ATTACHMENT_PATH',
 			prettyName: 'Treatment List',
@@ -460,46 +460,46 @@ const schema = {
 				order: 1
 			}
 		},
-		{
-			columnName: 'FEDERAL_FUNDING_SOURCE',
-			prettyName: 'Federal',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'STATE_FUNDING_SOURCE',
-			prettyName: 'State',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'COMMODITY_FUNDING_SOURCE',
-			prettyName: 'Commodity',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'OTHER_FUNDING_SOURCE',
-			prettyName: 'Other',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
+		// {
+		// 	columnName: 'FEDERAL_FUNDING_SOURCE',
+		// 	prettyName: 'Federal',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
+		// {
+		// 	columnName: 'STATE_FUNDING_SOURCE',
+		// 	prettyName: 'State',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
+		// {
+		// 	columnName: 'COMMODITY_FUNDING_SOURCE',
+		// 	prettyName: 'Commodity',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
+		// {
+		// 	columnName: 'OTHER_FUNDING_SOURCE',
+		// 	prettyName: 'Other',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
 		{
 			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
 			prettyName: 'Financial Support Available for Project',
@@ -872,18 +872,18 @@ const schema = {
 		{
 			title: 'Additional Responsibilities and Funding',
 			order: 4,
-			fieldsets: [
-				{
-					title: 'Specify Funding Agencies',
-					required: true,
-					columns: [
-						'FEDERAL_FUNDING_SOURCE',
-						'STATE_FUNDING_SOURCE',
-						'COMMODITY_FUNDING_SOURCE',
-						'OTHER_FUNDING_SOURCE'
-					]
-				}
-			]
+			// fieldsets: [
+			// 	{
+			// 		title: 'Specify Funding Agencies',
+			// 		required: true,
+			// 		columns: [
+			// 			'FEDERAL_FUNDING_SOURCE',
+			// 			'STATE_FUNDING_SOURCE',
+			// 			'COMMODITY_FUNDING_SOURCE',
+			// 			'OTHER_FUNDING_SOURCE'
+			// 		]
+			// 	}
+			// ]
 		},
 		{
 			title: 'Routing and Approval',

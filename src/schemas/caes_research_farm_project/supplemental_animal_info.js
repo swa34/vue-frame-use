@@ -66,7 +66,7 @@ const supplementalAnimalInfoSchema = {
 		},
 		{
 			columnName: 'SPECIAL_NEEDS',
-			prettyName: 'Special needs necessary to perform project (feed, labor, animals, drugs, equipment, fence construction, will project interfere with or impact the normal breeding season at the farm, etc.)',
+			prettyName: 'Special needs necessary to perform project',
 			type: 'nvarchar'
 		},
 		{

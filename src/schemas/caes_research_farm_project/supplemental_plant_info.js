@@ -247,6 +247,11 @@ const supplementalPlantInfoSchema = {
 				name: 'sales',
 				class: 'party'
 			}
+		},
+		{
+			columnName: 'SPECIAL_NEEDS',
+			prettyName: 'Special needs necessary to perform project',
+			type: 'nvarchar'
 		}
 	]
 };
