@@ -331,6 +331,21 @@ const schema = {
 			customClasses: ['inline']
 		},
 		{
+			columnName: 'SECONDARY_DISCIPLINE_ID',
+			prettyName: 'Other/Secondary Discipline',
+			type: 'int',
+			constraint: {
+				values: caesCache.data.crfp.discipline,
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL'
+			},
+			grouping: {
+				section: 'General Information',
+				order: 4
+			},
+			customClasses: ['inline']
+		},
+		{
 			columnName: 'PROJECT_AREA',
 			prettyName: 'Primary Area to Which the Project Pertains',
 			type: 'nvarchar',
@@ -512,6 +527,16 @@ const schema = {
 				order: 1
 			},
 			customComponent: FinancialSupport
+		},
+		{
+			columnName: 'RESULTS_LOCATION',
+			prettyName: 'Location where results will be published',
+			type: 'nvarchar',
+			grouping: {
+				section: 'Additional Responsibilities and Funding',
+				order: 1
+			},
+			customClasses: ['is-extra-wide']
 		},
 		{
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
@@ -836,7 +861,8 @@ const schema = {
 					columns: [
 						'COMMODITY_ID',
 						'COMMODITY_OTHER',
-						'DISCIPLINE_ID'
+						'DISCIPLINE_ID',
+						'SECONDARY_DISCIPLINE_ID'
 					]
 				}
 			]

@@ -41,7 +41,7 @@ const supplementalPlantInfoSchema = {
 		},
 		{
 			columnName: 'FIELD_NAME',
-			prettyName: 'Experimental field name or designation (will be populated by superintendent at a later time)',
+			prettyName: 'Experimental field name, designation, or building name (will be populated by superintendent at a later time)',
 			type: 'nvarchar'
 		},
 		{

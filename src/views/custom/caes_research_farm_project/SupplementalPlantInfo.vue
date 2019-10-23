@@ -249,7 +249,7 @@
 
 <style lang="scss" scoped>
 	label.checkbox, label.radio {
-		display: flex;
+		display: flex; padding: .25rem 0;
 		input { margin-right: 1rem; }
 		span { flex-grow: 1; }
 	}
