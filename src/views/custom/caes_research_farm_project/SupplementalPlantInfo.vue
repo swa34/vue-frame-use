@@ -33,7 +33,7 @@
 				<p>
 					<label>
 						<h4>{{ columns.FIELD_NAME.prettyName }}</h4>
-						<input v-model="record.FIELD_NAME" type="text" />
+						<input v-model="record.FIELD_NAME" type="text" :disabled="!userIsApprover" />
 					</label>
 				</p>
 			</div>
@@ -147,6 +147,14 @@
 			};
 		},
 		computed: {
+			approvers () {
+				return [
+					this.$store.state.project.STATION_SUPERINTENDENT_PERSONNEL_ID,
+					this.$store.state.project.DEPARTMENT_HEAD_PERSONNEL_ID,
+					this.$store.state.project.FINAL_SITE_APPROVER_PERSONNEL_ID,
+					this.$store.state.project.OFFICE_OF_RESEARCH_PERSONNEL_ID
+				];
+			},
 			duplicateId () {
 				return [
 					'duplicateId',
@@ -194,6 +202,10 @@
 						}
 						return tableGroups;
 					}, []);
+			},
+			userIsApprover () {
+				if (!activeUserId) return false;
+				return this.approvers.indexOf(activeUserId) !== -1;
 			}
 		},
 		mounted () {

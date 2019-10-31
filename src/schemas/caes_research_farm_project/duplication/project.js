@@ -36,15 +36,10 @@ const projectDuplication = {
 				columns: [
 					'PI_PERSONNEL_ID',
 					'PI_FIRST_NAME',
-					'PI_MIDDLE_NAME',
 					'PI_LAST_NAME',
 					'PI_EMAIL',
 					'PI_PHONE',
-					'PI_ADDRESS_1',
-					'PI_ADDRESS_2',
-					'PI_CITY',
-					'PI_STATE',
-					'PI_ZIPCODE',
+					'PI_ORGANIZATION',
 					'PI_DEPARTMENT'
 				]
 			}
@@ -55,15 +50,11 @@ const projectDuplication = {
 				columns: [
 					'SECONDARY_CONTACT_PERSONNEL_ID',
 					'SECONDARY_CONTACT_FIRST_NAME',
-					'SECONDARY_CONTACT_MIDDLE_NAME',
 					'SECONDARY_CONTACT_LAST_NAME',
 					'SECONDARY_CONTACT_EMAIL',
 					'SECONDARY_CONTACT_PHONE',
-					'SECONDARY_CONTACT_ADDRESS_1',
-					'SECONDARY_CONTACT_ADDRESS_2',
-					'SECONDARY_CONTACT_CITY',
-					'SECONDARY_CONTACT_STATE',
-					'SECONDARY_CONTACT_ZIPCODE'
+					'SECONDARY_CONTACT_ORGANIZATION',
+					'SECONDARY_CONTACT_DEPARTMENT'
 				]
 			}
 		},
@@ -72,7 +63,9 @@ const projectDuplication = {
 			areas: {
 				columns: [
 					'COMMODITY_ID',
+					'COMMODITY_OTHER',
 					'DISCIPLINE_ID',
+					'DISCIPLINE_OTHER',
 					'PROJECT_AREA'
 				]
 			}
@@ -86,10 +79,14 @@ const projectDuplication = {
 				]
 			}
 		},
-		'Plan of Work': {
+		'Attachments': {
 			duplicate: true,
 			areas: {
-				columns: ['PLAN_OF_WORK']
+				columns: [
+					'TREATMENT_LIST_ATTACHMENT_PATH',
+					'PLOT_MAP_ATTACHMENT_PATH',
+					'CALENDAR_ATTACHMENT_PATH'
+				]
 			}
 		},
 		'Plant Science Project Information': {
@@ -111,11 +108,8 @@ const projectDuplication = {
 			areas: {
 				columns: [
 					'SAFETY_REQUIREMENTS',
-					'FEDERAL_FUNDING_SOURCE',
-					'STATE_FUNDING_SOURCE',
-					'COMMODITY_FUNDING_SOURCE',
-					'OTHER_FUNDING_SOURCE',
-					'FINANCIAL_SUPPORT_AVAILABLE'
+					'FINANCIAL_SUPPORT_AVAILABLE',
+					'RESULTS_LOCATION'
 				]
 			}
 		}

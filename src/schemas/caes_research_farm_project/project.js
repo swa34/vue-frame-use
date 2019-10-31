@@ -122,9 +122,9 @@ const schema = {
 		},
 		{
 			columnName: 'PI_PERSONNEL_ID',
-			prettyName: 'CAES Principle Investigator',
+			prettyName: 'CAES Principal Investigator',
 			type: 'int',
-			caveat: 'Required.  If not populated, a non-CAES Principle Investigator must be entered.',
+			caveat: 'Required.  If not populated, a non-CAES Principal Investigator must be entered.',
 			constraint: {
 				values: caesCache.data.crfp.principleInvestigators,
 				foreignKey: 'PERSONNEL_ID',
@@ -331,14 +331,10 @@ const schema = {
 			customClasses: ['inline']
 		},
 		{
-			columnName: 'SECONDARY_DISCIPLINE_ID',
+			columnName: 'DISCIPLINE_OTHER',
 			prettyName: 'Other/Secondary Discipline',
-			type: 'int',
-			constraint: {
-				values: caesCache.data.crfp.discipline,
-				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
-			},
+			type: 'nvarchar',
+			required: false,
 			grouping: {
 				section: 'General Information',
 				order: 4
@@ -359,8 +355,8 @@ const schema = {
 				foreignKey: 'name',
 				foreignLabel: 'name',
 				values: [
-					{	name: 'Research' },
-					{ name: 'Extension' },
+					{	name: 'Research (Replicated Treatments)' },
+					{ name: 'Extension (Unreplicated Treatments)' },
 					{ name: 'Teaching' }
 				]
 			}
@@ -823,9 +819,9 @@ const schema = {
 					]
 				},
 				{
-					title: 'Non-CAES Principle Investigator',
+					title: 'Non-CAES Principal Investigator',
 					order: 3,
-					caveat: 'Required if CAES Principle Investigator is not selected.',
+					caveat: 'Required if CAES Principal Investigator is not selected.',
 					columns: [
 						'PI_FIRST_NAME',
 						'PI_LAST_NAME',
@@ -862,7 +858,7 @@ const schema = {
 						'COMMODITY_ID',
 						'COMMODITY_OTHER',
 						'DISCIPLINE_ID',
-						'SECONDARY_DISCIPLINE_ID'
+						'DISCIPLINE_OTHER'
 					]
 				}
 			]

@@ -13,11 +13,11 @@
 				<p>Loading...</p>
 			</div>
 		</div>
-		<p v-if="mode === 'edit' && hasRequiredFields">
+		<h3 v-if="mode === 'edit' && hasRequiredFields">
 			<em>
-				Required fields marked by an <span class="is-red">*</span>
+				<span class="is-red">Required fields marked by an *</span>
 			</em>
-		</p>
+		</h3>
 		<section v-for="section in schema.sections" :key="section.title">
 			<h2 class="head section-heading" @click="toggleSection(section)">
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
