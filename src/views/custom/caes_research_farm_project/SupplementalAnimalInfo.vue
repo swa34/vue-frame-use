@@ -33,16 +33,36 @@
 						<input v-model="record.DESCRIPTION" type="text" />
 					</label>
 				</p>
-				<p>
+				<p class="flex row wrap">
 					<label>
 						<h4>{{ columns.SOURCE.prettyName }}</h4>
-						<input v-model="record.SOURCE" type="text" />
+						<!-- <input v-model="record.SOURCE" type="text" /> -->
+						<select v-model="tempSourceSelection">
+							<option value="">(Select One)</option>
+							<option v-for="source in sourceOptions" :key="source">
+								{{ source }}
+							</option>
+						</select>
+					</label>
+					<label v-if="showSourceInput">
+						<h5>Please Describe Outside Source</h5>
+						<input v-model="tempSourceInput" type="text" />
 					</label>
 				</p>
-				<p>
+				<p class="flex row wrap">
 					<label>
 						<h4>{{ columns.FINAL_DISPOSITION.prettyName }}</h4>
-						<input v-model="record.FINAL_DISPOSITION" type="text" />
+						<!-- <input v-model="record.FINAL_DISPOSITION" type="text" /> -->
+						<select v-model="tempDispositionSelection">
+							<option value="">(Select One)</option>
+							<option v-for="disposition in dispositionOptions" :key="disposition">
+								{{ disposition }}
+							</option>
+						</select>
+					</label>
+					<label v-if="showDispositionInput">
+						<h5>Please Describe Other Disposition</h5>
+						<input v-model="tempDispositionInput" type="text" />
 					</label>
 				</p>
 			</div>
@@ -82,12 +102,6 @@
 						<input v-model="record.FEED_STORAGE_LOCATION" type="text" />
 					</label>
 				</p>
-				<p>
-					<label>
-						<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
-						<textarea v-model="record.SPECIAL_NEEDS"></textarea>
-					</label>
-				</p>
 			</div>
 			<div v-else>
 				<h4>{{ columns.FEEDING_REGIME.prettyName }}</h4>
@@ -96,8 +110,6 @@
 				<p>{{ record.TOTAL_FEED_AMOUNT }}</p>
 				<h4>{{ columns.FEED_STORAGE_LOCATION.prettyName }}</h4>
 				<p>{{ record.FEED_STORAGE_LOCATION }}</p>
-				<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
-				<p>{{ record.SPECIAL_NEEDS }}</p>
 			</div>
 		</div>
 		<div>
@@ -126,7 +138,7 @@
 							</p>
 						</td>
 						<td>
-							<select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
+							<!-- <select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
 								<option
 									v-for="option in responsiblePartyOptions"
 									:key="option.ID"
@@ -134,7 +146,18 @@
 								>
 									{{ option.NAME }}
 								</option>
-							</select>
+							</select> -->
+							<div v-if="mode === 'edit'">
+								<label v-for="option in responsiblePartyOptions" :key="option.ID" class="radio">
+									<input
+										v-model="record[columnGroup.partyColumn.columnName]"
+										type="radio"
+										:value="option.ID"
+										:disabled="mode === 'view'"
+									/>
+									<span>{{ option.NAME }}</span>
+								</label>
+							</div>
 							<span v-else>
 								{{ getResponiblePartyNameFromId(record[columnGroup.partyColumn.columnName]) }}
 							</span>
@@ -142,6 +165,16 @@
 					</tr>
 				</tbody>
 			</table>
+		</div>
+		<div v-if="mode === 'edit'">
+			<label>
+				<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+				<textarea v-model="record.SPECIAL_NEEDS"></textarea>
+			</label>
+		</div>
+		<div v-else>
+			<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+			<p>{{ record.SPECIAL_NEEDS }}</p>
 		</div>
 		<div>
 			<h3>Important Dates</h3>
@@ -233,6 +266,12 @@
 		data () {
 			return {
 				columns: getObjectIndexedByKeyFromArray(supplementalAnimalInfoSchema.columns, 'columnName'),
+				dispositionOptions: [
+					'Return to Resident Herd',
+					'Sell',
+					'Harvest',
+					'Other'
+				],
 				importantDateSchema,
 				localRecord: {
 					...supplementalAnimalInfoSchema.columns.reduce((out, column) => {
@@ -246,7 +285,18 @@
 					return output;
 				}, {}),
 				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
-				schema: supplementalAnimalInfoSchema
+				schema: supplementalAnimalInfoSchema,
+				showSourceInput: false,
+				showDispositionInput: false,
+				sourceOptions: [
+					'Resident Herd',
+					'Other Station',
+					'Outside Source'
+				],
+				tempSourceSelection: '',
+				tempSourceInput: '',
+				tempDispositionSelection: '',
+				tempDispositionInput: ''
 			};
 		},
 		computed: {
@@ -310,6 +360,38 @@
 						}
 					});
 				return tableGroups;
+			}
+		},
+		watch: {
+			tempSourceInput (val) { if (val) this.record.SOURCE = val; },
+			tempSourceSelection (val) {
+				if (val !== 'Outside Source') {
+					this.showSourceInput = false;
+					this.record.SOURCE = val;
+				} else {
+					this.showSourceInput = true;
+					if (this.record.SOURCE && this.sourceOptions.indexOf(this.record.SOURCE) === -1) {
+						this.tempSourceInput = this.record.SOURCE;
+					} else {
+						this.record.SOURCE = val;
+						this.tempSourceInput = '';
+					}
+				}
+			},
+			tempDispositionInput (val) { if (val) this.record.FINAL_DISPOSITION = val; },
+			tempDispositionSelection (val) {
+				if (val !== 'Other') {
+					this.showDispositionInput = false;
+					this.record.FINAL_DISPOSITION = val;
+				} else {
+					this.showDispositionInput = true;
+					if (this.record.FINAL_DISPOSITION && this.dispositionOptions.indexOf(this.record.FINAL_DISPOSITION) === -1) {
+						this.tempDispositionInput = this.record.FINAL_DISPOSITION;
+					} else {
+						this.record.FINAL_DISPOSITION = val;
+						this.tempDispositionInput = '';
+					}
+				}
 			}
 		},
 		mounted () {
@@ -384,6 +466,22 @@
 									if (this.isDuplicate && keysToSkipIfDuplicate.indexOf(key) !== -1) continue;
 									if (animalInfo[key]) this.record[key] = animalInfo[key];
 								}
+								if (animalInfo.SOURCE) {
+									if (this.sourceOptions.indexOf(animalInfo.SOURCE) === -1) {
+										this.tempSourceSelection = 'Outside Source';
+										this.tempSourceInput = animalInfo.SOURCE;
+									} else {
+										this.tempSourceSelection = animalInfo.SOURCE;
+									}
+								}
+								if (animalInfo.FINAL_DISPOSITION) {
+									if (this.dispositionOptions.indexOf(animalInfo.FINAL_DISPOSITION) === -1) {
+										this.tempDispositionSelection = 'Other';
+										this.tempDispositionInput = animalInfo.FINAL_DISPOSITION;
+									} else {
+										this.tempDispositionSelection = animalInfo.FINAL_DISPOSITION;
+									}
+								}
 								getImportantDates(animalInfo.ID);
 							}
 							this.fetched = true;
@@ -413,5 +511,21 @@
 </script>
 
 <style lang="scss" scoped>
+	label.checkbox, label.radio {
+		display: flex; padding: .25rem 0;
+		input { margin-right: 1rem; }
+		span { flex-grow: 1; }
+	}
 	em.required-asterisk { color: #6c3129; }
+	table tbody tr {
+		td:nth-child(2) {width: 50%;}
+	}
+	p.flex.row.wrap {
+		display: flex;
+		flex-wrap: wrap;
+		& > * {
+			margin-right: 1rem;
+			&:last-of-type { margin-right: 0; }
+		}
+	}
 </style>

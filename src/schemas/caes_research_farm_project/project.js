@@ -122,9 +122,9 @@ const schema = {
 		},
 		{
 			columnName: 'PI_PERSONNEL_ID',
-			prettyName: 'CAES Principle Investigator',
+			prettyName: 'CAES Principal Investigator',
 			type: 'int',
-			caveat: 'Required.  If not populated, a non-CAES Principle Investigator must be entered.',
+			caveat: 'Required.  If not populated, a non-CAES Principal Investigator must be entered.',
 			constraint: {
 				values: caesCache.data.crfp.principleInvestigators,
 				foreignKey: 'PERSONNEL_ID',
@@ -305,17 +305,9 @@ const schema = {
 		},
 		{
 			columnName: 'COMMODITY_OTHER',
-			prettyName: 'Other Commodity',
+			prettyName: 'Other/Secondary Commodity',
 			type: 'nvarchar',
-			required: true,
-			depends: {
-				column: 'COMMODITY_ID',
-				test (val) {
-					const otherCommodityIndex = caesCache.data.crfp.commodity.map(c => c.LABEL).indexOf('Other');
-					if (otherCommodityIndex < 0) return false;
-					return val === caesCache.data.crfp.commodity[otherCommodityIndex].ID;
-				}
-			},
+			required: false,
 			grouping: {
 				section: 'General Information',
 				order: 3
@@ -339,8 +331,19 @@ const schema = {
 			customClasses: ['inline']
 		},
 		{
+			columnName: 'DISCIPLINE_OTHER',
+			prettyName: 'Other/Secondary Discipline',
+			type: 'nvarchar',
+			required: false,
+			grouping: {
+				section: 'General Information',
+				order: 4
+			},
+			customClasses: ['inline']
+		},
+		{
 			columnName: 'PROJECT_AREA',
-			prettyName: 'Area to Which the Project Pertains',
+			prettyName: 'Primary Area to Which the Project Pertains',
 			type: 'nvarchar',
 			inputType: 'radio',
 			required: true,
@@ -352,8 +355,8 @@ const schema = {
 				foreignKey: 'name',
 				foreignLabel: 'name',
 				values: [
-					{	name: 'Research' },
-					{ name: 'Extension' },
+					{	name: 'Research (Replicated Treatments)' },
+					{ name: 'Extension (Unreplicated Treatments)' },
 					{ name: 'Teaching' }
 				]
 			}
@@ -384,16 +387,16 @@ const schema = {
 				order: 2
 			}
 		},
-		{
-			columnName: 'PLAN_OF_WORK',
-			type: 'nvarchar',
-			inputType: 'textarea',
-			required: true,
-			grouping: {
-				section: 'Scientist and Station Responsibilities',
-				order: 1
-			}
-		},
+		// {
+		// 	columnName: 'PLAN_OF_WORK',
+		// 	type: 'nvarchar',
+		// 	inputType: 'textarea',
+		// 	required: true,
+		// 	grouping: {
+		// 		section: 'Scientist and Station Responsibilities',
+		// 		order: 1
+		// 	}
+		// },
 		{
 			columnName: 'TREATMENT_LIST_ATTACHMENT_PATH',
 			prettyName: 'Treatment List',
@@ -468,46 +471,46 @@ const schema = {
 				order: 1
 			}
 		},
-		{
-			columnName: 'FEDERAL_FUNDING_SOURCE',
-			prettyName: 'Federal',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'STATE_FUNDING_SOURCE',
-			prettyName: 'State',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'COMMODITY_FUNDING_SOURCE',
-			prettyName: 'Commodity',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
-		{
-			columnName: 'OTHER_FUNDING_SOURCE',
-			prettyName: 'Other',
-			type: 'nvarchar',
-			grouping: {
-				section: 'Additional Responsibilities and Funding',
-				order: 1
-			},
-			customClasses: [ 'inline' ]
-		},
+		// {
+		// 	columnName: 'FEDERAL_FUNDING_SOURCE',
+		// 	prettyName: 'Federal',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
+		// {
+		// 	columnName: 'STATE_FUNDING_SOURCE',
+		// 	prettyName: 'State',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
+		// {
+		// 	columnName: 'COMMODITY_FUNDING_SOURCE',
+		// 	prettyName: 'Commodity',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
+		// {
+		// 	columnName: 'OTHER_FUNDING_SOURCE',
+		// 	prettyName: 'Other',
+		// 	type: 'nvarchar',
+		// 	grouping: {
+		// 		section: 'Additional Responsibilities and Funding',
+		// 		order: 1
+		// 	},
+		// 	customClasses: [ 'inline' ]
+		// },
 		{
 			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
 			prettyName: 'Financial Support Available for Project',
@@ -520,6 +523,16 @@ const schema = {
 				order: 1
 			},
 			customComponent: FinancialSupport
+		},
+		{
+			columnName: 'RESULTS_LOCATION',
+			prettyName: 'Location where results will be published',
+			type: 'nvarchar',
+			grouping: {
+				section: 'Additional Responsibilities and Funding',
+				order: 1
+			},
+			customClasses: ['is-extra-wide']
 		},
 		{
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
@@ -806,9 +819,9 @@ const schema = {
 					]
 				},
 				{
-					title: 'Non-CAES Principle Investigator',
+					title: 'Non-CAES Principal Investigator',
 					order: 3,
-					caveat: 'Required if CAES Principle Investigator is not selected.',
+					caveat: 'Required if CAES Principal Investigator is not selected.',
 					columns: [
 						'PI_FIRST_NAME',
 						'PI_LAST_NAME',
@@ -844,7 +857,8 @@ const schema = {
 					columns: [
 						'COMMODITY_ID',
 						'COMMODITY_OTHER',
-						'DISCIPLINE_ID'
+						'DISCIPLINE_ID',
+						'DISCIPLINE_OTHER'
 					]
 				}
 			]
@@ -880,18 +894,18 @@ const schema = {
 		{
 			title: 'Additional Responsibilities and Funding',
 			order: 4,
-			fieldsets: [
-				{
-					title: 'Specify Funding Agencies',
-					required: true,
-					columns: [
-						'FEDERAL_FUNDING_SOURCE',
-						'STATE_FUNDING_SOURCE',
-						'COMMODITY_FUNDING_SOURCE',
-						'OTHER_FUNDING_SOURCE'
-					]
-				}
-			]
+			// fieldsets: [
+			// 	{
+			// 		title: 'Specify Funding Agencies',
+			// 		required: true,
+			// 		columns: [
+			// 			'FEDERAL_FUNDING_SOURCE',
+			// 			'STATE_FUNDING_SOURCE',
+			// 			'COMMODITY_FUNDING_SOURCE',
+			// 			'OTHER_FUNDING_SOURCE'
+			// 		]
+			// 	}
+			// ]
 		},
 		{
 			title: 'Routing and Approval',

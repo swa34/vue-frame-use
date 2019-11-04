@@ -1,7 +1,7 @@
 <template lang="html">
 	<div>
 		<div class="header">
-			<h1>Research Farm Project</h1>
+			<h1>Research Farm Project Outline</h1>
 			<div :class="`button-container ${mode === 'view' ? 'hide-on-print' : ''}`">
 				<button
 					v-if="!isNewProject && userHasEditRights"
@@ -33,12 +33,12 @@
 			v-if="identifier && identifier.duplicate && !duplication.ready"
 			:duplication-schema="duplicationSchema"
 		/>
-		<p :class="`button-container ${mode === 'view' ? 'hide-on-print' : ''}`">
+		<!-- <p :class="`button-container ${mode === 'view' ? 'hide-on-print' : ''}`">
 			<strong>Research Farm Project Outline and Responsibility</strong>
 			<br />
 			Land requests for spring/summer projects should be made no later than Feb
 			15.  Land requests for fall/winter should be made no later than Aug 1.
-		</p>
+		</p> -->
 		<p :class="`button-container ${mode === 'view' ? 'hide-on-print' : ''}`">
 			Please contact Kelly Eisele at (706) 542-2151 or
 			<a href="mailto:agresch@uga.edu">agresch@uga.edu</a> with any questions.

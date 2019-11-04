@@ -33,7 +33,7 @@
 				<p>
 					<label>
 						<h4>{{ columns.FIELD_NAME.prettyName }}</h4>
-						<input v-model="record.FIELD_NAME" type="text" />
+						<input v-model="record.FIELD_NAME" type="text" :disabled="!userIsApprover" />
 					</label>
 				</p>
 			</div>
@@ -74,7 +74,7 @@
 							</p>
 						</td>
 						<td>
-							<select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
+							<!-- <select v-if="mode === 'edit'" v-model="record[columnGroup.partyColumn.columnName]">
 								<option
 									v-for="option in responsiblePartyOptions"
 									:key="option.ID"
@@ -82,7 +82,18 @@
 								>
 									{{ option.NAME }}
 								</option>
-							</select>
+							</select> -->
+							<div v-if="mode === 'edit'">
+								<label v-for="option in responsiblePartyOptions" :key="option.ID" class="radio">
+									<input
+										v-model="record[columnGroup.partyColumn.columnName]"
+										type="radio"
+										:value="option.ID"
+										:disabled="mode === 'view'"
+									/>
+									<span>{{ option.NAME }}</span>
+								</label>
+							</div>
 							<span v-else>
 								{{ getResponsiblePartyNameFromId(record[columnGroup.partyColumn.columnName]) }}
 							</span>
@@ -90,6 +101,16 @@
 					</tr>
 				</tbody>
 			</table>
+		</div>
+		<div v-if="mode === 'edit'">
+			<label>
+				<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+				<textarea v-model="record.SPECIAL_NEEDS"></textarea>
+			</label>
+		</div>
+		<div v-else>
+			<h4>{{ columns.SPECIAL_NEEDS.prettyName }}</h4>
+			<p>{{ record.SPECIAL_NEEDS }}</p>
 		</div>
 	</section>
 </template>
@@ -126,6 +147,14 @@
 			};
 		},
 		computed: {
+			approvers () {
+				return [
+					this.$store.state.project.STATION_SUPERINTENDENT_PERSONNEL_ID,
+					this.$store.state.project.DEPARTMENT_HEAD_PERSONNEL_ID,
+					this.$store.state.project.FINAL_SITE_APPROVER_PERSONNEL_ID,
+					this.$store.state.project.OFFICE_OF_RESEARCH_PERSONNEL_ID
+				];
+			},
 			duplicateId () {
 				return [
 					'duplicateId',
@@ -173,6 +202,10 @@
 						}
 						return tableGroups;
 					}, []);
+			},
+			userIsApprover () {
+				if (!activeUserId) return false;
+				return this.approvers.indexOf(activeUserId) !== -1;
 			}
 		},
 		mounted () {
@@ -228,9 +261,12 @@
 
 <style lang="scss" scoped>
 	label.checkbox, label.radio {
-		display: flex;
+		display: flex; padding: .25rem 0;
 		input { margin-right: 1rem; }
 		span { flex-grow: 1; }
 	}
 	em.required-asterisk { color: #6c3129; }
+	table tbody tr {
+		td:nth-child(2) {width: 50%;}
+	}
 </style>

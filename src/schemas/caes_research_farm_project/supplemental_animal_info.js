@@ -66,7 +66,7 @@ const supplementalAnimalInfoSchema = {
 		},
 		{
 			columnName: 'SPECIAL_NEEDS',
-			prettyName: 'Special needs necessary to perform project (feed, labor, animals, drugs, equipment, fence construction, will project interfere with or impact the normal breeding season at the farm, etc.)',
+			prettyName: 'Special needs necessary to perform project',
 			type: 'nvarchar'
 		},
 		{
@@ -88,7 +88,7 @@ const supplementalAnimalInfoSchema = {
 		},
 		{
 			columnName: 'FORAGE_TEXT',
-			prettyName: 'Forage Sample Collection',
+			prettyName: 'Forage/Feed Sample Collection',
 			type: 'nvarchar',
 			tableGroup: {
 				name: 'forage',
@@ -105,7 +105,7 @@ const supplementalAnimalInfoSchema = {
 		},
 		{
 			columnName: 'ROTATIONS_TEXT',
-			prettyName: 'Pasture/Paddock Rotations (both timing and the actual act)',
+			prettyName: 'Pasture/Paddock/Pen Rotations (both timing and the actual act)',
 			type: 'nvarchar',
 			tableGroup: {
 				name: 'rotations',
