@@ -258,6 +258,9 @@
 													<span v-if="(field.inputType === 'select' || sqlToHtml(field) === 'select')">
 														{{ getOptionLabel(field.constraint, record[field.columnName]) }}
 													</span>
+													<a v-else-if="field.inputType === 'file'" :href="`${application.attachmentWebPath}${record[field.columnName]}`">
+														{{ record[field.columnName] }}
+													</a>
 													<a v-else-if="field.inputType === 'email'" :href="`mailto:${record[field.columnName]}`">
 														{{ record[field.columnName] }}
 													</a>
