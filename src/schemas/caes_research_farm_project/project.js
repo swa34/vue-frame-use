@@ -773,6 +773,7 @@ const schema = {
 			schema: supplementalPlantInfoSchema,
 			customComponent: SupplementalPlantInfo,
 			localKey: 'ID',
+			customClasses: ['full-width'],
 			// foreignKey: 'PROJECT_ID',
 			associatedColumn: 'PROJECT_ID',
 			// isAssignable: true,
@@ -790,6 +791,7 @@ const schema = {
 			schema: supplementalAnimalInfoSchema,
 			customComponent: SupplementalAnimalInfo,
 			localKey: 'ID',
+			customClasses: ['full-width'],
 			associatedColumn: 'PROJECT_ID',
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
