@@ -63,6 +63,7 @@
 				<button
 					type="button"
 					class="button"
+					:disabled="isSubmissionPending"
 					@click="saveProjectWithoutSubmitting()"
 				>
 					Save Without Status Change
@@ -70,6 +71,7 @@
 				<button
 					type="button"
 					class="button approve"
+					:disabled="isSubmissionPending"
 					@click="submitProject()"
 				>
 					Approve this Project
@@ -77,6 +79,7 @@
 				<button
 					type="button"
 					class="button needs-review"
+					:disabled="isSubmissionPending"
 					@click="submitProjectForReview()"
 				>
 					Project Needs Revision
@@ -84,6 +87,7 @@
 				<button
 					type="button"
 					class="button reject"
+					:disabled="isSubmissionPending"
 					@click="rejectProject()"
 				>
 					Reject this Project
@@ -93,6 +97,7 @@
 				<button
 					type="button"
 					class="button"
+					:disabled="isSubmissionPending"
 					@click="saveProjectWithoutSubmitting()"
 				>
 					Save Without Submitting
@@ -100,6 +105,7 @@
 				<button
 					type="button"
 					class="button submit-for-approval"
+					:disabled="isSubmissionPending"
 					@click="submitProject(true)"
 				>
 					Submit for Approval
@@ -150,6 +156,7 @@
 		data () {
 			return {
 				duplicationSchema: projectDuplicationSchema,
+				isSubmissionPending: false,
 				mode: 'edit',
 				schema: getSortedSchema(schema),
 				statusesIndexedByName
@@ -316,6 +323,7 @@
 				return schemaLessStore;
 			},
 			async rejectProject () {
+				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = this.statusesIndexedByName['Rejected'];
 				let response = await saveProject(projectBlob);
@@ -324,9 +332,11 @@
 					alert.successfulReject(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
 					alert.failedReject(this.schema.title.toLowerCase(), response.MESSAGES);
+					this.isSubmissionPending = false;
 				}
 			},
 			async saveProjectWithoutSubmitting () {
+				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
 				if ((this.isNewProject || this.userIsOriginator || !projectBlob.project.STATUS_ID) && !this.userIsApprover) {
 					const indexOfStatus = caesCache.data.crfp.status.map(s => s.NAME).indexOf('Saved Without Submission');
@@ -346,6 +356,7 @@
 					}
 				} else {
 					alert.failedSave(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
+					this.isSubmissionPending = false;
 				}
 			},
 			setDocumentTitle () {
@@ -360,6 +371,7 @@
 				}
 			},
 			async submitProject (isBeingSubmittedForApproval = false) {
+				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
 				if (isBeingSubmittedForApproval) {
 					projectBlob.project.STATUS_ID = getProjectsNextStatusId(this.$store.state.project, true);
@@ -373,9 +385,11 @@
 					alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
 				} else {
 					alert.failedSubmit(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
+					this.isSubmissionPending = false;
 				}
 			},
 			async submitProjectForReview () {
+				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = getProjectsRevisionStatusId(projectBlob.project);
 				let response = await saveProject(projectBlob);
@@ -384,6 +398,7 @@
 					alert.successfulReturnForReview(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
 					alert.failedReturnForReview(this.schema.title.toLowerCase(), response.MESSAGES);
+					this.isSubmissionPending = false;
 				}
 			},
 			toggleMode () { this.mode === 'edit' ? this.mode = 'view' : this.mode = 'edit'; }
@@ -420,6 +435,10 @@
 				&.submit-for-approval, &.approve { background: #406242; }
 				&.needs-review { background: #f7b538; color: #000; }
 				&.reject, &.delete { background: $red; }
+				&:disabled {
+					background: #757575;
+					cursor: not-allowed;
+				}
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 {
   "name": "vue-application-framework",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "",
   "private": true,
   "sideEffects": [
@@ -36,7 +36,7 @@
     "eslint-plugin-vue": "^6.1.2",
     "fuse.js": "^3.4.6",
     "mini-css-extract-plugin": "^0.9.0",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.13.1",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "postcss-import": "^12.0.1",
     "postcss-loader": "^3.0.0",
