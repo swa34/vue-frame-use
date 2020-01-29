@@ -87,7 +87,7 @@
 					</ul>
 				</div>
 				<!-- Contacts -->
-				<div v-if="ownerContacts.length > 0">
+				<div v-if="reportAssociatedWithContacts">
 					<h4>
 						{{ ownerID === activeUserID ? 'Your' : getPersonnelNameFromID(ownerID) + '\'s' }} Contacts
 						<a class="help-link" @click="$emit('show-help', { helpMessageName: 'CONTACTS_HEADER' })">
@@ -402,6 +402,11 @@
 						label: [personnel.FIRST_NAME, personnel.MIDDLE_NAME, personnel.LAST_NAME].join(' ')
 					};
 				});
+			},
+			reportAssociatedWithContacts () {
+				return caesCache.data.gc3.associationReportTypeContactType
+					.map(assn => assn.REPORT_TYPE_ID)
+					.indexOf(this.reportType) !== -1;
 			},
 			reportContacts () { return this.$store.state.contacts.records; },
 			reportID () { return this.$store.state.report.ID; },

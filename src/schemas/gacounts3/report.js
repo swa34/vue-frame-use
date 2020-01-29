@@ -171,7 +171,10 @@ const schema = {
 	deleteExisting: deleteReport,
 	fetchExisting: getReport,
 	processSubmission: postReportData,
-	cleanUpData: (store) => {
+	// processSubmission: (report, callback) => {
+	// 	console.log(report);
+	// },
+	cleanUpData: store => {
 		// Remove media distribution/production records if report type does not need
 		// them.
 		const selectedReportType = store.reportType.records[0] || null;
@@ -185,12 +188,23 @@ const schema = {
 				if (!reportType.USES_MEDIA_DISTRIBUTION) store.mediaDistributed.records = [];
 			}
 		}
+
 		// Remove county ID if not required
 		if (!countyIdRequired(store.report.ACTIVITY_LOCATION_TYPE_ID)) store.report.COUNTY_ID = null;
+
 		// Sub-Report must only have a local or state issue, not both.
 		const subReport = store.subschemas.subReport.subReport;
 		if (subReport.ISSUE_TYPE === 'local' && subReport.STATE_PLANNED_PROGRAM_ID !== null) subReport.STATE_PLANNED_PROGRAM_ID = null;
 		if (subReport.ISSUE_TYPE === 'state' && subReport.PLANNED_PROGRAM_ID !== null) subReport.PLANNED_PROGRAM_ID = null;
+
+		// Clean up sub-report contacts
+		store.subschemas.subReport.contacts.records = store.subschemas.subReport.contacts.records.filter(contact => {
+			return caesCache.data.gc3.associationReportTypeContactType
+				.filter(assn => store.reportType.records.map(t => t.TYPE_ID).indexOf(assn.REPORT_TYPE_ID) !== -1)
+				.map(assn => assn.CONTACT_TYPE_ID)
+				.indexOf(contact.TYPE_ID) !== -1;
+		});
+
 		return store;
 	},
 	columns: [
