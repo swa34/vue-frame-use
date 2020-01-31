@@ -28,7 +28,7 @@ export const getProjectsNextStatusId = (project, isBeingSubmittedForApproval = f
 		'Rejected': 5
 	}[statusesIndexedById[currentStatus]];
 	const statusMap = caesCache.data.crfp.status.reduce((map, status) => {
-		if (stage < 1 && project.SUPERINTENDENT_PERSONNEL_ID !== null) {
+		if (stage < 1 && project.STATION_SUPERINTENDENT_PERSONNEL_ID !== null) {
 			map[status.ID] = statusesIndexedByName['Pending Superintendent Approval'];
 		} else if (stage < 2 && project.DEPARTMENT_HEAD_PERSONNEL_ID !== null) {
 			map[status.ID] = statusesIndexedByName['Pending Department Head Approval'];

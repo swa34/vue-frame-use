@@ -1,9 +1,16 @@
 /* global swal */
 import { logError } from '~/modules/caesdb';
 
+const red = '#6c3129';
+const blue = '#004e60';
+
+const defaultOptions = { confirmButtonColor: blue };
+const warnOptions = { confirmButtonColor: red, cancelButtonColor: blue };
+
 export default {
 	failedCommentSubmission: (title, messages) => {
 		swal({
+			...defaultOptions,
 			type: 'error',
 			title: 'Oops!',
 			html: `
@@ -19,6 +26,7 @@ export default {
 	},
 	failedDelete: (title, messages) => {
 		swal({
+			...defaultOptions,
 			type: 'error',
 			title: 'Oops!',
 			html: `
@@ -33,6 +41,7 @@ export default {
 	},
 	failedReject: (title, messages) => {
 		swal({
+			...defaultOptions,
 			type: 'error',
 			title: 'Oops!',
 			html: `
@@ -48,6 +57,7 @@ export default {
 	},
 	failedReturnForReview: (title, messages) => {
 		swal({
+			...defaultOptions,
 			type: 'error',
 			title: 'Oops!',
 			html: `
@@ -63,6 +73,7 @@ export default {
 	},
 	failedSave: (title, messages, isNew = true) => {
 		swal({
+			...defaultOptions,
 			type: 'error',
 			title: 'Oops!',
 			html: `
@@ -78,6 +89,7 @@ export default {
 	},
 	failedSubmit: (title, messages, isNew = true) => {
 		swal({
+			...defaultOptions,
 			type: 'error',
 			title: 'Oops!',
 			html: `
@@ -92,10 +104,14 @@ export default {
 		});
 	},
 	successfulChanges: projectId => {
-		swal('Awesome!', 'Your changes have been saved successfully.', 'success')
-			.then(() => {
-				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
-			});
+		swal({
+			...defaultOptions,
+			type: 'success',
+			title: 'Awesome!',
+			text: 'Your changes have been saved successfully'
+		}).then(() => {
+			window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
+		});
 	},
 	successfulCommentSubmission: (title, projectId, action) => {
 		if (['approve', 'returnForReview', 'reject'].indexOf(action) === -1) {
@@ -108,6 +124,7 @@ export default {
 			reject: 'marked as rejected'
 		};
 		swal({
+			...defaultOptions,
 			type: 'success',
 			title: 'Awesome!',
 			text: `Your comments have been submitted successfully, and the ${title} has been ${actionText[action]}`
@@ -115,6 +132,7 @@ export default {
 	},
 	successfulDelete: title => {
 		swal({
+			...defaultOptions,
 			type: 'success',
 			title: 'Awesome!',
 			text: `You have successfully deleted this ${title}.`,
@@ -125,6 +143,7 @@ export default {
 	},
 	successfulReject: (title, projectId) => {
 		swal({
+			...defaultOptions,
 			type: 'success',
 			title: 'Awesome!',
 			text: `You have successfully rejected this ${title}.`,
@@ -138,6 +157,7 @@ export default {
 	},
 	successfulReturnForReview: (title, projectId) => {
 		swal({
+			...defaultOptions,
 			type: 'success',
 			title: 'Awesome!',
 			text: `This ${title} has been successfully returned to the PI for review.`,
@@ -151,6 +171,7 @@ export default {
 	},
 	successfulSave: (title, projectId) => {
 		swal({
+			...defaultOptions,
 			type: 'success',
 			title: 'Awesome!',
 			text: `Your ${title} has been saved successfully.`,
@@ -170,6 +191,7 @@ export default {
 			}
 		};
 		swal({
+			...defaultOptions,
 			type: 'success',
 			title: messages.success.title,
 			text: messages.success.successfulSubmit[submitter],
