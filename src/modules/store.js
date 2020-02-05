@@ -1,5 +1,6 @@
 // Pull in required modules
 import { stringFormats } from '~/modules/utilities';
+import Cookies from 'js-cookie';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
@@ -67,6 +68,22 @@ const getStoreConfig = (schema, isNew = false) => {
 					columns: {},
 					associations: {},
 					subschemas: {}
+				}
+			},
+			preferences: {
+				namespaced: true,
+				state: {
+					showNotificationsForChanges: Cookies.get('showNotificationsForChanges') ? JSON.parse(Cookies.get('showNotificationsForChanges')) : true
+				},
+				mutations: {
+					hideNotifications (state) {
+						state.showNotificationsForChanges = false;
+						Cookies.set('showNotificationsForChanges', false);
+					},
+					showNotifications (state) {
+						state.showNotificationsForChanges = true;
+						Cookies.set('showNotificationsForChanges', true);
+					}
 				}
 			},
 			[schemaCamelTitle]: {

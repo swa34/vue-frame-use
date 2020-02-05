@@ -193,7 +193,8 @@
 				return this.options.filter(o => {
 					return this.computedRecord && this.computedRecord[this.associatedColumn] === o[this.optionID];
 				});
-			}
+			},
+			showNotifications () { return this.$store.state.preferences.showNotificationsForChanges; }
 		},
 		watch: {
 			// computedRecord (val) {
@@ -333,8 +334,17 @@
 				});
 			},
 			notifyOfChanges () {
+				if (!this.showNotifications) return;
 				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {
-					notify.log(constructNotificationMessage(this.title, this.affects.titles));
+					const content = constructNotificationMessage(this.title, this.affects.titles);
+					const notification = notify.log(content);
+					notification.addEventListener('click', e => {
+						if (!e.target.matches('.notify-button.hide-notifications')) return;
+						this.$store.commit('preferences/hideNotifications');
+						Array.from(notification.parentNode.children).forEach(el => {
+							el.parentNode.removeChild(el);
+						});
+					});
 				}
 				++this.changeCount;
 			}

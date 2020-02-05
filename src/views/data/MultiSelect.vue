@@ -208,6 +208,7 @@
 				get () { return this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched; },
 				set (val) { this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].fetched = val; }
 			},
+			showNotifications() { return this.$store.state.preferences.showNotificationsForChanges; },
 			// Records is used to hold the checked options
 			records: {
 				get () {
@@ -545,8 +546,17 @@
 				return this.records.map(r => r[this.associatedColumn]).indexOf(id) !== -1;
 			},
 			notifyOfChanges () {
+				if (!this.showNotifications) return;
 				if (this.affects && (this.affects.showAlways || this.changeCount < 1)) {
-					notify.log(constructNotificationMessage(this.title, this.affects.titles));
+					const notification = notify.log(constructNotificationMessage(this.title, this.affects.titles));
+					notification.addEventListener('click', e => {
+						if (!e.target.matches('.notify-button.hide-notifications')) return;
+						this.$store.commit('preferences/hideNotifications');
+						Array.from(notification.parentNode.children).forEach(el => {
+							el.parentNode.removeChild(el);
+						});
+					});
+
 				}
 				++this.changeCount;
 			}

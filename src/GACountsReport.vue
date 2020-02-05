@@ -385,6 +385,16 @@
 </script>
 
 <style lang="scss">
+	button.notify-button {
+		color: inherit;
+		background: rgba(0,0,0,0.1);
+		text-align: left;
+		padding: .5rem;
+		font-size: 1rem;
+		margin-bottom: 0;
+		margin-top: 1rem;
+		&:hover { background: rgba(0,0,0,0.2); }
+	}
 	table tfoot td {
 		color: #fff;
 		background-color: lighten(#545959, 20%);

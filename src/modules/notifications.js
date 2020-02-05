@@ -22,7 +22,15 @@ const constructNotificationMessage = (name, titles) => {
 			}
 		});
 	}
-	return before + middle + after;
+	return `
+		${before}
+		${middle}
+		${after}
+		<br />
+		<button type="button" class="notify-button hide-notifications">
+			Don't show me these again
+		</button>
+	`.trim();
 };
 
 export {
