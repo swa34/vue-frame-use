@@ -526,7 +526,7 @@ const schema = {
 		},
 		{
 			columnName: 'RESULTS_LOCATION',
-			prettyName: 'Location where results will be published',
+			prettyName: 'Location/site where superintendent can access results',
 			type: 'nvarchar',
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
