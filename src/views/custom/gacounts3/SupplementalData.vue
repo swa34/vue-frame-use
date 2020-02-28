@@ -84,12 +84,6 @@
 		<p v-else>
 			(There are no supplemental data fields available for reports of this type.)
 		</p>
-		<!-- <p v-if="!forSubReport">
-			This set of supplemental data fields is for data pertaining to those reported activities that you were personally involved in.
-		</p>
-		<p v-else>
-			This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.
-		</p> -->
 	</div>
 </template>
 
@@ -423,6 +417,16 @@
 				return fieldType.LABEL === 'Header Field';
 			},
 			populateRecords () {
+				const defaults = [
+					{ label: 'Number of Sessions (This is not a multiplier. Please use combined totals for all supplementary data fields.)', value: 1 }
+				];
+
+				const getDefaultValue = label => {
+					const index = defaults.map(d => d.label).indexOf(label);
+					if (index < 0) return null;
+					return defaults[index].value;
+				};
+
 				// Generates a record from a field, an optional value
 				const generateRecord = (field, value = null) => {
 					return {
@@ -446,7 +450,7 @@
 						const componentRecord = this.records[indexOfFieldInComponentRecords];
 						let fieldValue = componentRecord.FIELD_VALUE;
 
-						if (fieldValue === null && fieldIsUsedByRecordsFetchedFromDB) {
+						if ((fieldValue === null || fieldValue === getDefaultValue(field.REPORT_FIELD_LABEL)) && fieldIsUsedByRecordsFetchedFromDB) {
 							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
 							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
 						}
@@ -463,6 +467,8 @@
 						if (fieldIsUsedByRecordsFetchedFromDB) {
 							const recordFetchedFromDB = this.existingRecords[indexOfFieldInRecordsFetchedFromDB];
 							fieldValue = recordFetchedFromDB[fieldUsesOptionLabel ? 'FIELD_OPTION_LABEL' : 'FIELD_VALUE'];
+						} else if (getDefaultValue(field.REPORT_FIELD_LABEL)) {
+							fieldValue = getDefaultValue(field.REPORT_FIELD_LABEL);
 						}
 						records.push(generateRecord(field, fieldValue));
 					}
