@@ -655,12 +655,12 @@
 									confirmButtonText: 'OK',
 									cancelButtonText: 'Duplicate this ' + this.schema.title.toLowerCase()
 								}).then((result) => {
-									if (result.value) {
-										// They clicked OK
-										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
-									} else if (result.dismiss === swal.DismissReason.cancel) {
+									if (result.dismiss === swal.DismissReason.cancel) {
 										// They clicked duplicate
 										window.location.assign(window.location + '&duplicateID=' + data.REPORT_ID);
+									} else {
+										// Send them to the report
+										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
 									}
 								});
 							} else {
