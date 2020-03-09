@@ -889,7 +889,8 @@ const schema = {
 					columns: [
 						'INVOLVES_PLANTS',
 						'INVOLVES_ANIMALS'
-					]
+					],
+					required: true
 				}
 			]
 		},
