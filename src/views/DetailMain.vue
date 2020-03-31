@@ -101,6 +101,9 @@
 												<em class="is-small">(Not yet uploaded)</em>
 											</div>
 										</div>
+										<span v-else-if="area.data.type === 'bit'">
+											{{ record[area.data.columnName] ? 'Yes' : 'No' }}
+										</span>
 										<span v-else>
 											{{ record[area.data.columnName] }}
 										</span>

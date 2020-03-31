@@ -361,13 +361,25 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'DONE_FULLY_AT_A_DISTANCE',
+			prettyName: 'Delivered Fully at a Distance',
+			description: 'Example: presentations made via Video Conferencing, Webinars, Facebook Live, etc.',
+			type: 'bit',
+			required: true,
+			default: false,
+			grouping: {
+				section: 'Main Report Information',
+				order: 9
+			}
+		},
+		{
 			columnName: 'DATE_BEGIN',
 			prettyName: 'Begin Date',
 			type: 'datetime',
 			required: true,
 			grouping: {
 				section: 'Main Report Information',
-				order: 9
+				order: 10
 			},
 			validate (store) {
 				const startDate = store.report.DATE_BEGIN ? new Date(store.report.DATE_BEGIN) : null;
@@ -393,7 +405,7 @@ const schema = {
 			description: 'If left blank, end date will be the same as the begin date.',
 			grouping: {
 				section: 'Main Report Information',
-				order: 10
+				order: 11
 			},
 			validate (store) {
 				if (store.report.DATE_END) {
@@ -417,7 +429,7 @@ const schema = {
 			automated: true,
 			grouping: {
 				section: 'Main Report Information',
-				order: 11
+				order: 12
 			}
 		},
 		{
@@ -427,7 +439,7 @@ const schema = {
 			automated: true,
 			grouping: {
 				section: 'Main Report Information',
-				order: 12
+				order: 13
 			}
 		}
 	],

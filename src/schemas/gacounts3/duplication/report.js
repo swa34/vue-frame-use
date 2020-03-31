@@ -17,7 +17,8 @@ const reportDuplication = {
 					'SCOPE_ID',
 					'ACTIVITY_LOCATION_TYPE_ID',
 					'COUNTY_ID',
-					'ACTIVITY_LOCATION_ALTERNATE_TEXT'
+					'ACTIVITY_LOCATION_ALTERNATE_TEXT',
+					'DONE_FULLY_AT_A_DISTANCE'
 				]
 			}
 		},
