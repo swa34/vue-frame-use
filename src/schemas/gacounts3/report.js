@@ -3,6 +3,13 @@
 /* global caesCache */
 
 // Pull in required modules
+import { ccdAssociationKeywordTopicCriteriaStructure } from '~/criteriaStructures/caes_central_database';
+import FourHImportComponent from '~/views/custom/gacounts3/FourHImport';
+import MediaProducedComponent from '~/views/custom/gacounts3/MediaProduced';
+import RADIO_OPTIONS_BOOLEAN from '~/globals/radio-options-boolean';
+import SubReportCollaborators from '~/views/custom/gacounts3/SubReportCollaborators';
+import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForReport';
+import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
 import {
 	associationReportFieldSchema,
 	associationReportKeywordSchema,
@@ -10,8 +17,8 @@ import {
 	associationReportTopicSchema,
 	associationReportTypeSchema,
 	ethnicDemographicSchema,
-	mediaProductionSchema,
 	mediaDistributedSchema,
+	mediaProductionSchema,
 	mediaReviewSchema,
 	racialDemographicSchema,
 	reportContactSchema,
@@ -20,13 +27,6 @@ import {
 	subReportSchema,
 	targetAudienceSchema
 } from '~/schemas/gacounts3';
-import {
-	ccdAssociationKeywordTopicCriteriaStructure
-} from '~/criteriaStructures/caes_central_database';
-import {
-	gc3AssociationReportTypeContactTypeCriteriaStructure,
-	gc3TargetAudienceCriteriaStructure
-} from '~/criteriaStructures/gacounts3';
 import {
 	deleteReport,
 	getAssociationKeywordTopic,
@@ -37,11 +37,10 @@ import {
 	getReport,
 	postReportData
 } from '~/modules/caesdb/gacounts3';
-import FourHImportComponent from '~/views/custom/gacounts3/FourHImport';
-import MediaProducedComponent from '~/views/custom/gacounts3/MediaProduced';
-import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
-import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForReport';
-import SubReportCollaborators from '~/views/custom/gacounts3/SubReportCollaborators';
+import {
+	gc3AssociationReportTypeContactTypeCriteriaStructure,
+	gc3TargetAudienceCriteriaStructure
+} from '~/criteriaStructures/gacounts3';
 
 // Adjust the racial demographic schema to suit our needs
 const altRacialDemographicSchema = Object.assign({}, racialDemographicSchema);
@@ -352,6 +351,7 @@ const schema = {
 				test (val) {
 					const activityLocationMap = caesCache.data.gc3.activityLocationType.map(location => location.ID);
 					const activityLocationIndex = activityLocationMap.indexOf(Number(val));
+
 					return activityLocationIndex !== -1 && caesCache.data.gc3.activityLocationType[activityLocationIndex].USES_ALTERNATE_TEXT;
 				}
 			},
@@ -365,8 +365,10 @@ const schema = {
 			prettyName: 'Delivered Fully at a Distance',
 			description: 'Example: presentations made via Video Conferencing, Webinars, Facebook Live, etc.',
 			type: 'bit',
+			inputType: 'radio',
 			required: true,
 			default: false,
+			constraint: { ...RADIO_OPTIONS_BOOLEAN },
 			grouping: {
 				section: 'Main Report Information',
 				order: 9
