@@ -2,7 +2,9 @@
 	<div>
 		<div class="header">
 			<h1>Research Farm Project Outline</h1>
+			<!-- Buttons at the top of the page -->
 			<div :class="`button-container ${mode === 'view' ? 'hide-on-print' : ''}`">
+				<!-- Edit Button -->
 				<button
 					v-if="!isNewProject && userHasEditRights"
 					type="button"
@@ -11,6 +13,7 @@
 				>
 					{{ mode === 'edit' ? 'View' : 'Edit' }}
 				</button>
+				<!-- Duplication Button -->
 				<button
 					v-if="!isNewProject"
 					type="button"
@@ -19,6 +22,7 @@
 				>
 					Copy
 				</button>
+				<!-- Delete Button -->
 				<button
 					v-if="!isNewProject && userIsAdmin"
 					type="button"
@@ -64,41 +68,43 @@
 					type="button"
 					class="button"
 					:disabled="isSubmissionPending"
-					@click="saveProjectWithoutSubmitting()"
+					@click="saveProjectWithoutSubmitting"
 				>
-					Save Without Status Change
+					{{ projectIsApproved ? "Save" : "Save Without Status Change" }}
 				</button>
-				<button
-					type="button"
-					class="button approve"
-					:disabled="isSubmissionPending"
-					@click="submitProject()"
-				>
-					Approve this Project
-				</button>
-				<button
-					type="button"
-					class="button needs-review"
-					:disabled="isSubmissionPending"
-					@click="submitProjectForReview()"
-				>
-					Project Needs Revision
-				</button>
-				<button
-					type="button"
-					class="button reject"
-					:disabled="isSubmissionPending"
-					@click="rejectProject()"
-				>
-					Reject this Project
-				</button>
+				<div v-if="!projectIsApproved">
+					<button
+						type="button"
+						class="approve button"
+						:disabled="isSubmissionPending"
+						@click="submitProject"
+					>
+						Approve this Project
+					</button>
+					<button
+						type="button"
+						class="button needs-review"
+						:disabled="isSubmissionPending"
+						@click="submitProjectForReview"
+					>
+						Project Needs Revision
+					</button>
+					<button
+						type="button"
+						class="button reject"
+						:disabled="isSubmissionPending"
+						@click="rejectProject"
+					>
+						Reject this Project
+					</button>
+				</div>
 			</div>
 			<div v-else-if="isNewProject || userIsOriginator || (savedWithoutSubmit && userIsAdmin)" class="button-container">
 				<button
 					type="button"
 					class="button"
 					:disabled="isSubmissionPending"
-					@click="saveProjectWithoutSubmitting()"
+					@click="saveProjectWithoutSubmitting"
 				>
 					Save Without Submitting
 				</button>
@@ -202,6 +208,17 @@
 			},
 			isDuplicatedProject () { return this.duplicateId !== null && this.duplicateId !== false; },
 			isNewProject () { return url.getParam('new') !== null || url.getParam('NEW') !== null; },
+			projectIsApproved () {
+				try {
+					const { data: { crfp: { status: statuses } } } = caesCache;
+					const index = statuses.map(({ ID }) => ID).indexOf(this.$store.state.project.STATUS_ID);
+					const { [index]: currentStatus } = statuses;
+
+					return currentStatus.NAME === 'Approved';
+				} catch (err) {
+					return false;
+				}
+			},
 			projectsNextStatusId () { return getProjectsNextStatusId(this.$store.state.project); },
 			savedWithoutSubmit () {
 				if (!this.STATUS_ID) return false;
@@ -215,7 +232,9 @@
 				if (this.userIsOriginator) return true;
 				if (this.userIsPi) return true;
 				if (Boolean(activeUser.IS_ADMINISTRATOR) === true) return true;
-				return this.userIsCurrentApprover;
+				if (this.userIsCurrentApprover) return true;
+
+				return this.projectIsApproved && this.userIsApprover;
 			},
 			userIsAdmin () { return Boolean(activeUser.IS_ADMINISTRATOR); },
 			userIsApprover () {
