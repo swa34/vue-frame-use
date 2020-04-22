@@ -1,6 +1,6 @@
 <template lang="html">
 	<div class="fuzzy-select">
-		<input v-model="inputText" type="text" @input="debounceInput" />
+		<input v-model="inputText" type="text" />
 		<div class="options">
 			<span
 				v-for="(option, index) in filteredOptions"
@@ -17,11 +17,14 @@
 </template>
 
 <script>
-	import Fuse from 'fuse.js';
 	import debounce from 'debounce';
+	import Fuse from 'fuse.js';
+
+	// Wait 250ms before handling input
+	const DEBOUNCE_TIMEOUT = 250;
 
 	// Object holding keycodes for arrow keys
-	const keyCodes = {
+	const KEY_CODES = {
 		up: 38,
 		down: 40,
 		enter: 13
@@ -36,18 +39,16 @@
 			},
 			value: {
 				default: null,
-				type: [
-					String,
-					Number,
-					Boolean
-				]
+				type: [Boolean, Number, String]
 			}
 		},
 		data () {
+			const { options, value } = this;
 			let selectedOptionLabel = '';
-			this.options.forEach((option) => {
-				if (option.key === this.value) selectedOptionLabel = option.label;
+			options.forEach(({ key, label }) => {
+				if (key === value) selectedOptionLabel = label;
 			});
+
 			return {
 				fuseOptions: {
 					includeMatches: true,
@@ -55,7 +56,7 @@
 					shouldSort: true,
 					threshold: 0.45
 				},
-				filteredOptions: this.options,
+				filteredOptions: options,
 				inputHandling: {
 					selectionIndex: -1
 				},
@@ -63,10 +64,6 @@
 			};
 		},
 		computed: {
-			fuse () {
-				delete this.fuse;
-				return new Fuse(this.options.map(o => o.label), this.fuseOptions);
-			},
 			computedValue: {
 				get () {
 					return this.value;
@@ -83,45 +80,67 @@
 			}
 		},
 		watch: {
+			fuseOptions () { this.resetFuse(); },
+			inputText () {
+				this.debouncedHandleInput();
+			},
 			value () {
 				if (this.value === null) this.inputText = '';
 			}
 		},
 		beforeDestroy () {
-			delete this.fuse;
+			if ('fuse' in this) delete this.fuse;
+		},
+		created () {
+			this.resetFuse();
+			this.debouncedHandleInput = debounce(this.handleInput, DEBOUNCE_TIMEOUT);
 		},
 		mounted () {
-			this.inputEl.onkeydown = (e) => {
-				const keyCode = e.keyCode;
+			this.inputEl.onkeydown = e => {
+				const { up, down, enter } = KEY_CODES;
+				const { keyCode } = e;
 				switch (keyCode) {
-					case keyCodes.up:
+					case up:
 						if (this.inputHandling.selectionIndex > -1) --this.inputHandling.selectionIndex;
 						break;
-					case keyCodes.down:
+					case down:
 						if (this.inputHandling.selectionIndex < this.filteredOptions.length) ++this.inputHandling.selectionIndex;
 						break;
-					case keyCodes.enter:
+					case enter:
 						if (this.inputHandling.selectionIndex >= 0) this.setValue(this.filteredOptions[this.inputHandling.selectionIndex]);
+						break;
+					default:
 						break;
 				}
 			};
 		},
 		methods: {
-			debounceInput: debounce(function (e) {
-				const searchText = e.target.value;
-				let tempArr = [];
-				this.fuse.search(searchText).forEach((result) => {
-					tempArr.push(this.options[result.item]);
-				});
-				this.filteredOptions = tempArr.length > 0 ? tempArr : this.options;
-				this.computedValue = searchText.length > 0 ? this.filteredOptions[0].key : this.computedValue;
-			}, 250),
+			handleInput () {
+				const {
+					fuse,
+					inputText,
+					options
+				} = this;
+
+				const matches = fuse
+					.search(inputText)
+					.map(({ refIndex }) => options[refIndex]);
+
+				if (matches.length > 0) this.filteredOptions = [...matches];
+				else this.filteredOptions = [...options];
+
+				if (inputText.length > 0) this.computedValue = this.filteredOptions[0].key;
+			},
+			resetFuse () {
+				if ('fuse' in this) delete this.fuse;
+				const { fuseOptions, options } = this;
+				this.fuse = new Fuse(options.map(({ label }) => label), fuseOptions);
+			},
 			setSelectionIndex (index) {
 				this.inputHandling.selectionIndex = index;
 			},
 			setValue (option) {
 				this.computedValue = option.key;
-				// this.inputText = option.label;
 				this.unfocusInput();
 				this.inputHandling.selectionIndex = -1;
 				this.$emit('addCollaborator');
