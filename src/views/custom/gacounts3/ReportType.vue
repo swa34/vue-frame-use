@@ -12,7 +12,14 @@
 			:mode="mode"
 		/>
 		<div v-if="selectedReportType" class="details">
-			<h4>{{ selectedReportType.LABEL }}</h4>
+			<h4>
+				<span class="icon-wrapper">
+					<InfoIcon />
+				</span>
+				<span>
+					Report Type: {{ selectedReportType.LABEL }}
+				</span>
+			</h4>
 			<p>
 				Informal educational programming.  This may include field days, tours,
 				and contests.  The list is almost endless... these are activities that
@@ -41,12 +48,13 @@
 	/* global caesCache */
 	import { DataRadio } from '~/views/data';
 	import { getSortedSchema } from '~/modules/schemaTools';
+	import { InfoIcon } from 'vue-feather-icons';
 	import reportSchema from '~/schemas/gacounts3/report';
 	import { singleItem } from '@gabegabegabe/utils/dist/array/reducers';
 
 	export default {
 		name: 'ReportType',
-		components: { DataRadio },
+		components: { DataRadio, InfoIcon },
 		data () {
 			const area = getSortedSchema(reportSchema)
 				.sections
@@ -87,7 +95,30 @@
 <style lang="scss" scoped>
 	div.two-column {
 		display: flex;
+		align-items: flex-start;
 		& > div { flex-basis: 33%; }
-		div.details { flex-grow: 1; }
+		div.details {
+			background-color: #87bcde;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+			flex-grow: 1;
+			margin-top: 3rem;
+			h4 {
+				background-color: rgba(0,0,0,.3);
+				color: #fff;
+				margin-top: 0;
+				padding: 1rem;
+				span {
+					font-size: 1.2rem;
+					&.icon-wrapper {
+						margin-right: 0.5rem;
+						svg { vertical-align: bottom; }
+					}
+				}
+			}
+			p {
+				&, span, strong { font-size: 1rem; }
+				padding: 0 1rem;
+			}
+		}
 	}
 </style>
