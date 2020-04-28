@@ -193,7 +193,10 @@
 		data () {
 			let newRecord = {};
 			this.schema.columns.forEach((column) => {
-				newRecord[column.columnName] = !this.identifier.duplicate && this.identifier.key && this.identifier.value && this.identifier.key === column.columnName ? this.identifier.value : column.default || null;
+				const isIdentifierColumn = !this.identifier.duplicate && this.identifier.key && this.identifier.value && this.identifier.key === column.columnName;
+				if (isIdentifierColumn) newRecord[column.columnName] = this.identifier.value;
+				else if (typeof column.default === 'undefined') newRecord[column.columnName] = null;
+				else newRecord[column.columnName] = column.default;
 			});
 			return {
 				localRecords: [],

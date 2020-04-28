@@ -1,15 +1,18 @@
 /* global activeUser */
 /* global actualUser */
 /* global caesCache */
+/* global swal */
 
 // Pull in required modules
 import { ccdAssociationKeywordTopicCriteriaStructure } from '~/criteriaStructures/caes_central_database';
 import FourHImportComponent from '~/views/custom/gacounts3/FourHImport';
 import MediaProducedComponent from '~/views/custom/gacounts3/MediaProduced';
 import RADIO_OPTIONS_BOOLEAN from '~/globals/radio-options-boolean';
+import { singleItem } from '@gabegabegabe/utils/dist/array/reducers';
 import SubReportCollaborators from '~/views/custom/gacounts3/SubReportCollaborators';
 import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForReport';
 import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
+import { toKey } from '@gabegabegabe/utils/dist/array/mappers';
 import {
 	associationReportFieldSchema,
 	associationReportKeywordSchema,
@@ -169,7 +172,32 @@ const schema = {
 	},
 	deleteExisting: deleteReport,
 	fetchExisting: getReport,
-	processSubmission: postReportData,
+	processSubmission: (report, callback) => {
+		const reportTypeId = report.reportType.records.map(toKey('TYPE_ID')).reduce(singleItem);
+		const isMediaProducedDistributed = caesCache.data.gc3.reportType
+			.filter(({ LABEL }) => LABEL === 'Media Produced/Distributed')
+			.map(toKey('ID'))
+			.reduce(singleItem) === reportTypeId;
+
+		if (isMediaProducedDistributed) {
+			const hasDistributedRecords = report.mediaDistributed.records.length > 0;
+
+			if (hasDistributedRecords) postReportData(report, callback);
+			else swal.fire({
+				title: 'Are you sure?',
+				text: 'You have selected Media Produced/Distributed as your report type, but have not entered any Media Distributed records.  Please click the "add" button beside the media distribution line to connect your entry to this report.  If you have no distribution numbers you may dismiss this warning.',
+				type: 'warning',
+				confirmButtonColor: '#6c3129',
+				confirmButtonText: 'Yes',
+				cancelButtonColor: '#004e60',
+				showCancelButton: true
+			}).then(result => {
+				if (result.value) postReportData(report, callback);
+			});
+		} else {
+			postReportData(report, callback);
+		}
+	},
 	// processSubmission: (report, callback) => {
 	// 	console.log(report);
 	// },

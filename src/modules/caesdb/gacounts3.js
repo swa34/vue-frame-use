@@ -23,12 +23,12 @@ export const get4HActivityList = (countyName, callback) => {
 	makePostRequest(url, countyName, callback, false);
 };
 
-export const getActivityLocationTypes = (callback) => {
+export const getActivityLocationTypes = callback => {
 	const url = generateUrl('activityLocationTypes', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getAssociationKeywordTopic = (callback) => {
+export const getAssociationKeywordTopic = callback => {
 	const url = generateUrl('associationKeywordTopic', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -58,7 +58,7 @@ export const getAssociationReportType = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getAssociationReportTypeContactType = (callback) => {
+export const getAssociationReportTypeContactType = callback => {
 	const url = generateUrl('associationReportTypeContactType', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -68,12 +68,12 @@ export const getAssociationReportTypeField = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getAssociationReportTypeProgramArea = (callback) => {
+export const getAssociationReportTypeProgramArea = callback => {
 	const url = generateUrl('associationReportTypeProgramArea', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getAssociationReportTypeRole = (callback) => {
+export const getAssociationReportTypeRole = callback => {
 	const url = generateUrl('associationReportTypeRole', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -88,17 +88,17 @@ export const getAssociationSubReportRole = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getAssociationTargetAudienceProgramArea = (callback) => {
+export const getAssociationTargetAudienceProgramArea = callback => {
 	const url = generateUrl('associationTargetAudienceProgramArea', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getAssociationTopicArea = (callback) => {
+export const getAssociationTopicArea = callback => {
 	const url = generateUrl('associationTopicArea', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getContactTypes = (callback) => {
+export const getContactTypes = callback => {
 	const url = generateUrl('contactTypes', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -106,17 +106,20 @@ export const getContactTypes = (callback) => {
 export const getContextualHelpMessageHTML = async messageName => {
 	if (!messageName) {
 		logError(new Error('Cannot fetch contextual help message HTML: messageName is undefined.'));
-		return;
+
+		return null;
 	}
 	const url = `${apiPrefix}contextualHelpMessageHTML?messageName=${messageName}`;
 	try {
 		return (await request.get(url)).text;
 	} catch (err) {
 		logError(err);
+
+		return null;
 	}
 };
 
-export const getCounties = (callback) => {
+export const getCounties = callback => {
 	const url = generateUrl('counties', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -131,7 +134,7 @@ export const getEthnicDemographic = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getEthnicities = (callback) => {
+export const getEthnicities = callback => {
 	const url = generateUrl('ethnicities', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -141,17 +144,17 @@ export const getFieldOptions = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getFieldTypes = (callback) => {
+export const getFieldTypes = callback => {
 	const url = generateUrl('fieldTypes', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getGenders = (callback) => {
+export const getGenders = callback => {
 	const url = generateUrl('genders', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getKeywords = (callback) => {
+export const getKeywords = callback => {
 	const url = generateUrl('keywords', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -171,22 +174,22 @@ export const getMediaReview = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getMediaReviewType = (callback) => {
+export const getMediaReviewType = callback => {
 	const url = generateUrl('mediaReviewType', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getMediaType = (callback) => {
+export const getMediaType = callback => {
 	const url = generateUrl('mediaType', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getMediaTypeCategory = (callback) => {
+export const getMediaTypeCategory = callback => {
 	const url = generateUrl('mediaTypeCategory', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getPersonnel = (callback) => {
+export const getPersonnel = callback => {
 	const url = generateUrl('personnel', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -201,17 +204,17 @@ export const getPlannedPrograms = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getProgramScopes = (callback) => {
+export const getProgramScopes = callback => {
 	const url = generateUrl('programScopes', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getProgramAreas = (callback) => {
+export const getProgramAreas = callback => {
 	const url = generateUrl('programAreas', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getRaces = (callback) => {
+export const getRaces = callback => {
 	const url = generateUrl('races', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -231,7 +234,7 @@ export const getReportContact = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getReportFields = (callback) => {
+export const getReportFields = callback => {
 	const url = generateUrl('reportFields', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -246,7 +249,7 @@ export const getReportTargetAudience = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getReportTypes = (callback) => {
+export const getReportTypes = callback => {
 	const url = generateUrl('reportTypes', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -256,12 +259,12 @@ export const getResidenceDemographic = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getResidenceTypes = (callback) => {
+export const getResidenceTypes = callback => {
 	const url = generateUrl('residenceTypes', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getStatePlannedPrograms = (callback) => {
+export const getStatePlannedPrograms = callback => {
 	const url = generateUrl('statePlannedPrograms', apiPrefix);
 	makeGetRequest(url, callback);
 };
@@ -281,12 +284,12 @@ export const getSubReportPurposeAchievements = (criteriaStructure, callback) => 
 	makePostRequest(url, criteriaStructure, callback);
 };
 
-export const getTargetAudiences = (callback) => {
+export const getTargetAudiences = callback => {
 	const url = generateUrl('targetAudiences', apiPrefix);
 	makeGetRequest(url, callback);
 };
 
-export const getTopics = (callback) => {
+export const getTopics = callback => {
 	const url = generateUrl('topics', apiPrefix);
 	makeGetRequest(url, callback);
 };

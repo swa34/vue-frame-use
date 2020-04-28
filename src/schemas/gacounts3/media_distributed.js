@@ -1,8 +1,8 @@
+import { enableConstraintValues } from '~/modules/schemaTools';
 import {
 	getMediaDistributed,
 	getMediaType
 } from '~/modules/caesdb/gacounts3';
-import { enableConstraintValues } from '~/modules/schemaTools';
 
 const schema = {
 	title: 'Media Distributed',
@@ -46,7 +46,8 @@ const schema = {
 		{
 			columnName: 'QUANTITY_UNIQUE_WORKS',
 			type: 'int',
-			required: true
+			required: true,
+			default: 0
 		},
 		{
 			columnName: 'CIRCULATION',
