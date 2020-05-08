@@ -81,6 +81,7 @@
 			},
 			shouldShowDetails () {
 				if (!this.editMode) return false;
+				if (this.$store.state.programAreas.records.length < 1) return false;
 				if (!this.selectedReportType) return false;
 				if (!this.selectedReportType.DESCRIPTION) return false;
 				if (!this.selectedReportType.EXAMPLES) return false;
