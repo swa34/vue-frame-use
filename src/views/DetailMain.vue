@@ -135,6 +135,7 @@
 											:is="area.data.customComponent"
 											v-if="dependencyMet(area.data)"
 											:mode="getMode(area.data)"
+											:identifier="generateIdentifier(area.data)"
 											@show-help="showHelp"
 											@expand-section="expandSection"
 											@collapse-section="collapseSection"

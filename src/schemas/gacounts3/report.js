@@ -9,6 +9,7 @@ import FourHImportComponent from '~/views/custom/gacounts3/FourHImport';
 import MediaProducedComponent from '~/views/custom/gacounts3/MediaProduced';
 import RADIO_OPTIONS_BOOLEAN from '~/globals/radio-options-boolean';
 import { singleItem } from '@gabegabegabe/utils/dist/array/reducers';
+import ReportType from '~/views/custom/gacounts3/ReportType';
 import SubReportCollaborators from '~/views/custom/gacounts3/SubReportCollaborators';
 import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForReport';
 import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
@@ -510,6 +511,7 @@ const schema = {
 		{
 			title: 'Report Type',
 			schema: associationReportTypeSchema,
+			customComponent: ReportType,
 			helpMessageName: 'NewReportReportType',
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',
