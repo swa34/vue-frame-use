@@ -1,7 +1,7 @@
-const path										= require('path');
-const Visualizer							= require('webpack-visualizer-plugin');
-const { CleanWebpackPlugin }	= require('clean-webpack-plugin');
-const { VueLoaderPlugin }			= require('vue-loader');
+const path = require('path');
+const Visualizer = require('webpack-visualizer-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
 const resolve = dir => path.join(__dirname, dir);
 
@@ -39,18 +39,21 @@ module.exports = {
 			// 	exclude: /node_modules/
 			// },
 			{
-				test: /\.js$/,
-				exclude: /node_modules\/(?!(superagent)\/)/,
+				test: /\.js$/u,
+				// exclude: /node_modules\/(?!(superagent)\/)/u,
 				use: {
 					loader: 'babel-loader',
 					options: {
 						presets: ['@babel/preset-env'],
-						plugins: ['@babel/plugin-transform-regenerator', '@babel/plugin-proposal-object-rest-spread']
+						plugins: [
+							'@babel/plugin-transform-regenerator',
+							'@babel/plugin-proposal-object-rest-spread'
+						]
 					}
 				}
 			},
 			{
-				test: /\.vue$/,
+				test: /\.vue$/u,
 				loader: 'vue-loader'
 			}
 		]

@@ -47,9 +47,9 @@ import {
 } from '~/criteriaStructures/gacounts3';
 
 // Adjust the racial demographic schema to suit our needs
-const altRacialDemographicSchema = Object.assign({}, racialDemographicSchema);
+const altRacialDemographicSchema = { ...racialDemographicSchema };
 altRacialDemographicSchema.columns = [];
-racialDemographicSchema.columns.forEach((column) => {
+racialDemographicSchema.columns.forEach(column => {
 	if (column.columnName !== 'GENDER_ID' && column.columnName !== 'QUANTITY') altRacialDemographicSchema.columns.push(column);
 });
 altRacialDemographicSchema.columns.push({
@@ -64,47 +64,44 @@ altRacialDemographicSchema.columns.push({
 	type: 'int',
 	min: 0
 });
-altRacialDemographicSchema.prepareForSubmit = (newRecords) => {
+altRacialDemographicSchema.prepareForSubmit = newRecords => {
 	// An array to hold our records to be submitted
-	let transformedRecords = [];
-	newRecords.forEach((record) => {
+	const transformedRecords = [];
+	newRecords.forEach(record => {
 		if (record.QUANTITY_MALE > 0 || record.QUANTITY_FEMALE > 0) {
-			let newRecordTemplate = {};
-			for (let key in record) {
-				if (key !== 'QUANTITY_MALE' && key !== 'QUANTITY_FEMALE') newRecordTemplate[key] = record[key];
-			}
+			const newRecordTemplate = {};
+			for (const key in record) if (key !== 'QUANTITY_MALE' && key !== 'QUANTITY_FEMALE') newRecordTemplate[key] = record[key];
+
 			if (record.QUANTITY_MALE > 0) {
-				let maleRecord = Object.assign({}, newRecordTemplate);
+				const maleRecord = { ...newRecordTemplate };
 				maleRecord.GENDER_ID = 1;
 				maleRecord.QUANTITY = record.QUANTITY_MALE;
 				transformedRecords.push(maleRecord);
 			}
 			if (record.QUANTITY_FEMALE > 0) {
-				let femaleRecord = Object.assign({}, newRecordTemplate);
+				const femaleRecord = { ...newRecordTemplate };
 				femaleRecord.GENDER_ID = 2;
 				femaleRecord.QUANTITY = record.QUANTITY_FEMALE;
 				transformedRecords.push(femaleRecord);
 			}
 		}
 	});
+
 	return transformedRecords;
 };
 altRacialDemographicSchema.prepareFromRetrieval = (existingRecords, componentRecords) => {
-	existingRecords.forEach((record) => {
-		let componentRecordsRaceMap = componentRecords.map(r => r.RACE_ID);
-		let matchingRecord = componentRecords[componentRecordsRaceMap.indexOf(record.RACE_ID)];
-		if (record.GENDER_ID === 1) {
-			matchingRecord.QUANTITY_MALE = record.QUANTITY;
-		} else if (record.GENDER_ID === 2) {
-			matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
-		}
+	existingRecords.forEach(record => {
+		const componentRecordsRaceMap = componentRecords.map(r => r.RACE_ID);
+		const matchingRecord = componentRecords[componentRecordsRaceMap.indexOf(record.RACE_ID)];
+		if (record.GENDER_ID === 1) matchingRecord.QUANTITY_MALE = record.QUANTITY;
+		 else if (record.GENDER_ID === 2) matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
 	});
 };
 
 // Adjust the ethnic demographic schema to suit our needs
-const altEthnicDemographicSchema = Object.assign({}, ethnicDemographicSchema);
+const altEthnicDemographicSchema = { ...ethnicDemographicSchema };
 altEthnicDemographicSchema.columns = [];
-ethnicDemographicSchema.columns.forEach((column) => {
+ethnicDemographicSchema.columns.forEach(column => {
 	if (column.columnName !== 'GENDER_ID' && column.columnName !== 'QUANTITY') altEthnicDemographicSchema.columns.push(column);
 });
 altEthnicDemographicSchema.columns.push({
@@ -119,14 +116,11 @@ altEthnicDemographicSchema.columns.push({
 });
 altEthnicDemographicSchema.prepareForSubmit = altRacialDemographicSchema.prepareForSubmit;
 altEthnicDemographicSchema.prepareFromRetrieval = (existingRecords, componentRecords) => {
-	existingRecords.forEach((record) => {
-		let componentRecordsEthnicMap = componentRecords.map(r => r.ETHNICITY_ID);
-		let matchingRecord = componentRecords[componentRecordsEthnicMap.indexOf(record.ETHNICITY_ID)];
-		if (record.GENDER_ID === 1) {
-			matchingRecord.QUANTITY_MALE = record.QUANTITY;
-		} else if (record.GENDER_ID === 2) {
-			matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
-		}
+	existingRecords.forEach(record => {
+		const componentRecordsEthnicMap = componentRecords.map(r => r.ETHNICITY_ID);
+		const matchingRecord = componentRecords[componentRecordsEthnicMap.indexOf(record.ETHNICITY_ID)];
+		if (record.GENDER_ID === 1) matchingRecord.QUANTITY_MALE = record.QUANTITY;
+		 else if (record.GENDER_ID === 2) matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
 	});
 };
 
@@ -138,18 +132,17 @@ const demographicsTest = (records, schema) => {
 	const association = schema.associations[associationsMap.indexOf('Contacts')];
 	const columnsMap = association.schema.columns.map(c => c.columnName);
 	const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
-	const values = column.constraint.values;
+	const { values } = column.constraint;
 	const valuesIdMap = values.map(v => v.key);
-	const valuesUsesDemographicsMap = values.map((v) => {
-		if (v.originalValue) {
-			return v.originalValue.USES_DEMOGRAPHICS;
-		} else {
-			return v.USES_DEMOGRAPHICS;
-		}
+	const valuesUsesDemographicsMap = values.map(v => {
+		if (v.originalValue) return v.originalValue.USES_DEMOGRAPHICS;
+
+		 return v.USES_DEMOGRAPHICS;
 	});
-	records.forEach((record) => {
+	records.forEach(record => {
 		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 	});
+
 	return passes;
 };
 
@@ -159,6 +152,7 @@ const countyIdRequired = val => {
 	const activityLocationIndex = activityLocationMap.indexOf(Number(val));
 	if (activityLocationIndex === -1) return false;
 	const activityLocationType = caesCache.data.gc3.activityLocationType[activityLocationIndex];
+
 	return Boolean(activityLocationType.USES_COUNTY_ID);
 };
 
@@ -199,7 +193,8 @@ const schema = {
 			postReportData(report, callback);
 		}
 	},
-	// processSubmission: (report, callback) => {
+
+	// ProcessSubmission: (report, callback) => {
 	// 	console.log(report);
 	// },
 	cleanUpData: store => {
@@ -221,17 +216,15 @@ const schema = {
 		if (!countyIdRequired(store.report.ACTIVITY_LOCATION_TYPE_ID)) store.report.COUNTY_ID = null;
 
 		// Sub-Report must only have a local or state issue, not both.
-		const subReport = store.subschemas.subReport.subReport;
+		const { subReport } = store.subschemas.subReport;
 		if (subReport.ISSUE_TYPE === 'local' && subReport.STATE_PLANNED_PROGRAM_ID !== null) subReport.STATE_PLANNED_PROGRAM_ID = null;
 		if (subReport.ISSUE_TYPE === 'state' && subReport.PLANNED_PROGRAM_ID !== null) subReport.PLANNED_PROGRAM_ID = null;
 
 		// Clean up sub-report contacts
-		store.subschemas.subReport.contacts.records = store.subschemas.subReport.contacts.records.filter(contact => {
-			return caesCache.data.gc3.associationReportTypeContactType
-				.filter(assn => store.reportType.records.map(t => t.TYPE_ID).indexOf(assn.REPORT_TYPE_ID) !== -1)
-				.map(assn => assn.CONTACT_TYPE_ID)
-				.indexOf(contact.TYPE_ID) !== -1;
-		});
+		store.subschemas.subReport.contacts.records = store.subschemas.subReport.contacts.records.filter(contact => caesCache.data.gc3.associationReportTypeContactType
+			.filter(assn => store.reportType.records.map(t => t.TYPE_ID).indexOf(assn.REPORT_TYPE_ID) !== -1)
+			.map(assn => assn.CONTACT_TYPE_ID)
+			.indexOf(contact.TYPE_ID) !== -1);
 
 		return store;
 	},
@@ -252,7 +245,8 @@ const schema = {
 			type: 'int',
 			required: true,
 			automated: true,
-			// default: activeUser.PERSONNEL_ID,
+
+			// Default: activeUser.PERSONNEL_ID,
 			constraint: {
 				foreignKey: 'ID',
 				values: []
@@ -290,6 +284,7 @@ const schema = {
 			},
 			validate (store) {
 				const title = store.report.TITLE;
+
 				return {
 					isValid: title && typeof title === 'string' && title.length > 3,
 					message: 'Your report title must contain more than three characters.'
@@ -312,14 +307,12 @@ const schema = {
 				order: 5
 			},
 			validate (store) {
-				if (store.report.SCOPE_ID) {
-					return { isValid: true };
-				} else {
-					return {
-						isValid: false,
-						message: 'You must select a value for the geographic reach of your activity.'
-					};
-				}
+				if (store.report.SCOPE_ID) return { isValid: true };
+
+				return {
+					isValid: false,
+					message: 'You must select a value for the geographic reach of your activity.'
+				};
 			}
 		},
 		{
@@ -331,8 +324,9 @@ const schema = {
 				foreignLabel: 'LABEL',
 				values: caesCache.data.gc3.activityLocationType.sort((a, b) => {
 					if (a.LABEL > b.LABEL) return 1;
-					else if (a.LABEL < b.LABEL) return -1;
-					else return 0;
+					if (a.LABEL < b.LABEL) return -1;
+
+					return 0;
 				})
 			},
 			grouping: {
@@ -340,14 +334,12 @@ const schema = {
 				order: 6
 			},
 			validate (store) {
-				if (store.report.ACTIVITY_LOCATION_TYPE_ID) {
-					return { isValid: true };
-				} else {
-					return {
-						isValid: false,
-						message: 'You much select the location of your activity.'
-					};
-				}
+				if (store.report.ACTIVITY_LOCATION_TYPE_ID) return { isValid: true };
+
+				return {
+					isValid: false,
+					message: 'You much select the location of your activity.'
+				};
 			}
 		},
 		{
@@ -414,18 +406,19 @@ const schema = {
 			},
 			validate (store) {
 				const startDate = store.report.DATE_BEGIN ? new Date(store.report.DATE_BEGIN) : null;
-				if (startDate !== null && startDate instanceof Date && !isNaN(startDate)) {
-					// valid
+				if (startDate !== null && startDate instanceof Date && !isNaN(startDate))
+
+					// Valid
 					return {
 						isValid: true
 					};
-				} else {
-					// invalid
-					return {
-						isValid: false,
-						message: 'You have entered an invalid date for the start date.'
-					};
-				}
+
+
+				// Invalid
+				return {
+					isValid: false,
+					message: 'You have entered an invalid date for the start date.'
+				};
 			}
 		},
 		{
@@ -442,15 +435,16 @@ const schema = {
 				if (store.report.DATE_END) {
 					const endDate = new Date(store.report.DATE_END).getTime();
 					const startDate = new Date(store.report.DATE_BEGIN).getTime();
+
 					return {
 						isValid: endDate >= startDate,
 						message: 'The end date for your report must be after the begin date.'
 					};
-				} else {
-					return {
-						isValid: true
-					};
 				}
+
+				return {
+					isValid: true
+				};
 			}
 		},
 		{
@@ -489,23 +483,17 @@ const schema = {
 				order: 13
 			},
 			affects: {
-				titles: [
-					'Report Types',
-					'Topics',
-					'Keywords'
-				],
+				titles: ['Report Types', 'Topics', 'Keywords'],
 				showAlways: false
 			},
 			validate (store) {
 				const areas = store.programAreas.records;
-				if (areas.length > 0) {
-					return { isValid: true };
-				} else {
-					return {
-						isValid: false,
-						message: 'You must select at least one Program Area.'
-					};
-				}
+				if (areas.length > 0) return { isValid: true };
+
+				return {
+					isValid: false,
+					message: 'You must select at least one Program Area.'
+				};
 			}
 		},
 		{
@@ -543,14 +531,12 @@ const schema = {
 			},
 			validate (store) {
 				const reportTypeRecords = store.reportType.records;
-				if (reportTypeRecords.length === 1) {
-					return { isValid: true };
-				} else {
-					return {
-						isValid: false,
-						message: 'You must select a report type.'
-					};
-				}
+				if (reportTypeRecords.length === 1) return { isValid: true };
+
+				return {
+					isValid: false,
+					message: 'You must select a report type.'
+				};
 			}
 		},
 		{
@@ -574,7 +560,7 @@ const schema = {
 				column: 'AREA_ID'
 			},
 			affects: {
-				titles: [ 'Keywords' ]
+				titles: ['Keywords']
 			}
 		},
 		{
@@ -616,9 +602,7 @@ const schema = {
 			depends: {
 				association: 'Program Areas',
 				useValues: true,
-				test: (records, schema) => {
-					return records.length > 0 && records.map(r => r.AREA_ID).indexOf(3) !== -1;
-				}
+				test: (records, schema) => records.length > 0 && records.map(r => r.AREA_ID).indexOf(3) !== -1
 			},
 			grouping: {
 				section: 'Demographic Information',
@@ -722,18 +706,17 @@ const schema = {
 					const association = schema.associations[associationsMap.indexOf('Report Type')];
 					const columnsMap = association.schema.columns.map(c => c.columnName);
 					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
-					const values = column.constraint.values;
+					const { values } = column.constraint;
 					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesResidenceMap = values.map((v) => {
-						if (v.originalValue) {
-							return v.originalValue.USES_RESIDENCE;
-						} else {
-							return v.USES_RESIDENCE;
-						}
+					const valuesUsesResidenceMap = values.map(v => {
+						if (v.originalValue) return v.originalValue.USES_RESIDENCE;
+
+						 return v.USES_RESIDENCE;
 					});
-					records.forEach((record) => {
+					records.forEach(record => {
 						if (valuesUsesResidenceMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
+
 					return passes;
 				}
 			}
@@ -771,7 +754,8 @@ const schema = {
 			title: 'Media Produced',
 			schema: mediaProductionSchema,
 			customComponent: MediaProducedComponent,
-			// localKey: 'ID',
+
+			// LocalKey: 'ID',
 			// foreignKey: 'REPORT_ID',
 			// associatedColumn: 'REPORT_ID',
 			// isAssignable: true,
@@ -779,7 +763,8 @@ const schema = {
 				section: 'Supplemental Data',
 				order: 2
 			},
-			// limit: 1,
+
+			// Limit: 1,
 			depends: {
 				association: 'Report Type',
 				useValues: true,
@@ -789,18 +774,17 @@ const schema = {
 					const association = schema.associations[associationsMap.indexOf('Report Type')];
 					const columnsMap = association.schema.columns.map(c => c.columnName);
 					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
-					const values = column.constraint.values;
+					const { values } = column.constraint;
 					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesMediaProductionMap = values.map((v) => {
-						if (v.originalValue) {
-							return v.originalValue.USES_MEDIA_PRODUCTION;
-						} else {
-							return v.USES_MEDIA_PRODUCTION;
-						}
+					const valuesUsesMediaProductionMap = values.map(v => {
+						if (v.originalValue) return v.originalValue.USES_MEDIA_PRODUCTION;
+
+						 return v.USES_MEDIA_PRODUCTION;
 					});
-					records.forEach((record) => {
+					records.forEach(record => {
 						if (valuesUsesMediaProductionMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
+
 					return passes;
 				}
 			}
@@ -825,18 +809,17 @@ const schema = {
 					const association = schema.associations[associationsMap.indexOf('Report Type')];
 					const columnsMap = association.schema.columns.map(c => c.columnName);
 					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
-					const values = column.constraint.values;
+					const { values } = column.constraint;
 					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesMediaDistributedMap = values.map((v) => {
-						if (v.originalValue) {
-							return v.originalValue.USES_MEDIA_DISTRIBUTION;
-						} else {
-							return v.USES_MEDIA_DISTRIBUTION;
-						}
+					const valuesUsesMediaDistributedMap = values.map(v => {
+						if (v.originalValue) return v.originalValue.USES_MEDIA_DISTRIBUTION;
+
+						 return v.USES_MEDIA_DISTRIBUTION;
 					});
-					records.forEach((record) => {
+					records.forEach(record => {
 						if (valuesUsesMediaDistributedMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
+
 					return passes;
 				}
 			}
@@ -858,12 +841,11 @@ const schema = {
 				test: (records, schema) => {
 					let passes = false;
 					const valuesIdMap = caesCache.data.gc3.reportType.map(t => t.ID);
-					const valuesUsesMediaReviewMap = caesCache.data.gc3.reportType.map((t) => {
-						return t.USES_MEDIA_REVIEW;
-					});
-					records.forEach((record) => {
+					const valuesUsesMediaReviewMap = caesCache.data.gc3.reportType.map(t => t.USES_MEDIA_REVIEW);
+					records.forEach(record => {
 						if (valuesUsesMediaReviewMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 					});
+
 					return passes;
 				}
 			}
@@ -917,32 +899,21 @@ const schema = {
 			order: 2,
 			required: true,
 			depends: {
-				associations: [
-					'Program Areas',
-					'Report Type'
-				]
+				associations: ['Program Areas', 'Report Type']
 			}
 		},
 		{
 			title: 'Demographic Information',
 			order: 3,
 			depends: {
-				associations: [
-					'Program Areas',
-					'Report Type',
-					'Topics'
-				]
+				associations: ['Program Areas', 'Report Type', 'Topics']
 			}
 		},
 		{
 			title: 'Supplemental Data',
 			order: 4,
 			depends: {
-				associations: [
-					'Program Areas',
-					'Report Type',
-					'Topics'
-				]
+				associations: ['Program Areas', 'Report Type', 'Topics']
 			}
 		},
 		{
@@ -951,11 +922,7 @@ const schema = {
 			required: true,
 			customComponent: SubReportCollaborators,
 			depends: {
-				associations: [
-					'Program Areas',
-					'Report Type',
-					'Topics'
-				]
+				associations: ['Program Areas', 'Report Type', 'Topics']
 			}
 		}
 	]

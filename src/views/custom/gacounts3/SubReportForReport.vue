@@ -161,12 +161,13 @@
 			},
 			criteriaStructures () {
 				const critStructs = {
-					associationReportTypeContactType: Object.assign({}, this.criteriaStructureTemplates.associationReportTypeContactType),
-					associationReportTypeRole: Object.assign({}, this.criteriaStructureTemplates.associationReportTypeRole)
+					associationReportTypeContactType: { ...this.criteriaStructureTemplates.associationReportTypeContactType },
+					associationReportTypeRole: { ...this.criteriaStructureTemplates.associationReportTypeRole }
 				};
 				const reportTypes = this.$store.state.reportType.records.map(r => r.TYPE_ID);
 				critStructs.associationReportTypeContactType.criteria_REPORT_TYPE_ID_eq = reportTypes;
 				critStructs.associationReportTypeRole.criteria_TYPE_ID_eq = reportTypes;
+
 				return critStructs;
 			},
 			neededReportValues () {
@@ -200,6 +201,7 @@
 			},
 			reportType () {
 				const reportTypeRecords = this.$store.state.reportType.records;
+
 				return reportTypeRecords.length > 0 ? reportTypeRecords[0].TYPE_ID : -1;
 			},
 			roles: {
@@ -223,9 +225,10 @@
 			},
 			totalContacts () {
 				let sum = 0;
-				this.contacts.forEach((contact) => {
+				this.contacts.forEach(contact => {
 					sum += Number(contact.QUANTITY);
 				});
+
 				return sum;
 			}
 		},
@@ -241,50 +244,38 @@
 			this.populateOutcomeRecord();
 			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_CONTACT_TYPE', (err, data) => {
 				if (err) logError(err);
-				if (data) {
-					this.criteriaStructureTemplates.associationReportTypeContactType = data;
-				}
+				if (data) this.criteriaStructureTemplates.associationReportTypeContactType = data;
 			});
 			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_TYPE_ROLE', (err, data) => {
 				if (err) logError(err);
-				if (data) {
-					this.criteriaStructureTemplates.associationReportTypeRole = data;
-				}
+				if (data) this.criteriaStructureTemplates.associationReportTypeRole = data;
 			});
 			getContactTypes((err, data) => {
 				if (err) logError(err);
-				if (data) {
-					this.contactTypes = data;
-				}
+				if (data) this.contactTypes = data;
 			});
 			getAssociationReportTypeRole((err, data) => {
 				if (err) logError(err);
-				if (data) {
-					this.unfilteredRoleTypes = data;
-				}
+				if (data) this.unfilteredRoleTypes = data;
 			});
 			getCriteriaStructure('GACOUNTS3', 'FPW_PLANNED_PROGRAM', (err, data) => {
 				if (err) logError(err);
 				if (data) {
-					let critStruct = data;
+					const critStruct = data;
 					critStruct.criteria_USER_ID_eq.push(activeUserID);
 					getPlannedPrograms(critStruct, (err, data) => {
 						if (err) logError(err);
-						if (data) {
-							this.plannedPrograms = data;
-						}
+						if (data) this.plannedPrograms = data;
 					});
 				}
 			});
 			getStatePlannedPrograms((err, data) => {
 				if (err) logError(err);
-				if (data) {
-					this.statePlannedPrograms = data;
-				}
+				if (data) this.statePlannedPrograms = data;
 			});
 
 			const fetchExistingData = () => {
-				const fetchSubReportCriteriaStructure = (callback) => {
+				const fetchSubReportCriteriaStructure = callback => {
 					getCriteriaStructure('GACOUNTS3', 'GC3_SUB_REPORT', (err, data) => {
 						if (err) logError(err);
 						if (data) {
@@ -293,8 +284,8 @@
 						}
 					});
 				};
-				const fetchSubReport = (callback) => {
-					const critStruct = Object.assign({}, this.criteriaStructureTemplates.subReport);
+				const fetchSubReport = callback => {
+					const critStruct = { ...this.criteriaStructureTemplates.subReport };
 					critStruct.criteria_REPORT_ID_eq = this.reportId || url.getParam('duplicateID');
 					critStruct.criteria_USER_ID_eq = activeUserID;
 					getSubReport(critStruct, (err, data) => {
@@ -311,13 +302,10 @@
 								'IS_HIGHLIGHTED',
 								'DATE_CREATED',
 								'DATE_LAST_UPDATED'
-							].forEach((key) => {
+							].forEach(key => {
 								if (existingSubReport[key]) this.record[key] = existingSubReport[key];
-								if (existingSubReport.PLANNED_PROGRAM_ID) {
-									this.issueType = 'local';
-								} else if (existingSubReport.STATE_PLANNED_PROGRAM_ID) {
-									this.issueType = 'state';
-								}
+								if (existingSubReport.PLANNED_PROGRAM_ID) this.issueType = 'local';
+								else if (existingSubReport.STATE_PLANNED_PROGRAM_ID) this.issueType = 'state';
 							});
 							callback();
 						}
@@ -333,7 +321,7 @@
 							getAssociationSubReportRole(critStruct, (err, data) => {
 								if (err) logError(err);
 								if (data) {
-									data.forEach((record) => {
+									data.forEach(record => {
 										delete record.SUB_REPORT_ROLE_LABEL;
 									});
 									this.roles = data;
@@ -353,7 +341,7 @@
 								if (err) logError(err);
 								if (data) {
 									const contactsMap = this.contacts.map(c => c.TYPE_ID);
-									data.forEach((record) => {
+									data.forEach(record => {
 										const index = contactsMap.indexOf(record.TYPE_ID);
 										if (index !== -1) this.contacts[index].QUANTITY = record.QUANTITY;
 									});
@@ -373,7 +361,7 @@
 								if (err) logError(err);
 								if (data) {
 									const suppDataMap = this.supplementalData.map(d => d.FIELD_ID);
-									data.forEach((record) => {
+									data.forEach(record => {
 										const index = suppDataMap.indexOf(record.FIELD_ID);
 										if (index !== -1) this.supplementalData[index].FIELD_VALUE = record.FIELD_VALUE;
 									});
@@ -391,9 +379,7 @@
 							critStruct.criteria_SUB_REPORT_ID_eq = this.record.ID || -1;
 							getSubReportPurposeAchievements(critStruct, (err, data) => {
 								if (err) logError(err);
-								if (data) {
-									this.outcomes = data;
-								}
+								if (data) this.outcomes = data;
 							});
 						}
 					});
@@ -414,6 +400,7 @@
 			getContactLabelFromID (id) {
 				const index = this.contactTypes.map(t => t.ID).indexOf(id);
 				if (index === -1) return '';
+
 				return this.contactTypes[index].LABEL;
 			},
 			generateRoleRecord (role) {
@@ -425,8 +412,8 @@
 			populateContactsRecords () {
 				if (this.neededReportValues.contacts.length > 0) {
 					const contacts = [];
-					this.neededReportValues.contacts.forEach((record) => {
-						let newRecord = Object.assign({}, record);
+					this.neededReportValues.contacts.forEach(record => {
+						const newRecord = { ...record };
 						newRecord.QUANTITY = null;
 						contacts.push(newRecord);
 					});
@@ -434,17 +421,13 @@
 				} else if (this.contacts.length < 1) {
 					getAssociationReportTypeContactType((err, data) => {
 						if (err) logError(err);
-						if (data) {
-							data.forEach((record) => {
-								if (record.REPORT_TYPE_ID === this.reportType) {
-									this.contacts.push({
-										REPORT_ID: this.reportId,
-										TYPE_ID: record.CONTACT_TYPE_ID,
-										QUANTITY: null
-									});
-								}
+						if (data) data.forEach(record => {
+							if (record.REPORT_TYPE_ID === this.reportType) this.contacts.push({
+								REPORT_ID: this.reportId,
+								TYPE_ID: record.CONTACT_TYPE_ID,
+								QUANTITY: null
 							});
-						}
+						});
 					});
 				}
 			},

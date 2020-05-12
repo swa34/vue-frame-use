@@ -5,18 +5,19 @@ const criteriaFields = [
 	'lt'
 ];
 
-const getCriteriaStructure = (schema) => {
-	let criteriaStructure = {
+const getCriteriaStructure = schema => {
+	const criteriaStructure = {
 		submitSearch: true,
 		displayMode: 'NORMAL',
 		queryMode: 'NORMAL',
 		sortKey: ''
 	};
-	schema.columns.forEach((column) => {
-		criteriaFields.forEach((field) => {
-			criteriaStructure['criteria_' + column.columnName + '_' + field] = '';
+	schema.columns.forEach(column => {
+		criteriaFields.forEach(field => {
+			criteriaStructure[`criteria_${column.columnName}_${field}`] = '';
 		});
 	});
+
 	return criteriaStructure;
 };
 

@@ -23,7 +23,7 @@
 				<ChevronDownIcon v-if="sectionShouldBeDisplayed(section)" class="hide-on-print" />
 				<ChevronRightIcon v-else class="hide-on-print" />
 				{{ section.title }}
-				<em v-if="section.required" class="required-label hide-on-print">
+				<em v-if="section.required" class="hide-on-print required-label">
 					(Required)
 				</em>
 			</h2>
@@ -365,6 +365,7 @@
 	export default {
 		// The component's name
 		name: 'DetailMain',
+
 		// The nested components available to this component
 		components: {
 			ChevronDownIcon,
@@ -379,23 +380,23 @@
 			SmartInput,
 			Spinner
 		},
+
 		// The component's properties, which are set by the parent component.
 		props: {
 			// The schema to be used
-			'schema': {
+			schema: {
 				type: Object,
 				required: true
 			},
+
 			// An optional identifier/selector
-			'identifier': {
+			identifier: {
 				default: false,
-				type: [
-					Object,
-					Boolean
-				]
+				type: [Object, Boolean]
 			},
+
 			// Display mode
-			'mode': {
+			mode: {
 				type: String,
 				required: true,
 				default: 'view',
@@ -403,20 +404,23 @@
 					return ['edit', 'view'].indexOf(value) !== -1;
 				}
 			},
+
 			// Should associations be rendered too?
-			'includeAssociations': {
+			includeAssociations: {
 				type: Boolean,
 				default: true
 			},
+
 			// How about subschemas?
-			'includeSubSchemas': {
+			includeSubSchemas: {
 				type: Boolean,
 				default: true
 			},
-			'userIsOwner': {
+			userIsOwner: {
 				type: Boolean,
 				default: false
 			},
+
 			// Show default submit button/verbage?
 			useDefaultSubmit: {
 				type: Boolean,
@@ -427,11 +431,10 @@
 			return {
 				application: caesCache.application ? caesCache.application : { attachmentWebPath: '/' },
 				hasRequiredFields: this.schema.sections.reduce((hasRequiredFields, section) => {
-					if (section.areas) {
-						section.areas.forEach(area => {
-							if (area.data.required) hasRequiredFields = true;
-						});
-					}
+					if (section.areas) section.areas.forEach(area => {
+						if (area.data.required) hasRequiredFields = true;
+					});
+
 
 					return hasRequiredFields;
 				}, false),
@@ -446,24 +449,23 @@
 		computed: {
 			columns: {
 				get () {
-					let columns = [];
-					this.schema.sections.forEach((section) => {
-						section.areas.forEach((area) => {
-							if (area.type === 'column') {
-								columns.push(area.data);
-							} else if (area.type === 'fieldset') {
-								area.data.fields.forEach(column => { columns.push(column); });
-							}
+					const columns = [];
+					this.schema.sections.forEach(section => {
+						section.areas.forEach(area => {
+							if (area.type === 'column') columns.push(area.data);
+							else if (area.type === 'fieldset') area.data.fields.forEach(column => { columns.push(column); });
 						});
 					});
+
 					return columns;
 				}
 			},
 			dateFields () {
-				let dateFields = [];
-				this.columns.forEach((column) => {
+				const dateFields = [];
+				this.columns.forEach(column => {
 					if (sqlToHtml(column) === 'date') dateFields.push(column.columnName);
 				});
+
 				return dateFields;
 			},
 			duplication () {
@@ -490,34 +492,30 @@
 		mounted () {
 			// Set up the watcher for pending requests
 			setInterval(() => {
-				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0)) {
-					this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0;
-				}
+				if (this.requestsInProgress !== (typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0)) this.requestsInProgress = typeof window.pendingRequests !== 'undefined' && window.pendingRequests > 0;
 			}, 300);
 
 			const getConstraintData = () => {
-				this.columns.forEach((column) => {
+				this.columns.forEach(column => {
 					// We only care about columns that have a constraint and a getValues
 					// function, since those are the ones we have to fetch values for
-					if (column.constraint && column.constraint.getValues) {
-						if (column.constraint.tablePrefix) {
-							// If the constraint has a tablePrefix, we need to get a criteria
-							// structure first, then send our request
-							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
-								if (err) logError(err);
-								criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
-								column.constraint.getValues(criteriaStructure, (err, data) => {
-									if (err) logError(err);
-									if (data) column.constraint.values = data;
-								});
-							});
-						} else {
-							// If no table prefix, just fetch the data
-							column.constraint.getValues((err, data) => {
+					if (column.constraint && column.constraint.getValues) if (column.constraint.tablePrefix) {
+						// If the constraint has a tablePrefix, we need to get a criteria
+						// structure first, then send our request
+						getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
+							if (err) logError(err);
+							criteriaStructure[column.constraint.criteria.string] = column.constraint.criteria.useUserID ? activeUserID : column.constraint.criteria.value;
+							column.constraint.getValues(criteriaStructure, (err, data) => {
 								if (err) logError(err);
 								if (data) column.constraint.values = data;
 							});
-						}
+						});
+					} else {
+						// If no table prefix, just fetch the data
+						column.constraint.getValues((err, data) => {
+							if (err) logError(err);
+							if (data) column.constraint.values = data;
+						});
 					}
 				});
 			};
@@ -525,6 +523,7 @@
 			if (this.identifier) this.getMainData();
 			getConstraintData();
 		},
+
 		// The methods available to this component during render
 		methods: {
 			isFile,
@@ -540,18 +539,13 @@
 					cancelButtonColor: '#004e60',
 					confirmButtonText: 'Yes, delete it!'
 				}).then(async result => {
-					if (result.value) {
-						try {
-							const response = await column.deleteFile(this.record.ID, this.record[column.columnName]);
-							if (response.success) {
-								this.record[column.columnName] = null;
-							} else {
-								alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), response.messages);
-							}
-						} catch (err) {
-							logError(err);
-							alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
-						}
+					if (result.value) try {
+						const response = await column.deleteFile(this.record.ID, this.record[column.columnName]);
+						if (response.success) this.record[column.columnName] = null;
+						else alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), response.messages);
+					} catch (err) {
+						logError(err);
+						alert.failedDelete(this.getPrettyColumnNameFromColumnName(column.columnName), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
 					}
 				});
 			},
@@ -564,8 +558,10 @@
 					const disableForEditMode = section.disableFlex.modes.indexOf('edit') !== -1;
 					if (disableForViewMode && this.mode === 'view') return '';
 					if (disableForEditMode && this.mode === 'edit') return '';
+
 					return 'flex-section';
 				}
+
 				return '';
 			},
 			showHelp (area) {
@@ -585,50 +581,45 @@
 					type: 'warning',
 					showCancelButton: true,
 					confirmButtonText: 'Yes, delete it!'
-				}).then((result) => {
-					if (result.value) {
-						this.schema.deleteExisting(this.identifier.value, (err, data) => {
-							if (err) logError(err);
-							if (data.SUCCESS) {
-								swal(
-									'Deleted!',
-									'Your ' + this.schema.title + ' has been deleted.',
-									'success'
-								).then(() => {
-									window.location.assign('https://' + window.location.hostname + '/gacounts3');
-								});
-							} else {
-								swal(
-									'Oops!',
-									'Something went wrong on our end and your ' + this.schema.title + ' could not be deleted.',
-									'error'
-								);
-							}
+				}).then(result => {
+					if (result.value) this.schema.deleteExisting(this.identifier.value, (err, data) => {
+						if (err) logError(err);
+						if (data.SUCCESS) swal(
+							'Deleted!',
+							`Your ${this.schema.title} has been deleted.`,
+							'success'
+						).then(() => {
+							window.location.assign(`https://${window.location.hostname}/gacounts3`);
 						});
-					}
+						else swal(
+							'Oops!',
+							`Something went wrong on our end and your ${this.schema.title} could not be deleted.`,
+							'error'
+						);
+					});
 				});
 			},
+
 			// Clean up any extra data that no longer applies based on current
 			// selections/entries
 			cleanUpData () {
 				const schemaLessStore = deepObjectAssign({}, this.$store.state);
 				delete schemaLessStore.schema;
 				const cleanedUpStore = this.schema.cleanUpData(schemaLessStore);
-				this.schema.sections.forEach((section) => {
-					section.areas.forEach((area) => {
+				this.schema.sections.forEach(section => {
+					section.areas.forEach(area => {
 						const areaCamelTitle = stringFormats.camelCase(area.data.title);
 						if (area.type === 'association' && area.data.schema && area.data.schema.prepareForSubmit) {
-							const records = schemaLessStore[areaCamelTitle].records;
+							const { records } = schemaLessStore[areaCamelTitle];
 							schemaLessStore[areaCamelTitle].records = area.data.schema.prepareForSubmit(records);
 						}
 						if (area.type === 'subschema') {
-							if (area.data.schema.prepareForSubmit) {
-								schemaLessStore.subschemas[areaCamelTitle][areaCamelTitle] = area.data.schema.prepareForSubmit(schemaLessStore.subschemas[areaCamelTitle][areaCamelTitle]);
-							}
-							area.data.schema.associations.forEach((subArea) => {
+							if (area.data.schema.prepareForSubmit) schemaLessStore.subschemas[areaCamelTitle][areaCamelTitle] = area.data.schema.prepareForSubmit(schemaLessStore.subschemas[areaCamelTitle][areaCamelTitle]);
+
+							area.data.schema.associations.forEach(subArea => {
 								if (subArea.schema && subArea.schema.prepareForSubmit) {
 									const subAreaCamelTitle = stringFormats.camelCase(subArea.title);
-									const records = schemaLessStore.subschemas[areaCamelTitle][subAreaCamelTitle].records;
+									const { records } = schemaLessStore.subschemas[areaCamelTitle][subAreaCamelTitle];
 									schemaLessStore.subschemas[areaCamelTitle][subAreaCamelTitle].records = subArea.schema.prepareForSubmit(records);
 								}
 							});
@@ -637,49 +628,47 @@
 				});
 				this.validateData(cleanedUpStore);
 			},
+
 			// Run validation on the data
 			validateData (store) {
-				let isValid = true;
+				const isValid = true;
 				if (isValid) this.submitData(store);
 			},
+
 			// Doesn't send anything yet, just pretends like it does
 			submitData (store) {
 				notify.clear();
 				store = prepareForCf(store);
 				this.schema.processSubmission(store, (err, data) => {
 					if (err) notify.error(err);
-					if (data) {
-						if (data.SUCCESS) {
-							if (this.isNew) {
-								swal({
-									type: 'success',
-									title: 'Awesome!',
-									text: 'Your ' + this.schema.title.toLowerCase() + ' has been saved successfully.',
-									showCancelButton: true,
-									confirmButtonText: 'OK',
-									cancelButtonText: 'Duplicate this ' + this.schema.title.toLowerCase()
-								}).then((result) => {
-									if (result.dismiss === swal.DismissReason.cancel) {
-										// They clicked duplicate
-										window.location.assign(window.location + '&duplicateID=' + data.REPORT_ID);
-									} else {
-										// Send them to the report
-										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
-									}
-								});
-							} else {
-								swal('Awesome!', 'Your changes have been saved successfully.', 'success')
-									.then((result) => {
-										window.location.assign('https://' + window.location.hostname + '/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=' + data.REPORT_ID);
-									});
-							}
-						} else {
-							swal({
-								type: 'error',
-								title: 'Oops!',
-								html: '<p>Your ' + (this.isNew ? this.schema.title.toLowerCase() + ' was' : 'changes were') + ' unable to be saved due to the following issues:</p><div style="text-align: left;">' + data.MESSAGES + '</div>'
+					if (data) if (data.SUCCESS) {
+						if (this.isNew) swal({
+							type: 'success',
+							title: 'Awesome!',
+							text: `Your ${this.schema.title.toLowerCase()} has been saved successfully.`,
+							showCancelButton: true,
+							confirmButtonText: 'OK',
+							cancelButtonText: `Duplicate this ${this.schema.title.toLowerCase()}`
+						}).then(result => {
+							if (result.dismiss === swal.DismissReason.cancel)
+
+								// They clicked duplicate
+								window.location.assign(`${window.location}&duplicateID=${data.REPORT_ID}`);
+							else
+
+								// Send them to the report
+								window.location.assign(`https://${window.location.hostname}/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=${data.REPORT_ID}`);
+						});
+						else swal('Awesome!', 'Your changes have been saved successfully.', 'success')
+							.then(result => {
+								window.location.assign(`https://${window.location.hostname}/gacounts3/index.cfm?referenceInterface=REPORT&subInterface=detail_main&PK_ID=${data.REPORT_ID}`);
 							});
-						}
+					} else {
+						swal({
+							type: 'error',
+							title: 'Oops!',
+							html: `<p>Your ${this.isNew ? `${this.schema.title.toLowerCase()} was` : 'changes were'} unable to be saved due to the following issues:</p><div style="text-align: left;">${data.MESSAGES}</div>`
+						});
 					}
 				});
 			},
@@ -687,43 +676,41 @@
 				if (this.mode === 'view' && column.showOnView) return true;
 				if (!column.depends) {
 					if (column.automated) return false;
+
 					return true;
+				}
+				if (column.depends.column) {
+					if (typeof column.depends.column === 'string') return column.depends.test(this.record[column.depends.column]);
+					if (Array.isArray(column.depends.column)) return column.depends.test(column.depends.column.map(column => this.record[column]));
 				} else {
-					if (column.depends.column) {
-						if (typeof column.depends.column === 'string') {
-							return column.depends.test(this.record[column.depends.column]);
-						} else if (Array.isArray(column.depends.column)) {
-							return column.depends.test(column.depends.column.map(column => {
-								return this.record[column];
-							}));
-						}
-					} else {
-						return column.depends.test();
-					}
+					return column.depends.test();
 				}
 			},
+
 			// A function to determine if an association's dependency has been met
 			dependencyMet (association) {
 				// If there is no dependency, it obviously has
 				if (!association.depends) return true;
+
 				// Otherwise, we need to make sure the association dependency specifies
 				// which column or association it depends on
-				if (association.depends.column) {
+				if (association.depends.column)
+
 					// If it depends on a column, run the depend's test function on that
 					// columns value
 					return association.depends.test(this.$store.state[stringFormats.camelCase(this.schema.title || this.schema.table)][association.depends.column]);
-				} else if (association.depends.association) {
+				if (association.depends.association) {
 					// If it's an association, run the test function on that association's
 					// records.
-					if (association.depends.useValues) {
-						return association.depends.test(this.$store.state[stringFormats.camelCase(association.depends.association)].records, this.$store.state.schema);
-					} else {
-						return association.depends.test(this.$store.state[stringFormats.camelCase(association.depends.association)].records);
-					}
+					if (association.depends.useValues) return association.depends.test(this.$store.state[stringFormats.camelCase(association.depends.association)].records, this.$store.state.schema);
+
+					return association.depends.test(this.$store.state[stringFormats.camelCase(association.depends.association)].records);
 				}
+
 				// If no column or association were specified, we're in an error state
 				// so say so and consider the dependency unmet.
 				logError(new Error(`Dependency information missing for association: ${association.title}`));
+
 				return false;
 			},
 			generateIdentifier (association) {
@@ -738,21 +725,19 @@
 				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
-						let critStruct = data;
+						const critStruct = data;
 						critStruct[this.schema.criteria.string] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) logError(err);
 							if (data && data.length > 0) {
-								let existingRecord = data[0];
-								for (let key in this.record) {
-									if ((this.identifier.duplicate && this.duplication.columns[key]) || !this.identifier.duplicate) {
-										if (existingRecord.hasOwnProperty(key)) {
-											this.record[key] = existingRecord[key];
-										} else {
-											console.warn('Local record has key "' + key + '" but remote record does not.');
-										}
-									}
+								const existingRecord = data[0];
+								for (const key in this.record) if (this.identifier.duplicate && this.duplication.columns[key] || !this.identifier.duplicate) if (existingRecord.hasOwnProperty(key)) {
+									this.record[key] = existingRecord[key];
+								} else {
+									console.warn(`Local record has key "${key}" but remote record does not.`);
 								}
+
+
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.record);
 								this.record._fetched = true;
 							}
@@ -763,10 +748,11 @@
 			getMode (area) {
 				if (area.disallowEditOfExisting) {
 					if (this.isNew) return this.mode;
+
 					return 'view';
-				} else {
-					return this.mode;
 				}
+
+				return this.mode;
 			},
 			getOptionLabel (constraint, value) {
 				if (constraint.values.length < 1) return '';
@@ -775,11 +761,13 @@
 				const option = constraint.values[index];
 				if (!option) return '';
 				const label = option[constraint.foreignLabel];
+
 				return label;
 			},
 			getPrettyColumnNameFromColumnName (columnName) {
-				let columnIndex = this.columns.map(c => c.columnName).indexOf(columnName);
+				const columnIndex = this.columns.map(c => c.columnName).indexOf(columnName);
 				if (columnIndex === -1) return columnName;
+
 				return this.columns[columnIndex].prettyName || getPrettyColumnName(this.columns[columnIndex].columnName);
 			},
 			getSectionDependsMessage (section) {
@@ -788,44 +776,33 @@
 				let listedDependencies = 0;
 				if (section.depends.columns) totalDependencies += section.depends.columns.length;
 				if (section.depends.associations) totalDependencies += section.depends.associations.length;
-				if (section.depends.columns) {
-					section.depends.columns.forEach(column => {
-						++listedDependencies;
-						if (totalDependencies === 1) {
-							message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
-						} else if (listedDependencies < totalDependencies) {
-							message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
-						} else {
-							message += `and a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
-						}
-					});
-				}
-				if (section.depends.associations) {
-					section.depends.associations.forEach((association) => {
-						++listedDependencies;
-						if (listedDependencies < totalDependencies) {
-							message += '<strong>' + association + '</strong>, ';
-						} else {
-							message += 'and <strong>' + association + '</strong>';
-						}
-					});
-				}
+				if (section.depends.columns) section.depends.columns.forEach(column => {
+					++listedDependencies;
+					if (totalDependencies === 1) message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
+					else if (listedDependencies < totalDependencies) message += `a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
+					else message += `and a <strong>${this.getPrettyColumnNameFromColumnName(column)}</strong>`;
+				});
+
+				if (section.depends.associations) section.depends.associations.forEach(association => {
+					++listedDependencies;
+					if (listedDependencies < totalDependencies) message += `<strong>${association}</strong>, `;
+					else message += `and <strong>${association}</strong>`;
+				});
+
 				return message;
 			},
 			sectionDependenciesMet (section) {
 				if (!section.depends) return true;
 				let dependenciesMet = true;
-				if (section.depends.columns) {
-					section.depends.columns.forEach((column) => {
-						if (!this.record[column]) dependenciesMet = false;
-					});
-				}
-				if (section.depends.associations) {
-					section.depends.associations.forEach((association) => {
-						let camelTitle = stringFormats.camelCase(association);
-						if (this.$store.state[camelTitle].records.length < 1) dependenciesMet = false;
-					});
-				}
+				if (section.depends.columns) section.depends.columns.forEach(column => {
+					if (!this.record[column]) dependenciesMet = false;
+				});
+
+				if (section.depends.associations) section.depends.associations.forEach(association => {
+					const camelTitle = stringFormats.camelCase(association);
+					if (this.$store.state[camelTitle].records.length < 1) dependenciesMet = false;
+				});
+
 				return dependenciesMet;
 			},
 			sectionShouldBeDisplayed (section) {
@@ -839,11 +816,8 @@
 			},
 			toggleSection (section) {
 				const index = this.sectionsToDisplay.indexOf(section.title);
-				if (index === -1) {
-					this.sectionsToDisplay.push(section.title);
-				} else {
-					this.sectionsToDisplay.splice(index, 1);
-				}
+				if (index === -1) this.sectionsToDisplay.push(section.title);
+				else this.sectionsToDisplay.splice(index, 1);
 			}
 		}
 	};

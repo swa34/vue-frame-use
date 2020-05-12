@@ -68,7 +68,7 @@
 			XIcon
 		},
 		props: {
-			'mode': {
+			mode: {
 				type: String,
 				default: 'view',
 				validator (value) {
@@ -106,15 +106,13 @@
 			fetchActivity () {
 				this.loadingActivity = true;
 				get4HActivity({ activityID: this.activityID }, (err, data) => {
-					if (err) {
-						logError(err);
-					} else if (data && data.length > 0) {
-						this.setDemographics(data[0]);
-					}
+					if (err) logError(err);
+					else if (data && data.length > 0) this.setDemographics(data[0]);
 				});
 			},
 			fetchActivityList () {
 				this.loadingActivityList = true;
+
 				// Hijack pending requests since we'll already have a spinner wheel for
 				// this request
 				--window.pendingRequests;
@@ -136,16 +134,13 @@
 						logError(err);
 					} else if (data) {
 						this.counties = data;
-						if (this.$store.state.report.COUNTY_ID) {
-							this.setCountyName(this.$store.state.report.COUNTY_ID);
-						} else if (activeUser.COUNTYLISTID) {
-							this.setCountyName(activeUser.COUNTYLISTID);
-						}
+						if (this.$store.state.report.COUNTY_ID) this.setCountyName(this.$store.state.report.COUNTY_ID);
+						else if (activeUser.COUNTYLISTID) this.setCountyName(activeUser.COUNTYLISTID);
 					}
 				});
 			},
 			notifyUserAboutNoActivities () {
-				notify.warn('No 4-H enrollment activities were found for ' + this.countyName + ' county.');
+				notify.warn(`No 4-H enrollment activities were found for ${this.countyName} county.`);
 			},
 			openModal () {
 				if (!this.dataImported) {
@@ -173,13 +168,11 @@
 					AMERICAN_INDIAN: raceMap.indexOf(4),
 					PACIFIC_ISLANDER: raceMap.indexOf(5)
 				};
-				for (let key in races) {
+				for (const key in races) {
 					const index = races[key];
-					if (index !== -1) {
-						['MALE', 'FEMALE'].forEach((gender) => {
-							this.$store.state.racialDemographics.records[index]['QUANTITY_' + gender] = data[key + '_' + gender];
-						});
-					}
+					if (index !== -1) ['MALE', 'FEMALE'].forEach(gender => {
+						this.$store.state.racialDemographics.records[index][`QUANTITY_${gender}`] = data[`${key}_${gender}`];
+					});
 				}
 
 				// Ethnic Demographics
@@ -198,11 +191,9 @@
 					SUBURBAN: residenceMap.indexOf(4),
 					CITY: residenceMap.indexOf(5)
 				};
-				for (let key in residences) {
+				for (const key in residences) {
 					const index = residences[key];
-					if (index !== -1) {
-						this.$store.state.residenceDemographics.records[index].QUANTITY = data[key];
-					}
+					if (index !== -1) this.$store.state.residenceDemographics.records[index].QUANTITY = data[key];
 				}
 
 				// Target Audiences
@@ -226,11 +217,9 @@
 					ADULT: targAudMap.indexOf(35),
 					UGA_STAFF: targAudMap.indexOf(37)
 				};
-				for (let key in audiences) {
+				for (const key in audiences) {
 					const index = audiences[key];
-					if (index !== -1) {
-						this.$store.state.targetAudiences.records[index].QUANTITY = data[key];
-					}
+					if (index !== -1) this.$store.state.targetAudiences.records[index].QUANTITY = data[key];
 				}
 
 				// This can likely eventually be removed, as the k3 audience type is no
@@ -247,11 +236,9 @@
 					TOTAL_YOUTH_VOLUNTEERS: supMap.indexOf(37),
 					MILITARY_CONTACTS: supMap.indexOf(35)
 				};
-				for (let key in supps) {
+				for (const key in supps) {
 					const index = supps[key];
-					if (index !== -1) {
-						this.$store.state.supplementalData.records[index].FIELD_VALUE = data[key];
-					}
+					if (index !== -1) this.$store.state.supplementalData.records[index].FIELD_VALUE = data[key];
 				}
 
 				// We're done loading content

@@ -59,6 +59,7 @@
 			closeModal (event) {
 				const modalShouldBeClosed = this.cssSelectorsForClosingModal.reduce((modalShouldBeClosed, selector) => {
 					if (event.target.matches(selector)) modalShouldBeClosed = true;
+
 					return modalShouldBeClosed;
 				}, false);
 				if (modalShouldBeClosed) this.$emit('close-modal');

@@ -23,24 +23,22 @@ const genericCommentFieldDescription = `
 	PI / project originator.
 `.trim();
 
-const getResearchFarmDependencyTest = key => {
-	return val => {
-		if (!val) return false;
-		const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
-		if (farmIndex === -1) return false;
-		const farm = caesCache.data.crfp.researchFarm[farmIndex];
-		return farm[key] !== null;
-	};
+const getResearchFarmDependencyTest = key => val => {
+	if (!val) return false;
+	const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
+	if (farmIndex === -1) return false;
+	const farm = caesCache.data.crfp.researchFarm[farmIndex];
+
+	return farm[key] !== null;
 };
 
-const getResearchFarmDependentValueFn = key => {
-	return store => {
-		const farmId = store.state.project.PARTICIPATING_RESEARCH_FARM_ID;
-		if (nullTest(farmId)) return null;
-		const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(farmId);
-		if (farmIndex === -1) return null;
-		return caesCache.data.crfp.researchFarm[farmIndex][key];
-	};
+const getResearchFarmDependentValueFn = key => store => {
+	const farmId = store.state.project.PARTICIPATING_RESEARCH_FARM_ID;
+	if (nullTest(farmId)) return null;
+	const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(farmId);
+	if (farmIndex === -1) return null;
+
+	return caesCache.data.crfp.researchFarm[farmIndex][key];
 };
 
 const schema = {
@@ -108,7 +106,7 @@ const schema = {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'END_DATE',
@@ -118,7 +116,7 @@ const schema = {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_PERSONNEL_ID',
@@ -167,7 +165,7 @@ const schema = {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_LAST_NAME',
@@ -177,7 +175,7 @@ const schema = {
 				section: 'General Information',
 				order: 3
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PI_EMAIL',
@@ -354,11 +352,7 @@ const schema = {
 			constraint: {
 				foreignKey: 'name',
 				foreignLabel: 'name',
-				values: [
-					{	name: 'Research (Replicated Treatments)' },
-					{ name: 'Extension (Unreplicated Treatments)' },
-					{ name: 'Teaching' }
-				]
+				values: [{	name: 'Research (Replicated Treatments)' }, { name: 'Extension (Unreplicated Treatments)' }, { name: 'Teaching' }]
 			}
 		},
 		{
@@ -387,6 +381,7 @@ const schema = {
 				order: 2
 			}
 		},
+
 		// {
 		// 	columnName: 'PLAN_OF_WORK',
 		// 	type: 'nvarchar',
@@ -402,42 +397,36 @@ const schema = {
 			prettyName: 'Treatment List',
 			type: 'nvarchar',
 			inputType: 'file',
-			deleteFile: (projectId, fileName) => {
-				return deleteFile(projectId, 'TREATMENT_LIST_ATTACHMENT_PATH', fileName);
-			},
+			deleteFile: (projectId, fileName) => deleteFile(projectId, 'TREATMENT_LIST_ATTACHMENT_PATH', fileName),
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'PLOT_MAP_ATTACHMENT_PATH',
 			prettyName: 'Plot Map',
 			type: 'nvarchar',
 			inputType: 'file',
-			deleteFile: (projectId, fileName) => {
-				return deleteFile(projectId, 'PLOT_MAP_ATTACHMENT_PATH', fileName);
-			},
+			deleteFile: (projectId, fileName) => deleteFile(projectId, 'PLOT_MAP_ATTACHMENT_PATH', fileName),
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'CALENDAR_ATTACHMENT_PATH',
 			prettyName: 'Calendar',
 			type: 'nvarchar',
 			inputType: 'file',
-			deleteFile: (projectId, fileName) => {
-				return deleteFile(projectId, 'CALENDAR_ATTACHMENT_PATH', fileName);
-			},
+			deleteFile: (projectId, fileName) => deleteFile(projectId, 'CALENDAR_ATTACHMENT_PATH', fileName),
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 1
 			},
-			customClasses: [ 'inline' ]
+			customClasses: ['inline']
 		},
 		{
 			columnName: 'INVOLVES_PLANTS',
@@ -471,6 +460,7 @@ const schema = {
 				order: 1
 			}
 		},
+
 		// {
 		// 	columnName: 'FEDERAL_FUNDING_SOURCE',
 		// 	prettyName: 'Federal',
@@ -593,13 +583,14 @@ const schema = {
 				foreignKey: 'PERSONNEL_ID',
 				foreignLabel: 'DISPLAY_NAME'
 			},
-			getDependentValue: async (store) => {
+			getDependentValue: async store => {
 				const piPersonnelId = store.state.project.PI_PERSONNEL_ID;
 				if (nullTest(piPersonnelId)) return null;
 				try {
 					const dHeadId = await getDepartmentHeadCollegeId(piPersonnelId);
 					const dHeadIndex = caesCache.data.crfp.departmentHeads.map(h => h.COLLEGE_ID).indexOf(dHeadId);
 					if (dHeadIndex === -1) return;
+
 					return caesCache.data.crfp.departmentHeads[dHeadIndex].PERSONNEL_ID;
 				} catch (err) {
 					logError(err);
@@ -774,9 +765,11 @@ const schema = {
 			customComponent: SupplementalPlantInfo,
 			localKey: 'ID',
 			customClasses: ['full-width'],
-			// foreignKey: 'PROJECT_ID',
+
+			// ForeignKey: 'PROJECT_ID',
 			associatedColumn: 'PROJECT_ID',
-			// isAssignable: true,
+
+			// IsAssignable: true,
 			grouping: {
 				section: 'Scientist and Station Responsibilities',
 				order: 2
@@ -815,10 +808,7 @@ const schema = {
 				{
 					title: 'Dates',
 					order: 3,
-					columns: [
-						'START_DATE',
-						'END_DATE'
-					]
+					columns: ['START_DATE', 'END_DATE']
 				},
 				{
 					title: 'Non-CAES Principal Investigator',
@@ -875,29 +865,23 @@ const schema = {
 			fieldsets: [
 				{
 					title: 'Attachments',
-					columns: [
-						'TREATMENT_LIST_ATTACHMENT_PATH',
-						'PLOT_MAP_ATTACHMENT_PATH',
-						'CALENDAR_ATTACHMENT_PATH'
-					]
+					columns: ['TREATMENT_LIST_ATTACHMENT_PATH', 'PLOT_MAP_ATTACHMENT_PATH', 'CALENDAR_ATTACHMENT_PATH']
 				},
 				{
 					title: 'Project Involves Plants/Animals',
 					description: `Use the checkboxes below to indicate plant or animal
 					project (if "animal" or "plants and animals" is chosen, an AUP number
 					must be entered in order for the form to send.)`,
-					columns: [
-						'INVOLVES_PLANTS',
-						'INVOLVES_ANIMALS'
-					],
+					columns: ['INVOLVES_PLANTS', 'INVOLVES_ANIMALS'],
 					required: true
 				}
 			]
 		},
 		{
 			title: 'Additional Responsibilities and Funding',
-			order: 4,
-			// fieldsets: [
+			order: 4
+
+			// Fieldsets: [
 			// 	{
 			// 		title: 'Specify Funding Agencies',
 			// 		required: true,

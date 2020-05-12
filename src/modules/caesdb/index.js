@@ -19,10 +19,12 @@ export const generateUrl = (string, prefix) => [prefix, string, '.json'].join(''
 export const getCriteriaStructure = (databaseName, tablePrefix, callback) => {
 	if (!tablePrefix) {
 		logError(new Error('Cannot fetch criteria structure: table prefix is undefined'));
+
 		return;
 	}
 	if (!databaseName) {
 		logError(new Error('Cannot fetch criteria structure: database name is undefined'));
+
 		return;
 	}
 	const url = `${apiPrefix}criteriaStructure.json?TablePrefix=${tablePrefix}&DatabaseName=${databaseName}`;
@@ -36,13 +38,16 @@ export const getCriteriaStructure = (databaseName, tablePrefix, callback) => {
 export const asyncGetCriteriaStructure = (databaseName, tablePrefix) => {
 	if (!tablePrefix) {
 		logError(new Error('Cannot fetch criteria structure: table prefix is undefined'));
+
 		return;
 	}
 	if (!databaseName) {
 		logError(new Error('Cannot fetch criteria structure: database name is undefined'));
+
 		return;
 	}
 	const url = `${apiPrefix}criteriaStructure.json?TablePrefix=${tablePrefix}&DatabaseName=${databaseName}`;
+
 	return request.get(url);
 };
 
@@ -53,6 +58,7 @@ export const logError = (err, dump = {}, trace = null) => {
 
 	// Grab the current url
 	const currentUrl = new URL(window.location);
+
 	// Create an object that mirrors our error log table
 	const errObj = {
 		ID: null,
@@ -62,7 +68,7 @@ export const logError = (err, dump = {}, trace = null) => {
 		DATE_CREATED: null,
 		DATE_LAST_UPDATED: null,
 		BROWSER: navigator.userAgent,
-		ERROR_DATETIME: (new Date()).toUTCString(),
+		ERROR_DATETIME: new Date().toUTCString(),
 		DETAIL: null,
 		ERROR_DIAGNOSTICS: null,
 		ERROR_CODE: null,
@@ -85,6 +91,7 @@ export const logError = (err, dump = {}, trace = null) => {
 		APPLICATION_DUMP: null,
 		REQUEST_DUMP: null
 	};
+
 	// (typeof err === 'string' ? err : JSON.stringify(err, null, 2)) + (trace ? '\n' + JSON.stringify(trace, null, 2) : '')
 	if (err.status) {
 		let response = null;
@@ -101,17 +108,18 @@ export const logError = (err, dump = {}, trace = null) => {
 			response
 		}, null, 4)}</pre>`;
 	} else {
-		if (typeof err === 'object') {
-			errObj.DETAIL = `<pre>${JSON.stringify(err, null, 4)}</pre>`;
-		} else {
-			errObj.DETAIL = err;
-		}
+		if (typeof err === 'object') errObj.DETAIL = `<pre>${JSON.stringify(err, null, 4)}</pre>`;
+		 else errObj.DETAIL = err;
+
 		if (dump && dump !== '') errObj.APPLICATION_DUMP = JSON.stringify(dump, null, 4);
 	}
+
 	// The url for the error logging endpoint
 	let url = '/rest/global/logError.json';
+
 	// Optionally provide a url param specifying the application name
 	if (applicationName) url += `?applicationName=${applicationName}`;
+
 	// Send it off!
 	makePostRequest(url, prepareForCf(errObj), false);
 
@@ -125,13 +133,9 @@ export const makeGetRequest = (url, callback) => {
 		.end((err, response) => {
 			--window.pendingRequests;
 			const data = response.body;
-			if (err) {
-				callback(err);
-			} else if (data.Message) {
-				callback(new Error(data.Message));
-			} else {
-				callback(null, data);
-			}
+			if (err) callback(err);
+			 else if (data.Message) callback(new Error(data.Message));
+			 else callback(null, data);
 		});
 };
 
@@ -140,6 +144,7 @@ export const makeAsyncPostRequest = async (url, dataToSend, isCriteriaStructure 
 	try {
 		const response = await request.post(url).send(isCriteriaStructure ? jsToCf(dataToSend) : dataToSend);
 		--window.pendingRequests;
+
 		return response.body;
 	} catch (err) {
 		--window.pendingRequests;
@@ -154,12 +159,8 @@ export const makePostRequest = (url, dataToSend, callback, isCriteriaStructure =
 		.end((err, response) => {
 			--window.pendingRequests;
 			const data = response.body;
-			if (err || !data) {
-				callback(err || new Error('No data returned'));
-			} else if (data.Message) {
-				callback(new Error(data.Message));
-			} else {
-				callback(null, data);
-			}
+			if (err || !data) callback(err || new Error('No data returned'));
+			 else if (data.Message) callback(new Error(data.Message));
+			 else callback(null, data);
 		});
 };

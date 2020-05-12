@@ -43,6 +43,7 @@
 				const filteredList = caesCache.data.crfp[this.isPrinciple ? 'principleInvestigators' : 'secondaryContacts'].filter(p => p.PERSONNEL_ID === this.personnelId);
 				if (filteredList.length < 1) return nullPi;
 				const personnelRecord = filteredList[0];
+
 				return {
 					name: personnelRecord.FULL_NAME_LAST_FIRST,
 					email: personnelRecord.EMAIL,

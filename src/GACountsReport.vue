@@ -14,7 +14,7 @@
 			<button
 				v-if="!isNew && userCanFileSubReport && userCollaboratorRecord.HAS_REPORTED === 0"
 				type="button"
-				class="reject-sub-report hide-on-print"
+				class="hide-on-print reject-sub-report"
 				@click="redirectToSubReportRejection"
 			>
 				Decline Sub-Report
@@ -30,7 +30,7 @@
 			<button
 				v-if="(userIsOwner || userIsAdmin) && !isNew && mode === 'edit'"
 				type="button"
-				class="hide-on-print delete"
+				class="delete hide-on-print"
 				@click="deleteReport"
 			>
 				Delete
@@ -46,7 +46,7 @@
 			<button
 				v-if="!isNew && duplicateRecord.hasBeenFetched"
 				type="button"
-				:class="`favorite ${duplicateRecord.IS_TEMPLATE ? 'filled-in': ''} hide-on-print`"
+				:class="`favorite ${duplicateRecord.IS_TEMPLATE ? 'filled-in' : ''} hide-on-print`"
 				title="Making a report a favorite will pin it to your GACounts homepage, allowing for easier duplication."
 				@click="updateReportTemplateStatus"
 			>
@@ -136,7 +136,7 @@
 	} from '~/modules/utilities';
 	import {
 		getCriteriaStructure,
-		logError,
+		logError
 	} from '~/modules/caesdb';
 	import {
 		getDuplicatedReport,
@@ -200,15 +200,12 @@
 			// If not entering a new record, we need to get the Report ID
 			if (!isNew) {
 				const id = url.getParam('PK_ID') || url.getParam('pk_id');
-				if (id) {
-					data.identifier = {
-						key: 'ID',
-						value: id,
-						duplicate: false
-					};
-				} else {
-					logError(new Error('Neither the "new" parameter or a pkid were found when attempting to view an existing report.  This state should not be possible, so it must mean something has really gone wrong.'));
-				}
+				if (id) data.identifier = {
+					key: 'ID',
+					value: id,
+					duplicate: false
+				};
+				else logError(new Error('Neither the "new" parameter or a pkid were found when attempting to view an existing report.  This state should not be possible, so it must mean something has really gone wrong.'));
 			} else if (duplicateId) {
 				data.identifier = {
 					key: 'ID',
@@ -218,9 +215,8 @@
 			}
 
 			// Set the mode to edit if applicable
-			if (isNew) {
-				data.mode = 'edit';
-			}
+			if (isNew) data.mode = 'edit';
+
 
 			return data;
 		},
@@ -231,13 +227,11 @@
 			},
 			schemaLessStore: {
 				get () {
-					let schemaLessStore = Object.assign({}, this.$store.state);
+					const schemaLessStore = { ...this.$store.state };
 					delete schemaLessStore.schema;
-					if (schemaLessStore.subschemas) {
-						for (let key in schemaLessStore.subschemas) {
-							delete schemaLessStore.subschemas[key].schema;
-						}
-					}
+					if (schemaLessStore.subschemas) for (const key in schemaLessStore.subschemas) delete schemaLessStore.subschemas[key].schema;
+
+
 					return schemaLessStore;
 				}
 			},
@@ -248,6 +242,7 @@
 				const userCollaboratorRecordIndex = this.$store.state.collaborators.records.map(r => r.PERSONNEL_ID).indexOf(activeUserID);
 				if (userCollaboratorRecordIndex === -1) return {};
 				const userCollaboratorRecord = this.$store.state.collaborators.records[userCollaboratorRecordIndex];
+
 				return userCollaboratorRecord;
 			},
 			userIsAdmin () {
@@ -261,22 +256,20 @@
 			ID () {
 				// Once we have a report ID, we need to check if the user has a
 				// duplicated report record for this report
-				if (!isNaN(this.ID)) {
-					getCriteriaStructure('GACOUNTS3', 'GC3_DUPLICATED_REPORT', (err, data) => {
-						if (err) logError(err);
-						if (data) {
-							let critStruct = data;
-							critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
-							critStruct.criteria_REPORT_ID_eq.push(this.ID);
-							getDuplicatedReport(critStruct, (err, data) => {
-								if (err) logError(err);
-								this.duplicateRecord.REPORT_ID = this.ID;
-								if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
-								this.duplicateRecord.hasBeenFetched = true;
-							});
-						}
-					});
-				}
+				if (!isNaN(this.ID)) getCriteriaStructure('GACOUNTS3', 'GC3_DUPLICATED_REPORT', (err, data) => {
+					if (err) logError(err);
+					if (data) {
+						const critStruct = data;
+						critStruct.criteria_PERSONNEL_ID_eq.push(activeUserID);
+						critStruct.criteria_REPORT_ID_eq.push(this.ID);
+						getDuplicatedReport(critStruct, (err, data) => {
+							if (err) logError(err);
+							this.duplicateRecord.REPORT_ID = this.ID;
+							if (data.length > 0) this.duplicateRecord.IS_TEMPLATE = data[0].IS_TEMPLATE;
+							this.duplicateRecord.hasBeenFetched = true;
+						});
+					}
+				});
 			},
 			TITLE () {
 				if (!this.isNew && this.breadCrumbsHaveNotBeenSet && this.TITLE !== null && this.TITLE !== '') {
@@ -289,14 +282,11 @@
 			this.watchFields = true;
 			if (this.userIsOwner) this.mode = 'edit';
 			if (url.getParam('new') !== null) this.OWNER_ID = activeUserID;
+
 			// Set the page title
-			if (this.isNew && this.isDuplicate) {
-				document.title = `Duplicate Activity Report | ${document.title}`;
-			} else if (this.isNew) {
-				document.title = `New Activity Report | ${document.title}`;
-			} else {
-				document.title = `View Activity Report | ${document.title}`;
-			}
+			if (this.isNew && this.isDuplicate) document.title = `Duplicate Activity Report | ${document.title}`;
+			else if (this.isNew) document.title = `New Activity Report | ${document.title}`;
+			else document.title = `View Activity Report | ${document.title}`;
 		},
 		methods: {
 			deleteReport () {
@@ -306,46 +296,42 @@
 					type: 'warning',
 					showCancelButton: true,
 					confirmButtonText: 'Yes, delete it!'
-				}).then((result) => {
-					if (result.value) {
-						this.schema.deleteExisting(this.identifier.value, (err, data) => {
-							if (err) logError(err);
-							if (data.SUCCESS) {
-								swal(
-									'Deleted!',
-									'Your ' + this.schema.title + ' has been deleted.',
-									'success'
-								).then(() => {
-									window.location.assign('https://' + window.location.hostname + '/gacounts3');
-								});
-							} else {
-								swal(
-									'Oops!',
-									'Something went wrong on our end and your ' + this.schema.title + ' could not be deleted.',
-									'error'
-								);
-							}
+				}).then(result => {
+					if (result.value) this.schema.deleteExisting(this.identifier.value, (err, data) => {
+						if (err) logError(err);
+						if (data.SUCCESS) swal(
+							'Deleted!',
+							`Your ${this.schema.title} has been deleted.`,
+							'success'
+						).then(() => {
+							window.location.assign(`https://${window.location.hostname}/gacounts3`);
 						});
-					}
+						else swal(
+							'Oops!',
+							`Something went wrong on our end and your ${this.schema.title} could not be deleted.`,
+							'error'
+						);
+					});
 				});
 			},
 			redirectToDuplication () {
-				window.location = 'https://' + window.location.hostname + '/gacounts3?referenceInterface=REPORT&subInterface=detail_main&new&duplicateID=' + this.ID;
+				window.location = `https://${window.location.hostname}/gacounts3?referenceInterface=REPORT&subInterface=detail_main&new&duplicateID=${this.ID}`;
 			},
 			redirectToSubReportEntry () {
-				window.location = 'https://' + window.location.hostname + '/gacounts3?function=NewSubReport&REPORT_ID=' + this.ID + '&PERSONNEL_ID=' + activeUserID;
+				window.location = `https://${window.location.hostname}/gacounts3?function=NewSubReport&REPORT_ID=${this.ID}&PERSONNEL_ID=${activeUserID}`;
 			},
 			redirectToSubReportRejection () {
-				window.location = 'https://' + window.location.hostname + '/gacounts3?function=RefuseSubReportInvitation&REPORT_ID=' + this.ID;
+				window.location = `https://${window.location.hostname}/gacounts3?function=RefuseSubReportInvitation&REPORT_ID=${this.ID}`;
 			},
 			reloadPage () {
-				if (this.inputID !== null) {
+				if (this.inputID !== null)
+
 					// Send to existing report
-					window.location.href = window.location.href + '&pkid=' + this.inputID;
-				} else {
+					window.location.href = `${window.location.href}&pkid=${this.inputID}`;
+				else
+
 					// Send to new report
-					window.location.href = window.location.href + '&new';
-				}
+					window.location.href = `${window.location.href}&new`;
 			},
 			setBreadCrumbs () {
 				const breadCrumbList = document.querySelector('ul.breadcrumbs');
@@ -353,34 +339,28 @@
 					const item = document.createElement('li');
 					const link = document.createElement('a');
 					link.setAttribute('href', url);
-					link.innerHTML = text + ' ';
+					link.innerHTML = `${text} `;
 					item.appendChild(link);
 					breadCrumbList.appendChild(item);
 				};
-				addListItem('https://' + window.location.hostname + '/gacounts3/index.cfm?function=reporting_index', 'Reports');
+				addListItem(`https://${window.location.hostname}/gacounts3/index.cfm?function=reporting_index`, 'Reports');
 				addListItem(window.location, this.TITLE);
 			},
 			toggleMode () {
-				if (this.mode === 'edit') {
-					this.mode = 'view';
-				} else if (this.mode === 'view') {
-					this.mode = 'edit';
-				}
+				if (this.mode === 'edit') this.mode = 'view';
+				else if (this.mode === 'view') this.mode = 'edit';
 			},
 			updateReportTemplateStatus () {
-				const duplicateRecord = Object.assign({}, this.duplicateRecord);
+				const duplicateRecord = { ...this.duplicateRecord };
 				duplicateRecord.IS_TEMPLATE = !this.duplicateRecord.IS_TEMPLATE;
 				postReportTemplateStatus(duplicateRecord, (err, data) => {
 					if (err) logError(err);
-					if (data.SUCCESS) {
-						this.duplicateRecord.IS_TEMPLATE = duplicateRecord.IS_TEMPLATE;
-					} else {
-						notify.error(data.messages);
-					}
+					if (data.SUCCESS) this.duplicateRecord.IS_TEMPLATE = duplicateRecord.IS_TEMPLATE;
+					else notify.error(data.messages);
 				});
 			}
 		},
-		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
+		store: getStore(schema, !url.getParam('key') || url.getParam('key') && !url.getParam('value'))
 	};
 </script>
 

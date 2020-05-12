@@ -45,7 +45,7 @@
 			}
 		},
 		data () {
-			return Object.assign({}, this.duplicationSchema);
+			return { ...this.duplicationSchema };
 		},
 		computed: {
 			duplication: {
@@ -58,19 +58,16 @@
 			},
 			totalDuplicates () {
 				let count = 0;
-				for (let key in this.sections) {
-					if (this.sections[key].duplicate) ++count;
-				}
+				for (const key in this.sections) if (this.sections[key].duplicate) ++count;
+
 				return count;
 			}
 		},
 		watch: {
 			totalDuplicates () {
-				for (let key in this.sections) {
+				for (const key in this.sections) {
 					const section = this.sections[key];
-					if (!this.dependenciesMet(section)) {
-						section.duplicate = false;
-					}
+					if (!this.dependenciesMet(section)) section.duplicate = false;
 				}
 			}
 		},
@@ -79,37 +76,32 @@
 				this.duplication.ready = true;
 			},
 			closeModal (event) {
-				if (event.target.matches('div.modal')) {
-					this.cancelDuplication();
-				}
+				if (event.target.matches('div.modal')) this.cancelDuplication();
 			},
 			dependenciesMet (section) {
 				if (!section.depends) return true;
 				let dependenciesMet = true;
-				section.depends.forEach((dependency) => {
+				section.depends.forEach(dependency => {
 					if (!this.sections[dependency].duplicate) dependenciesMet = false;
 				});
+
 				return dependenciesMet;
 			},
 			processDuplicationOptions () {
-				for (let key in this.sections) {
+				for (const key in this.sections) {
 					const section = this.sections[key];
 					if (section.duplicate) {
-						if (section.areas.columns && section.areas.columns.length > 0) {
-							section.areas.columns.forEach((column) => {
-								this.duplication.columns[column] = true;
-							});
-						}
-						if (section.areas.associations && section.areas.associations.length > 0) {
-							section.areas.associations.forEach((association) => {
-								this.duplication.associations[association] = true;
-							});
-						}
-						if (section.areas.subschemas && section.areas.subschemas.length > 0) {
-							section.areas.subschemas.forEach((subschema) => {
-								this.duplication.subschemas[subschema] = true;
-							});
-						}
+						if (section.areas.columns && section.areas.columns.length > 0) section.areas.columns.forEach(column => {
+							this.duplication.columns[column] = true;
+						});
+
+						if (section.areas.associations && section.areas.associations.length > 0) section.areas.associations.forEach(association => {
+							this.duplication.associations[association] = true;
+						});
+
+						if (section.areas.subschemas && section.areas.subschemas.length > 0) section.areas.subschemas.forEach(subschema => {
+							this.duplication.subschemas[subschema] = true;
+						});
 					}
 				}
 				this.duplication.ready = true;

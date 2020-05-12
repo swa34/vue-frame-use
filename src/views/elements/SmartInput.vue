@@ -277,6 +277,7 @@
 		computed: {
 			dependentColumnValue () {
 				if (!this.field.depends || !this.field.depends.column) return null;
+
 				return this.$store.state[this.$store.state.schema.title.toLowerCase()][this.field.depends.column];
 			},
 			fieldName () { return this.field.prettyName || getPrettyColumnName(this.field.columnName); },

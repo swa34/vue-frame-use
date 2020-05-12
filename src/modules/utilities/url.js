@@ -8,6 +8,7 @@ const getParam = term => url.searchParams.get(term);
 
 const getEditMode = () => {
 	const editParam = getParam('edit');
+
 	return editParam && editParam === 'true';
 };
 

@@ -13,30 +13,29 @@
 		props: {
 			value: {
 				default: null,
-				type: [
-					Number,
-					String
-				]
+				type: [Number, String]
 			}
 		},
 		computed: {
 			date: {
 				get () {
 					if (this.value) return dateFormat(this.value, 'yyyy-mm-dd');
+
 					return null;
 				},
 				set (val) {
-					const newValue = val + ' ' + this.time + ':00';
+					const newValue = `${val} ${this.time}:00`;
 					this.$emit('input', newValue);
 				}
 			},
 			time: {
 				get () {
 					if (this.value) return dateFormat(this.value, 'HH:MM');
+
 					return null;
 				},
 				set (val) {
-					const newValue = this.date + ' ' + val + ':00';
+					const newValue = `${this.date} ${val}:00`;
 					this.$emit('input', newValue);
 				}
 			}

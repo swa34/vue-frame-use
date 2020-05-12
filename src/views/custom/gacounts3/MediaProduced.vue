@@ -81,7 +81,7 @@
 	export default {
 		name: 'MediaProduced',
 		props: {
-			'mode': {
+			mode: {
 				type: String,
 				default: 'view',
 				validator: modeValidator
@@ -101,23 +101,22 @@
 			},
 			record: {
 				get () {
-					if (this.$store.state.mediaProduced.records.length < 1) {
-						return {
-							'ID': null,
-							'REPORT_ID': null,
-							'TYPE_ID': null,
-							'CITATION': null,
-							'REVIEW_TYPE_ID': null,
-							'STATUS_ID': 3
-						};
-					} else {
-						return this.$store.state.mediaProduced.records[0];
-					}
+					if (this.$store.state.mediaProduced.records.length < 1) return {
+						ID: null,
+						REPORT_ID: null,
+						TYPE_ID: null,
+						CITATION: null,
+						REVIEW_TYPE_ID: null,
+						STATUS_ID: 3
+					};
+
+					return this.$store.state.mediaProduced.records[0];
 				},
 				set (val) {
 					this.$store.state.mediaProduced.records = [];
 					this.$store.state.mediaProduced.records.push(val);
-					// if (this.$store.state.mediaProduced.records.length > 1) {
+
+					// If (this.$store.state.mediaProduced.records.length > 1) {
 					// 	this.$
 					// };
 				}
@@ -133,15 +132,13 @@
 						critStruct.criteria_REPORT_ID_eq = [this.reportID || this.duplication.reportID];
 						getMediaProduction(critStruct, (err, data) => {
 							if (err) logError(err);
-							if (data) {
-								if (data.length < 1) {
-									this.populateRecord();
-								} else {
-									this.record = data[0];
-									if (!this.reportID && this.duplication.reportID) {
-										this.record.ID = null;
-										this.record.REPORT_ID = null;
-									}
+							if (data) if (data.length < 1) {
+								this.populateRecord();
+							} else {
+								this.record = data[0];
+								if (!this.reportID && this.duplication.reportID) {
+									this.record.ID = null;
+									this.record.REPORT_ID = null;
 								}
 							}
 						});
@@ -185,12 +182,14 @@
 				if (id === null) return '';
 				const index = this.mediaTypes.map(t => t.ID).indexOf(id);
 				if (index === -1) return '';
+
 				return this.mediaTypes[index].LABEL;
 			},
 			getReviewTypeLabelFromID (id) {
 				if (id === null) return '';
 				const index = this.reviewTypes.map(t => t.ID).indexOf(id);
 				if (index === -1) return '';
+
 				return this.reviewTypes[index].LABEL;
 			},
 			populateRecord () {

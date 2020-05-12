@@ -16,33 +16,35 @@ const compare = {
 
 // Sorting function
 const sortRecords = (records, key) => {
-	if (records.length > 0) {
-		if (!key) {
-			// If no key, attempt alphabetical sort
-			let testRecord = records[0];
-			if (testRecord.hasOwnProperty('LABEL')) {
-				// Sort by LABEL key
-				records.sort((a, b) => {
-					if (a.LABEL > b.LABEL) return 1;
-					if (a.LABEL === b.LABEL) return 0;
-					return -1;
-				});
-			} else if (testRecord.hasOwnProperty('NAME')) {
-				// Sort by NAME key
-				records.sort((a, b) => {
-					if (a.NAME > b.NAME) return 1;
-					if (a.NAME === b.NAME) return 0;
-					return -1;
-				});
-			}
-		} else {
-			// Else, sort by the key
+	if (records.length > 0) if (!key) {
+		// If no key, attempt alphabetical sort
+		const testRecord = records[0];
+		if (testRecord.hasOwnProperty('LABEL'))
+
+		// Sort by LABEL key
 			records.sort((a, b) => {
-				if (a[key] > b[key]) return 1;
-				if (a[key] === b[key]) return 0;
+				if (a.LABEL > b.LABEL) return 1;
+				if (a.LABEL === b.LABEL) return 0;
+
 				return -1;
 			});
-		}
+			 else if (testRecord.hasOwnProperty('NAME'))
+
+		// Sort by NAME key
+			records.sort((a, b) => {
+				if (a.NAME > b.NAME) return 1;
+				if (a.NAME === b.NAME) return 0;
+
+				return -1;
+			});
+	} else {
+		// Else, sort by the key
+		records.sort((a, b) => {
+			if (a[key] > b[key]) return 1;
+			if (a[key] === b[key]) return 0;
+
+			return -1;
+		});
 	}
 };
 
@@ -71,6 +73,7 @@ const criteriaToObj = (criteria, value) => {
 		test (record) {
 			// If the record doesn't contain the key, it's invalid
 			if (!record[this.key]) return false;
+
 			return compare[this.comparison](record[this.key], this.value);
 		}
 	};
@@ -83,12 +86,12 @@ const criteriaToObj = (criteria, value) => {
 // the specified criteria.
 const filter = (records, criteriaStructure = {}) => {
 	// An array to hold records that satisfy the criteria
-	let newRecords = [];
+	const newRecords = [];
 
 	// Loop through each of the records
-	records.forEach((record) => {
+	records.forEach(record => {
 		let recordIsValid = true;
-		for (let key in criteriaStructure) {
+		for (const key in criteriaStructure) {
 			// Convert the key to an object
 			const criteria = criteriaToObj(key, criteriaStructure[key]);
 
@@ -101,52 +104,51 @@ const filter = (records, criteriaStructure = {}) => {
 			// If the record is invalid, exit the loop
 			if (!recordIsValid) break;
 		}
+
 		// Self-explanatory
 		if (recordIsValid) newRecords.push(record);
 	});
 
 	// Return the valid records
 	sortRecords(newRecords, criteriaStructure.SortKey);
+
 	return newRecords;
 };
 
-const jsToCf = (criteriaStructure) => {
-	let newCriteriaStructure = Object.assign({}, criteriaStructure);
-	for (let key in newCriteriaStructure) {
-		switch (true) {
-			case (newCriteriaStructure[key] === null):
-				newCriteriaStructure[key] = '';
-				break;
-			case (Array.isArray(newCriteriaStructure[key])):
-				newCriteriaStructure[key] = newCriteriaStructure[key].join(',');
-				break;
-			case (typeof newCriteriaStructure[key] === 'boolean'):
-				newCriteriaStructure[key] = newCriteriaStructure[key].toString();
-				break;
-		};
+const jsToCf = criteriaStructure => {
+	const newCriteriaStructure = { ...criteriaStructure };
+	for (const key in newCriteriaStructure) switch (true) {
+		case newCriteriaStructure[key] === null:
+			newCriteriaStructure[key] = '';
+			break;
+		case Array.isArray(newCriteriaStructure[key]):
+			newCriteriaStructure[key] = newCriteriaStructure[key].join(',');
+			break;
+		case typeof newCriteriaStructure[key] === 'boolean':
+			newCriteriaStructure[key] = newCriteriaStructure[key].toString();
+			break;
 	}
+
 	return newCriteriaStructure;
 };
 
-const cfToJs = (criteriaStructure) => {
-	let newCriteriaStructure = Object.assign({}, criteriaStructure);
-	for (let key in newCriteriaStructure) {
-		switch (true) {
-			case (newCriteriaStructure[key] === ''):
-				const critMatch = key.match(rgx.comparison);
-				if (critMatch && critMatch[1]) {
-					if (/n?eq/.test(critMatch[1])) {
-						newCriteriaStructure[key] = [];
-					} else {
-						newCriteriaStructure[key] = null;
-					}
-				}
-				break;
-			case (/false|true/i.test(newCriteriaStructure[key])):
-				newCriteriaStructure[key] = JSON.parse(newCriteriaStructure[key]);
-				break;
-		}
+const cfToJs = criteriaStructure => {
+	const newCriteriaStructure = { ...criteriaStructure };
+	for (const key in newCriteriaStructure) switch (true) {
+		case newCriteriaStructure[key] === '':
+			const critMatch = key.match(rgx.comparison);
+			if (critMatch && critMatch[1]) if ((/n?eq/).test(critMatch[1])) {
+				newCriteriaStructure[key] = [];
+			} else {
+				newCriteriaStructure[key] = null;
+			}
+
+			break;
+		case (/false|true/i).test(newCriteriaStructure[key]):
+			newCriteriaStructure[key] = JSON.parse(newCriteriaStructure[key]);
+			break;
 	}
+
 	return newCriteriaStructure;
 };
 

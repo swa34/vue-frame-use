@@ -1,43 +1,29 @@
 const maps = [
 	{
 		input: 'number',
-		types: [
-			'int',
-			'float'
-		]
+		types: ['int', 'float']
 	},
 	{
 		input: 'date',
-		types: [
-			'datetime'
-		]
+		types: ['datetime']
 	},
 	{
 		input: 'checkbox',
-		types: [
-			'bit'
-		]
+		types: ['bit']
 	},
 	{
 		input: 'text',
-		types: [
-			'nvarchar'
-		]
+		types: ['nvarchar']
 	},
 	{
 		input: 'textarea',
-		types: [
-			'ntext'
-		]
+		types: ['ntext']
 	}
 ];
 
 export default column => {
 	for (let i = 0; i < maps.length; ++i) {
-		if (!column.constraint && maps[i].types.indexOf(column.type) !== -1) {
-			return maps[i].input;
-		} else if (column.constraint) {
-			return 'select';
-		}
+		if (!column.constraint && maps[i].types.indexOf(column.type) !== -1) return maps[i].input;
+		 if (column.constraint) return 'select';
 	}
 };

@@ -188,6 +188,7 @@
 					'DuPlIcAtEiD'
 				].reduce((duplicateId, param) => {
 					if (url.getParam(param) !== null) duplicateId = url.getParam(param);
+
 					return duplicateId;
 				}, false);
 			},
@@ -200,6 +201,7 @@
 				const duplicate = this.isDuplicatedProject;
 				const value = duplicate ? this.duplicateId : url.getParam('PK_ID') || url.getParam('pk_id');
 				if (!value) return false;
+
 				return {
 					key,
 					duplicate,
@@ -222,10 +224,12 @@
 			projectsNextStatusId () { return getProjectsNextStatusId(this.$store.state.project); },
 			savedWithoutSubmit () {
 				if (!this.STATUS_ID) return false;
+
 				// Find the name of the project's current status
 				const indexOfStatusId = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.STATUS_ID);
 				if (indexOfStatusId === -1) return false;
 				const currentStatusName = caesCache.data.crfp.status[indexOfStatusId].NAME;
+
 				return currentStatusName === 'Saved Without Submission';
 			},
 			userHasEditRights () {
@@ -239,12 +243,15 @@
 			userIsAdmin () { return Boolean(activeUser.IS_ADMINISTRATOR); },
 			userIsApprover () {
 				if (!activeUserId) return false;
+
 				return this.approvers.indexOf(activeUserId) !== -1;
 			},
 			userIsCurrentApprover () {
 				if (!this.STATUS_ID) return false;
+
 				// If they're not the approver, they're not the current one either
 				if (!this.userIsApprover) return false;
+
 				// Find the name of the project's current status
 				const indexOfStatusId = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.STATUS_ID);
 				if (indexOfStatusId === -1) return false;
@@ -253,15 +260,20 @@
 
 				// Filter the columns down to columns containing extra status/personnel data
 				const columnsWithExtraStatus = schema.columns.filter(c => c.extra && c.extra.status);
+
 				// Grab the index of the column for the current pending approver
 				const indexOfColumnForPersonnel = columnsWithExtraStatus.map(c => c.extra.status).indexOf(currentStatusName);
 				if (indexOfColumnForPersonnel === -1) return false;
+
 				// Grab that personnel id string
 				const personnelString = columnsWithExtraStatus[indexOfColumnForPersonnel].extra.personnelColumn;
+
 				// If it's not there, we're in trouble
 				if (!personnelString) return false;
+
 				// Finally, determine whether the current user is that approver
 				const isCurrentApprover = this[personnelString] === activeUserId;
+
 				return isCurrentApprover;
 			},
 			userIsOriginator () { return this.ORIGINATOR_ID === activeUserId; },
@@ -271,6 +283,7 @@
 			// This function will only ever be run once
 			if (this.isNewProject) this.initializeNewProject();
 			this.setDocumentTitle();
+
 			// Set mode
 			if (url.getParam('pk_id')) this.mode = 'view';
 		},
@@ -285,18 +298,13 @@
 					cancelButtonColor: '#004e60',
 					confirmButtonText: 'Yes, delete it!'
 				}).then(async result => {
-					if (result.value) {
-						try {
-							const response = await deleteProject(this.ID);
-							if (response.success) {
-								alert.successfulDelete(this.schema.title.toLowerCase());
-							} else {
-								alert.failedDelete(this.schema.title.toLowerCase(), response.Messages);
-							}
-						} catch (err) {
-							logError(err);
-							alert.failedDelete(this.schema.title.toLowerCase(), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
-						}
+					if (result.value) try {
+						const response = await deleteProject(this.ID);
+						if (response.success) alert.successfulDelete(this.schema.title.toLowerCase());
+						else alert.failedDelete(this.schema.title.toLowerCase(), response.Messages);
+					} catch (err) {
+						logError(err);
+						alert.failedDelete(this.schema.title.toLowerCase(), '<p>Server error.  If the problem persists please contact caesweb@uga.edu.</p>');
 					}
 				});
 			},
@@ -310,12 +318,13 @@
 			getPreparedStoreForSubmit () {
 				const schemaLessStore = deepObjectAssign({}, this.$store.state);
 				delete schemaLessStore.schema;
-				for (let key in schemaLessStore.project) if (schemaLessStore.project[key] === null) schemaLessStore.project[key] = '';
+				for (const key in schemaLessStore.project) if (schemaLessStore.project[key] === null) schemaLessStore.project[key] = '';
 				schema.associations.map(a => stringFormats.camelCase(a.title)).forEach(association => {
 					schemaLessStore[association].records.forEach(record => {
-						for (let key in record) if (record[key] === null) record[key] = '';
+						for (const key in record) if (record[key] === null) record[key] = '';
 					});
 				});
+
 				// Need to re-add files since they get broken during the deep object assign
 				schema.columns.filter(c => c.inputType === 'file').forEach(column => {
 					schemaLessStore.project[column.columnName] = this.$store.state.project[column.columnName];
@@ -327,24 +336,26 @@
 						'Pending Final Site Approver Approval',
 						'Pending Office of Associate Dean of Research Approval'
 					];
+
 					return approvalStatusNames.indexOf(status.NAME) !== -1;
 				}).forEach(status => {
-					const approvalDateString = status.NAME
+					const approvalDateString = `${status.NAME
 						.replace(/^Pending (Superintendent|Department Head|Final Site Approver|Office of)(?: Approval| Associate Dean of )(Research)?.*/, '$1 $2')
 						.trim()
 						.toUpperCase()
-						.replace(/ /g, '_') + '_APPROVAL_DATE';
+						.replace(/ /g, '_')}_APPROVAL_DATE`;
 					if (schemaLessStore.project.STATUS_ID === status.ID) {
 						const now = new Date();
 						schemaLessStore.project[approvalDateString] = dateFormat(now, 'yyyy-mm-dd HH:MM:ss');
 					}
 				});
+
 				return schemaLessStore;
 			},
 			async rejectProject () {
 				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
-				projectBlob.project.STATUS_ID = this.statusesIndexedByName['Rejected'];
+				projectBlob.project.STATUS_ID = this.statusesIndexedByName.Rejected;
 				let response = await saveProject(projectBlob);
 				response = await response.body;
 				if (response.SUCCESS) {
@@ -361,6 +372,7 @@
 					const indexOfStatus = caesCache.data.crfp.status.map(s => s.NAME).indexOf('Saved Without Submission');
 					if (indexOfStatus === -1) {
 						logError('Unable to save project.  Unable to set status for saving without submission.');
+
 						return;
 					}
 					projectBlob.project.STATUS_ID = caesCache.data.crfp.status[indexOfStatus].ID;
@@ -368,35 +380,25 @@
 				let response = await saveProject(projectBlob, true);
 				response = await response.body;
 				if (response.SUCCESS) {
-					if (this.isNewProject) {
-						alert.successfulSave(this.schema.title.toLowerCase(), response.PROJECT_ID);
-					} else {
-						alert.successfulChanges(response.PROJECT_ID);
-					}
+					if (this.isNewProject) alert.successfulSave(this.schema.title.toLowerCase(), response.PROJECT_ID);
+					else alert.successfulChanges(response.PROJECT_ID);
 				} else {
 					alert.failedSave(this.schema.title.toLowerCase(), response.MESSAGES, this.isNewProject);
 					this.isSubmissionPending = false;
 				}
 			},
 			setDocumentTitle () {
-				if (this.isNewProject && this.isDuplicatedProject) {
-					document.title = `Duplicate Research Farm Project | ${document.title}`;
-				} else if (this.isNewProject) {
-					document.title = `New Research Farm Project | ${document.title}`;
-				} else if (this.mode === 'edit') {
-					document.title = `Research Farm Project | ${document.title}`;
-				} else {
-					document.title = `View Research Farm Project | ${document.title}`;
-				}
+				if (this.isNewProject && this.isDuplicatedProject) document.title = `Duplicate Research Farm Project | ${document.title}`;
+				else if (this.isNewProject) document.title = `New Research Farm Project | ${document.title}`;
+				else if (this.mode === 'edit') document.title = `Research Farm Project | ${document.title}`;
+				else document.title = `View Research Farm Project | ${document.title}`;
 			},
 			async submitProject (isBeingSubmittedForApproval = false) {
 				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
-				if (isBeingSubmittedForApproval) {
-					projectBlob.project.STATUS_ID = getProjectsNextStatusId(this.$store.state.project, true);
-				} else {
-					projectBlob.project.STATUS_ID = this.projectsNextStatusId;
-				}
+				if (isBeingSubmittedForApproval) projectBlob.project.STATUS_ID = getProjectsNextStatusId(this.$store.state.project, true);
+				else projectBlob.project.STATUS_ID = this.projectsNextStatusId;
+
 				let response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
 				response = await response.body;
@@ -422,7 +424,7 @@
 			},
 			toggleMode () { this.mode === 'edit' ? this.mode = 'view' : this.mode = 'edit'; }
 		},
-		store: getStore(schema, !url.getParam('key') || (url.getParam('key') && !url.getParam('value')))
+		store: getStore(schema, !url.getParam('key') || url.getParam('key') && !url.getParam('value'))
 	};
 </script>
 

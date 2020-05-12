@@ -140,6 +140,7 @@
 				columns: getObjectIndexedByKeyFromArray(supplementalPlantInfoSchema.columns, 'columnName'),
 				localRecord: supplementalPlantInfoSchema.columns.reduce((out, column) => {
 					out[column.columnName] = null;
+
 					return out;
 				}, {}),
 				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
@@ -166,6 +167,7 @@
 					'DuPlIcAtEiD'
 				].reduce((duplicateId, param) => {
 					if (url.getParam(param) !== null) duplicateId = url.getParam(param);
+
 					return duplicateId;
 				}, false);
 			},
@@ -173,12 +175,13 @@
 			isNew () { return this.$store.state.project.ID === null; },
 			record: {
 				get () {
-					let records = this.$store.state.supplementalPlantInformation.records;
+					const { records } = this.$store.state.supplementalPlantInformation;
 					if (records.length < 1) return this.localRecord;
+
 					return records[0];
 				},
 				set (val) {
-					let records = this.$store.state.supplementalPlantInformation.records;
+					const { records } = this.$store.state.supplementalPlantInformation;
 					if (records.length < 1) records.push(val);
 					records[0] = val;
 				}
@@ -186,6 +189,7 @@
 			shouldBeDuplicated () {
 				if (!this.$store.state.duplication) return false;
 				if (!this.$store.state.duplication.associations) return false;
+
 				return this.$store.state.duplication.associations.supplementalPlantInformation === true;
 			},
 			tableGroups () {
@@ -200,23 +204,24 @@
 						} else {
 							tableGroups[indexOfGroup][`${column.tableGroup.class}Column`] = column;
 						}
+
 						return tableGroups;
 					}, []);
 			},
 			userIsApprover () {
 				if (!activeUserId) return false;
+
 				return this.approvers.indexOf(activeUserId) !== -1;
 			}
 		},
 		mounted () {
-			let records = this.$store.state.supplementalPlantInformation.records;
-			if (records.length < 1) {
-				records.push(this.localRecord);
-			} else {
-				this.localRecord = records[0];
-			}
+			const { records } = this.$store.state.supplementalPlantInformation;
+			if (records.length < 1) records.push(this.localRecord);
+			else this.localRecord = records[0];
+
 			if (!this.isNew) this.fetchExistingData(this.$store.state.project.ID);
 			else if (this.isDuplicate && this.shouldBeDuplicated) this.fetchExistingData(this.duplicateId);
+
 			// Set default values
 			this.schema.columns.forEach(column => {
 				if (column.default !== undefined && column.default !== null && this.record[column.columnName] === null) this.record[column.columnName] = column.default;
@@ -235,7 +240,7 @@
 								if (result.data.length > 0) {
 									const plantInfo = result.data[0];
 									const keysToSkipIfDuplicate = ['ID', 'PROJECT_ID'];
-									for (let key in this.record) {
+									for (const key in this.record) {
 										if (this.isDuplicate && keysToSkipIfDuplicate.indexOf(key) !== -1) continue;
 										if (plantInfo[key]) this.record[key] = plantInfo[key];
 									}
@@ -253,6 +258,7 @@
 				if (!id) return null;
 				const index = this.responsiblePartyOptions.map(o => o.ID).indexOf(id);
 				if (index === -1) return 'Unknown';
+
 				return this.responsiblePartyOptions[index].NAME || 'Unknown';
 			}
 		}

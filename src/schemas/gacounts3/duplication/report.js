@@ -2,12 +2,10 @@ const reportDuplication = {
 	title: 'Report Duplication',
 	instruction: 'Please select below which sections you would like to copy into your new report.  Note that duplicating some sections requires duplication of others.  If you do not wish to use the sections required by a section you do wish to use, you may change that section after duplication.',
 	sections: {
-		'Title': {
+		Title: {
 			duplicate: false,
 			areas: {
-				columns: [
-					'TITLE'
-				]
+				columns: ['TITLE']
 			}
 		},
 		'Location Information': {
@@ -22,46 +20,31 @@ const reportDuplication = {
 				]
 			}
 		},
-		'Dates': {
+		Dates: {
 			duplicate: false,
 			areas: {
-				columns: [
-					'DATE_BEGIN',
-					'DATE_END'
-				]
+				columns: ['DATE_BEGIN', 'DATE_END']
 			}
 		},
 		'Program Areas': {
 			duplicate: true,
 			areas: {
-				associations: [
-					'programAreas'
-				]
+				associations: ['programAreas']
 			}
 		},
 		'Report Type': {
 			duplicate: true,
 			areas: {
-				associations: [
-					'reportType'
-				]
+				associations: ['reportType']
 			},
-			depends: [
-				'Program Areas'
-			]
+			depends: ['Program Areas']
 		},
 		'Topics and Keywords': {
 			duplicate: true,
 			areas: {
-				associations: [
-					'topics',
-					'keywords'
-				]
+				associations: ['topics', 'keywords']
 			},
-			depends: [
-				'Program Areas',
-				'Report Type'
-			]
+			depends: ['Program Areas', 'Report Type']
 		},
 		'Demographic Information': {
 			title: 'Demographic Information',
@@ -75,11 +58,7 @@ const reportDuplication = {
 					'targetAudiences'
 				]
 			},
-			depends: [
-				'Program Areas',
-				'Report Type',
-				'Topics and Keywords'
-			]
+			depends: ['Program Areas', 'Report Type', 'Topics and Keywords']
 		},
 		'Supplemental Data': {
 			duplicate: false,
@@ -91,32 +70,20 @@ const reportDuplication = {
 					'supplementalData'
 				]
 			},
-			depends: [
-				'Program Areas',
-				'Report Type',
-				'Topics and Keywords'
-			]
+			depends: ['Program Areas', 'Report Type', 'Topics and Keywords']
 		},
 		'Sub-Report': {
 			duplicate: false,
 			areas: {
-				subschemas: [
-					'subReport'
-				]
+				subschemas: ['subReport']
 			},
-			depends: [
-				'Program Areas',
-				'Report Type',
-				'Topics and Keywords'
-			]
+			depends: ['Program Areas', 'Report Type', 'Topics and Keywords']
 		},
-		'Collaborators': {
+		Collaborators: {
 			title: 'Collaborators',
 			duplicate: false,
 			areas: {
-				associations: [
-					'collaborators'
-				]
+				associations: ['collaborators']
 			}
 		}
 	}

@@ -246,7 +246,8 @@ const supplementalAnimalInfoSchema = {
 			schema: importantDateSchema,
 			localKey: 'ID',
 			associatedColumn: 'SUPPLEMENTAL_ANIMAL_INFO_ID'
-			// isAssignable: true
+
+			// IsAssignable: true
 		}
 	]
 };

@@ -78,9 +78,7 @@
 		},
 		computed: {
 			columns () {
-				return this.schema.columns.filter(column => {
-					return column.grouping.section === 'Routing and Approval' && !column.automated;
-				});
+				return this.schema.columns.filter(column => column.grouping.section === 'Routing and Approval' && !column.automated);
 			},
 			record: {
 				get () { return this.$store.state.project; },
@@ -89,11 +87,14 @@
 			status () {
 				// Grab the index of the project's current status
 				const statusIndex = caesCache.data.crfp.status.map(s => s.ID).indexOf(this.record.STATUS_ID);
+
 				// If it's not found, assume it's a new project and so no comment
 				// sections should be displayed.
 				if (statusIndex === -1) return null;
+
 				// Grab the status from the cache
 				const status = caesCache.data.crfp.status[statusIndex];
+
 				return status;
 			}
 		},
@@ -104,56 +105,53 @@
 				if (this.mode === 'view' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
 				if (this.mode === 'edit' && column.type !== 'nvarchar' && (typeof this.record[column.columnName] === 'undefined' || this.record[column.columnName] === null || this.record[column.columnName] === '')) return false;
 				if (!column.depends) return true;
-				if (Array.isArray(column.depends.column)) {
-					return column.depends.test(column.depends.column.map(column => {
-						return this.record[column];
-					}));
-				}
+				if (Array.isArray(column.depends.column)) return column.depends.test(column.depends.column.map(column => this.record[column]));
+
 				return column.depends.test(this.$store.state.project[column.depends.column]);
 			},
 			getDisplayText (column) {
 				if (!column.constraint) {
 					const value = this.record[column.columnName];
+
 					return value === null || value === '' ? '(None)' : value;
 				}
 				const constraintValueIndex = column.constraint.values.map(v => v[column.constraint.foreignKey]).indexOf(this.record[column.columnName]);
 				if (constraintValueIndex === -1) return '(None)';
 				const constraintValue = column.constraint.values[constraintValueIndex];
+
 				return constraintValue[column.constraint.foreignLabel];
 			},
 			async submitComments (columnName, comment, action) {
 				if (['approve', 'returnForReview', 'reject'].indexOf(action) === -1) {
 					logError('Invalid action for comment submission alert.');
+
 					return;
 				}
 				let status = this.$store.state.project.STATUS_ID;
-				if (action === 'approve') {
-					status = getProjectsNextStatusId(this.$store.state.project);
-				} else if (action === 'returnForReview') {
-					status = getProjectsRevisionStatusId(this.$store.state.project);
-				} else if (action === 'reject') {
-					status = statusesIndexedByName['Rejected'];
-				}
+				if (action === 'approve') status = getProjectsNextStatusId(this.$store.state.project);
+				else if (action === 'returnForReview') status = getProjectsRevisionStatusId(this.$store.state.project);
+				else if (action === 'reject') status = statusesIndexedByName.Rejected;
+
 				const response = await addComment(this.$store.state.project.ID, status, columnName, comment);
-				if (response.SUCCESS) {
-					alert.successfulCommentSubmission(this.schema.title.toLowerCase(), response.PROJECT_ID, action);
-				} else {
-					alert.failedCommentSubmission(this.schema.title.toLowerCase(), response.MESSAGES);
-				}
+				if (response.SUCCESS) alert.successfulCommentSubmission(this.schema.title.toLowerCase(), response.PROJECT_ID, action);
+				else alert.failedCommentSubmission(this.schema.title.toLowerCase(), response.MESSAGES);
 			},
 			typeToShow (column) {
 				// If it's an ID input, always show the input
 				if (column.type === 'int') return this.mode === 'edit' ? 'input' : 'text';
+
 				// Else, if it's a comment section, so we have more work to do
 				if (column.type === 'nvarchar') {
 					// If the current user is the approver or an administrator and the
 					// project is pending the approver's approval, an input should be
 					// shown.
 					if ((activeUserId === this.record[column.extra.personnelColumn] || activeUser.IS_ADMINISTRATOR) && this.status && this.status.NAME === column.extra.status) return 'input';
+
 					// If the approval date for this comment section is not null, display
 					// the comments as plain text.
 					if (this.record[column.extra.dateColumn]) return 'text';
 				}
+
 				return false;
 			}
 		}

@@ -4,22 +4,20 @@
 const makeRequest = (url, options, callback) => {
 	fetch(url, options)
 		.then(response => response.json())
-		.then((response) => {
+		.then(response => {
 			callback(null, response);
 		});
 };
 
 // Options constructor
-const getOptions = (method, data) => {
-	return {
-		body: JSON.stringify(data),
-		credentials: 'cors',
-		headers: {
-			'content-type': 'application/json'
-		},
-		method
-	};
-};
+const getOptions = (method, data) => ({
+	body: JSON.stringify(data),
+	credentials: 'cors',
+	headers: {
+		'content-type': 'application/json'
+	},
+	method
+});
 
 const request = {
 	get: (url, callback) => {

@@ -5,29 +5,22 @@ const projectDuplication = {
 		project.
 	`.trim(),
 	sections: {
-		'Title': {
+		Title: {
 			duplicate: true,
 			areas: {
-				columns: [
-					'TITLE'
-				]
+				columns: ['TITLE']
 			}
 		},
 		'Participating Research Farm': {
 			duplicate: true,
 			areas: {
-				columns: [
-					'PARTICIPATING_RESEARCH_FARM_ID'
-				]
+				columns: ['PARTICIPATING_RESEARCH_FARM_ID']
 			}
 		},
-		'Dates': {
+		Dates: {
 			duplicate: true,
 			areas: {
-				columns: [
-					'START_DATE',
-					'END_DATE'
-				]
+				columns: ['START_DATE', 'END_DATE']
 			}
 		},
 		'Principal Investigator': {
@@ -73,20 +66,13 @@ const projectDuplication = {
 		'Summary of Project': {
 			duplicate: true,
 			areas: {
-				columns: [
-					'RATIONALE',
-					'OBJECTIVES_SUMMARY'
-				]
+				columns: ['RATIONALE', 'OBJECTIVES_SUMMARY']
 			}
 		},
-		'Attachments': {
+		Attachments: {
 			duplicate: true,
 			areas: {
-				columns: [
-					'TREATMENT_LIST_ATTACHMENT_PATH',
-					'PLOT_MAP_ATTACHMENT_PATH',
-					'CALENDAR_ATTACHMENT_PATH'
-				]
+				columns: ['TREATMENT_LIST_ATTACHMENT_PATH', 'PLOT_MAP_ATTACHMENT_PATH', 'CALENDAR_ATTACHMENT_PATH']
 			}
 		},
 		'Plant Science Project Information': {
@@ -106,11 +92,7 @@ const projectDuplication = {
 		'Additional Responsibilities and Funding': {
 			duplicate: true,
 			areas: {
-				columns: [
-					'SAFETY_REQUIREMENTS',
-					'FINANCIAL_SUPPORT_AVAILABLE',
-					'RESULTS_LOCATION'
-				]
+				columns: ['SAFETY_REQUIREMENTS', 'FINANCIAL_SUPPORT_AVAILABLE', 'RESULTS_LOCATION']
 			}
 		}
 	}

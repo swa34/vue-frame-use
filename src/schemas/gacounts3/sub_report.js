@@ -9,9 +9,10 @@ import {
 
 const schema = {
 	title: 'Sub-Report',
-	prepareForSubmit: (subReport) => {
+	prepareForSubmit: subReport => {
 		if (subReport.ISSUE_TYPE === 'local' && subReport.STATE_PLANNED_PROGRAM_ID !== null) subReport.STATE_PLANNED_PROGRAM_ID = null;
 		if (subReport.ISSUE_TYPE === 'state' && subReport.PLANNED_PROGRAM_ID !== null) subReport.PLANNED_PROGRAM_ID = null;
+
 		return subReport;
 	},
 	columns: [
@@ -50,7 +51,8 @@ const schema = {
 			type: 'bit',
 			immutable: true,
 			automated: true
-			// default: 'local'
+
+			// Default: 'local'
 		},
 		{
 			columnName: 'PLANNED_PROGRAM_ID',
@@ -132,7 +134,8 @@ const schema = {
 		},
 		{
 			title: 'Supplemental Data'
-			// schema: {
+
+			// Schema: {
 			// 	prepareForSubmit: (records) => {
 			// 		let preparedRecords = [];
 			// 		records.forEach((record) => {

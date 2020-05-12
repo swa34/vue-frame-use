@@ -276,23 +276,21 @@
 				localRecord: {
 					...supplementalAnimalInfoSchema.columns.reduce((out, column) => {
 						out[column.columnName] = null;
+
 						return out;
 					}, {}),
 					importantDates: []
 				},
 				newImportantDate: importantDateSchema.columns.reduce((output, column) => {
 					output[column.columnName] = null;
+
 					return output;
 				}, {}),
 				responsiblePartyOptions: caesCache.data.crfp.responsibleParty,
 				schema: supplementalAnimalInfoSchema,
 				showSourceInput: false,
 				showDispositionInput: false,
-				sourceOptions: [
-					'Resident Herd',
-					'Other Station',
-					'Outside Source'
-				],
+				sourceOptions: ['Resident Herd', 'Other Station', 'Outside Source'],
 				tempSourceSelection: '',
 				tempSourceInput: '',
 				tempDispositionSelection: '',
@@ -316,6 +314,7 @@
 					'DuPlIcAtEiD'
 				].reduce((duplicateId, param) => {
 					if (url.getParam(param) !== null) duplicateId = url.getParam(param);
+
 					return duplicateId;
 				}, false);
 			},
@@ -323,19 +322,21 @@
 			isNew () { return this.$store.state.project.ID === null; },
 			newImportantDateIsValid () {
 				return importantDateSchema.columns.reduce((isValid, column) => {
-					let val = this.newImportantDate[column.columnName];
+					const val = this.newImportantDate[column.columnName];
 					if (!column.automated && column.required && !val) isValid = false;
+
 					return isValid;
 				}, true);
 			},
 			record: {
 				get () {
-					let records = this.$store.state.supplementalAnimalInformation.records;
+					const { records } = this.$store.state.supplementalAnimalInformation;
 					if (records.length < 1) return this.localRecord;
+
 					return records[0];
 				},
 				set (val) {
-					let records = this.$store.state.supplementalAnimalInformation.records;
+					const { records } = this.$store.state.supplementalAnimalInformation;
 					if (records.length < 1) records.push(val);
 					records[0] = val;
 				}
@@ -343,22 +344,24 @@
 			shouldBeDuplicated () {
 				if (!this.$store.state.duplication) return false;
 				if (!this.$store.state.duplication.associations) return false;
+
 				return this.$store.state.duplication.associations.supplementalAnimalInformation === true;
 			},
 			tableGroups () {
-				let tableGroups = [];
+				const tableGroups = [];
 				this.schema.columns
 					.filter(column => column.tableGroup)
 					.forEach(column => {
-						let indexOfGroup = tableGroups.map(g => g.name).indexOf(column.tableGroup.name);
+						const indexOfGroup = tableGroups.map(g => g.name).indexOf(column.tableGroup.name);
 						if (indexOfGroup === -1) {
-							let groupObj = { name: column.tableGroup.name };
+							const groupObj = { name: column.tableGroup.name };
 							groupObj[`${column.tableGroup.class}Column`] = column;
 							tableGroups.push(groupObj);
 						} else {
 							tableGroups[indexOfGroup][`${column.tableGroup.class}Column`] = column;
 						}
 					});
+
 				return tableGroups;
 			}
 		},
@@ -395,12 +398,10 @@
 			}
 		},
 		mounted () {
-			let records = this.$store.state.supplementalAnimalInformation.records;
-			if (records.length < 1) {
-				records.push(this.localRecord);
-			} else {
-				this.localRecord = records[0];
-			}
+			const { records } = this.$store.state.supplementalAnimalInformation;
+			if (records.length < 1) records.push(this.localRecord);
+			else this.localRecord = records[0];
+
 			if (!this.isNew) this.fetchExistingData(this.$store.state.project.ID);
 			else if (this.isDuplicate && this.shouldBeDuplicated) this.fetchExistingData(this.duplicateId);
 		},
@@ -409,6 +410,7 @@
 				this.record.importantDates.push(this.newImportantDate);
 				this.newImportantDate = importantDateSchema.columns.reduce((output, column) => {
 					output[column.columnName] = null;
+
 					return output;
 				}, {});
 			},
@@ -416,6 +418,7 @@
 				const getAnimalInfoCritStruct = async () => {
 					try {
 						const critStruct = await asyncGetCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix);
+
 						return critStruct;
 					} catch (err) {
 						logError(err);
@@ -424,6 +427,7 @@
 				const getImportantDateCritStruct = async () => {
 					try {
 						const critStruct = await asyncGetCriteriaStructure(this.importantDateSchema.databaseName, this.importantDateSchema.tablePrefix);
+
 						return critStruct;
 					} catch (err) {
 						logError(err);
@@ -439,11 +443,10 @@
 							formatDates(this.importantDateSchema.columns.filter(c => c.type === 'datetime').map(c => c.columnName), result.data);
 							const keysToSkipIfDuplicate = ['SUPPLEMENTAL_ANIMAL_INFO_ID'];
 							result.data.forEach(importantDate => {
-								if (this.isDuplicate) {
-									keysToSkipIfDuplicate.forEach(key => {
-										importantDate[key] = null;
-									});
-								}
+								if (this.isDuplicate) keysToSkipIfDuplicate.forEach(key => {
+									importantDate[key] = null;
+								});
+
 								this.record.importantDates.push(importantDate);
 							});
 							this.fetched = true;
@@ -462,26 +465,24 @@
 							if (result.data.length > 0) {
 								const animalInfo = result.data[0];
 								const keysToSkipIfDuplicate = ['ID', 'PROJECT_ID'];
-								for (let key in this.record) {
+								for (const key in this.record) {
 									if (this.isDuplicate && keysToSkipIfDuplicate.indexOf(key) !== -1) continue;
 									if (animalInfo[key]) this.record[key] = animalInfo[key];
 								}
-								if (animalInfo.SOURCE) {
-									if (this.sourceOptions.indexOf(animalInfo.SOURCE) === -1) {
-										this.tempSourceSelection = 'Outside Source';
-										this.tempSourceInput = animalInfo.SOURCE;
-									} else {
-										this.tempSourceSelection = animalInfo.SOURCE;
-									}
+								if (animalInfo.SOURCE) if (this.sourceOptions.indexOf(animalInfo.SOURCE) === -1) {
+									this.tempSourceSelection = 'Outside Source';
+									this.tempSourceInput = animalInfo.SOURCE;
+								} else {
+									this.tempSourceSelection = animalInfo.SOURCE;
 								}
-								if (animalInfo.FINAL_DISPOSITION) {
-									if (this.dispositionOptions.indexOf(animalInfo.FINAL_DISPOSITION) === -1) {
-										this.tempDispositionSelection = 'Other';
-										this.tempDispositionInput = animalInfo.FINAL_DISPOSITION;
-									} else {
-										this.tempDispositionSelection = animalInfo.FINAL_DISPOSITION;
-									}
+
+								if (animalInfo.FINAL_DISPOSITION) if (this.dispositionOptions.indexOf(animalInfo.FINAL_DISPOSITION) === -1) {
+									this.tempDispositionSelection = 'Other';
+									this.tempDispositionInput = animalInfo.FINAL_DISPOSITION;
+								} else {
+									this.tempDispositionSelection = animalInfo.FINAL_DISPOSITION;
 								}
+
 								getImportantDates(animalInfo.ID);
 							}
 							this.fetched = true;
@@ -500,6 +501,7 @@
 				if (!id) return null;
 				const index = this.responsiblePartyOptions.map(o => o.ID).indexOf(id);
 				if (index === -1) return 'Unknown';
+
 				return this.responsiblePartyOptions[index].NAME || 'Unknown';
 			},
 			removeImportantDate (importantDate) {

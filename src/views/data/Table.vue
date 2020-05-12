@@ -145,59 +145,60 @@
 			HelpCircleIcon
 		},
 		props: {
-			'allowInsert': {
+			allowInsert: {
 				type: Boolean
 			},
-			'associatedColumn': {
+			associatedColumn: {
 				type: String,
 				default: ''
 			},
-			'description': {
+			description: {
 				type: String,
 				default: ''
 			},
-			'fieldsToDisplay': {
+			fieldsToDisplay: {
 				type: Array,
 				default: () => []
 			},
-			'fieldsToEdit': {
+			fieldsToEdit: {
 				type: Array,
 				default: () => []
 			},
-			'helpMessageName': {
+			helpMessageName: {
 				type: String,
 				default: ''
 			},
-			'identifier': {
+			identifier: {
 				type: Object,
 				default: null
 			},
-			'mode': {
+			mode: {
 				type: String,
 				default: 'view',
 				validator: modeValidator
 			},
-			'recordLimit': {
+			recordLimit: {
 				type: Number,
 				default: 0
 			},
-			'schema': {
+			schema: {
 				type: Object,
 				required: true
 			},
-			'title': {
+			title: {
 				type: String,
 				default: ''
 			}
 		},
 		data () {
-			let newRecord = {};
-			this.schema.columns.forEach((column) => {
+			const newRecord = {};
+			this.schema.columns.forEach(column => {
 				const isIdentifierColumn = !this.identifier.duplicate && this.identifier.key && this.identifier.value && this.identifier.key === column.columnName;
 				if (isIdentifierColumn) newRecord[column.columnName] = this.identifier.value;
 				else if (typeof column.default === 'undefined') newRecord[column.columnName] = null;
 				else newRecord[column.columnName] = column.default;
 			});
+
 			return {
 				localRecords: [],
 				associations: [],
@@ -222,20 +223,15 @@
 					return this.$store ? this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records : this.localRecords;
 				},
 				set (val) {
-					if (this.$store) {
-						this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
-					} else {
-						this.localRecords = val;
-					}
+					if (this.$store) this.$store.state[stringFormats.camelCase(this.title || this.schema.title)].records = val;
+					else this.localRecords = val;
 				}
 			}
 		},
 		watch: {
 			duplication: {
 				handler () {
-					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) {
-						this.getMainData();
-					}
+					if (this.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) this.getMainData();
 				},
 				deep: true
 			}
@@ -243,33 +239,31 @@
 		mounted () {
 			const component = this;
 
-			component.schema.columns.forEach((column) => {
+			component.schema.columns.forEach(column => {
 				if (sqlToHtml(column) === 'date') this.dateFields.push(column.columnName);
 			});
 
 			const getConstraintData = () => {
-				component.schema.columns.forEach((column) => {
+				component.schema.columns.forEach(column => {
 					if (column.constraint && column.constraint.values && column.constraint.values.length > 0) {
-						let values = [];
-						column.constraint.values.forEach((result) => {
+						const values = [];
+						column.constraint.values.forEach(result => {
 							let value = null;
-							if (column.constraint.generateValue) {
-								value = column.constraint.generateValue(result);
-							} else {
-								if (result.originalValue) {
-									value = result;
-								} else {
-									value = {
-										key: result[column.constraint.foreignKey],
-										label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
-									};
-								}
-							}
+							if (column.constraint.generateValue) value = column.constraint.generateValue(result);
+							else
+								if (result.originalValue) value = result;
+								else value = {
+									key: result[column.constraint.foreignKey],
+									label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey]
+								};
+
+
 							values.push(value);
 						});
 						column.constraint.values = values;
 					} else if (column.constraint && column.constraint.getValues) {
-						if (column.constraint.tablePrefix) {
+						if (column.constraint.tablePrefix)
+
 							// If the constraint has a tablePrefix, we need to get a criteria
 							// structure first, then send our request
 							getCriteriaStructure(column.constraint.databaseName, column.constraint.tablePrefix, (err, criteriaStructure) => {
@@ -280,66 +274,64 @@
 									if (data) column.constraint.values = data;
 								});
 							});
-						} else {
+						else
+
 							// If no table prefix, just fetch the data
 							column.constraint.getValues((err, data) => {
 								if (err) logError(err);
 								if (data) {
-									let values = [];
-									data.forEach((result) => {
+									const values = [];
+									data.forEach(result => {
 										let value = null;
-										if (column.constraint.generateValue) {
-											value = column.constraint.generateValue(result);
-										} else {
-											value = {
-												key: result[column.constraint.foreignKey],
-												label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
-												originalValue: result
-											};
-										}
+										if (column.constraint.generateValue) value = column.constraint.generateValue(result);
+										else value = {
+											key: result[column.constraint.foreignKey],
+											label: column.constraint.foreignLabel ? result[column.constraint.foreignLabel] : result[column.constraint.foreignKey],
+											originalValue: result
+										};
+
 										values.push(value);
 									});
 									column.constraint.values = values.sort((a, b) => {
 										if (a.label > b.label) return 1;
 										if (a.label === b.label) return 0;
+
 										return -1;
 									});
 								}
 							});
-						}
 					}
 				});
 			};
-			if ((!component.identifier.duplicate && component.identifier.value) || (component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)])) {
-				if (!this.fetched) this.getMainData();
-			}
+			if (!component.identifier.duplicate && component.identifier.value || component.identifier.duplicate && this.duplication.associations[stringFormats.camelCase(this.title || this.schema.title)]) if (!this.fetched) this.getMainData();
+
 			if (component.allowEdit || component.allowInsert) getConstraintData();
 		},
 		methods: {
 			addNewRecord () {
-				this.records.push(Object.assign({}, this.newRecord));
-				for (let key in this.newRecord) {
-					this.newRecord[key] = null;
-				}
+				this.records.push({ ...this.newRecord });
+				for (const key in this.newRecord) this.newRecord[key] = null;
 			},
 			columnShouldBeDisplayed (column) {
 				if (!this.identifier.value) {
 					// If there's no identifier and the column is not the associated column
-					if (column.columnName !== this.associatedColumn) {
+					if (column.columnName !== this.associatedColumn)
+
 						// Show it if it's not automated
 						return !column.automated;
-					} else {
-						// Otherwise, don't
-						return false;
-					}
-				} else {
-					// If there is an identifier, then show the column if no fields to
-					// display were passed in, or if inserting is allowed and the column
-					// is required, or if fields to display were passed in and the column
-					// is one of those fields.
-					if (column.automated) return false;
-					return !this.fieldsToDisplay || this.fieldsToDisplay.length < 1 || (this.allowInsert && column.required) || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
+
+
+					// Otherwise, don't
+					return false;
 				}
+
+				// If there is an identifier, then show the column if no fields to
+				// display were passed in, or if inserting is allowed and the column
+				// is required, or if fields to display were passed in and the column
+				// is one of those fields.
+				if (column.automated) return false;
+
+				return !this.fieldsToDisplay || this.fieldsToDisplay.length < 1 || this.allowInsert && column.required || this.fieldsToDisplay.indexOf(column.columnName) !== -1;
 			},
 			columnShouldBeEditable (column) {
 				// Rules for column to be editable:
@@ -350,9 +342,7 @@
 			},
 			deleteRecord (record) {
 				const index = this.records.indexOf(record);
-				if (index !== -1) {
-					this.records.splice(index, 1);
-				}
+				if (index !== -1) this.records.splice(index, 1);
 			},
 			getPrettyColumnName,
 			sqlToHtml,
@@ -364,19 +354,18 @@
 				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
 					if (data) {
-						let critStruct = data;
+						const critStruct = data;
 						critStruct[this.identifier.criteriaString] = this.identifier.value;
 						this.schema.fetchExisting(critStruct, (err, data) => {
 							if (err) logError(err);
 							if (data) {
 								this.records = data;
 								if (this.dateFields.length > 0) formatDates(this.dateFields, this.records);
-								if (this.identifier.duplicate) {
-									this.records.forEach((record) => {
-										if (record.ID) record.ID = null;
-										record[this.associatedColumn] = null;
-									});
-								}
+								if (this.identifier.duplicate) this.records.forEach(record => {
+									if (record.ID) record.ID = null;
+									record[this.associatedColumn] = null;
+								});
+
 								this.fetched = true;
 							}
 						});

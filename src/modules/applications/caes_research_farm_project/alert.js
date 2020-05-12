@@ -78,7 +78,7 @@ export default {
 			title: 'Oops!',
 			html: `
 				<p>
-					Your ${(isNew ? `${title} was` : 'changes were')}
+					Your ${isNew ? `${title} was` : 'changes were'}
 					unable to be saved due to the following issues:
 				</p>
 				<div style="text-align: left;">
@@ -94,7 +94,7 @@ export default {
 			title: 'Oops!',
 			html: `
 				<p>
-					Your ${(isNew ? `${title} was` : 'changes were')}
+					Your ${isNew ? `${title} was` : 'changes were'}
 					unable to be saved due to the following issues:
 				</p>
 				<div style="text-align: left;">
@@ -116,6 +116,7 @@ export default {
 	successfulCommentSubmission: (title, projectId, action) => {
 		if (['approve', 'returnForReview', 'reject'].indexOf(action) === -1) {
 			logError('Invalid action for comment submission alert.');
+
 			return;
 		}
 		const actionText = {
@@ -137,7 +138,7 @@ export default {
 			title: 'Awesome!',
 			text: `You have successfully deleted this ${title}.`,
 			confirmButtonText: 'OK'
-		}).then((result) => {
+		}).then(result => {
 			window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm`;
 		});
 	},
@@ -148,11 +149,11 @@ export default {
 			title: 'Awesome!',
 			text: `You have successfully rejected this ${title}.`,
 			confirmButtonText: 'OK'
-		}).then((result) => {
-			if (result.value) {
+		}).then(result => {
+			if (result.value)
+
 				// They clicked OK
 				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
-			}
 		});
 	},
 	successfulReturnForReview: (title, projectId) => {
@@ -162,11 +163,11 @@ export default {
 			title: 'Awesome!',
 			text: `This ${title} has been successfully returned to the PI for review.`,
 			confirmButtonText: 'OK'
-		}).then((result) => {
-			if (result.value) {
+		}).then(result => {
+			if (result.value)
+
 				// They clicked OK
 				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
-			}
 		});
 	},
 	successfulSave: (title, projectId) => {
@@ -196,11 +197,11 @@ export default {
 			title: messages.success.title,
 			text: messages.success.successfulSubmit[submitter],
 			confirmButtonText: 'OK'
-		}).then((result) => {
-			if (result.value) {
+		}).then(result => {
+			if (result.value)
+
 				// They clicked OK
 				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
-			}
 		});
 	}
 };
