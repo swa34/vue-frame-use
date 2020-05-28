@@ -15,6 +15,7 @@ import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForRe
 import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
 import { toKey } from '@gabegabegabe/utils/dist/array/mappers';
 import {
+	associationReport4HEnrollmentActivitySchema,
 	associationReportFieldSchema,
 	associationReportKeywordSchema,
 	associationReportProgramAreaSchema,
@@ -355,6 +356,7 @@ const schema = {
 				values: caesCache.data.pdb.countyList
 			},
 			depends: {
+
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
 				test: countyIdRequired
 			},
@@ -872,6 +874,18 @@ const schema = {
 			isAssignable: true,
 			grouping: {
 				section: 'Sub-Reports',
+				order: 1
+			}
+		},
+		{
+			title: '4H Enrollment Activities',
+			schema: associationReport4HEnrollmentActivitySchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			isAssignable: false,
+			forDataStoreOnly: true,
+			grouping: {
+				section: 'Demographic Information',
 				order: 1
 			}
 		}

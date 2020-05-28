@@ -35,6 +35,8 @@ const getUnsortedSections = schema => {
 
 		// Do the same for associations
 		schema.associations.forEach(association => {
+			if (association.forDataStoreOnly) return;
+
 			areas.push({
 				type: 'association',
 				data: association
@@ -145,6 +147,10 @@ const getUnsortedSections = schema => {
 
 	// Then, essentially do the same thing for associations
 	if (schema.associations) schema.associations.forEach(association => {
+		// If the association is only present to populate the data store, we can
+		// skip it here.
+		if (association.forDataStoreOnly) return;
+
 		// Check if the association has grouping information specified
 		if (!association.grouping || !association.grouping.section)
 
@@ -169,7 +175,7 @@ const getUnsortedSections = schema => {
 			order: 1,
 			data: subschema
 		});
-				 else sections[sectionTitleMap.indexOf(subschema.grouping.section)].areas.push({
+		else sections[sectionTitleMap.indexOf(subschema.grouping.section)].areas.push({
 			type: 'subschema',
 			order: subschema.grouping.order || -1,
 			data: subschema

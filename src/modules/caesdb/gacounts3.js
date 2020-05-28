@@ -33,6 +33,11 @@ export const getAssociationKeywordTopic = callback => {
 	makeGetRequest(url, callback);
 };
 
+export const getAssociationReport4HEnrollmentActivity = (criteriaStructure, callback) => {
+	const url = generateUrl('associationReport4HEnrollmentActivity', apiPrefix);
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 export const getAssociationReportField = (criteriaStructure, callback) => {
 	const url = generateUrl('associationReportField', apiPrefix);
 	makePostRequest(url, criteriaStructure, callback);

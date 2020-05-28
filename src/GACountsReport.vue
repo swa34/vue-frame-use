@@ -71,7 +71,11 @@
 		<DuplicationModal
 			v-if="identifier && identifier.duplicate && !duplication.ready"
 			:duplication-schema="duplicationSchema"
-		/>
+		>
+			<template #custom-content>
+				<DuplicationPane4HEnrollment :demographics-selected-for-import="demographicsSelectedForImport" />
+			</template>
+		</DuplicationModal>
 		<DetailMain
 			v-if="isNew || identifier !== null"
 			:schema="schema"
@@ -123,17 +127,14 @@
 	// Import required modules
 	import DetailMain from '~/views/DetailMain';
 	import DuplicationModal from '~/views/DuplicationModal';
+	import DuplicationPane4HEnrollment from '~/views/custom/gacounts3/DuplicationPane4HEnrollment';
 	import duplicationSchema from '~/schemas/gacounts3/duplication/report';
-	import schema from '~/schemas/gacounts3/report';
 	import { getSortedSchema } from '~/modules/schemaTools';
+	import schema from '~/schemas/gacounts3/report';
 	import {
 		getComputed,
 		getStore
 	} from '~/modules/store';
-	import {
-		stringFormats,
-		url
-	} from '~/modules/utilities';
 	import {
 		getCriteriaStructure,
 		logError
@@ -142,6 +143,10 @@
 		getDuplicatedReport,
 		postReportTemplateStatus
 	} from '~/modules/caesdb/gacounts3';
+	import {
+		stringFormats,
+		url
+	} from '~/modules/utilities';
 
 	// Configure notifications
 	notify.configure({
@@ -170,7 +175,8 @@
 		name: 'GACountsReport',
 		components: {
 			DetailMain,
-			DuplicationModal
+			DuplicationModal,
+			DuplicationPane4HEnrollment
 		},
 		data () {
 			// Determine if entering new record
@@ -222,6 +228,9 @@
 		},
 		computed: {
 			...getComputed(schema),
+			demographicsSelectedForImport () {
+				return this.duplicationSchema.sections['Demographic Information'].duplicate;
+			},
 			duplication () {
 				return this.$store.state.duplication;
 			},
@@ -324,14 +333,8 @@
 				window.location = `https://${window.location.hostname}/gacounts3?function=RefuseSubReportInvitation&REPORT_ID=${this.ID}`;
 			},
 			reloadPage () {
-				if (this.inputID !== null)
-
-					// Send to existing report
-					window.location.href = `${window.location.href}&pkid=${this.inputID}`;
-				else
-
-					// Send to new report
-					window.location.href = `${window.location.href}&new`;
+				if (this.inputID === null) window.location.href = `${window.location.href}&new`;
+				else window.location.href = `${window.location.href}&pkid=${this.inputID}`;
 			},
 			setBreadCrumbs () {
 				const breadCrumbList = document.querySelector('ul.breadcrumbs');
@@ -367,33 +370,38 @@
 <style lang="scss">
 	button.notify-button {
 		color: inherit;
-		background: rgba(0,0,0,0.1);
+		background: rgba(0, 0, 0, 0.1);
 		text-align: left;
-		padding: .5rem;
+		padding: 0.5rem;
 		font-size: 1rem;
 		margin-bottom: 0;
 		margin-top: 1rem;
-		&:hover { background: rgba(0,0,0,0.2); }
+
+		&:hover { background: rgba(0, 0, 0, 0.2); }
 	}
+
 	table tfoot td {
 		color: #fff;
 		background-color: lighten(#545959, 20%);
 		font-weight: 600;
 	}
-	td input {
-		width: 100%;
-	}
+
+	td input { width: 100%; }
+
 	ul.checkbox {
 		list-style-type: none;
 		padding: 0;
 		column-count: 2;
 		column-width: 7.5rem;
+
 		li {
 			break-inside: avoid-column;
 			page-break-inside: avoid;
 			-webkit-column-break-inside: avoid;
+
 			label {
 				display: inline-flex;
+
 				span {
 					display: flex;
 					flex-direction: column;
@@ -402,78 +410,106 @@
 			}
 		}
 	}
-	h1, h2, h3, h4, h5, h6 {
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
 		&.inline {
 			display: inline;
 		}
 	}
+
 	.outlined {
 		border: 1px solid #000;
-		padding: .5rem;
+		padding: 0.5rem;
 	}
+
 	.margined {
-		margin: .5rem;
+		margin: 0.5rem;
 	}
+
 	button.small {
-		font-size: .75rem;
-		padding: .5rem;
+		font-size: 0.75rem;
+		padding: 0.5rem;
 	}
+
 	a.help-link {
 		cursor: pointer;
+
 		svg {
 			height: 1.125rem;
 			vertical-align: sub;
 		}
 	}
+
 	table caption a.help-link svg {
 		color: #fff;
 	}
-	div.modal-container div.modal div.help-message  {
+
+	div.modal-container div.modal div.help-message {
 		h2 {
 			margin-top: 0;
 		}
+
 		p.new-window-note {
 			display: none;
 		}
 	}
+
 	div.heading-container {
 		@media screen and (max-width: 1080px) {
 			display: block;
-			h1 { margin-bottom: .5rem; }
+
+			h1 { margin-bottom: 0.5rem; }
+
 			button[type="button"] {
-				padding: .5rem;
+				padding: 0.5rem;
 				margin: 0;
+
 				&.favorite div span.icon-wrapper {
 					font-size: 1em;
-					line-height: inherit
+					line-height: inherit;
 				}
 			}
 		}
+
 		display: flex;
 		align-items: stretch;
+
 		h1 { align-self: center; }
-		div.spacer {
-			flex-grow: 1;
-		}
+
+		div.spacer { flex-grow: 1; }
+
 		button {
 			margin-left: 1rem;
+
 			&.file-sub-report { background: #406242; }
-			&.reject-sub-report { background: #6C3129; }
-			&.delete { background: #C44536; }
+
+			&.reject-sub-report { background: #6c3129; }
+
+			&.delete { background: #c44536; }
+
 			&.favorite {
 				&.filled-in {
-					background: #F7B538;
+					background: #f7b538;
 					box-shadow: none;
 					color: #fff;
 				}
+
 				background: transparent;
-				box-shadow: inset 0 0 0 .125rem #f7b538;
+				box-shadow: inset 0 0 0 0.125rem #f7b538;
 				color: #000;
 				width: 10rem;
+
 				div {
 					display: flex;
+
 					span {
 						&:last-of-type { flex-grow: 1; }
+
 						display: flex;
 						flex-direction: column;
 						justify-content: center;
@@ -483,5 +519,6 @@
 			}
 		}
 	}
+
 	div.inline { display: inline-block; }
 </style>
