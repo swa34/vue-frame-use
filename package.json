@@ -10,7 +10,7 @@
     "build": "webpack --config webpack.prod.js",
     "dev": "webpack --config webpack.dev.js --watch",
     "devbuild": "webpack --config webpack.dev.js",
-		"lint": "eslint src/**/*.js src/**/*.vue",
+    "lint": "eslint src/**/*.js src/**/*.vue",
     "watch": "webpack --config webpack.dev.js --watch"
   },
   "keywords": [],

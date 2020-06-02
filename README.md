@@ -1,5 +1,5 @@
 # Vue Application Framework
-This is a Vue.js framework for building out interfaces for the CAES and Extension web applications.
+This is a Vue.js framework for building out interfaces for the CAES, and Extension web applications.
 
 ## Development
 ### Clone
