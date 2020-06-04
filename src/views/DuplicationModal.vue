@@ -167,17 +167,12 @@
 				justify-content: center;
 
 				ul.section-list {
-					$border-style: 1px solid #000;
-
 					flex-grow: 1;
 					list-style-type: none;
 					padding: 0 0.5rem;
 					display: inline-block;
 					column-count: 2;
 					column-width: 14rem;
-					column-rule: $border-style;
-					border-left: $border-style;
-					border-right: $border-style;
 
 					li {
 						margin-bottom: 0.75rem;

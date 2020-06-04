@@ -30,6 +30,11 @@ const schema = {
 			columnName: 'ACTIVITY_COUNTY_ID',
 			type: 'int',
 			required: true
+		},
+		{
+			columnName: 'ACTIVITY_DATE',
+			type: 'datetime',
+			required: true
 		}
 	]
 };

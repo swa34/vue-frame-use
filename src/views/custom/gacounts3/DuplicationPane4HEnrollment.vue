@@ -1,22 +1,19 @@
 <template lang="html">
-	<div>
+	<div class="pane-wrapper-wrapper">
 		<div v-if="hasEnrollmentActivities" class="pane-wrapper">
-			<h3>Want to duplicate 4-H Enrollment data?</h3>
+			<h3>Tie to same 4-H Enrollment activity?</h3>
 			<p>
-				You are duplicating a report that imported data from the following 4-H
-				Enrollment activities:
+				You are duplicating a report that is tied to the following 4-H Enrollment activity(-ies):
 			</p>
 			<p>
-				<strong>Activities</strong>
 				<ul class="activity-list">
 					<li v-for="activity in enrollmentActivities" :key="activity.ACTIVITY_ID">
-						{{ activity.ACTIVITY_NAME }}
+						{{ activity.ACTIVITY_NAME }} - ({{ activity.ACTIVITY_DATE | simple-date }})
 					</li>
 				</ul>
 			</p>
 			<p>
-				If you select the "Demographic Information" to the left, numbers from
-				these activities will be imported for your new report.
+				Check the "Demographic Information" checkbox to tie your new report to the same activity(-ies).
 			</p>
 			<p class="four-h-logo-wrapper">
 				<img src="/global/images/4h-logo-green.svg" alt="4-H Logo" />
@@ -79,9 +76,14 @@
 </script>
 
 <style lang="scss" scoped>
-	div.pane-wrapper {
-		margin: 0 2rem;
-	}
+		div.pane-wrapper-wrapper {
+			background: #eee;
+			padding: 1rem 0;
+			margin-bottom: 1rem;
+			div.pane-wrapper {
+				margin: 0 2rem;
+			}
+		}
 
 	ul {
 		&.activity-list { padding: 0 1rem; }
@@ -96,6 +98,6 @@
 	p.four-h-logo-wrapper {
 		text-align: center;
 
-		img { width: 10rem; }
+		img { width: 7rem; }
 	}
 </style>

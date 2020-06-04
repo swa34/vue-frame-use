@@ -35,7 +35,7 @@
 								:size="activities.length < 15 ? activities.length : 15"
 							>
 								<option v-for="activity in activities" :key="activity.ACTIVITY_ID" :value="activity.ACTIVITY_ID">
-									{{ activity.NAME }} - {{ activity.BEGIN_DATE.replace(/ ([0-9]{2}:){2}[0-9]{2}$/, '') }}
+									{{ activity.NAME }} - ({{ activity.BEGIN_DATE | simple-date }})
 								</option>
 							</select>
 							<Spinner v-else />
@@ -172,7 +172,8 @@
 					const association = {
 						ACTIVITY_ID: id,
 						ACTIVITY_NAME: activity.NAME,
-						ACTIVITY_COUNTY_ID: county.COUNTYLISTID
+						ACTIVITY_COUNTY_ID: county.COUNTYLISTID,
+						ACTIVITY_DATE: activity.BEGIN_DATE
 					};
 
 					this.$store.state['4HEnrollmentActivities'].records.push(association);
