@@ -1,24 +1,27 @@
 <template lang="html">
 	<div>
-		<h3>4H Enrollment Activities</h3>
-		<p>
-			The report you are duplicating is associated with the following 4H
-			Enrollment Activities.  If you would like to carry those associations over
-			to this new report, simply check "Demographic Information" to the left.
-		</p>
-		<p>
-			Should you wish to select different 4H Enrollment Activities, simply do not
-			select "Demographic Information" and then use the green 4H Import button as
-			you normally would when entering a new report.
-		</p>
-		<p>
-			<strong>Activities</strong>
-			<ul :class="listClasses">
-				<li v-for="activity in enrollmentActivities" :key="activity.ACTIVITY_ID">
-					{{ activity.ACTIVITY_NAME }}
-				</li>
-			</ul>
-		</p>
+		<div v-if="hasEnrollmentActivities" class="pane-wrapper">
+			<h3>Want to duplicate 4-H Enrollment data?</h3>
+			<p>
+				You are duplicating a report that imported data from the following 4-H
+				Enrollment activities:
+			</p>
+			<p>
+				<strong>Activities</strong>
+				<ul class="activity-list">
+					<li v-for="activity in enrollmentActivities" :key="activity.ACTIVITY_ID">
+						{{ activity.ACTIVITY_NAME }}
+					</li>
+				</ul>
+			</p>
+			<p>
+				If you select the "Demographic Information" to the left, numbers from
+				these activities will be imported for your new report.
+			</p>
+			<p class="four-h-logo-wrapper">
+				<img src="/global/images/4h-logo-green.svg" alt="4-H Logo" />
+			</p>
+		</div>
 	</div>
 </template>
 
@@ -46,12 +49,7 @@
 			};
 		},
 		computed: {
-			listClasses () {
-				const classes = ['activity-list'];
-				if (!this.demographicsSelectedForImport) classes.push('disabled-text');
-
-				return classes.join(' ');
-			}
+			hasEnrollmentActivities () { return this.enrollmentActivities.length > 0; }
 		},
 		watch: {
 			demographicsSelectedForImport (val) {
@@ -81,6 +79,10 @@
 </script>
 
 <style lang="scss" scoped>
+	div.pane-wrapper {
+		margin: 0 2rem;
+	}
+
 	ul {
 		&.activity-list { padding: 0 1rem; }
 
@@ -89,5 +91,11 @@
 			text-decoration: line-through;
 			font-style: italic;
 		}
+	}
+
+	p.four-h-logo-wrapper {
+		text-align: center;
+
+		img { width: 10rem; }
 	}
 </style>

@@ -42,6 +42,7 @@
 </template>
 
 <script>
+	/* global swal */
 	import { url } from '~/modules/utilities';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
 
@@ -116,6 +117,11 @@
 				}
 				this.duplication.ready = true;
 				this.duplication.reportID = url.getParam('duplicateID');
+				swal(
+					'Yippee!',
+					'Data from your old report has been imported successfully!',
+					'success'
+				);
 			}
 		}
 	};
@@ -167,7 +173,7 @@
 					list-style-type: none;
 					padding: 0 0.5rem;
 					display: inline-block;
-					column-count: 3;
+					column-count: 2;
 					column-width: 14rem;
 					column-rule: $border-style;
 					border-left: $border-style;
@@ -175,6 +181,7 @@
 
 					li {
 						margin-bottom: 0.75rem;
+						break-inside: avoid;
 
 						label {
 							display: flex;
@@ -192,14 +199,7 @@
 					}
 				}
 
-				div.custom-content {
-					text-align: left;
-
-					& > * {
-						margin-left: 2rem;
-						margin-right: 2rem;
-					}
-				}
+				div.custom-content { text-align: left; }
 			}
 
 			div.button-container { text-align: center; }

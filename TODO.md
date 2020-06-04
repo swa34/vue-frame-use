@@ -20,20 +20,20 @@
 	- ~~IS_ENRICHMENT criteria~~
 
 ## REST API
-- endpoint for association_report_enrollment_activity
-- ~~endpoint for for "enrichment" reports~~
+- ~~endpoint for association_report_enrollment_activity~~
+ ~~endpoint for for "enrichment" reports~~
 
 ## Vue
 - ~~multi-select~~
 	- ~~4himport component~~
 	- ~~get4HActivities request method~~
-- duplication
+- ~~duplication~~
 
 ## Coldfusion
 - "unmatched" report
 - "enrichment" report
 
 
-- Activities x,y,z have been imported
+- ~~Activities x,y,z have been imported~~
 - Grab associations from last year, flesh out list with info "you've already
 	imported this one" etc.
