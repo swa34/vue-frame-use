@@ -157,6 +157,7 @@
 											:affects="area.data.affects"
 											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											:max-allowed="area.data.maxAllowed"
 											@show-help="showHelp(area.data)"
 										/>
 									</div>

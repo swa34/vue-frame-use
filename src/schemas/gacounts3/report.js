@@ -574,6 +574,7 @@ const schema = {
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'KEYWORD_ID',
 			multiSelect: true,
+			maxAllowed: 6,
 			grouping: {
 				section: 'Topics and Keywords',
 				order: 2
