@@ -34,7 +34,11 @@
 								multiple
 								:size="activities.length < 15 ? activities.length : 15"
 							>
-								<option v-for="activity in activities" :key="activity.ACTIVITY_ID" :value="activity.ACTIVITY_ID">
+								<option v-for="activity in activities"
+									:key="activity.ACTIVITY_ID"
+									:value="activity.ACTIVITY_ID"
+									:class="activityAlreadyImported(activity.ACTIVITY_ID) ? 'alreadyImported' : '' "
+								>
 									{{ activity.NAME }} - ({{ activity.BEGIN_DATE | simple-date }})
 								</option>
 							</select>
@@ -58,16 +62,20 @@
 	/* global activeUser */
 	/* global notify */
 	/* global swal */
-	import { logError } from '~/modules/caesdb';
 	import { singleItem } from '@gabegabegabe/utils/dist/array/reducers';
+	import { toKey } from '@gabegabegabe/utils/dist/array/mappers';
 	import Spinner from 'vue-simple-spinner';
 	import { url } from '~/modules/utilities';
 	import XIcon from 'vue-feather-icons/icons/XIcon';
 	import {
 		get4HActivity,
 		get4HActivityList,
+		getAssociationReport4HEnrollmentActivity,
 		getCounties
 	} from '~/modules/caesdb/gacounts3';
+	import { getCriteriaStructure,
+		logError
+	} from '~/modules/caesdb';
 
 	export default {
 		name: 'FourHImport',
@@ -92,6 +100,7 @@
 				countyName: null,
 				counties: [],
 				displayModal: false,
+				existingAssociations: [],
 				loadingActivity: false,
 				loadingActivityList: false
 			};
@@ -138,8 +147,27 @@
 		},
 		mounted () {
 			if (this.isNew) this.fetchCountyList();
+			getCriteriaStructure('GACOUNTS3', 'GC3_ASSOCIATION_REPORT_4H_ENROLLMENT_ACTIVITY', (err, data) => {
+				if (err) logError(new Error('Could not fetch criteria structure'));
+				if (!data) return;
+
+				const critStruct = { ...data };
+				critStruct.criteria_REPORT_OWNER_ID_eq.push(activeUserID);
+				getAssociationReport4HEnrollmentActivity(critStruct, (subErr, subData) => {
+					if (subErr) logError(new Error('Could not fetch enrollment activity associations'));
+					if (!subData) return;
+
+					subData
+						// eslint-disable-next-line no-unused-vars
+						.map(({ REPORT_ID, DATE_CREATED, ...association }) => association)
+						.forEach(association => this.existingAssociations.push(association));
+				});
+			});
 		},
 		methods: {
+			activityAlreadyImported (activityID) {
+				return this.existingAssociations.map(toKey('ACTIVITY_ID')).indexOf(activityID) !== -1;
+			},
 			closeModal (event) {
 				if (event.target.matches('div.modal') || event.target.matches('span.close svg.feather')) this.displayModal = false;
 			},
@@ -319,6 +347,12 @@
 </script>
 
 <style lang="scss" scoped>
+	option.alreadyImported::after {
+		content:"(Previously imported)";
+		font-size: 0.75em;
+		font-style: italic;
+	}
+
 	button.load-modal {
 		background: #396;
 
