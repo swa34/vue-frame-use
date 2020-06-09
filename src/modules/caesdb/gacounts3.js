@@ -301,7 +301,20 @@ export const getTopics = callback => {
 
 export const postReportData = (report, callback) => {
 	const url = generateUrl('processSinglePageReport', apiPrefix);
-	makePostRequest(url, report, callback, false);
+	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
+	const pendingRequest = request
+		.post(url);
+
+	pendingRequest.field('reportBlob', JSON.stringify(report));
+
+	pendingRequest.end((err, response) => {
+		--window.pendingRequests;
+		const { body: data } = response;
+		if (err || !data) return callback(err || new Error('No data returned'));
+		if (data.Message) return callback(new Error(data.Message));
+
+		return callback(null, data);
+	});
 };
 
 export const postReportTemplateStatus = (duplicatedReportRecord, callback) => {
