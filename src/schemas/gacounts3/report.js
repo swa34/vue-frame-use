@@ -317,6 +317,33 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'LOCATION_OF_AGENT',
+			prettyName: 'Location of Agent',
+			type: 'int',
+			constraint: {
+				foreignKey: 'COUNTY_OFFICE_ID',
+				foreignLabel: 'COUNTYOFFICENAME',
+				values: caesCache.data.ccd.associationPersonnelJobRole
+					.filter(({ COUNTY_OFFICE_ID }, i, arr) => COUNTY_OFFICE_ID !== null
+					.filter(({ COUNTY_OFFICE_ID }, i, arr) => arr.map(toKey('COUNTY_OFFICE_ID')).indexOf(COUNTY_OFFICE_ID) === i)
+					.sort((a, b) => {
+						if (a.COUNTYOFFICENAME > b.COUNTYOFFICENAME) return 1;
+						if (a.COUNTYOFFICENAME < b.COUNTYOFFICENAME) return -1;
+						return 0;
+					})
+			},
+			default: activeUser.COUNTY_OFFICE_ID,
+			depends: {
+				test: () => caesCache.data.ccd.associationPersonnelJobRole
+					.filter(({ COUNTY_OFFICE_ID }, i, arr) => COUNTY_OFFICE_ID !== null
+					.filter(({ COUNTY_OFFICE_ID }, i, arr) => arr.map(toKey('COUNTY_OFFICE_ID')).indexOf(COUNTY_OFFICE_ID) === i).length > 1
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 6
+			}
+		},
+		{
 			columnName: 'ACTIVITY_LOCATION_TYPE_ID',
 			prettyName: 'Location of Activity',
 			type: 'int',
