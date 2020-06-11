@@ -312,6 +312,12 @@ export const postReportData = (report, callback) => {
 
 	pendingRequest.field('reportBlob', JSON.stringify(report));
 
+	report.reportAttachments.records.forEach((record, i) => {
+		console.log(record);
+		console.log(record.FILE_NAME instanceof File);
+		pendingRequest.attach(`ATTACHMENT_${i}`, record.FILE_NAME);
+	});
+
 	pendingRequest.end((err, response) => {
 		--window.pendingRequests;
 		const { body: data } = response;

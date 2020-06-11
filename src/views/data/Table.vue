@@ -44,6 +44,16 @@
 								:min="column.min || 0"
 								:disabled="column.immutable"
 							/>
+							<span v-else-if="column.inputType === 'file'">{{ record[column.columnName].name }}</span>
+							<!-- <input
+								v-else-if="column.inputType === 'file'"
+								type="file"
+								:files="[record[column.columnName]]"
+								:accepted="column.acceptedTypes ? column.acceptedTypes.join(', ') : false"
+								:required="column.required"
+								:disabled="column.immutable"
+								:style="column.style"
+							/> -->
 							<input
 								v-else
 								v-model="record[column.columnName]"
@@ -99,6 +109,17 @@
 								type="number"
 								:min="column.min || 0"
 								:disabled="!columnShouldBeEditable(column)"
+							/>
+							<input
+								v-else-if="column.inputType === 'file'"
+								type="file"
+								ref="newFileInput"
+								:files="[newRecord[column.columnName]]"
+								:accepted="column.acceptedTypes ? column.acceptedTypes.join(', ') : false"
+								:required="column.required"
+								:disabled="column.immutable"
+								:style="column.style"
+								@change="handleFileInput($event, column.columnName)"
 							/>
 							<input
 								v-else
@@ -307,7 +328,11 @@
 		methods: {
 			addNewRecord () {
 				this.records.push({ ...this.newRecord });
+
 				for (const key in this.newRecord) this.newRecord[key] = null;
+
+				// Need to reset the file input's value (if a file input exists)
+				if (this.$refs.newFileInput.length > 0) this.$refs.newFileInput[0].value = null;
 			},
 			columnShouldBeDisplayed (column) {
 				if (!this.identifier.value) {
@@ -342,6 +367,9 @@
 				if (index !== -1) this.records.splice(index, 1);
 			},
 			getPrettyColumnName,
+			handleFileInput ({ target: { files: { 0: file } } }, columnName) {
+				this.newRecord[columnName] = file;
+			},
 			sqlToHtml,
 			updateRecord (record) {
 				console.log('Sending data to server:');
