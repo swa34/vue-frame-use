@@ -16,6 +16,7 @@ import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData
 import { toKey } from '@gabegabegabe/utils/dist/array/mappers';
 import {
 	associationReport4HEnrollmentActivitySchema,
+	associationReportAttachmentsSchema,
 	associationReportFieldSchema,
 	associationReportKeywordSchema,
 	associationReportProgramAreaSchema,
@@ -882,6 +883,17 @@ const schema = {
 			}
 		},
 		{
+			title: 'Report Attachments',
+			description: 'Attach files.  This is optional.',
+			customClasses: ['full-width'],
+			schema: associationReportAttachmentsSchema,
+			isAssignable: true,
+			grouping: {
+				section: 'Report Attachments',
+				order: 1
+			}
+		},
+		{
 			title: 'Supplemental Data',
 			description: 'This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.',
 			customClasses: ['full-width'],
@@ -960,8 +972,12 @@ const schema = {
 			}
 		},
 		{
+			title: 'Report Attachments',
+			order: 5
+		},
+		{
 			title: 'Sub-Reports',
-			order: 5,
+			order: 6,
 			required: true,
 			customComponent: SubReportCollaborators,
 			depends: {

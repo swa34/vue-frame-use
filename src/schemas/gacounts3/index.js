@@ -1,6 +1,7 @@
 import activityLocationTypeSchema from './activity_location_type';
 import advisedStudentSchema from './advised_student';
 import associationReport4HEnrollmentActivitySchema from './association_report_4h_enrollment_activity';
+import associationReportAttachmentsSchema from './association_report_attachments';
 import associationReportFieldSchema from './association_report_field';
 import associationReportKeywordSchema from './association_report_keyword';
 import associationReportProgramAreaSchema from './association_report_program_area';
@@ -25,6 +26,7 @@ export {
 	activityLocationTypeSchema,
 	advisedStudentSchema,
 	associationReport4HEnrollmentActivitySchema,
+	associationReportAttachmentsSchema,
 	associationReportFieldSchema,
 	associationReportKeywordSchema,
 	associationReportProgramAreaSchema,

@@ -116,9 +116,6 @@
 				</tr>
 			</transition-group>
 		</table>
-		<p v-if="description">
-			{{ description }}
-		</p>
 	</div>
 </template>
 

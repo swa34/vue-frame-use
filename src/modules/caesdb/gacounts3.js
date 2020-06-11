@@ -38,6 +38,11 @@ export const getAssociationReport4HEnrollmentActivity = (criteriaStructure, call
 	makePostRequest(url, criteriaStructure, callback);
 };
 
+export const getAssociationReportAttachments = (criteriaStructure, callback) => {
+	const url = generateUrl('getAssociationReportAttachments', apiPrefix);
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 export const getAssociationReportField = (criteriaStructure, callback) => {
 	const url = generateUrl('associationReportField', apiPrefix);
 	makePostRequest(url, criteriaStructure, callback);
