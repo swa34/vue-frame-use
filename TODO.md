@@ -37,3 +37,8 @@
 - ~~Activities x,y,z have been imported~~
 - Grab associations from last year, flesh out list with info "you've already
 	imported this one" etc.
+
+- Add note "hold ctrl" to 4h import modal
+- Detail column for report search "File Attachments"
+- Filter to search for reports which do/do not have attachments
+- Add file attachments to FAR
