@@ -319,7 +319,7 @@ const schema = {
 		},
 		{
 			columnName: 'LOCATION_OF_AGENT',
-			prettyName: 'Location of Agent',
+			prettyName: 'Agent\'s County',
 			type: 'int',
 			constraint: {
 				foreignKey: 'COUNTY_OFFICE_ID',

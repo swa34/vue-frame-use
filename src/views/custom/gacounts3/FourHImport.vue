@@ -27,6 +27,7 @@
 							<strong>
 								Activities
 							</strong>
+							<p><em>Note: To select multiple actvities, hold down the CTL key as you select them.</em></p>
 							<select
 								v-if="!loadingActivityList"
 								v-model="activityIDs"

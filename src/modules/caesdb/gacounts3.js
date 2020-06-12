@@ -310,14 +310,15 @@ export const postReportData = (report, callback) => {
 	const pendingRequest = request
 		.post(url);
 
-	pendingRequest.field('reportBlob', JSON.stringify(report));
-
 	report.reportAttachments.records.forEach((record, i) => {
-		console.log(record);
-		console.log(record.FILE_NAME instanceof File);
-		pendingRequest.attach(`ATTACHMENT_${i}`, record.FILE_NAME);
+		if (record.FILE_NAME instanceof File) {
+			pendingRequest.attach(`ATTACHMENT_${i}`, record.FILE_NAME);
+			report.reportAttachments.records[i].FILE_NAME = record.FILE_NAME.name;
+		}
 	});
 
+	pendingRequest.field('reportBlob', JSON.stringify(report));
+	
 	pendingRequest.end((err, response) => {
 		--window.pendingRequests;
 		const { body: data } = response;
