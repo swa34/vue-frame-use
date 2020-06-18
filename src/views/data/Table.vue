@@ -44,7 +44,8 @@
 								:min="column.min || 0"
 								:disabled="column.immutable"
 							/>
-							<span v-else-if="column.inputType === 'file'">{{ record[column.columnName].name }}</span>
+							<span v-else-if="column.inputType === 'file' && isFile(record[column.columnName])">{{ record[column.columnName].name }}</span>
+							<span v-else-if="column.inputType === 'file'">{{ record[column.columnName] }}</span>
 							<!-- <input
 								v-else-if="column.inputType === 'file'"
 								type="file"
@@ -65,6 +66,9 @@
 							<span v-if="column.inputType === 'select' || sqlToHtml(column) === 'select'">
 								{{ column.constraint.values[column.constraint.values.map(v => v.key).indexOf(record[column.columnName])].label }}
 							</span>
+							<a v-if="column.inputType === 'file'" :href="`${application.attachmentWebPath}${record[column.columnName]}`">
+								{{ record[column.columnName] }}
+							</a>
 							<span v-else>
 								{{ record[column.columnName] }}
 							</span>
@@ -144,6 +148,7 @@
 	/* global activeUserID */
 	import FuzzySelect from '~/views/elements/FuzzySelect';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import { isFile } from '~/modules/utilities/validation';
 	import {
 		getCriteriaStructure,
 		logError
@@ -221,7 +226,8 @@
 				localRecords: [],
 				associations: [],
 				newRecord,
-				dateFields: []
+				dateFields: [],
+				application: caesCache.application
 			};
 		},
 		computed: {
@@ -370,6 +376,7 @@
 			handleFileInput ({ target: { files: { 0: file } } }, columnName) {
 				this.newRecord[columnName] = file;
 			},
+			isFile,
 			sqlToHtml,
 			updateRecord (record) {
 				console.log('Sending data to server:');
