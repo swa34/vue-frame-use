@@ -15,6 +15,8 @@ import SubReportForReportComponent from '~/views/custom/gacounts3/SubReportForRe
 import SupplementalDataComponent from '~/views/custom/gacounts3/SupplementalData';
 import { toKey } from '@gabegabegabe/utils/dist/array/mappers';
 import {
+	associationReport4HEnrollmentActivitySchema,
+	associationReportAttachmentsSchema,
 	associationReportFieldSchema,
 	associationReportKeywordSchema,
 	associationReportProgramAreaSchema,
@@ -316,6 +318,34 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'LOCATION_OF_AGENT',
+			prettyName: 'Agent\'s County',
+			type: 'int',
+			constraint: {
+				foreignKey: 'COUNTY_OFFICE_ID',
+				foreignLabel: 'COUNTYOFFICENAME',
+				values: caesCache.data.ccd.associationPersonnelJobRole
+					.filter(({ COUNTY_OFFICE_ID }) => COUNTY_OFFICE_ID !== null)
+					.filter(({ COUNTY_OFFICE_ID }, i, arr) => arr.map(toKey('COUNTY_OFFICE_ID')).indexOf(COUNTY_OFFICE_ID) === i)
+					.sort((a, b) => {
+						if (a.COUNTYOFFICENAME > b.COUNTYOFFICENAME) return 1;
+						if (a.COUNTYOFFICENAME < b.COUNTYOFFICENAME) return -1;
+
+						return 0;
+					})
+			},
+			default: activeUser.COUNTY_OFFICE_ID,
+			depends: {
+				test: () => caesCache.data.ccd.associationPersonnelJobRole
+					.filter(({ COUNTY_OFFICE_ID }) => COUNTY_OFFICE_ID !== null)
+					.filter(({ COUNTY_OFFICE_ID }, i, arr) => arr.map(toKey('COUNTY_OFFICE_ID')).indexOf(COUNTY_OFFICE_ID) === i).length > 1
+			},
+			grouping: {
+				section: 'Main Report Information',
+				order: 6
+			}
+		},
+		{
 			columnName: 'ACTIVITY_LOCATION_TYPE_ID',
 			prettyName: 'Location of Activity',
 			type: 'int',
@@ -355,6 +385,7 @@ const schema = {
 				values: caesCache.data.pdb.countyList
 			},
 			depends: {
+
 				column: 'ACTIVITY_LOCATION_TYPE_ID',
 				test: countyIdRequired
 			},
@@ -572,6 +603,7 @@ const schema = {
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'KEYWORD_ID',
 			multiSelect: true,
+			maxAllowed: 6,
 			grouping: {
 				section: 'Topics and Keywords',
 				order: 2
@@ -851,6 +883,19 @@ const schema = {
 			}
 		},
 		{
+			title: 'Report Attachments',
+			description: 'Attach files.  This is optional.',
+			customClasses: ['full-width'],
+			foreignKey: 'REPORT_ID',
+			associatedColumn: 'REPORT_ID',
+			schema: associationReportAttachmentsSchema,
+			isAssignable: true,
+			grouping: {
+				section: 'Report Attachments',
+				order: 1
+			}
+		},
+		{
 			title: 'Supplemental Data',
 			description: 'This set of supplemental data fields is for data pertaining to all the reported activities, not just those activities you were personally involved in.',
 			customClasses: ['full-width'],
@@ -872,6 +917,18 @@ const schema = {
 			isAssignable: true,
 			grouping: {
 				section: 'Sub-Reports',
+				order: 1
+			}
+		},
+		{
+			title: '4H Enrollment Activities',
+			schema: associationReport4HEnrollmentActivitySchema,
+			localKey: 'ID',
+			foreignKey: 'REPORT_ID',
+			isAssignable: false,
+			forDataStoreOnly: true,
+			grouping: {
+				section: 'Demographic Information',
 				order: 1
 			}
 		}
@@ -917,8 +974,12 @@ const schema = {
 			}
 		},
 		{
+			title: 'Report Attachments',
+			order: 5
+		},
+		{
 			title: 'Sub-Reports',
-			order: 5,
+			order: 6,
 			required: true,
 			customComponent: SubReportCollaborators,
 			depends: {

@@ -11,16 +11,26 @@
 				<p class="instruction">
 					{{ duplicationSchema.instruction }}
 				</p>
-				<ul>
-					<li v-for="(section, title) in duplicationSchema.sections" :key="title">
-						<label>
-							<input v-model="section.duplicate" type="checkbox" :disabled="!dependenciesMet(section)" />
-							<span :class="!dependenciesMet(section) ? 'disabled' : ''">
-								{{ title }}
-							</span>
-						</label>
-					</li>
-				</ul>
+				<div class="content-wrapper">
+					<ul class="section-list">
+						<li v-for="(section, title) in duplicationSchema.sections" :key="title">
+							<label>
+								<input v-model="section.duplicate" type="checkbox" :disabled="!dependenciesMet(section)" />
+								<span :class="!dependenciesMet(section) ? 'disabled' : ''">
+									{{ title }}
+								</span>
+							</label>
+						</li>
+					</ul>
+					<div class="custom-content">
+						<slot name="custom-content">
+						<!--
+							By defualt there's no content here, however custom content can be
+							added when this component is included in another component.
+						-->
+						</slot>
+					</div>
+				</div>
 			</div>
 			<div class="button-container">
 				<button type="button" @click="processDuplicationOptions">
@@ -32,8 +42,9 @@
 </template>
 
 <script>
-	import XIcon from 'vue-feather-icons/icons/XIcon';
+	/* global swal */
 	import { url } from '~/modules/utilities';
+	import XIcon from 'vue-feather-icons/icons/XIcon';
 
 	export default {
 		name: 'DuplicationModal',
@@ -106,6 +117,11 @@
 				}
 				this.duplication.ready = true;
 				this.duplication.reportID = url.getParam('duplicateID');
+				swal(
+					'Yippee!',
+					'Data from your old report has been imported successfully!',
+					'success'
+				);
 			}
 		}
 	};
@@ -119,53 +135,69 @@
 		z-index: 999;
 		width: 100vw;
 		height: 100vh;
-		background: rgba(0,0,0,.15);
+		background: rgba(0, 0, 0, 0.15);
 		padding-top: 1rem;
 		overflow: auto;
 		text-align: center;
+
 		span.close {
 			display: block;
 			text-align: right;
-			svg {
-				cursor: pointer;
-			}
+
+			svg { cursor: pointer; }
 		}
+
 		div.container {
 			background: #fff;
-			// width: calc(100% - 2rem);
-			max-width: 960px;
+			max-width: 720px;
 			margin: 0 auto;
 			padding: 1rem;
-			box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+			box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
 			text-align: center;
 			display: inline-block;
-			border-radius: .375rem;
-			p.instruction {
-				padding: 0 2rem;
-				text-align: left;
-			}
-			ul {
-				list-style-type: none;
-				padding: 0;
-				display: inline-block;
-				li {
-					margin-bottom: .75rem;
-					label {
-						display: flex;
-						span {
+			border-radius: 0.375rem;
+
+			p.instruction,
+			div.content-wrapper { padding: 0 2rem; }
+
+			p.instruction { text-align: left; }
+
+			div.content-wrapper {
+				display: flex;
+				justify-content: center;
+
+				ul.section-list {
+					flex-grow: 1;
+					list-style-type: none;
+					padding: 0 0.5rem;
+					display: inline-block;
+					column-count: 2;
+					column-width: 14rem;
+
+					li {
+						margin-bottom: 0.75rem;
+						break-inside: avoid;
+
+						label {
 							display: flex;
-							flex-direction: column;
-							justify-content: center;
-							&.disabled {
-								color: #999;
+
+							span {
+								display: flex;
+								flex-direction: column;
+								justify-content: center;
+
+								&.disabled {
+									color: #999;
+								}
 							}
 						}
 					}
 				}
+
+				div.custom-content { text-align: left; }
 			}
-			div.button-container {
-				text-align: center;
-			}
+
+			div.button-container { text-align: center; }
 		}
 	}
 </style>

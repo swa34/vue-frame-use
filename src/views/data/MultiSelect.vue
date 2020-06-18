@@ -1,12 +1,16 @@
 <template lang="html">
 	<div v-if="displayedGroups.length > 0 && filteredOptions.length > 0">
 		<!-- Show the title if there is one -->
-		<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
-			{{ (title || schema.title) + (mode === 'view' ? ':' : '') }}
-			<a v-if="helpMessageName && mode === 'edit'" class="help-link" @click="$emit('show-help')">
-				<HelpCircleIcon />
-			</a>
-		</h3>
+		<div class="heading-wrapper">
+			<h3 v-if="title || schema.title" :class="mode === 'view' ? 'inline' : ''">
+				{{ (title || schema.title) + (mode === 'view' ? ':' : '') }}
+				<a v-if="helpMessageName && mode === 'edit'" class="help-link" @click="$emit('show-help')">
+					<HelpCircleIcon />
+				</a>
+			</h3>
+			<em v-if="maxAllowed >= 0">({{records.length}}/{{maxAllowed}} Selected)</em>
+		</div>
+
 		<!-- Show the description if there's one of those too -->
 		<p v-if="description && mode === 'edit'">
 			{{ description }}
@@ -42,6 +46,7 @@
 										v-model="records"
 										type="checkbox"
 										:value="generateRecord(option)"
+										:disabled="disableCheckbox(option[optionID])"
 										@click="notifyOfChanges"
 									/>
 									<!-- The option's label -->
@@ -85,6 +90,7 @@
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 	import { filter } from '~/modules/criteriaUtils';
 	import { constructNotificationMessage } from '~/modules/notifications';
+	import { toKey } from '@gabegabegabe/utils/dist/array/mappers';
 	import {
 		getCriteriaStructure,
 		logError
@@ -153,6 +159,12 @@
 			identifier: {
 				type: Object,
 				default: null
+			},
+
+			// Max Allowed
+			maxAllowed: {
+				type: Number,
+				default: -1
 			},
 
 			// The display mode
@@ -529,6 +541,14 @@
 					if (recordIndex !== -1) this.records.splice(recordIndex, 1);
 				});
 			},
+
+			disableCheckbox (value) {
+				if (this.maxAllowed < 0) return false;
+				if (this.records.length < this.maxAllowed) return false;
+				if (this.records.map(toKey(this.associatedColumn)).indexOf(value)===-1) return true;
+				return false;
+			},
+
 			getOptionsThatHaveRecords (options) {
 				const newOptions = [];
 				options.forEach(option => {
@@ -610,6 +630,12 @@
 	div.group {
 		padding: 0 1rem;
 	}
+
+	div.heading-wrapper{
+		align-items: center;
+		display: flex;
+	}
+
 	span.group-name {
 		font-size: .85rem;
 		font-weight: 600;

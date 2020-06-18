@@ -115,6 +115,7 @@
 								</td>
 								<td>
 									<input v-model.number="contact.QUANTITY" type="number" min="0" />
+									<em>Quantity Entered Above: {{ getMainReportContactQuantity(contact.TYPE_ID) }}</em>
 								</td>
 							</tr>
 						</tbody>
@@ -216,6 +217,7 @@
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
 	import SubReportPlainText from '~/views/custom/gacounts3/SubReportPlainText';
 	import SupplementalData from '~/views/custom/gacounts3/SupplementalData';
+	import { singleItem } from '@gabegabegabe/utils/dist/array/reducers';
 	import {
 		getCriteriaStructure,
 		logError
@@ -695,6 +697,13 @@
 				if (index === -1) return '';
 
 				return this.contactTypes[index].LABEL;
+			},
+			getMainReportContactQuantity(typeId) {
+				const filteredContacts = this.$store.state.contacts.records
+					.filter(({TYPE_ID}) => TYPE_ID === typeId);
+				if (filteredContacts.length > 0) return filteredContacts.reduce(singleItem).QUANTITY;
+
+				return 0;
 			},
 			getOwnerPlannedProgramFromID (id) {
 				let plannedProgram = {};

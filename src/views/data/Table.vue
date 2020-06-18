@@ -44,6 +44,17 @@
 								:min="column.min || 0"
 								:disabled="column.immutable"
 							/>
+							<span v-else-if="column.inputType === 'file' && isFile(record[column.columnName])">{{ record[column.columnName].name }}</span>
+							<span v-else-if="column.inputType === 'file'">{{ record[column.columnName] }}</span>
+							<!-- <input
+								v-else-if="column.inputType === 'file'"
+								type="file"
+								:files="[record[column.columnName]]"
+								:accepted="column.acceptedTypes ? column.acceptedTypes.join(', ') : false"
+								:required="column.required"
+								:disabled="column.immutable"
+								:style="column.style"
+							/> -->
 							<input
 								v-else
 								v-model="record[column.columnName]"
@@ -55,6 +66,9 @@
 							<span v-if="column.inputType === 'select' || sqlToHtml(column) === 'select'">
 								{{ column.constraint.values[column.constraint.values.map(v => v.key).indexOf(record[column.columnName])].label }}
 							</span>
+							<a v-if="column.inputType === 'file'" :href="`${application.attachmentWebPath}${record[column.columnName]}`">
+								{{ record[column.columnName] }}
+							</a>
 							<span v-else>
 								{{ record[column.columnName] }}
 							</span>
@@ -101,6 +115,17 @@
 								:disabled="!columnShouldBeEditable(column)"
 							/>
 							<input
+								v-else-if="column.inputType === 'file'"
+								type="file"
+								ref="newFileInput"
+								:files="[newRecord[column.columnName]]"
+								:accepted="column.acceptedTypes ? column.acceptedTypes.join(', ') : false"
+								:required="column.required"
+								:disabled="column.immutable"
+								:style="column.style"
+								@change="handleFileInput($event, column.columnName)"
+							/>
+							<input
 								v-else
 								v-model="newRecord[column.columnName]"
 								:type="column.inputType || sqlToHtml(column)"
@@ -116,9 +141,6 @@
 				</tr>
 			</transition-group>
 		</table>
-		<p v-if="description">
-			{{ description }}
-		</p>
 	</div>
 </template>
 
@@ -126,6 +148,7 @@
 	/* global activeUserID */
 	import FuzzySelect from '~/views/elements/FuzzySelect';
 	import HelpCircleIcon from 'vue-feather-icons/icons/HelpCircleIcon';
+	import { isFile } from '~/modules/utilities/validation';
 	import {
 		getCriteriaStructure,
 		logError
@@ -203,7 +226,8 @@
 				localRecords: [],
 				associations: [],
 				newRecord,
-				dateFields: []
+				dateFields: [],
+				application: caesCache.application
 			};
 		},
 		computed: {
@@ -310,7 +334,11 @@
 		methods: {
 			addNewRecord () {
 				this.records.push({ ...this.newRecord });
+
 				for (const key in this.newRecord) this.newRecord[key] = null;
+
+				// Need to reset the file input's value (if a file input exists)
+				if (this.$refs.newFileInput.length > 0) this.$refs.newFileInput[0].value = null;
 			},
 			columnShouldBeDisplayed (column) {
 				if (!this.identifier.value) {
@@ -345,6 +373,10 @@
 				if (index !== -1) this.records.splice(index, 1);
 			},
 			getPrettyColumnName,
+			handleFileInput ({ target: { files: { 0: file } } }, columnName) {
+				this.newRecord[columnName] = file;
+			},
+			isFile,
 			sqlToHtml,
 			updateRecord (record) {
 				console.log('Sending data to server:');

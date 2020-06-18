@@ -33,6 +33,16 @@ export const getAssociationKeywordTopic = callback => {
 	makeGetRequest(url, callback);
 };
 
+export const getAssociationReport4HEnrollmentActivity = (criteriaStructure, callback) => {
+	const url = generateUrl('associationReport4HEnrollmentActivity', apiPrefix);
+	makePostRequest(url, criteriaStructure, callback);
+};
+
+export const getAssociationReportAttachments = (criteriaStructure, callback) => {
+	const url = generateUrl('associationReportAttachments', apiPrefix);
+	makePostRequest(url, criteriaStructure, callback);
+};
+
 export const getAssociationReportField = (criteriaStructure, callback) => {
 	const url = generateUrl('associationReportField', apiPrefix);
 	makePostRequest(url, criteriaStructure, callback);
@@ -296,7 +306,27 @@ export const getTopics = callback => {
 
 export const postReportData = (report, callback) => {
 	const url = generateUrl('processSinglePageReport', apiPrefix);
-	makePostRequest(url, report, callback, false);
+	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
+	const pendingRequest = request
+		.post(url);
+
+	report.reportAttachments.records.forEach((record, i) => {
+		if (record.FILE_NAME instanceof File) {
+			pendingRequest.attach(`ATTACHMENT_${i}`, record.FILE_NAME);
+			report.reportAttachments.records[i].FILE_NAME = record.FILE_NAME.name;
+		}
+	});
+
+	pendingRequest.field('reportBlob', JSON.stringify(report));
+	
+	pendingRequest.end((err, response) => {
+		--window.pendingRequests;
+		const { body: data } = response;
+		if (err || !data) return callback(err || new Error('No data returned'));
+		if (data.Message) return callback(new Error(data.Message));
+
+		return callback(null, data);
+	});
 };
 
 export const postReportTemplateStatus = (duplicatedReportRecord, callback) => {

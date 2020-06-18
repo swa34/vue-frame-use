@@ -117,7 +117,7 @@
 										</span>
 									</div>
 								</div>
-								<div v-else-if="area.type === 'association'">
+								<div v-else-if="area.type === 'association' && !area.hidden">
 									<div v-if="area.data.isExternal && identifier.value && dependencyMet(area.data)">
 										<!-- Then just show the association title and link to edit it -->
 										<h3>
@@ -157,6 +157,7 @@
 											:affects="area.data.affects"
 											:help-message-name="area.data.helpMessageName"
 											:mode="getMode(area.data)"
+											:max-allowed="area.data.maxAllowed"
 											@show-help="showHelp(area.data)"
 										/>
 									</div>
