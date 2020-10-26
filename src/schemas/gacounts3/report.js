@@ -66,13 +66,22 @@ altRacialDemographicSchema.columns.push({
 	type: 'int',
 	min: 0
 });
+altRacialDemographicSchema.columns.push({
+	columnName: 'QUANTITY_OTHER',
+	prettyName: 'Other/Unidentified',
+	type: 'int',
+	min: 0
+});
 altRacialDemographicSchema.prepareForSubmit = newRecords => {
 	// An array to hold our records to be submitted
 	const transformedRecords = [];
 	newRecords.forEach(record => {
-		if (record.QUANTITY_MALE > 0 || record.QUANTITY_FEMALE > 0) {
+		if (record.QUANTITY_MALE > 0 || record.QUANTITY_FEMALE > 0 || record.QUANTITY_OTHER > 0) {
 			const newRecordTemplate = {};
-			for (const key in record) if (key !== 'QUANTITY_MALE' && key !== 'QUANTITY_FEMALE') newRecordTemplate[key] = record[key];
+			for (const key in record)  {
+				if (key !== 'QUANTITY_MALE' && key !== 'QUANTITY_FEMALE'
+				 	&& key !== 'QUANTITY_OTHER') newRecordTemplate[key] = record[key];
+			}
 
 			if (record.QUANTITY_MALE > 0) {
 				const maleRecord = { ...newRecordTemplate };
@@ -86,6 +95,12 @@ altRacialDemographicSchema.prepareForSubmit = newRecords => {
 				femaleRecord.QUANTITY = record.QUANTITY_FEMALE;
 				transformedRecords.push(femaleRecord);
 			}
+			if (record.QUANTITY_OTHER > 0) {
+				const otherRecord = { ...newRecordTemplate };
+				otherRecord.GENDER_ID = 3;
+				otherRecord.QUANTITY = record.QUANTITY_OTHER;
+				transformedRecords.push(otherRecord);
+			}
 		}
 	});
 
@@ -96,7 +111,8 @@ altRacialDemographicSchema.prepareFromRetrieval = (existingRecords, componentRec
 		const componentRecordsRaceMap = componentRecords.map(r => r.RACE_ID);
 		const matchingRecord = componentRecords[componentRecordsRaceMap.indexOf(record.RACE_ID)];
 		if (record.GENDER_ID === 1) matchingRecord.QUANTITY_MALE = record.QUANTITY;
-		 else if (record.GENDER_ID === 2) matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
+		else if (record.GENDER_ID === 2) matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
+		else if (record.GENDER_ID === 3) matchingRecord.QUANTITY_OTHER = record.QUANTITY;
 	});
 };
 
@@ -116,13 +132,19 @@ altEthnicDemographicSchema.columns.push({
 	prettyName: 'Female',
 	type: 'int'
 });
+altEthnicDemographicSchema.columns.push({
+	columnName: 'QUANTITY_OTHER',
+	prettyName: 'Other/Unidentified',
+	type: 'int'
+});
 altEthnicDemographicSchema.prepareForSubmit = altRacialDemographicSchema.prepareForSubmit;
 altEthnicDemographicSchema.prepareFromRetrieval = (existingRecords, componentRecords) => {
 	existingRecords.forEach(record => {
 		const componentRecordsEthnicMap = componentRecords.map(r => r.ETHNICITY_ID);
 		const matchingRecord = componentRecords[componentRecordsEthnicMap.indexOf(record.ETHNICITY_ID)];
 		if (record.GENDER_ID === 1) matchingRecord.QUANTITY_MALE = record.QUANTITY;
-		 else if (record.GENDER_ID === 2) matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
+		else if (record.GENDER_ID === 2) matchingRecord.QUANTITY_FEMALE = record.QUANTITY;
+		else if (record.GENDER_ID === 3) matchingRecord.QUANTITY_OTHER = record.QUANTITY;
 	});
 };
 
