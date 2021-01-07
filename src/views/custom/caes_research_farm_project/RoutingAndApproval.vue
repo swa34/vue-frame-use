@@ -110,6 +110,10 @@
 				return column.depends.test(this.$store.state.project[column.depends.column]);
 			},
 			getDisplayText (column) {
+				if (column.displayModeColumnName) {
+					return this.record[column.displayModeColumnName];
+					//return "Robby Thrift";
+				}
 				if (!column.constraint) {
 					const value = this.record[column.columnName];
 

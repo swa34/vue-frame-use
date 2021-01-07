@@ -135,7 +135,7 @@
 					</td>
 					<td>
 						<button type="button" class="button" @click="addNewRecord">
-							Add
+							Save Row
 						</button>
 					</td>
 				</tr>

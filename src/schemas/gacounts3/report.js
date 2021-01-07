@@ -182,7 +182,7 @@ const schema = {
 			if (hasDistributedRecords) postReportData(report, callback);
 			else swal.fire({
 				title: 'Are you sure?',
-				text: 'You have selected Media Produced/Distributed as your report type, but have not entered any Media Distributed records.  Please click the "add" button beside the media distribution line to connect your entry to this report.  If you have no distribution numbers you may dismiss this warning.',
+				text: 'You have selected Media Produced/Distributed as your report type, but have not entered any Media Distributed records.  Please click the "Save Row" button beside the media distribution line to connect your entry to this report.  If you have no distribution numbers you may dismiss this warning.',
 				type: 'warning',
 				confirmButtonColor: '#6c3129',
 				confirmButtonText: 'Yes',
@@ -823,6 +823,7 @@ const schema = {
 		},
 		{
 			title: 'Media Distributed',
+			description: 'Be sure to click the "Save Row" button on each row entered to save the entry.  Otherwise the entry will not be saved.',
 			schema: mediaDistributedSchema,
 			localKey: 'ID',
 			foreignKey: 'REPORT_ID',

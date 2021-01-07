@@ -527,6 +527,7 @@ const schema = {
 		{
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
 			prettyName: 'Station Superintendent',
+			displayModeColumnName:  'STATION_SUPERINTENDENT_DISPLAY_NAME',
 			type: 'int',
 			immutable: true,
 			getDependentValue: getResearchFarmDependentValueFn('SUPERINTENDENT_PERSONNEL_ID'),
@@ -543,6 +544,16 @@ const schema = {
 				column: 'PARTICIPATING_RESEARCH_FARM_ID',
 				test: getResearchFarmDependencyTest('SUPERINTENDENT_PERSONNEL_ID')
 			}
+		},
+		{
+			columnName: 'STATION_SUPERINTENDENT_DISPLAY_NAME',
+			prettyName: 'Station Superintendent',
+			type: 'hidden',
+			immutable: true,
+			grouping: {
+				section: 'Routing and Approval',
+				order: 1
+			},
 		},
 		{
 			columnName: 'SUPERINTENDENT_COMMENTS',
