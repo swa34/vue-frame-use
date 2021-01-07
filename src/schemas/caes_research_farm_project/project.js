@@ -547,6 +547,7 @@ const schema = {
 		},
 		{
 			columnName: 'STATION_SUPERINTENDENT_DISPLAY_NAME',
+			//pseudo column to store supt name, needs for retired supt
 			prettyName: 'Station Superintendent',
 			type: 'hidden',
 			immutable: true,
