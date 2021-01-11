@@ -164,7 +164,7 @@ const demographicsTest = (records, schema) => {
 		 return v.USES_DEMOGRAPHICS;
 	});
 	records.forEach(record => {
-		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(reocrd.TYPE_ID)]) passes = true;
 	});
 
 	return passes;
@@ -449,6 +449,45 @@ const schema = {
 			}
 		},
 		{
+			columnName: 'DEMOGRAPHIC_COLLECTION_METHOD_ID',
+			prettyName: 'Demographic Collection Method',
+			type: 'int',
+			inputType: 'radio',
+			default: caesCache.data.gc3.demographicCollectionMethod.find(d => d.IS_DEFAULT === true).ID,
+			constraint: {
+				foreignKey: 'ID',
+				foreignLabel: 'LABEL',
+				values: caesCache.data.gc3.demographicCollectionMethod
+			},
+			grouping: {
+				section: 'Demographic Information',
+				order: 3
+			},
+			depends: {
+				association: 'Contacts',
+				useValues: true,
+				test: (records, schema) => {
+					let passes = false;
+					const associationsMap = schema.associations.map(a => a.title);
+					const association = schema.associations[associationsMap.indexOf('Contacts')];
+					const columnsMap = association.schema.columns.map(c => c.columnName);
+					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
+					const { values } = column.constraint;
+					const valuesIdMap = values.map(v => v.key);
+					const valuesUsesDemographicsMap = values.map(v => {
+						if (v.originalValue) return v.originalValue.USES_DEMOGRAPHICS;
+				
+						 return v.USES_DEMOGRAPHICS;
+					});
+					records.forEach(record => {
+						if (valuesUsesDemographicsMap[valuesIdMap.indexOf(reocrd.TYPE_ID)]) passes = true;
+					});
+				
+					return passes;
+				}
+			}
+		},
+		{
 			columnName: 'DATE_BEGIN',
 			prettyName: 'Begin Date',
 			type: 'datetime',
@@ -707,7 +746,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 3
+				order: 4
 			},
 			depends: {
 				association: 'Contacts',
@@ -728,7 +767,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 4
+				order: 5
 			},
 			depends: {
 				association: 'Contacts',
@@ -749,7 +788,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 5
+				order: 6
 			},
 			depends: {
 				association: 'Report Type',
@@ -790,7 +829,7 @@ const schema = {
 			showTotals: true,
 			grouping: {
 				section: 'Demographic Information',
-				order: 6
+				order: 7
 			},
 			filter: {
 				associations: [
