@@ -148,10 +148,13 @@ altEthnicDemographicSchema.prepareFromRetrieval = (existingRecords, componentRec
 	});
 };
 
+let showDemographics = false;
+
 // Define our demographics test function to be reused for each of the
 // demographic associations
 const demographicsTest = (records, schema) => {
 	let passes = false;
+	showDemographics = false;
 	const associationsMap = schema.associations.map(a => a.title);
 	const association = schema.associations[associationsMap.indexOf('Contacts')];
 	const columnsMap = association.schema.columns.map(c => c.columnName);
@@ -164,10 +167,17 @@ const demographicsTest = (records, schema) => {
 		 return v.USES_DEMOGRAPHICS;
 	});
 	records.forEach(record => {
-		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(reocrd.TYPE_ID)]) passes = true;
+		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 	});
 
+	if (passes) showDemographics = true;
+
 	return passes;
+};
+
+const showDemographicCollectionMethod = () => {
+	console.log(showDemographics);
+	return showDemographics;
 };
 
 // Function to determine if a county id is required
@@ -466,26 +476,8 @@ const schema = {
 			depends: {
 				association: 'Contacts',
 				useValues: true,
-				test: (records, schema) => {
-					let passes = false;
-					const associationsMap = schema.associations.map(a => a.title);
-					const association = schema.associations[associationsMap.indexOf('Contacts')];
-					const columnsMap = association.schema.columns.map(c => c.columnName);
-					const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
-					const { values } = column.constraint;
-					const valuesIdMap = values.map(v => v.key);
-					const valuesUsesDemographicsMap = values.map(v => {
-						if (v.originalValue) return v.originalValue.USES_DEMOGRAPHICS;
-				
-						 return v.USES_DEMOGRAPHICS;
-					});
-					records.forEach(record => {
-						if (valuesUsesDemographicsMap[valuesIdMap.indexOf(reocrd.TYPE_ID)]) passes = true;
-					});
-				
-					return passes;
-				}
-			}
+				test: () => { return showDemographics; }
+			}			
 		},
 		{
 			columnName: 'DATE_BEGIN',
