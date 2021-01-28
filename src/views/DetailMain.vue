@@ -683,6 +683,12 @@
 				if (column.depends.column) {
 					if (typeof column.depends.column === 'string') return column.depends.test(this.record[column.depends.column]);
 					if (Array.isArray(column.depends.column)) return column.depends.test(column.depends.column.map(column => this.record[column]));
+				} else if (column.depends.useValues && column.depends.association) {
+					if (column.depends.useColumnValue) {
+						return column.depends.test(this.record[column.columnName],this.$store.state[stringFormats.camelCase(column.depends.association)].records, this.$store.state.schema);	
+					} else {
+						return column.depends.test(this.$store.state[stringFormats.camelCase(column.depends.association)].records, this.$store.state.schema);
+					}
 				} else {
 					return column.depends.test();
 				}

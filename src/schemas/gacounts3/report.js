@@ -148,13 +148,10 @@ altEthnicDemographicSchema.prepareFromRetrieval = (existingRecords, componentRec
 	});
 };
 
-let showDemographics = false;
-
 // Define our demographics test function to be reused for each of the
 // demographic associations
 const demographicsTest = (records, schema) => {
 	let passes = false;
-	showDemographics = false;
 	const associationsMap = schema.associations.map(a => a.title);
 	const association = schema.associations[associationsMap.indexOf('Contacts')];
 	const columnsMap = association.schema.columns.map(c => c.columnName);
@@ -170,14 +167,31 @@ const demographicsTest = (records, schema) => {
 		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
 	});
 
-	if (passes) showDemographics = true;
-
 	return passes;
 };
 
-const showDemographicCollectionMethod = () => {
-	console.log(showDemographics);
-	return showDemographics;
+const demographicsCollectionMethodTest = (columnValue, records, schema) => {
+
+	//don't show if value is unknown (reports prior to Jan 2021)
+	if ( columnValue === caesCache.data.gc3.demographicCollectionMethod.find( ({ LABEL }) => LABEL === 'Unknown' ).ID) return false;
+
+	let passes = false;
+	const associationsMap = schema.associations.map(a => a.title);
+	const association = schema.associations[associationsMap.indexOf('Contacts')];
+	const columnsMap = association.schema.columns.map(c => c.columnName);
+	const column = association.schema.columns[columnsMap.indexOf('TYPE_ID')];
+	const { values } = column.constraint;
+	const valuesIdMap = values.map(v => v.key);
+	const valuesUsesDemographicsMap = values.map(v => {
+		if (v.originalValue) return v.originalValue.USES_DEMOGRAPHICS;
+
+		 return v.USES_DEMOGRAPHICS;
+	});
+	records.forEach(record => {
+		if (valuesUsesDemographicsMap[valuesIdMap.indexOf(record.TYPE_ID)]) passes = true;
+	});
+
+	return passes;
 };
 
 // Function to determine if a county id is required
@@ -463,11 +477,12 @@ const schema = {
 			prettyName: 'Demographic Collection Method',
 			type: 'int',
 			inputType: 'radio',
+			helpMessageName: 'DemographicCollectionMethod',
 			default: caesCache.data.gc3.demographicCollectionMethod.find(d => d.IS_DEFAULT === true).ID,
 			constraint: {
 				foreignKey: 'ID',
 				foreignLabel: 'LABEL',
-				values: caesCache.data.gc3.demographicCollectionMethod
+				values: caesCache.data.gc3.demographicCollectionMethod.filter(d => d.IS_VISIBLE === true)
 			},
 			grouping: {
 				section: 'Demographic Information',
@@ -476,7 +491,8 @@ const schema = {
 			depends: {
 				association: 'Contacts',
 				useValues: true,
-				test: () => { return showDemographics; }
+				useColumnValue: true,
+				test: demographicsCollectionMethodTest
 			}			
 		},
 		{
