@@ -178,7 +178,12 @@
 				<div class="subreport-section">
 					<p v-if="(editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID) || editMode === 'admin'">
 						<a :href="'https://' + hostname + '/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
-							{{ collaborator.HAS_REPORTED ? 'Edit' : 'File Sub-Report' }}
+							{{ collaborator.HAS_REPORTED ? 'Edit/Delete' : 'File Sub-Report' }}
+						</a>
+					</p>
+					<p v-else-if="editMode === 'owner' && collaborator.HAS_REPORTED">
+						<a :href="'https://' + hostname + '/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
+							Delete
 						</a>
 					</p>
 					<p v-if="!needExistingData || !collaborator.HAS_REPORTED || collaborator.HAS_REPORTED !== 1">
