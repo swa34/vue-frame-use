@@ -2,11 +2,13 @@
 /* global activeUserId */
 import CaesPersonnelDetails from '~/views/custom/caes_research_farm_project/CaesPersonnelDetails';
 import FinancialSupport from '~/views/custom/caes_research_farm_project/FinancialSupport';
+import ResultsFile from '~/views/custom/caes_research_farm_project/ResultsFile';
 import RoutingAndApproval from '~/views/custom/caes_research_farm_project/RoutingAndApproval';
 import SupplementalAnimalInfo from '~/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
 import SupplementalPlantInfo from '~/views/custom/caes_research_farm_project/SupplementalPlantInfo';
 import supplementalAnimalInfoSchema from '~/schemas/caes_research_farm_project/supplemental_animal_info';
 import supplementalPlantInfoSchema from '~/schemas/caes_research_farm_project/supplemental_plant_info';
+import RADIO_OPTIONS_BOOLEAN from '~/globals/radio-options-boolean';
 import {
 	deleteFile,
 	getDepartmentHeadCollegeId,
@@ -312,6 +314,20 @@ const schema = {
 			},
 			customClasses: ['inline']
 		},
+		// 3/12/21 RHT  Just before pushing to prod, Dr. Stougaard decided against having this field.
+		/*{
+			columnName: 'INVOLVES_PRECISION_AGRICULTURE',
+			type: 'bit',
+			required: true,
+			inputType: 'radio',
+			default: false,
+			constraint: { ...RADIO_OPTIONS_BOOLEAN },
+			grouping: {
+				section: 'General Information',
+				order: 3
+			},
+			customClasses: ['inline']
+		},*/
 		{
 			columnName: 'DISCIPLINE_ID',
 			prettyName: 'Discipline',
@@ -523,6 +539,18 @@ const schema = {
 				order: 1
 			},
 			customClasses: ['is-extra-wide']
+		},
+		{
+			columnName: 'RESULTS_FILE',
+			prettyName: 'Results File',
+			type: 'nvarchar',
+			inputType: 'file',
+			deleteFile: (projectId, fileName) => deleteFile(projectId, 'RESULTS_FILE', fileName),
+			grouping: {
+				section: 'Additional Responsibilities and Funding',
+				order: 1
+			},
+			customComponent: ResultsFile
 		},
 		{
 			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
@@ -861,6 +889,7 @@ const schema = {
 					columns: [
 						'COMMODITY_ID',
 						'COMMODITY_OTHER',
+						//'INVOLVES_PRECISION_AGRICULTURE',
 						'DISCIPLINE_ID',
 						'DISCIPLINE_OTHER'
 					]

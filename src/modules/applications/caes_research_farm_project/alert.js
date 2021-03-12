@@ -55,6 +55,21 @@ export default {
 			`.trim()
 		});
 	},
+	failedResultsFileUpload: (title, messages) => {
+		swal({
+			...defaultOptions,
+			type: 'error',
+			title: 'Oops!',
+			html: `
+				<p>
+					We were unable to upload the results file for this ${title}.
+				</p>
+				<div style="text-align: left;">
+					${messages}
+				</div>
+			`.trim()
+		});
+	},
 	failedReturnForReview: (title, messages) => {
 		swal({
 			...defaultOptions,
@@ -148,6 +163,20 @@ export default {
 			type: 'success',
 			title: 'Awesome!',
 			text: `You have successfully rejected this ${title}.`,
+			confirmButtonText: 'OK'
+		}).then(result => {
+			if (result.value)
+
+				// They clicked OK
+				window.location.href = `https://${window.location.hostname}/CAESResearchFarmProject/index.cfm?function=projectForm&pk_id=${projectId}`;
+		});
+	},
+	successfulResultsFileUpload: (title, projectId) => {
+		swal({
+			...defaultOptions,
+			type: 'success',
+			title: 'Awesome!',
+			text: `You have successfully uploaded a results file for this ${title}.`,
 			confirmButtonText: 'OK'
 		}).then(result => {
 			if (result.value)

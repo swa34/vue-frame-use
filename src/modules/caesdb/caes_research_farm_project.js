@@ -131,3 +131,24 @@ export const addComment = async (projectId, statusId, columnName, comment = '') 
 		return failureMessage;
 	}
 };
+
+export const saveResultsFile = async (projectBlob) => {
+	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
+	try {
+		const url = generateUrl('saveResultsFile', apiPrefix);
+
+		// Const data = await makeAsyncPostRequest(url, project, false);
+		const data = await request
+			.post(url)
+			.attach('RESULTS_FILE', projectBlob.project.RESULTS_FILE instanceof File ? projectBlob.project.RESULTS_FILE : null)
+			.field('projectBlob', JSON.stringify(projectBlob))
+		--window.pendingRequests;
+
+		return data;
+	} catch (err) {
+		--window.pendingRequests;
+		logError(err);
+
+		return failureMessage;
+	}
+};

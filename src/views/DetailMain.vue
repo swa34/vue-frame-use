@@ -255,6 +255,8 @@
 													:is-inside-fieldset="true"
 													:fetched="record._fetched"
 													@show-help="showHelp(field)"
+													@delete-file="deleteFile(field)"
+													@reset-value="record[field.columnName] = null"
 												/>
 												<div v-else class="view-mode-wrapper">
 													<h4 class="inline">
@@ -844,6 +846,15 @@
 				&.inline {
 					flex-basis: auto;
 					margin-right: .5rem;
+					div.radio-container {
+						h4 {
+							margin: 0;
+							margin-bottom: .5rem;
+						}
+						label {
+							display: inline;
+						}
+					}
 				}
 				label legend h3 { font-size: .75rem; }
 			}
