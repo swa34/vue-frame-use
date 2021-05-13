@@ -334,6 +334,7 @@
 	/* global notify */
 	/* global swal */
 	// Import required modules
+	import alert from '~/modules/applications/caes_research_farm_project/alert';
 	import ContextualHelpMessage from '~/views/ContextualHelpMessage';
 	import ChevronDownIcon from 'vue-feather-icons/icons/ChevronDownIcon';
 	import ChevronRightIcon from 'vue-feather-icons/icons/ChevronRightIcon';
