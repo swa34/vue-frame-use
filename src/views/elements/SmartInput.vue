@@ -110,6 +110,15 @@
 						Delete
 					</button>
 				</div>
+				<div v-else-if="duplicateId">
+					<a :href="`${application.attachmentWebPath}${value}`">
+						{{ value }}
+					</a>
+					<br />
+					<button type="button" class="button file-delete" @click="$emit('reset-value')">
+						Delete
+					</button>
+				</div>
 				<div v-else>
 					<a :href="`${application.attachmentWebPath}${value}`">
 						{{ value }}
@@ -229,7 +238,8 @@
 	import { phoneInputMask } from '~/modules/utilities/input-masking';
 	import {
 		getPrettyColumnName,
-		sqlToHtml
+		sqlToHtml,
+		url
 	} from '~/modules/utilities';
 
 	export default {
@@ -281,7 +291,22 @@
 				return this.$store.state[this.$store.state.schema.title.toLowerCase()][this.field.depends.column];
 			},
 			fieldName () { return this.field.prettyName || getPrettyColumnName(this.field.columnName); },
-			fieldType () { return this.field.inputType || sqlToHtml(this.field); }
+			fieldType () { return this.field.inputType || sqlToHtml(this.field); },
+			duplicateId () {
+				return [
+					'duplicateId',
+					'duplicateID',
+					'DUPLICATEID',
+					'duplicateid',
+					'DuplicateID',
+					'DuplicateId',
+					'DuPlIcAtEiD'
+				].reduce((duplicateId, param) => {
+					if (url.getParam(param) !== null) duplicateId = url.getParam(param);
+
+					return duplicateId;
+				}, false);
+			},
 		},
 		watch: {
 			dependentColumnValue () { this.updateDependentValue(); },
