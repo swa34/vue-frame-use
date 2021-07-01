@@ -176,7 +176,7 @@
 					</button>
 				</h3>
 				<div class="subreport-section">
-					<p v-if="(editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID) || editMode === 'admin'">
+					<p v-if="!isNew && ((editMode === 'collaborator' && activeUserID === collaborator.PERSONNEL_ID) || editMode === 'admin')">
 						<a :href="'https://' + hostname + '/gacounts3/index.cfm?function=NewSubReport&REPORT_ID=' + reportID + '&PERSONNEL_ID=' + collaborator.PERSONNEL_ID">
 							{{ collaborator.HAS_REPORTED ? 'Edit/Delete' : 'File Sub-Report' }}
 						</a>
@@ -267,6 +267,8 @@
 			}
 		},
 		data () {
+			// Determine if entering new record
+			const isNew = url.getParam('new') !== null;
 			const data = {
 				activeUserID,
 				collaboratorRecords: {
@@ -285,6 +287,7 @@
 					subReport: cfToJs(caesCache.criteriaStructures.gc3.subReport)
 				},
 				hostname: window.location.hostname,
+				isNew,
 				newCollaborator: {
 					REPORT_ID: this.reportID || null,
 					PERSONNEL_ID: null,
