@@ -34,6 +34,7 @@
 				:style="field.style"
 				:minlength="field.minlength"
 				:maxlength="field.maxlength"
+				:class="field.customClasses ? field.customClasses.join(' ') : ''"
 				@input="$emit('input', $event.target.value)"
 			>
 			</textarea>

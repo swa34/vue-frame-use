@@ -83,7 +83,7 @@ const schema = {
 				section: 'General Information',
 				order: 1
 			},
-			customClasses: ['is-extra-wide']
+			customClasses: ['medium']
 		},
 		{
 			columnName: 'PARTICIPATING_RESEARCH_FARM_ID',
@@ -382,7 +382,8 @@ const schema = {
 			grouping: {
 				section: 'Summary of Project',
 				order: 1
-			}
+			},
+			customClasses: ['full']
 		},
 		{
 			columnName: 'OBJECTIVES_SUMMARY',
@@ -395,7 +396,8 @@ const schema = {
 			grouping: {
 				section: 'Summary of Project',
 				order: 2
-			}
+			},
+			customClasses: ['full']
 		},
 
 		// {
@@ -474,7 +476,8 @@ const schema = {
 			grouping: {
 				section: 'Additional Responsibilities and Funding',
 				order: 1
-			}
+			},
+			customClasses: ['full']
 		},
 
 		// {
