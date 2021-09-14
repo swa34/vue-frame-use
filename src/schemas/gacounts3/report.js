@@ -954,7 +954,7 @@ const schema = {
 		},
 		{
 			title: 'Report Attachments',
-			description: 'Attach files.  This is optional.',
+			description: 'Attach files (optional)',
 			customClasses: ['full-width'],
 			foreignKey: 'REPORT_ID',
 			associatedColumn: 'REPORT_ID',

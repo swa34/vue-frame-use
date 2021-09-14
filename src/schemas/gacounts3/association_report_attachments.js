@@ -20,7 +20,7 @@ const schema = {
 		},
 		{
 			columnName: 'FILE_NAME',
-			prettyName: 'File Name',
+			prettyName: 'File',
 			type: 'nvarchar',
 			inputType: 'file'
 		},

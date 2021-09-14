@@ -410,7 +410,7 @@
 
 <style lang="scss" scoped>
 	.list-complete-item {
-		transition: all .5s;
+		transition: all 0.5s;
 		display: table-row;
 	}
 	.list-complete-enter, .list-complete-leave-to {
