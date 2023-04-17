@@ -734,6 +734,8 @@
 			getMainData () {
 				getCriteriaStructure(this.schema.databaseName, this.schema.tablePrefix, (err, data) => {
 					if (err) logError(err);
+					console.log('Here is the data from the getMainData fetch function: ')
+					console.log(data);
 					if (data) {
 						const critStruct = data;
 						critStruct[this.schema.criteria.string] = this.identifier.value;

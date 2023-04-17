@@ -78,6 +78,7 @@ export const getAssociationReportTypeField = (criteriaStructure, callback) => {
 	makePostRequest(url, criteriaStructure, callback);
 };
 
+// Error passes through this function
 export const getAssociationReportTypeProgramArea = callback => {
 	const url = generateUrl('associationReportTypeProgramArea', apiPrefix);
 	makeGetRequest(url, callback);
@@ -320,10 +321,21 @@ export const postReportData = (report, callback) => {
 	pendingRequest.field('reportBlob', JSON.stringify(report));
 	
 	pendingRequest.end((err, response) => {
+		// We're receiving an HTTP response here: do we need to catch and repair?
+		// JDK 4/17/2023
 		--window.pendingRequests;
-		const { body: data } = response;
+		console.log('Successfully received a response for the postReportData function. This is the reponse:');
+		console.log(response);
+		// const { body: data } = response;
+		const data = response.body === null ? JSON.parse(response.text) : response.body;
+
 		if (err || !data) return callback(err || new Error('No data returned'));
-		if (data.Message) return callback(new Error(data.Message));
+		console.log('About to attempt to access the .Message field of data');
+		if (data.Message) {
+			console.log('the data object has a Message field and these are its contents:');
+			console.log(data.Message);	
+			return callback(new Error(data.Message));
+		}
 
 		return callback(null, data);
 	});

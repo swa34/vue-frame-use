@@ -9,6 +9,7 @@ import {
 	cfToJs,
 	jsToCf
 } from '~/modules/criteriaUtils';
+import { getSubReportPurposeAchievements } from './gacounts3';
 
 const apiPrefix = '/rest/global/';
 
@@ -30,6 +31,12 @@ export const getCriteriaStructure = (databaseName, tablePrefix, callback) => {
 	const url = `${apiPrefix}criteriaStructure.json?TablePrefix=${tablePrefix}&DatabaseName=${databaseName}`;
 	request.get(url)
 		.end((err, response) => {
+			// Do we need a response check-and-repair here?
+			// Note that if this fetch is caught and repaired, there is no red error pop-up in the corner of Georgia Counts (even when there should be).
+			// JDK 4/17/2023
+			if (response.body === null) {
+				response.body = JSON.parse(response.text);
+			}
 			callback(err, cfToJs(response.body));
 		});
 };
@@ -96,9 +103,15 @@ export const logError = (err, dump = {}, trace = null) => {
 	if (err.status) {
 		let response = null;
 		try {
+			// This is one of the locations where a catch and repair is needed
 			response = JSON.parse(err.response.text);
 		} catch (e) {
 			// Do nothing
+			console.log('Could not parse err.response.text.');
+			console.log('Here is err.response.text:');
+			console.log(error.response.text);
+			console.log('Here is err:');
+			console.log(err);
 		}
 		errObj.DETAIL = `<pre>${JSON.stringify({
 			url: err.response.req.url,
@@ -111,7 +124,12 @@ export const logError = (err, dump = {}, trace = null) => {
 		if (typeof err === 'object') errObj.DETAIL = `<pre>${JSON.stringify(err, null, 4)}</pre>`;
 		 else errObj.DETAIL = err;
 
-		if (dump && dump !== '') errObj.APPLICATION_DUMP = JSON.stringify(dump, null, 4);
+		if (dump && dump !== '') {
+			console.log('About to attempt stringification of the error dump.');
+			errObj.APPLICATION_DUMP = JSON.stringify(dump, null, 4);
+			console.log('Finished stringification of the error dump.');
+
+		}
 	}
 
 	// The url for the error logging endpoint
@@ -127,15 +145,49 @@ export const logError = (err, dump = {}, trace = null) => {
 	notify.error(`An error has occurred.  If this persists, please email <a href="mailto:caesweb@uga.edu">caesweb@uga.edu</a> and include the following error message:<br /><br />${err}`);
 };
 
+// We're having a problem in this function where a JSON call is being fetched as plaintext, which results in the response.body field being empty.
 export const makeGetRequest = (url, callback) => {
 	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
-	request.get(url)
+
+	// Alternate fetch method for debugging purposes
+	// fetch(url, {
+	// 	credentials: "include",
+	// 	method: "GET",
+	// 	headers: {
+	// 		Accept: "application/json",
+	// 		"Content-Type": "application/json"
+	// 	}
+	// })
+	// .then(response => {
+	// 	--window.pendingRequests;
+	// 	const data = response.body;
+	// 	if (data === null) {
+	// 		console.log(url);
+	// 		data=response.message;
+	// 		console.log(data);
+	// 	}
+	// });
+
+console.log('About to make a request to ' + url);
+
+	request
+	// The below method should really work, but for some reason browsers won't recognize it as a valid method.
+	// Hence the necessity of having a repair case for when the object inexplicably comes back with content-type
+	// text/plain.
+	// JDK 1/27/2023
+		// .setRequestHeader('Accept', 'application/json')
+		.get(url)
 		.end((err, response) => {
 			--window.pendingRequests;
-			const data = response.body;
+			let data = response.body;
+			if (response.body === null) {
+				data = JSON.parse(response.text);
+			}
+			
 			if (err) callback(err);
-			 else if (data.Message) callback(new Error(data.Message));
-			 else callback(null, data);
+			else if (data.Message) callback(new Error(data.Message));
+			else callback(null, data);
+
 		});
 };
 
@@ -144,7 +196,9 @@ export const makeAsyncPostRequest = async (url, dataToSend, isCriteriaStructure 
 	try {
 		const response = await request.post(url).send(isCriteriaStructure ? jsToCf(dataToSend) : dataToSend);
 		--window.pendingRequests;
-
+		if (response.body === null) {
+			response.body = JSON.parse(response.text);
+		}
 		return response.body;
 	} catch (err) {
 		--window.pendingRequests;
@@ -153,12 +207,34 @@ export const makeAsyncPostRequest = async (url, dataToSend, isCriteriaStructure 
 };
 
 export const makePostRequest = (url, dataToSend, callback, isCriteriaStructure = true) => {
+	console.log('The makePostRequest function has just been called.');
+	console.log('Here is the callback function: ');
+	console.log(callback);
 	window.pendingRequests ? ++window.pendingRequests : window.pendingRequests = 1;
+	console.log('About to send the post request to the following URL: ');
+	console.log(url);
 	request.post(url)
 		.send(isCriteriaStructure ? jsToCf(dataToSend) : dataToSend)
 		.end((err, response) => {
 			--window.pendingRequests;
-			const data = response.body;
+			var data = response.body;
+			// Another location for catch and repair
+			if (response.body === null) {
+				try {
+					data = JSON.parse(response.text);
+				}
+				catch {
+					data = response.text;
+					console.log('Data was returned but was not JSON.');
+					console.log('Here is the problem data .text field:');
+					console.log(response.text);
+					console.log('Here is the entire object:');
+					console.log(response);
+				}
+			}
+			if (data === null) {
+				console.log('You got null post data breh.');
+			}
 			if (err || !data) callback(err || new Error('No data returned'));
 			 else if (data.Message) callback(new Error(data.Message));
 			 else callback(null, data);

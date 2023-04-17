@@ -357,7 +357,13 @@
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = this.statusesIndexedByName.Rejected;
 				let response = await saveProject(projectBlob);
-				response = await response.body;
+				// response = await response.body;
+				response = await response;
+				if (response.body === null) {
+					response = JSON.parse(response.text);
+				} else {
+					response = response.body;
+				}
 				if (response.SUCCESS) {
 					alert.successfulReject(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {
@@ -378,7 +384,15 @@
 					projectBlob.project.STATUS_ID = caesCache.data.crfp.status[indexOfStatus].ID;
 				}
 				let response = await saveProject(projectBlob, true);
-				response = await response.body;
+				// response = await response.body;
+				response = await response;
+				if (response.body === null) {
+					response = JSON.parse(response.text);
+				} else {
+					response = response.body;
+				}
+				// const parsedResponse = JSON.parse(response.text);
+				// console.log(parsedResponse);
 				if (response.SUCCESS) {
 					if (this.isNewProject) alert.successfulSave(this.schema.title.toLowerCase(), response.PROJECT_ID);
 					else alert.successfulChanges(response.PROJECT_ID);
@@ -394,6 +408,7 @@
 				else document.title = `View Research Farm Project | ${document.title}`;
 			},
 			async submitProject (isBeingSubmittedForApproval = false) {
+				console.log('Hit line 397');
 				this.isSubmissionPending = true;
 				const projectBlob = this.getPreparedStoreForSubmit();
 				if (isBeingSubmittedForApproval) projectBlob.project.STATUS_ID = getProjectsNextStatusId(this.$store.state.project, true);
@@ -401,7 +416,13 @@
 
 				let response = await saveProject(projectBlob);
 				const submitter = this.userIsOriginator ? 'originator' : 'approver';
-				response = await response.body;
+				// response = await response.body;
+				response = await response;
+				if (response.body === null) {
+					response = JSON.parse(response.text);
+				} else {
+					response = response.body;
+				}
 				if (response.SUCCESS) {
 					alert.successfulSubmit(this.schema.title.toLowerCase(), submitter, response.PROJECT_ID);
 				} else {
@@ -414,7 +435,13 @@
 				const projectBlob = this.getPreparedStoreForSubmit();
 				projectBlob.project.STATUS_ID = getProjectsRevisionStatusId(projectBlob.project);
 				let response = await saveProject(projectBlob);
-				response = await response.body;
+				// response = await response.body;
+				response = await response;
+				if (response.body === null) {
+					response = JSON.parse(response.text);
+				} else {
+					response = response.body;
+				}
 				if (response.SUCCESS) {
 					alert.successfulReturnForReview(this.schema.title.toLowerCase(), response.PROJECT_ID);
 				} else {

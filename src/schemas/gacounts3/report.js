@@ -216,7 +216,11 @@ const schema = {
 	deleteExisting: deleteReport,
 	fetchExisting: getReport,
 	processSubmission: (report, callback) => {
+		// These functions examine multiple objects having keys 'TYPE_ID' and 'ID', respectively, and returning
+		// just lists of the type ID and ID for these objects.
 		const reportTypeId = report.reportType.records.map(toKey('TYPE_ID')).reduce(singleItem);
+		// Gabe's fix! Don't misplace!
+		// const reportTypeId = report.reportType.records.length < 1 ? -1 : report.reportType.records.map(toKey('TYPE_ID')).reduce(singleItem);
 		const isMediaProducedDistributed = caesCache.data.gc3.reportType
 			.filter(({ LABEL }) => LABEL === 'Media Produced/Distributed')
 			.map(toKey('ID'))
