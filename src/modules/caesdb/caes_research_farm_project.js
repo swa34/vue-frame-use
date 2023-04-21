@@ -18,7 +18,14 @@ export const getDepartmentHeadCollegeId = async personnelId => {
 	}
 	const url = `${apiPrefix}departmentsFromPersonnelId.json?personnelId=${personnelId}`;
 	try {
-		const departments = (await request.get(url)).body;
+		const requestContents = await request.get(url);
+		let departments = [];
+		if (requestContents.body === null) {
+			departments = JSON.parse(requestContents.text);
+		} else {
+			departments = requestContents.body;
+		}
+		// const departments = (await request.get(url)).body;
 		if (!departments || departments.length < 1) throw new Error('No departments found');
 		if (!departments[0].DEPTHEAD) throw new Error('No department head ID found');
 		--window.pendingRequests;
@@ -138,11 +145,16 @@ export const saveResultsFile = async (projectBlob) => {
 		const url = generateUrl('saveResultsFile', apiPrefix);
 
 		// Const data = await makeAsyncPostRequest(url, project, false);
-		const data = await request
+		let data = await request
 			.post(url)
 			.attach('RESULTS_FILE', projectBlob.project.RESULTS_FILE instanceof File ? projectBlob.project.RESULTS_FILE : null)
 			.field('projectBlob', JSON.stringify(projectBlob))
 		--window.pendingRequests;
+
+		// HTTP catch and repair JDK 4/21/2023
+		if (data.body === null) {
+			data.body = JSON.parse(data.text);
+		}
 
 		return data;
 	} catch (err) {
