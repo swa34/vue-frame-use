@@ -146,6 +146,7 @@ const schema = {
 			}
 		},
 
+		//Added by Scott
 		{
 			columnName: "CI_PERSONNEL_ID",
 			prettyName: "Co-Principal Investigator",
