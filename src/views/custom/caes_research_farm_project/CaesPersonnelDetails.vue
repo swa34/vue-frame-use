@@ -5,7 +5,7 @@
 		</h3>
 		<!-- Added by SA 05/05/23 -->
 		<h3 v-else-if="options.isCoInvestigator">
-			CAES Co-Principal Investigator:
+			Co-Principal Investigator:
 		</h3>
 		<!-- End of addition by SA 05/05/23 -->
 		<h3 v-else>
@@ -34,41 +34,25 @@ export default {
 		options: {
 			type: Object,
 			required: false,
-			default: () => ({ isPrinciple: true, isCoInvestigator: false }) // Added by SA 05/05/23
+			default: () => ({ isPrinciple: true, isCoInvestigator: true }) // Added by SA 05/05/23
 		}
 	},
 	data() {
 		return {
-			...this.options,
-			isCoInvestigator: this.options.isCoInvestigator || false
+			...this.options
 		};
 	},
-	//Removed options i.e this.options.isCoInvestigator dont know if it matters
 	computed: {
 		personnelId() {
-			console.log("isPrinciple: " + this.isPrinciple);
-			console.log("isCoInvestigator: " + this.isCoInvestigator);
-			if (this.isPrinciple) {
-				console.log(
-					"isPrinciple: " + this.$store.state.project.PI_PERSONNEL_ID
-				);
-				return this.$store.state.project.PI_PERSONNEL_ID;
-			}
+			if (this.isPrinciple) return this.$store.state.project.PI_PERSONNEL_ID;
 			// Added by SA 05/05/23
-			if (this.isCoInvestigator) {
-				console.log(
-					"isCoInvestigator: " + this.$store.state.project.CI_PERSONNEL_ID
-				);
+			if (this.isCoInvestigator)
 				return this.$store.state.project.CI_PERSONNEL_ID;
-			}
 			// End of addition by SA 05/05/23
-			console.log(
-				"SECONDARY_CONTACT_PERSONNEL_ID: " +
-					this.$store.state.project.SECONDARY_CONTACT_PERSONNEL_ID
-			);
 			return this.$store.state.project.SECONDARY_CONTACT_PERSONNEL_ID;
 		},
 		personnel() {
+			console.log("this.personnelId:", this.personnelId);
 			const nullPi = { name: null, email: null, phone: null };
 			if (!this.personnelId) return nullPi;
 
@@ -76,16 +60,23 @@ export default {
 			let listKey;
 			if (this.isPrinciple) {
 				listKey = "principleInvestigators";
-			} else if (this.isCoInvestigator) {
-				listKey = "coInvestigators";
+			} else if (this.options.isCoInvestigator) {
+				listKey = "principleInvestigators";
 			} else {
 				listKey = "secondaryContacts";
 			}
-			// End of addition by SA 05/05/23
-
+			console.log("listKey:", listKey);
+			console.log("caesCache.data.crfp:", caesCache.data.crfp);
+			console.log(
+				"caesCache.data.crfp[listKey]:",
+				caesCache.data.crfp[listKey]
+			);
 			const filteredList = caesCache.data.crfp[listKey].filter(
 				p => p.PERSONNEL_ID === this.personnelId
 			);
+			console.log("filteredList:", filteredList); // Added by SA 05/05/23
+			// End of addition by SA 05/05/23
+
 			if (filteredList.length < 1) return nullPi;
 			const personnelRecord = filteredList[0];
 

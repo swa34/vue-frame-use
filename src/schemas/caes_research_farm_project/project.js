@@ -142,16 +142,16 @@ const schema = {
 			},
 			customComponentForViewMode: {
 				component: CaesPersonnelDetails,
-				options: { isPrinciple: true }
+				options: { isPrinciple: true, isCoInvestigator: false }
 			}
 		},
 
-		//Added by Scott
+		//Added by Scott 05/05/2023
 		{
 			columnName: "CI_PERSONNEL_ID",
-			prettyName: "Co-Principal Investigator",
+			prettyName: "CAES Co-Principal Investigator",
 			type: "int",
-			caveat: "Optional",
+			caveat: "Optional. Co-Principal Investigator must be CAES personnel.",
 			constraint: {
 				values: caesCache.data.crfp.principleInvestigators,
 				foreignKey: "PERSONNEL_ID",
