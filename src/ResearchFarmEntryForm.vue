@@ -65,6 +65,7 @@
 				approved by the relevant committees as appropriate (radiological safety,
 				biological hazards, animal use).
 			</p>
+
 			<div
 				v-if="
 					!isNewProject &&
