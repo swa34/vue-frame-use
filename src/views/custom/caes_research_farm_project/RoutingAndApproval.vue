@@ -16,11 +16,6 @@
 							:field="column"
 							:fetched="false"
 						/>
-						<div
-							class="teams-share-button"
-							data-href="https://teams.microsoft.com/l/team/19%3a9f0422c095ce4b34a7b9b6a9cb108491%40thread.skype/conversations?groupId=7c2c96fa-4290-48cb-a098-b3f328dc266d&tenantId=a8216c1e-4d63-4352-8c3b-50fa1f1475b1"
-							data-icon-px-size="64"
-						></div>
 					</div>
 					<!--:fetched="record._fetched"-->
 					<div
@@ -151,15 +146,7 @@ export default {
 			return status;
 		}
 	},
-	//Added by scott for teams Icon 05/15/2023
-	mounted() {
-		let script = document.createElement("script");
-		script.setAttribute("src", "https://teams.microsoft.com/share/launcher.js");
-		script.setAttribute("async", "");
-		script.setAttribute("defer", "");
-		document.head.appendChild(script);
-	},
-	//end added by scott
+
 	methods: {
 		getPrettyColumnName,
 		columnShouldBeDisplayed(column) {

@@ -165,6 +165,11 @@ const schema = {
 			customComponentForViewMode: {
 				component: CaesPersonnelDetails,
 				options: { isPrinciple: false, isCoInvestigator: true }
+			},
+			//Added by Scott 05/16/2023
+			depends: {
+				column: "PI_PERSONNEL_ID",
+				test: value => value
 			}
 		},
 
