@@ -1,22 +1,22 @@
 /* global caesCache */
 /* global activeUserId */
-import CaesPersonnelDetails from '~/views/custom/caes_research_farm_project/CaesPersonnelDetails';
-import FinancialSupport from '~/views/custom/caes_research_farm_project/FinancialSupport';
-import ResultsFile from '~/views/custom/caes_research_farm_project/ResultsFile';
-import RoutingAndApproval from '~/views/custom/caes_research_farm_project/RoutingAndApproval';
-import SupplementalAnimalInfo from '~/views/custom/caes_research_farm_project/SupplementalAnimalInfo';
-import SupplementalPlantInfo from '~/views/custom/caes_research_farm_project/SupplementalPlantInfo';
-import supplementalAnimalInfoSchema from '~/schemas/caes_research_farm_project/supplemental_animal_info';
-import supplementalPlantInfoSchema from '~/schemas/caes_research_farm_project/supplemental_plant_info';
-import RADIO_OPTIONS_BOOLEAN from '~/globals/radio-options-boolean';
+import CaesPersonnelDetails from "~/views/custom/caes_research_farm_project/CaesPersonnelDetails";
+import FinancialSupport from "~/views/custom/caes_research_farm_project/FinancialSupport";
+import ResultsFile from "~/views/custom/caes_research_farm_project/ResultsFile";
+import RoutingAndApproval from "~/views/custom/caes_research_farm_project/RoutingAndApproval";
+import SupplementalAnimalInfo from "~/views/custom/caes_research_farm_project/SupplementalAnimalInfo";
+import SupplementalPlantInfo from "~/views/custom/caes_research_farm_project/SupplementalPlantInfo";
+import supplementalAnimalInfoSchema from "~/schemas/caes_research_farm_project/supplemental_animal_info";
+import supplementalPlantInfoSchema from "~/schemas/caes_research_farm_project/supplemental_plant_info";
+import RADIO_OPTIONS_BOOLEAN from "~/globals/radio-options-boolean";
 import {
 	deleteFile,
 	getDepartmentHeadCollegeId,
 	getProject
-} from '~/modules/caesdb/caes_research_farm_project';
-import { logError } from '~/modules/caesdb';
+} from "~/modules/caesdb/caes_research_farm_project";
+import { logError } from "~/modules/caesdb";
 
-const nullTest = val => val === null || val === '';
+const nullTest = val => val === null || val === "";
 const notNullTest = val => !nullTest(val);
 
 const genericCommentFieldDescription = `
@@ -27,7 +27,9 @@ const genericCommentFieldDescription = `
 
 const getResearchFarmDependencyTest = key => val => {
 	if (!val) return false;
-	const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(val);
+	const farmIndex = caesCache.data.crfp.researchFarm
+		.map(f => f.ID)
+		.indexOf(val);
 	if (farmIndex === -1) return false;
 	const farm = caesCache.data.crfp.researchFarm[farmIndex];
 
@@ -37,121 +39,152 @@ const getResearchFarmDependencyTest = key => val => {
 const getResearchFarmDependentValueFn = key => store => {
 	const farmId = store.state.project.PARTICIPATING_RESEARCH_FARM_ID;
 	if (nullTest(farmId)) return null;
-	const farmIndex = caesCache.data.crfp.researchFarm.map(f => f.ID).indexOf(farmId);
+	const farmIndex = caesCache.data.crfp.researchFarm
+		.map(f => f.ID)
+		.indexOf(farmId);
 	if (farmIndex === -1) return null;
 
 	return caesCache.data.crfp.researchFarm[farmIndex][key];
 };
 
 const schema = {
-	title: 'Project',
-	databaseName: 'CAES_RESEARCH_FARM_PROJECT',
-	tablePrefix: 'CRFP_PROJECT',
+	title: "Project",
+	databaseName: "CAES_RESEARCH_FARM_PROJECT",
+	tablePrefix: "CRFP_PROJECT",
 	criteria: {
-		string: 'criteria_ID_eq'
+		string: "criteria_ID_eq"
 	},
 	fetchExisting: getProject,
 	columns: [
 		{
-			columnName: 'ID',
-			prettyName: 'Project Number',
-			type: 'int',
+			columnName: "ID",
+			prettyName: "Project Number",
+			type: "int",
 			immutable: true,
 			automated: true,
 			showOnView: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 1
 			}
 		},
 		{
-			columnName: 'ORIGINATOR_ID',
-			type: 'int',
+			columnName: "ORIGINATOR_ID",
+			type: "int",
 			default: activeUserId,
 			immutable: true,
 			automated: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			}
 		},
 		{
-			columnName: 'TITLE',
-			type: 'nvarchar',
+			columnName: "TITLE",
+			type: "nvarchar",
 			required: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 1
 			},
-			customClasses: ['medium']
+			customClasses: ["medium"]
 		},
 		{
-			columnName: 'PARTICIPATING_RESEARCH_FARM_ID',
-			prettyName: 'Participating Research Farm',
-			type: 'int',
+			columnName: "PARTICIPATING_RESEARCH_FARM_ID",
+			prettyName: "Participating Research Farm",
+			type: "int",
 			required: true,
 			constraint: {
-				foreignKey: 'ID',
-				foreignLabel: 'NAME',
+				foreignKey: "ID",
+				foreignLabel: "NAME",
 				values: caesCache.data.crfp.researchFarm
 			},
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			}
 		},
 		{
-			columnName: 'START_DATE',
-			type: 'datetime',
+			columnName: "START_DATE",
+			type: "datetime",
 			required: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'END_DATE',
-			type: 'datetime',
+			columnName: "END_DATE",
+			type: "datetime",
 			required: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PI_PERSONNEL_ID',
-			prettyName: 'CAES Principal Investigator',
-			type: 'int',
-			caveat: 'Required.  If not populated, a non-CAES Principal Investigator must be entered.',
+			columnName: "PI_PERSONNEL_ID",
+			prettyName: "CAES Principal Investigator",
+			type: "int",
+			caveat:
+				"Required.  If not populated, a non-CAES Principal Investigator must be entered.",
 			constraint: {
 				values: caesCache.data.crfp.principleInvestigators,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'FULL_NAME_LAST_FIRST'
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "FULL_NAME_LAST_FIRST"
 			},
 			allowNullOption: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
 			customComponentForViewMode: {
 				component: CaesPersonnelDetails,
-				options: { isPrinciple: true }
+				options: { isPrinciple: true, isCoInvestigator: false }
 			}
 		},
+
+		//Added by Scott 05/05/2023
 		{
-			columnName: 'SECONDARY_CONTACT_PERSONNEL_ID',
-			prettyName: 'CAES Secondary Contact',
-			type: 'int',
+			columnName: "CI_PERSONNEL_ID",
+			prettyName: "CAES Co-Principal Investigator",
+			type: "int",
+			caveat: "Optional. Co-Principal Investigator must be CAES personnel.",
 			constraint: {
-				values: caesCache.data.crfp.secondaryContacts,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'FULL_NAME_LAST_FIRST'
+				values: caesCache.data.crfp.principleInvestigators,
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "FULL_NAME_LAST_FIRST"
 			},
 			allowNullOption: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
+				order: 3
+			},
+			customComponentForViewMode: {
+				component: CaesPersonnelDetails,
+				options: { isPrinciple: false, isCoInvestigator: true }
+			},
+			//Added by Scott 05/16/2023
+			depends: {
+				column: "PI_PERSONNEL_ID",
+				test: value => value
+			}
+		},
+
+		{
+			columnName: "SECONDARY_CONTACT_PERSONNEL_ID",
+			prettyName: "CAES Secondary Contact",
+			type: "int",
+			constraint: {
+				values: caesCache.data.crfp.secondaryContacts,
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "FULL_NAME_LAST_FIRST"
+			},
+			allowNullOption: true,
+			grouping: {
+				section: "General Information",
 				order: 3
 			},
 			customComponentForViewMode: {
@@ -160,159 +193,159 @@ const schema = {
 			}
 		},
 		{
-			columnName: 'PI_FIRST_NAME',
-			prettyName: 'First Name',
-			type: 'nvarchar',
+			columnName: "PI_FIRST_NAME",
+			prettyName: "First Name",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PI_LAST_NAME',
-			prettyName: 'Last Name',
-			type: 'nvarchar',
+			columnName: "PI_LAST_NAME",
+			prettyName: "Last Name",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PI_EMAIL',
-			prettyName: 'Email Address',
-			placeholder: 'name@domain.com',
-			type: 'nvarchar',
-			inputType: 'email',
+			columnName: "PI_EMAIL",
+			prettyName: "Email Address",
+			placeholder: "name@domain.com",
+			type: "nvarchar",
+			inputType: "email",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PI_PHONE',
-			prettyName: 'Phone Number',
-			placeholder: '(xxx) xxx-xxxx',
-			type: 'nvarchar',
-			inputType: 'tel',
+			columnName: "PI_PHONE",
+			prettyName: "Phone Number",
+			placeholder: "(xxx) xxx-xxxx",
+			type: "nvarchar",
+			inputType: "tel",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PI_DEPARTMENT',
-			prettyName: 'Department Name',
-			type: 'nvarchar',
+			columnName: "PI_DEPARTMENT",
+			prettyName: "Department Name",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PI_ORGANIZATION',
-			prettyName: 'Organization',
-			type: 'nvarchar',
+			columnName: "PI_ORGANIZATION",
+			prettyName: "Organization",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_FIRST_NAME',
-			prettyName: 'First Name',
-			type: 'nvarchar',
+			columnName: "SECONDARY_CONTACT_FIRST_NAME",
+			prettyName: "First Name",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_LAST_NAME',
-			prettyName: 'Last Name',
-			type: 'nvarchar',
+			columnName: "SECONDARY_CONTACT_LAST_NAME",
+			prettyName: "Last Name",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_EMAIL',
-			prettyName: 'Email Address',
-			placeholder: 'name@domain.com',
-			type: 'nvarchar',
-			inputType: 'email',
+			columnName: "SECONDARY_CONTACT_EMAIL",
+			prettyName: "Email Address",
+			placeholder: "name@domain.com",
+			type: "nvarchar",
+			inputType: "email",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_PHONE',
-			prettyName: 'Phone Number',
-			placeholder: '(xxx) xxx-xxxx',
-			type: 'nvarchar',
-			inputType: 'tel',
+			columnName: "SECONDARY_CONTACT_PHONE",
+			prettyName: "Phone Number",
+			placeholder: "(xxx) xxx-xxxx",
+			type: "nvarchar",
+			inputType: "tel",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_DEPARTMENT',
-			prettyName: 'Department Name',
-			type: 'nvarchar',
+			columnName: "SECONDARY_CONTACT_DEPARTMENT",
+			prettyName: "Department Name",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SECONDARY_CONTACT_ORGANIZATION',
-			prettyName: 'Organization',
-			type: 'nvarchar',
+			columnName: "SECONDARY_CONTACT_ORGANIZATION",
+			prettyName: "Organization",
+			type: "nvarchar",
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'COMMODITY_ID',
-			prettyName: 'Commodity',
-			type: 'int',
+			columnName: "COMMODITY_ID",
+			prettyName: "Commodity",
+			type: "int",
 			required: true,
 			constraint: {
 				values: caesCache.data.crfp.commodity,
-				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignKey: "ID",
+				foreignLabel: "LABEL"
 			},
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'COMMODITY_OTHER',
-			prettyName: 'Other/Secondary Commodity',
-			type: 'nvarchar',
+			columnName: "COMMODITY_OTHER",
+			prettyName: "Other/Secondary Commodity",
+			type: "nvarchar",
 			required: false,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		// 3/12/21 RHT  Just before pushing to prod, Dr. Stougaard decided against having this field.
 		/*{
@@ -329,75 +362,79 @@ const schema = {
 			customClasses: ['inline']
 		},*/
 		{
-			columnName: 'DISCIPLINE_ID',
-			prettyName: 'Discipline',
-			type: 'int',
+			columnName: "DISCIPLINE_ID",
+			prettyName: "Discipline",
+			type: "int",
 			required: true,
 			constraint: {
 				values: caesCache.data.crfp.discipline,
-				foreignKey: 'ID',
-				foreignLabel: 'LABEL'
+				foreignKey: "ID",
+				foreignLabel: "LABEL"
 			},
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'DISCIPLINE_OTHER',
-			prettyName: 'Other/Secondary Discipline',
-			type: 'nvarchar',
+			columnName: "DISCIPLINE_OTHER",
+			prettyName: "Other/Secondary Discipline",
+			type: "nvarchar",
 			required: false,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 4
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PROJECT_AREA',
-			prettyName: 'Primary Area to Which the Project Pertains',
-			type: 'nvarchar',
-			inputType: 'radio',
+			columnName: "PROJECT_AREA",
+			prettyName: "Primary Area to Which the Project Pertains",
+			type: "nvarchar",
+			inputType: "radio",
 			required: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 3
 			},
 			constraint: {
-				foreignKey: 'name',
-				foreignLabel: 'name',
-				values: [{	name: 'Research (Replicated Treatments)' }, { name: 'Extension (Unreplicated Treatments)' }, { name: 'Teaching' }]
+				foreignKey: "name",
+				foreignLabel: "name",
+				values: [
+					{ name: "Research (Replicated Treatments)" },
+					{ name: "Extension (Unreplicated Treatments)" },
+					{ name: "Teaching" }
+				]
 			}
 		},
 		{
-			columnName: 'RATIONALE',
-			prettyName: 'Justification',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "RATIONALE",
+			prettyName: "Justification",
+			type: "nvarchar",
+			inputType: "textarea",
 			maxlength: 1250,
-			caveat: 'Maximum of 250 words',
+			caveat: "Maximum of 250 words",
 			required: true,
 			grouping: {
-				section: 'Summary of Project',
+				section: "Summary of Project",
 				order: 1
 			},
-			customClasses: ['full']
+			customClasses: ["full"]
 		},
 		{
-			columnName: 'OBJECTIVES_SUMMARY',
-			prettyName: 'Objectives',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "OBJECTIVES_SUMMARY",
+			prettyName: "Objectives",
+			type: "nvarchar",
+			inputType: "textarea",
 			maxlength: 1250,
-			caveat: 'Maximum of 250 words',
+			caveat: "Maximum of 250 words",
 			required: true,
 			grouping: {
-				section: 'Summary of Project',
+				section: "Summary of Project",
 				order: 2
 			},
-			customClasses: ['full']
+			customClasses: ["full"]
 		},
 
 		// {
@@ -411,73 +448,76 @@ const schema = {
 		// 	}
 		// },
 		{
-			columnName: 'TREATMENT_LIST_ATTACHMENT_PATH',
-			prettyName: 'Treatment List',
-			type: 'nvarchar',
-			inputType: 'file',
-			deleteFile: (projectId, fileName) => deleteFile(projectId, 'TREATMENT_LIST_ATTACHMENT_PATH', fileName),
+			columnName: "TREATMENT_LIST_ATTACHMENT_PATH",
+			prettyName: "Treatment List",
+			type: "nvarchar",
+			inputType: "file",
+			deleteFile: (projectId, fileName) =>
+				deleteFile(projectId, "TREATMENT_LIST_ATTACHMENT_PATH", fileName),
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'PLOT_MAP_ATTACHMENT_PATH',
-			prettyName: 'Plot Map',
-			type: 'nvarchar',
-			inputType: 'file',
-			deleteFile: (projectId, fileName) => deleteFile(projectId, 'PLOT_MAP_ATTACHMENT_PATH', fileName),
+			columnName: "PLOT_MAP_ATTACHMENT_PATH",
+			prettyName: "Plot Map",
+			type: "nvarchar",
+			inputType: "file",
+			deleteFile: (projectId, fileName) =>
+				deleteFile(projectId, "PLOT_MAP_ATTACHMENT_PATH", fileName),
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'CALENDAR_ATTACHMENT_PATH',
-			prettyName: 'Calendar',
-			type: 'nvarchar',
-			inputType: 'file',
-			deleteFile: (projectId, fileName) => deleteFile(projectId, 'CALENDAR_ATTACHMENT_PATH', fileName),
+			columnName: "CALENDAR_ATTACHMENT_PATH",
+			prettyName: "Calendar",
+			type: "nvarchar",
+			inputType: "file",
+			deleteFile: (projectId, fileName) =>
+				deleteFile(projectId, "CALENDAR_ATTACHMENT_PATH", fileName),
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'INVOLVES_PLANTS',
-			prettyName: 'Plants',
-			type: 'bit',
+			columnName: "INVOLVES_PLANTS",
+			prettyName: "Plants",
+			type: "bit",
 			default: false,
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'INVOLVES_ANIMALS',
-			prettyName: 'Animals',
-			type: 'bit',
+			columnName: "INVOLVES_ANIMALS",
+			prettyName: "Animals",
+			type: "bit",
 			default: false,
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 1
 			},
-			customClasses: ['inline']
+			customClasses: ["inline"]
 		},
 		{
-			columnName: 'SAFETY_REQUIREMENTS',
-			prettyName: 'Safety Precautions',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "SAFETY_REQUIREMENTS",
+			prettyName: "Safety Precautions",
+			type: "nvarchar",
+			inputType: "textarea",
 			grouping: {
-				section: 'Additional Responsibilities and Funding',
+				section: "Additional Responsibilities and Funding",
 				order: 1
 			},
-			customClasses: ['full']
+			customClasses: ["full"]
 		},
 
 		// {
@@ -521,117 +561,123 @@ const schema = {
 		// 	customClasses: [ 'inline' ]
 		// },
 		{
-			columnName: 'FINANCIAL_SUPPORT_AVAILABLE',
-			prettyName: 'Financial Support Available for Project',
-			description: 'Please enter the dollar amount (cash or value of in-kind contributions) of funding available for this project.',
-			type: 'int',
+			columnName: "FINANCIAL_SUPPORT_AVAILABLE",
+			prettyName: "Financial Support Available for Project",
+			description:
+				"Please enter the dollar amount (cash or value of in-kind contributions) of funding available for this project.",
+			type: "int",
 			required: true,
 			default: 0,
 			grouping: {
-				section: 'Additional Responsibilities and Funding',
+				section: "Additional Responsibilities and Funding",
 				order: 1
 			},
 			customComponent: FinancialSupport
 		},
 		{
-			columnName: 'RESULTS_LOCATION',
-			prettyName: 'Location/site where superintendent can access results',
-			type: 'nvarchar',
+			columnName: "RESULTS_LOCATION",
+			prettyName: "Location/site where superintendent can access results",
+			type: "nvarchar",
 			grouping: {
-				section: 'Additional Responsibilities and Funding',
+				section: "Additional Responsibilities and Funding",
 				order: 1
 			},
-			customClasses: ['is-extra-wide']
+			customClasses: ["is-extra-wide"]
 		},
 		{
-			columnName: 'RESULTS_FILE',
-			prettyName: 'Results File',
-			type: 'nvarchar',
-			inputType: 'file',
-			deleteFile: (projectId, fileName) => deleteFile(projectId, 'RESULTS_FILE', fileName),
+			columnName: "RESULTS_FILE",
+			prettyName: "Results File",
+			type: "nvarchar",
+			inputType: "file",
+			deleteFile: (projectId, fileName) =>
+				deleteFile(projectId, "RESULTS_FILE", fileName),
 			grouping: {
-				section: 'Additional Responsibilities and Funding',
+				section: "Additional Responsibilities and Funding",
 				order: 1
 			},
 			customComponent: ResultsFile
 		},
 		{
-			columnName: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
-			prettyName: 'Station Superintendent',
-			displayModeColumnName:  'STATION_SUPERINTENDENT_DISPLAY_NAME',
-			type: 'int',
+			columnName: "STATION_SUPERINTENDENT_PERSONNEL_ID",
+			prettyName: "Station Superintendent",
+			displayModeColumnName: "STATION_SUPERINTENDENT_DISPLAY_NAME",
+			type: "int",
 			immutable: true,
-			getDependentValue: getResearchFarmDependentValueFn('SUPERINTENDENT_PERSONNEL_ID'),
+			getDependentValue: getResearchFarmDependentValueFn(
+				"SUPERINTENDENT_PERSONNEL_ID"
+			),
 			constraint: {
 				values: caesCache.data.crfp.superintendents,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'DISPLAY_NAME'
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "DISPLAY_NAME"
 			},
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('SUPERINTENDENT_PERSONNEL_ID')
+				column: "PARTICIPATING_RESEARCH_FARM_ID",
+				test: getResearchFarmDependencyTest("SUPERINTENDENT_PERSONNEL_ID")
 			}
 		},
 		{
-			columnName: 'STATION_SUPERINTENDENT_DISPLAY_NAME',
+			columnName: "STATION_SUPERINTENDENT_DISPLAY_NAME",
 			//pseudo column to store supt name, needs for retired supt
-			prettyName: 'Station Superintendent',
-			type: 'hidden',
+			prettyName: "Station Superintendent",
+			type: "hidden",
 			immutable: true,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
-			},
+			}
 		},
 		{
-			columnName: 'SUPERINTENDENT_COMMENTS',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "SUPERINTENDENT_COMMENTS",
+			type: "nvarchar",
+			inputType: "textarea",
 			description: genericCommentFieldDescription,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('SUPERINTENDENT_PERSONNEL_ID')
+				column: "PARTICIPATING_RESEARCH_FARM_ID",
+				test: getResearchFarmDependencyTest("SUPERINTENDENT_PERSONNEL_ID")
 			},
 			extra: {
-				dateColumn: 'SUPERINTENDENT_APPROVAL_DATE',
+				dateColumn: "SUPERINTENDENT_APPROVAL_DATE",
 				needsApprovalButtons: true,
-				personnelColumn: 'STATION_SUPERINTENDENT_PERSONNEL_ID',
-				status: 'Pending Superintendent Approval'
+				personnelColumn: "STATION_SUPERINTENDENT_PERSONNEL_ID",
+				status: "Pending Superintendent Approval"
 			}
 		},
 		{
-			columnName: 'SUPERINTENDENT_APPROVAL_DATE',
-			type: 'datetime',
+			columnName: "SUPERINTENDENT_APPROVAL_DATE",
+			type: "datetime",
 			automated: true,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			}
 		},
 		{
-			columnName: 'DEPARTMENT_HEAD_PERSONNEL_ID',
-			prettyName: 'Department Head',
-			type: 'int',
+			columnName: "DEPARTMENT_HEAD_PERSONNEL_ID",
+			prettyName: "Department Head",
+			type: "int",
 			immutable: true,
 			constraint: {
 				values: caesCache.data.crfp.departmentHeads,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'DISPLAY_NAME'
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "DISPLAY_NAME"
 			},
 			getDependentValue: async store => {
 				const piPersonnelId = store.state.project.PI_PERSONNEL_ID;
 				if (nullTest(piPersonnelId)) return null;
 				try {
 					const dHeadId = await getDepartmentHeadCollegeId(piPersonnelId);
-					const dHeadIndex = caesCache.data.crfp.departmentHeads.map(h => h.COLLEGE_ID).indexOf(dHeadId);
+					const dHeadIndex = caesCache.data.crfp.departmentHeads
+						.map(h => h.COLLEGE_ID)
+						.indexOf(dHeadId);
 					if (dHeadIndex === -1) return;
 
 					return caesCache.data.crfp.departmentHeads[dHeadIndex].PERSONNEL_ID;
@@ -640,289 +686,305 @@ const schema = {
 				}
 			},
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
 			depends: {
-				column: 'PI_PERSONNEL_ID',
+				column: "PI_PERSONNEL_ID",
 				test: notNullTest
 			}
 		},
 		{
-			columnName: 'DEPARTMENT_HEAD_COMMENTS',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "DEPARTMENT_HEAD_COMMENTS",
+			type: "nvarchar",
+			inputType: "textarea",
 			description: genericCommentFieldDescription,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
 			depends: {
-				column: 'PI_PERSONNEL_ID',
+				column: "PI_PERSONNEL_ID",
 				test: notNullTest
 			},
 			extra: {
-				dateColumn: 'DEPARTMENT_HEAD_APPROVAL_DATE',
+				dateColumn: "DEPARTMENT_HEAD_APPROVAL_DATE",
 				needsApprovalButtons: true,
-				personnelColumn: 'DEPARTMENT_HEAD_PERSONNEL_ID',
-				status: 'Pending Department Head Approval'
+				personnelColumn: "DEPARTMENT_HEAD_PERSONNEL_ID",
+				status: "Pending Department Head Approval"
 			}
 		},
 		{
-			columnName: 'DEPARTMENT_HEAD_APPROVAL_DATE',
-			type: 'datetime',
+			columnName: "DEPARTMENT_HEAD_APPROVAL_DATE",
+			type: "datetime",
 			automated: true,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			}
 		},
 		{
-			columnName: 'FINAL_SITE_APPROVER_PERSONNEL_ID',
-			prettyName: 'Final Site Approver',
-			type: 'int',
+			columnName: "FINAL_SITE_APPROVER_PERSONNEL_ID",
+			prettyName: "Final Site Approver",
+			type: "int",
 			immutable: true,
 			constraint: {
 				values: caesCache.data.crfp.finalSiteApprovers,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'DISPLAY_NAME'
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "DISPLAY_NAME"
 			},
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
-			getDependentValue: getResearchFarmDependentValueFn('FINAL_SITE_APPROVER_PERSONNEL_ID'),
+			getDependentValue: getResearchFarmDependentValueFn(
+				"FINAL_SITE_APPROVER_PERSONNEL_ID"
+			),
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('FINAL_SITE_APPROVER_PERSONNEL_ID')
+				column: "PARTICIPATING_RESEARCH_FARM_ID",
+				test: getResearchFarmDependencyTest("FINAL_SITE_APPROVER_PERSONNEL_ID")
 			}
 		},
 		{
-			columnName: 'FINAL_SITE_APPROVER_COMMENTS',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "FINAL_SITE_APPROVER_COMMENTS",
+			type: "nvarchar",
+			inputType: "textarea",
 			description: genericCommentFieldDescription,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('FINAL_SITE_APPROVER_PERSONNEL_ID')
+				column: "PARTICIPATING_RESEARCH_FARM_ID",
+				test: getResearchFarmDependencyTest("FINAL_SITE_APPROVER_PERSONNEL_ID")
 			},
 			extra: {
-				dateColumn: 'FINAL_SITE_APPROVER_APPROVAL_DATE',
+				dateColumn: "FINAL_SITE_APPROVER_APPROVAL_DATE",
 				needsApprovalButtons: true,
-				personnelColumn: 'FINAL_SITE_APPROVER_PERSONNEL_ID',
-				status: 'Pending Final Site Approver Approval'
+				personnelColumn: "FINAL_SITE_APPROVER_PERSONNEL_ID",
+				status: "Pending Final Site Approver Approval"
 			}
 		},
 		{
-			columnName: 'FINAL_SITE_APPROVER_APPROVAL_DATE',
-			type: 'datetime',
+			columnName: "FINAL_SITE_APPROVER_APPROVAL_DATE",
+			type: "datetime",
 			automated: true,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			}
 		},
 		{
-			columnName: 'OFFICE_OF_RESEARCH_PERSONNEL_ID',
-			prettyName: 'Office of Research',
-			type: 'int',
+			columnName: "OFFICE_OF_RESEARCH_PERSONNEL_ID",
+			prettyName: "Office of Research",
+			type: "int",
 			immutable: true,
 			constraint: {
 				values: caesCache.data.crfp.officeOfResearchApprovers,
-				foreignKey: 'PERSONNEL_ID',
-				foreignLabel: 'DISPLAY_NAME'
+				foreignKey: "PERSONNEL_ID",
+				foreignLabel: "DISPLAY_NAME"
 			},
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
-			getDependentValue: getResearchFarmDependentValueFn('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID'),
+			getDependentValue: getResearchFarmDependentValueFn(
+				"OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID"
+			),
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID')
+				column: "PARTICIPATING_RESEARCH_FARM_ID",
+				test: getResearchFarmDependencyTest(
+					"OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID"
+				)
 			}
 		},
 		{
-			columnName: 'OFFICE_OF_RESEARCH_COMMENTS',
-			type: 'nvarchar',
-			inputType: 'textarea',
+			columnName: "OFFICE_OF_RESEARCH_COMMENTS",
+			type: "nvarchar",
+			inputType: "textarea",
 			description: genericCommentFieldDescription,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			},
 			depends: {
-				column: 'PARTICIPATING_RESEARCH_FARM_ID',
-				test: getResearchFarmDependencyTest('OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID')
+				column: "PARTICIPATING_RESEARCH_FARM_ID",
+				test: getResearchFarmDependencyTest(
+					"OFFICE_OF_RESEARCH_APPROVER_PERSONNEL_ID"
+				)
 			},
 			extra: {
-				dateColumn: 'OFFICE_OF_RESEARCH_APPROVAL_DATE',
+				dateColumn: "OFFICE_OF_RESEARCH_APPROVAL_DATE",
 				needsApprovalButtons: true,
-				personnelColumn: 'OFFICE_OF_RESEARCH_PERSONNEL_ID',
-				status: 'Pending Office of Associate Dean of Research Approval'
+				personnelColumn: "OFFICE_OF_RESEARCH_PERSONNEL_ID",
+				status: "Pending Office of Associate Dean of Research Approval"
 			}
 		},
 		{
-			columnName: 'OFFICE_OF_RESEARCH_APPROVAL_DATE',
-			type: 'datetime',
+			columnName: "OFFICE_OF_RESEARCH_APPROVAL_DATE",
+			type: "datetime",
 			automated: true,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			}
 		},
 		{
-			columnName: 'STATUS_ID',
-			prettyName: 'Status',
-			type: 'int',
+			columnName: "STATUS_ID",
+			prettyName: "Status",
+			type: "int",
 			automated: true,
 			showOnView: true,
 			grouping: {
-				section: 'General Information',
+				section: "General Information",
 				order: 2
 			},
 			constraint: {
 				values: caesCache.data.crfp.status,
-				foreignKey: 'ID',
-				foreignLabel: 'NAME'
+				foreignKey: "ID",
+				foreignLabel: "NAME"
 			}
 		},
 		{
-			columnName: 'DATE_UPDATED',
-			type: 'datetime',
+			columnName: "DATE_UPDATED",
+			type: "datetime",
 			automated: true,
 			grouping: {
-				section: 'Routing and Approval',
+				section: "Routing and Approval",
 				order: 1
 			}
 		}
 	],
 	associations: [
 		{
-			title: 'Supplemental Plant Information',
+			title: "Supplemental Plant Information",
 			schema: supplementalPlantInfoSchema,
 			customComponent: SupplementalPlantInfo,
-			localKey: 'ID',
-			customClasses: ['full-width'],
+			localKey: "ID",
+			customClasses: ["full-width"],
 
 			// ForeignKey: 'PROJECT_ID',
-			associatedColumn: 'PROJECT_ID',
+			associatedColumn: "PROJECT_ID",
 
 			// IsAssignable: true,
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 2
 			},
 			depends: {
-				column: 'INVOLVES_PLANTS',
-				test (val) { return val === true; }
+				column: "INVOLVES_PLANTS",
+				test(val) {
+					return val === true;
+				}
 			}
 		},
 		{
-			title: 'Supplemental Animal Information',
+			title: "Supplemental Animal Information",
 			schema: supplementalAnimalInfoSchema,
 			customComponent: SupplementalAnimalInfo,
-			localKey: 'ID',
-			customClasses: ['full-width'],
-			associatedColumn: 'PROJECT_ID',
+			localKey: "ID",
+			customClasses: ["full-width"],
+			associatedColumn: "PROJECT_ID",
 			grouping: {
-				section: 'Scientist and Station Responsibilities',
+				section: "Scientist and Station Responsibilities",
 				order: 3
 			},
 			depends: {
-				column: 'INVOLVES_ANIMALS',
-				test (val) { return val === true; }
+				column: "INVOLVES_ANIMALS",
+				test(val) {
+					return val === true;
+				}
 			}
 		}
 	],
 	subschemas: [],
 	sections: [
 		{
-			title: 'General Information',
+			title: "General Information",
 			order: 1,
 			disableFlex: {
-				modes: ['view']
+				modes: ["view"]
 			},
 			fieldsets: [
 				{
-					title: 'Dates',
+					title: "Dates",
 					order: 3,
-					columns: ['START_DATE', 'END_DATE']
+					columns: ["START_DATE", "END_DATE"]
 				},
 				{
-					title: 'Non-CAES Principal Investigator',
+					title: "Non-CAES Principal Investigator",
 					order: 3,
-					caveat: 'Required if CAES Principal Investigator is not selected.',
+					caveat: "Required if CAES Principal Investigator is not selected.",
 					columns: [
-						'PI_FIRST_NAME',
-						'PI_LAST_NAME',
-						'PI_EMAIL',
-						'PI_PHONE',
-						'PI_DEPARTMENT',
-						'PI_ORGANIZATION'
+						"PI_FIRST_NAME",
+						"PI_LAST_NAME",
+						"PI_EMAIL",
+						"PI_PHONE",
+						"PI_DEPARTMENT",
+						"PI_ORGANIZATION"
 					],
 					depends: {
-						column: 'PI_PERSONNEL_ID',
+						column: "PI_PERSONNEL_ID",
 						test: nullTest
 					}
 				},
 				{
-					title: 'Non-CAES Secondary Contact',
+					title: "Non-CAES Secondary Contact",
 					order: 3,
 					columns: [
-						'SECONDARY_CONTACT_FIRST_NAME',
-						'SECONDARY_CONTACT_LAST_NAME',
-						'SECONDARY_CONTACT_EMAIL',
-						'SECONDARY_CONTACT_PHONE',
-						'SECONDARY_CONTACT_DEPARTMENT',
-						'SECONDARY_CONTACT_ORGANIZATION'
+						"SECONDARY_CONTACT_FIRST_NAME",
+						"SECONDARY_CONTACT_LAST_NAME",
+						"SECONDARY_CONTACT_EMAIL",
+						"SECONDARY_CONTACT_PHONE",
+						"SECONDARY_CONTACT_DEPARTMENT",
+						"SECONDARY_CONTACT_ORGANIZATION"
 					],
 					depends: {
-						column: 'SECONDARY_CONTACT_PERSONNEL_ID',
+						column: "SECONDARY_CONTACT_PERSONNEL_ID",
 						test: nullTest
 					}
 				},
 				{
-					title: 'Commodity/Discipline',
+					title: "Commodity/Discipline",
 					order: 3,
 					columns: [
-						'COMMODITY_ID',
-						'COMMODITY_OTHER',
+						"COMMODITY_ID",
+						"COMMODITY_OTHER",
 						//'INVOLVES_PRECISION_AGRICULTURE',
-						'DISCIPLINE_ID',
-						'DISCIPLINE_OTHER'
+						"DISCIPLINE_ID",
+						"DISCIPLINE_OTHER"
 					]
 				}
 			]
 		},
 		{
-			title: 'Summary of Project',
+			title: "Summary of Project",
 			order: 2
 		},
 		{
-			title: 'Scientist and Station Responsibilities',
+			title: "Scientist and Station Responsibilities",
 			order: 3,
 			fieldsets: [
 				{
-					title: 'Attachments',
-					columns: ['TREATMENT_LIST_ATTACHMENT_PATH', 'PLOT_MAP_ATTACHMENT_PATH', 'CALENDAR_ATTACHMENT_PATH']
+					title: "Attachments",
+					columns: [
+						"TREATMENT_LIST_ATTACHMENT_PATH",
+						"PLOT_MAP_ATTACHMENT_PATH",
+						"CALENDAR_ATTACHMENT_PATH"
+					]
 				},
 				{
-					title: 'Project Involves Plants/Animals',
+					title: "Project Involves Plants/Animals",
 					description: `Use the checkboxes below to indicate plant or animal
 					project (if "animal" or "plants and animals" is chosen, an AUP number
 					must be entered in order for the form to send.)`,
-					columns: ['INVOLVES_PLANTS', 'INVOLVES_ANIMALS'],
+					columns: ["INVOLVES_PLANTS", "INVOLVES_ANIMALS"],
 					required: true
 				}
 			]
 		},
 		{
-			title: 'Additional Responsibilities and Funding',
+			title: "Additional Responsibilities and Funding",
 			order: 4
 
 			// Fieldsets: [
@@ -939,10 +1001,10 @@ const schema = {
 			// ]
 		},
 		{
-			title: 'Routing and Approval',
+			title: "Routing and Approval",
 			order: 5,
 			depends: {
-				columns: ['PARTICIPATING_RESEARCH_FARM_ID']
+				columns: ["PARTICIPATING_RESEARCH_FARM_ID"]
 			},
 			customComponent: RoutingAndApproval
 		}
