@@ -29,8 +29,8 @@
 							</select>
 						</label>
 						<label class="checkbox-container">
-							<input type="checkbox" v-model="checkboxValue" />
-							<span>4-H Adult</span>
+							<input type="checkbox" v-model="includeAdultsCheckbox" />
+							<span>Did adult attendees receive instruction?</span>
 						</label>
 						<label class="activity">
 							<strong>
@@ -70,7 +70,7 @@
 							<button
 								type="button"
 								:disabled="activityIDs.length < 1"
-								@click="fetchActivity"
+								@click="fetchActivity(includeAdultsCheckbox)"
 							>
 								Import
 							</button>
@@ -130,7 +130,7 @@
 				loadingActivity: false,
 				loadingActivityList: false,
 				//Added checkbox for 4-H Adult Scott/Jesse 05/23/23
-			    checkboxValue: false,
+			    includeAdultsCheckbox: false,
 			};
 		},
 		computed: {
@@ -199,7 +199,7 @@
 			closeModal (event) {
 				if (event.target.matches('div.modal') || event.target.matches('span.close svg.feather')) this.displayModal = false;
 			},
-			async fetchActivity () {
+			async fetchActivity (includeAdultsCheckbox) {
 				this.loadingActivity = true;
 				const promisedGet4HActivity = activityId => new Promise((resolve, reject) => {
 					get4HActivity(activityId, (err, data) => {
@@ -208,7 +208,7 @@
 					});
 				});
 
-				const summedActivities = (await Promise.all(this.activityIDs.map(id => promisedGet4HActivity({ activityID: id, includeAdults: true }))))
+				const summedActivities = (await Promise.all(this.activityIDs.map(id => promisedGet4HActivity({ activityID: id, includeAdults: includeAdultsCheckbox }))))
 					.reduce((summedRecord, record) => {
 						for (const key in record) if (key in summedRecord) summedRecord[key] = Number(summedRecord[key]) + Number(record[key]);
 
