@@ -1,7 +1,8 @@
 <template lang="html">
 	<div v-if="displayImportButton">
 		<button type="button" class="load-modal" @click="openModal">
-			<img src="/global/images/4h-logo-white-transparent.svg" /> Import 4-H Enrollment Activity Demographics
+			<img src="/global/images/4h-logo-white-transparent.svg" /> Import 4-H
+			Enrollment Activity Demographics
 		</button>
 		<div v-if="displayModal" class="modal" @click="closeModal">
 			<div class="container">
@@ -9,7 +10,7 @@
 					<XIcon @click="closeModal" />
 				</span>
 				<h2>
-					4-H Enrollment Activity Import
+					4-H Enrollment Activity Import2
 				</h2>
 				<div v-if="!loadingActivity">
 					<form>
@@ -18,16 +19,29 @@
 								County
 							</strong>
 							<select v-model="countyName" :disabled="counties.length < 1">
-								<option v-for="county in counties" :key="county.ID" :value="county.COUNTYNAME">
+								<option
+									v-for="county in counties"
+									:key="county.ID"
+									:value="county.COUNTYNAME"
+								>
 									{{ county.COUNTYNAME }}
 								</option>
 							</select>
+						</label>
+						<label class="checkbox-container">
+							<input type="checkbox" v-model="checkboxValue" />
+							<span>4-H Adult</span>
 						</label>
 						<label class="activity">
 							<strong>
 								Activities
 							</strong>
-							<p><em>Note: To select multiple actvities, hold down the CTL key as you select them.</em></p>
+							<p>
+								<em
+									>Note: To select multiple actvities, hold down the CTL key as
+									you select them.</em
+								>
+							</p>
 							<select
 								v-if="!loadingActivityList"
 								v-model="activityIDs"
@@ -35,18 +49,29 @@
 								multiple
 								:size="activities.length < 15 ? activities.length : 15"
 							>
-								<option v-for="activity in activities"
+								<option
+									v-for="activity in activities"
 									:key="activity.ACTIVITY_ID"
 									:value="activity.ACTIVITY_ID"
-									:class="activityAlreadyImported(activity.ACTIVITY_ID) ? 'alreadyImported' : '' "
+									:class="
+										activityAlreadyImported(activity.ACTIVITY_ID)
+											? 'alreadyImported'
+											: ''
+									"
 								>
-									{{ activity.NAME }} - ({{ activity.BEGIN_DATE | simple-date }})
+									{{ activity.NAME }} - ({{
+										activity.BEGIN_DATE | simple-date
+									}})
 								</option>
 							</select>
 							<Spinner v-else />
 						</label>
 						<div class="button-container">
-							<button type="button" :disabled="activityIDs.length < 1" @click="fetchActivity">
+							<button
+								type="button"
+								:disabled="activityIDs.length < 1"
+								@click="fetchActivity"
+							>
 								Import
 							</button>
 						</div>
@@ -103,7 +128,9 @@
 				displayModal: false,
 				existingAssociations: [],
 				loadingActivity: false,
-				loadingActivityList: false
+				loadingActivityList: false,
+				//Added checkbox for 4-H Adult Scott/Jesse 05/23/23
+			    checkboxValue: false,
 			};
 		},
 		computed: {
