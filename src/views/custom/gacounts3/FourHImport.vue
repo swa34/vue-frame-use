@@ -208,7 +208,7 @@
 					});
 				});
 
-				const summedActivities = (await Promise.all(this.activityIDs.map(id => promisedGet4HActivity({ activityID: id }))))
+				const summedActivities = (await Promise.all(this.activityIDs.map(id => promisedGet4HActivity({ activityID: id, includeAdults: true }))))
 					.reduce((summedRecord, record) => {
 						for (const key in record) if (key in summedRecord) summedRecord[key] = Number(summedRecord[key]) + Number(record[key]);
 
