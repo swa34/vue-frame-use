@@ -7,6 +7,7 @@
 			can be returned at any approval level with requested changes. The form
 			submitter will be notified by e-mail once the project has been approved.
 		</p>
+		<!--This is the approvers comment box code it use smartinput bellow-->
 		<div v-for="column in columns" :key="column.columnName">
 			<div v-show="columnShouldBeDisplayed(column)">
 				<div v-if="typeToShow(column) === 'input'">
@@ -193,18 +194,25 @@ export default {
 
 			return constraintValue[column.constraint.foreignLabel];
 		},
+		//Updated by Scott 05/17/2023
 		async submitComments(columnName, comment, action) {
-			if (["approve", "returnForReview", "reject"].indexOf(action) === -1) {
+			if (
+				["approve", "returnForReview", "reject", "response"].indexOf(action) ===
+				-1
+			) {
 				logError("Invalid action for comment submission alert.");
-
 				return;
 			}
+
 			let status = this.$store.state.project.STATUS_ID;
 			if (action === "approve")
 				status = getProjectsNextStatusId(this.$store.state.project);
 			else if (action === "returnForReview")
 				status = getProjectsRevisionStatusId(this.$store.state.project);
 			else if (action === "reject") status = statusesIndexedByName.Rejected;
+			// No change in status when PI is responding
+			else if (action === "response")
+				status = this.$store.state.project.STATUS_ID;
 
 			const response = await addComment(
 				this.$store.state.project.ID,
@@ -224,6 +232,7 @@ export default {
 					response.MESSAGES
 				);
 		},
+
 		typeToShow(column) {
 			// If it's an ID input, always show the input
 			if (column.type === "int") return this.mode === "edit" ? "input" : "text";
@@ -238,6 +247,15 @@ export default {
 						activeUser.IS_ADMINISTRATOR) &&
 					this.status &&
 					this.status.NAME === column.extra.status
+				)
+					return "input";
+				//Modified By Scott 05/17/2023
+				// If the current user is the PI and the project is pending their response,
+				// an input should be shown.
+				if (
+					activeUserId === this.record.PI_PERSONNEL_ID &&
+					this.status &&
+					this.status.NAME === "Awaiting PI Response" // Update this to the correct status
 				)
 					return "input";
 
